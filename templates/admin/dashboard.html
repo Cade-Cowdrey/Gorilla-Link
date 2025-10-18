@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | PittState-Connect</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      /* ===== Header ===== */
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      header .user-info {
+        font-size: 14px;
+        color: #fff8e1;
+      }
+
+      /* ===== Main Container ===== */
+      main {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 25px;
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 25px 30px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+
+      .card h2 {
+        color: var(--psu-red);
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      .card p {
+        color: #555;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+      }
+
+      .card a {
+        display: inline-block;
+        background-color: var(--psu-gold);
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px 16px;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+      }
+
+      .card a:hover {
+        background-color: #e6b500;
+      }
+
+      /* ===== Footer ===== */
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        header h1 {
+          margin-bottom: 8px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>🦍 PittState-Connect Admin Dashboard</h1>
+      <div class="user-info">
+        Logged in as <strong>Admin</strong> · {{ current_year }}
+      </div>
+    </header>
+
+    <main>
+      <div class="grid">
+        <!-- Email Management -->
+        <div class="card">
+          <h2>📧 Email Management</h2>
+          <p>
+            Preview, test, and manage all PSU-branded email templates.
+            Ensure confirmation, password reset, and digest emails look perfect before sending.
+          </p>
+          <a href="{{ url_for('admin.email_index') }}">Manage Emails</a>
+        </div>
+
+        <!-- Analytics -->
+        <div class="card">
+          <h2>📊 Analytics</h2>
+          <p>
+            View key insights about user engagement, network growth, and alumni activity.
+            Track PSU student-alumni connection trends in real time.
+          </p>
+          <a href="{{ url_for('analytics.dashboard') }}">View Analytics</a>
+        </div>
+
+        <!-- User Management -->
+        <div class="card">
+          <h2>👥 User Management</h2>
+          <p>
+            Browse and manage registered users, moderators, and admin accounts.
+            Activate, suspend, or update user profiles directly from the admin panel.
+          </p>
+          <a href="{{ url_for('admin.user_list') }}">Manage Users</a>
+        </div>
+
+        <!-- System Logs -->
+        <div class="card">
+          <h2>🗂 System Logs</h2>
+          <p>
+            Monitor important system events, error logs, and email delivery status.
+            Keep PittState-Connect stable, transparent, and reliable.
+          </p>
+          <a href="{{ url_for('admin.system_logs') }}">View Logs</a>
+        </div>
+
+        <!-- Settings -->
+        <div class="card">
+          <h2>⚙️ Settings</h2>
+          <p>
+            Configure PittState-Connect branding, mail settings, or integration tokens.
+            Customize PSU colors, logos, and platform preferences.
+          </p>
+          <a href="{{ url_for('admin.settings') }}">Platform Settings</a>
+        </div>
+      </div>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect · Pittsburg State University
+      </footer>
+    </main>
+  </body>
+</html>

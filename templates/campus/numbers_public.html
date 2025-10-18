@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Gorilla Nation by the Numbers — PittState Connect{% endblock %}
+{% block content %}
+
+<!-- Hero (PSU gold band for unique microsite identity) -->
+<section class="py-5" style="background:#FFC72C;">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2" style="color:#BA0C2F;">Gorilla Nation by the Numbers</h1>
+    <p class="mb-0" style="color:#3a3a3a;">
+      A celebration of growth, mentorship, and opportunity across Pittsburg State University.
+    </p>
+  </div>
+</section>
+
+<!-- Counters -->
+<section class="py-4 bg-white">
+  <div class="container">
+    <div id="psu-counters" class="row g-3 text-center">
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="small text-muted">Community Size</div>
+            <div class="display-6 fw-bold" style="color:#BA0C2F;" id="countCommunity">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="small text-muted">Mentors</div>
+            <div class="display-6 fw-bold" style="color:#BA0C2F;" id="countMentors">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="small text-muted">Departments</div>
+            <div class="display-6 fw-bold" style="color:#BA0C2F;" id="countDepartments">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <div class="small text-muted">Active Opportunities</div>
+            <div class="display-6 fw-bold" style="color:#BA0C2F;" id="countOpportunities">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Engagement highlight -->
+    <div class="text-center mt-3">
+      <span class="badge" style="background:#BA0C2F;">In the last 30 days</span>
+      <div class="small text-muted mt-2">
+        Community engagement continues to grow across campus.
+        <span class="fw-semibold" id="countEngagement" style="color:#BA0C2F;">0</span> highlights shared.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trend + Partners -->
+<section class="py-5" style="background:#faf9f8;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-light fw-bold">Monthly Growth &nbsp;<span class="small text-muted">(New Gorillas)</span></div>
+          <div class="card-body">
+            <canvas id="psuTrendChart" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-light fw-bold">Top Hiring Partners</div>
+          <ul class="list-group list-group-flush" id="partnersList">
+            <!-- populated via JS -->
+          </ul>
+        </div>
+        <div class="d-grid mt-3">
+          <a class="btn btn-outline-danger" href="{{ url_for('campus_bp.export_public_pdf') }}">📄 Download PDF Summary</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Closing Banner (unique to microsite) -->
+<section class="py-5" style="background:#BA0C2F;">
+  <div class="container text-center text-white">
+    <h2 class="fw-bold mb-2">Built by Gorillas. Powered by Opportunity.</h2>
+    <p class="mb-0">Pittsburg State University continues to expand mentorship, career pathways, and community impact.</p>
+  </div>
+</section>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script src="{{ url_for('static', filename='js/campus_charts.js') }}"></script>
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    window.PSU_CAMPUS_MICROSITE_BOOT({
+      dataUrl: "{{ url_for('campus_bp.numbers_public_data') }}",
+      colors: { red: "#BA0C2F", gold: "#FFC72C" }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

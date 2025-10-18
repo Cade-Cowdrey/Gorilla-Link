@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card shadow-sm p-4">
+      <h3 class="fw-bold text-center text-danger mb-4">Create an Account</h3>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="mb-3">
+          <label>Full Name</label>
+          <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Email (PittState or personal)</label>
+          <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Major</label>
+          <input type="text" name="major" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label>Graduation Year</label>
+          <input type="number" name="grad_year" class="form-control">
+        </div>
+        <button class="btn btn-danger w-100">Register</button>
+      </form>
+
+      <p class="text-center mt-3">
+        Already have an account? <a href="{{ url_for('login') }}">Login here</a>.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PittState-Connect Weekly Digest</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 680px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .header {
+      background-color: #C8102E;
+      padding: 25px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #FFC72C;
+    }
+    .content {
+      padding: 30px 40px;
+      color: #333;
+    }
+    .content h2 {
+      color: #C8102E;
+      border-bottom: 2px solid #FFC72C;
+      padding-bottom: 5px;
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 25px;
+    }
+    .section h3 {
+      color: #C8102E;
+      margin-bottom: 8px;
+    }
+    .post, .event {
+      border-left: 4px solid #FFC72C;
+      background-color: #fafafa;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+    .post-title {
+      font-weight: bold;
+      color: #C8102E;
+      margin: 0 0 4px 0;
+    }
+    .footer {
+      background-color: #f1f1f1;
+      color: #555;
+      font-size: 12px;
+      text-align: center;
+      padding: 15px 10px;
+      border-top: 2px solid #FFC72C;
+    }
+    .button {
+      display: inline-block;
+      background-color: #C8102E;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .button:hover {
+      background-color: #a10d22;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>🦍 PittState-Connect Weekly Digest</h1>
+      <p>Your campus network highlights</p>
+    </div>
+
+    <div class="content">
+      <h2>Weekly Highlights ({{ current_date.strftime('%B %d, %Y') }})</h2>
+      <p>Hello {{ recipient_name }}, here’s your weekly summary of what’s happening across the PittState-Connect community!</p>
+
+      <div class="section">
+        <h3>🔥 Top Posts</h3>
+        {% if top_posts %}
+          {% for post in top_posts %}
+          <div class="post">
+            <p class="post-title">{{ post.author }} — "{{ post.title }}"</p>
+            <p>{{ post.snippet }}</p>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p>No new posts this week.</p>
+        {% endif %}
+      </div>
+
+      <div class="section">
+        <h3>🎓 Upcoming Events</h3>
+        {% if events %}
+          {% for e in events %}
+          <div class="event">
+            <p class="post-title">{{ e.title }}</p>
+            <p><strong>Date:</strong> {{ e.date }} | <strong>Location:</strong> {{ e.location }}</p>
+            <p>{{ e.description }}</p>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p>No events scheduled this week.</p>
+        {% endif %}
+      </div>
+
+      <div class="section">
+        <h3>📈 Quick Stats</h3>
+        <p><strong>New Users:</strong> {{ stats.new_users }}</p>
+        <p><strong>Active This Week:</strong> {{ stats.active_users }}</p>
+        <p><strong>Average Engagement:</strong> {{ "%.2f"|format(stats.avg_engagement) }}</p>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="{{ url_for('core.home', _external=True) }}" class="button">View Full Dashboard</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 PittState-Connect | Office of Digital Analytics</p>
+      <p>For internal use only. You’re receiving this email as a member of the PittState-Connect community.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ dept.name }} — Department Insights{% endblock %}
+{% block content %}
+
+<section class="py-5" style="background:#FFC72C;">
+  <div class="container">
+    <h2 class="fw-bold mb-1" style="color:#BA0C2F;">{{ dept.name }} — Department Insights</h2>
+    <div class="text-muted">Period: {{ start }} → {{ end }}</div>
+  </div>
+</section>
+
+<section class="py-4 bg-white">
+  <div class="container">
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Students</div>
+          <div class="fs-3 fw-bold text-danger">{{ total_students }}</div>
+        </div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Mentors</div>
+          <div class="fs-3 fw-bold text-danger">{{ mentors }}</div>
+          <div class="small text-muted">Participation: <strong>{{ mentor_participation_pct }}%</strong></div>
+        </div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Posts (period)</div>
+          <div class="fs-3 fw-bold text-danger">{{ posts_period }}</div>
+        </div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Active Jobs</div>
+          <div class="fs-3 fw-bold text-danger">{{ active_jobs }}</div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-bold">Engagement Trend (Posts per Month)</div>
+          <div class="card-body">
+            <canvas id="deptTrend" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-bold">Top Hiring Partners</div>
+          <ul class="list-group list-group-flush">
+            {% for company, cnt in top_employers %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ company }}</span>
+              <span class="badge bg-danger">{{ cnt }}</span>
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">No active postings yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-end mt-3">
+      <a href="{{ url_for('departments_bp.detail', dept_id=dept.id) }}" class="btn btn-outline-danger btn-sm">View Department Portfolio</a>
+    </div>
+  </div>
+</section>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script>
+  const labels = {{ trend_labels|tojson }};
+  const values = {{ trend_values|tojson }};
+
+  new Chart(document.getElementById("deptTrend"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Posts",
+        data: values,
+        borderColor: "#BA0C2F",
+        backgroundColor: "rgba(186, 12, 47, 0.12)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.25,
+        pointRadius: 3
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+</script>
+{% endblock %}
+{% endblock %}

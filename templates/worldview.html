@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">🌍 Gorilla Worldview</h3>
+    <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger btn-sm">← Back to Insights</a>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <div class="small text-muted">Alumni Pins</div>
+          <div class="display-6 fw-bold" id="wv-count">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <div class="small text-muted">US States</div>
+          <div class="display-6 fw-bold" id="wv-states">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <div class="small text-muted">Top Dept</div>
+          <div class="fw-bold" id="wv-topdept">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <div class="small text-muted">Top Employer*</div>
+          <div class="fw-bold" id="wv-employer">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white fw-bold">Global Alumni Footprint</div>
+    <div class="card-body p-0">
+      <div id="worldviewMap" style="height: 520px; width: 100%;"></div>
+    </div>
+    <div class="card-footer small text-muted">
+      *“Top Employer” is derived from the most frequent employer name among mapped alumni (demo if data unavailable).
+    </div>
+  </div>
+
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize map
+  const map = L.map('worldviewMap', { worldCopyJump: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+  // Load alumni points
+  const resp = await fetch("{{ url_for('analytics_bp.alumni_map_data') }}");
+  const pts = await resp.json();
+
+  // Counters
+  document.getElementById("wv-count").textContent = pts.length.toString();
+
+  // Compute US states, top dept, top employer
+  const states = new Set();
+  const deptFreq = {};
+  const employerFreq = {};
+  pts.forEach(p => {
+    if (p.state) states.add(p.state.trim().toUpperCase());
+    if (p.department) deptFreq[p.department] = (deptFreq[p.department] || 0) + 1;
+    if (p.employer) employerFreq[p.employer] = (employerFreq[p.employer] || 0) + 1;
+  });
+  document.getElementById("wv-states").textContent = states.size || 0;
+
+  function topKey(freq) {
+    let k = "—", n = 0;
+    for (const [key, val] of Object.entries(freq)) {
+      if (val > n) { k = key; n = val; }
+    }
+    return k;
+  }
+  document.getElementById("wv-topdept").textContent = topKey(deptFreq);
+  document.getElementById("wv-employer").textContent = topKey(employerFreq);
+
+  // Marker clustering
+  const cluster = L.markerClusterGroup();
+  pts.forEach(p => {
+    if (typeof p.lat !== "number" || typeof p.lng !== "number") return;
+    const m = L.marker([p.lat, p.lng]);
+    const lines = [
+      `<strong>${p.name}</strong>`,
+      p.department ? `Dept: ${p.department}` : "",
+      p.grad_year ? `Grad: ${p.grad_year}` : "",
+      p.employer ? `Employer: ${p.employer}` : "",
+      (p.city || p.state) ? `${p.city || ""}${p.city && p.state ? ", " : ""}${p.state || ""}` : ""
+    ].filter(Boolean);
+    m.bindPopup(lines.join("<br>"));
+    cluster.addLayer(m);
+  });
+  map.addLayer(cluster);
+
+  if (cluster.getLayers().length) {
+    map.fitBounds(cluster.getBounds().pad(0.2));
+  } else {
+    // Default to Pittsburg, KS
+    map.setView([37.4109, -94.7040], 11);
+    L.marker([37.4109, -94.7040]).addTo(map).bindPopup("<strong>Pittsburg State University</strong>");
+  }
+});
+</script>
+{% endblock %}

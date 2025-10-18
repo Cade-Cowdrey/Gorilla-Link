@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | PittState-Connect{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:1000px;">
+
+  <div class="text-center mb-4">
+    <h2 style="color:var(--psu-red);">🦍 PittState-Connect Admin Dashboard</h2>
+    <p class="text-muted mb-2">Manage domains, test email systems, and view analytics reports.</p>
+    <hr style="border-top:2px solid var(--psu-gold); width:50%;">
+  </div>
+
+  <!-- Allowed Domains Section -->
+  <section class="mb-5">
+    <h4 style="color:var(--psu-red);">📧 Allowed Email Domains</h4>
+    <form action="{{ url_for('admin.add_domain') }}" method="POST" class="mb-3 d-flex" style="gap:10px;">
+      <input type="text" name="domain" placeholder="example: pittstate.edu" required class="form-control" style="border-radius:6px;">
+      <button class="btn btn-danger" style="background-color:var(--psu-red); border:none;">Add</button>
+    </form>
+
+    {% if allowed_domains %}
+    <ul class="list-group shadow-sm">
+      {% for d in allowed_domains %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>{{ d.domain }}</span>
+        <a href="{{ url_for('admin.delete_domain', domain_id=d.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">No domains added yet.</p>
+    {% endif %}
+  </section>
+
+  <!-- Send Test Digest Section -->
+  <section class="text-center mb-5">
+    <h4 style="color:var(--psu-red);">📬 Send Test Weekly Digest</h4>
+    <p class="text-muted mb-2">Preview the weekly PSU-branded digest email before automatic delivery.</p>
+    <form action="{{ url_for('admin.send_test_digest') }}">
+      <button class="btn btn-lg btn-warning" style="color:black; background-color:var(--psu-gold); border:none;">
+        📥 Send Test Digest to My Email
+      </button>
+    </form>
+  </section>
+
+  <hr style="border-top:2px solid var(--psu-gold); margin:40px 0;">
+
+  <!-- Reports and Analytics Section -->
+  <section>
+    <h4 class="text-center" style="color:var(--psu-red);">📊 Reports & Analytics</h4>
+    <div class="row justify-content-center mt-3">
+      <div class="col-md-4 text-center mb-3">
+        <a href="{{ url_for('analytics.admin_overview') }}" class="btn btn-outline-danger w-100">
+          🧮 Admin Overview
+        </a>
+      </div>
+      <div class="col-md-4 text-center mb-3">
+        <a href="{{ url_for('analytics.department_report') }}" class="btn btn-outline-warning w-100" style="border-color:var(--psu-gold); color:black;">
+          🏫 Department Report
+        </a>
+      </div>
+      <div class="col-md-4 text-center mb-3">
+        <a href="{{ url_for('admin.admin_reports_summary') }}" class="btn btn-outline-danger w-100">
+          📈 Reports Summary
+        </a>
+      </div>
+    </div>
+    <p class="text-center text-muted mt-3">
+      Review metrics, export summaries, and compare department engagement trends.
+    </p>
+  </section>
+
+  <hr>
+  <p class="text-center text-muted mt-3">
+    Total Registered Users: <strong>{{ total_users }}</strong>
+  </p>
+
+</div>
+{% endblock %}

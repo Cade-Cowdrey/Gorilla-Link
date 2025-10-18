@@ -1,0 +1,12 @@
+
+{# expects vars: dept_key (slug like 'biology'), dept_title #}
+{% set img = image_links.get(dept_key, '') %}
+<div class="dept-hero card">
+  {% if img %}
+    <img src="{{ img }}" alt="{{ dept_title }} — Pittsburg State University">
+  {% else %}
+    <div style="height:220px;background:linear-gradient(135deg,#B5121B,#FFD700)"></div>
+  {% endif %}
+  <div class="overlay"></div>
+  <div class="title">{{ dept_title }}</div>
+</div>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Logs | PittState-Connect Admin</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+        --log-info: #2E7D32;
+        --log-warn: #F9A825;
+        --log-error: #D32F2F;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      /* ===== Header ===== */
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      header a {
+        color: #fff;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+
+      header a:hover {
+        background-color: #e6b500;
+      }
+
+      /* ===== Container ===== */
+      main {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      h2 {
+        color: var(--psu-red);
+        border-bottom: 2px solid var(--psu-gold);
+        padding-bottom: 5px;
+        margin-bottom: 25px;
+      }
+
+      .filters {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .filters select {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .filters button {
+        background-color: var(--psu-red);
+        color: #fff;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .filters button:hover {
+        background-color: #A60D26;
+      }
+
+      /* ===== Logs Table ===== */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+
+      th, td {
+        padding: 14px 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        font-weight: 600;
+      }
+
+      tr:hover td {
+        background-color: #fafafa;
+      }
+
+      .log-info { color: var(--log-info); font-weight: 600; }
+      .log-warn { color: var(--log-warn); font-weight: 600; }
+      .log-error { color: var(--log-error); font-weight: 600; }
+
+      /* ===== Footer ===== */
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        header h1 {
+          margin-bottom: 8px;
+        }
+        th, td { font-size: 13px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>🗂 System Logs</h1>
+      <a href="{{ url_for('admin.dashboard') }}">⬅ Back to Admin</a>
+    </header>
+
+    <main>
+      <h2>Platform Event Logs</h2>
+
+      <div class="filters">
+        <form method="get" action="{{ url_for('admin.system_logs') }}">
+          <select name="level">
+            <option value="">All Levels</option>
+            <option value="INFO">Info</option>
+            <option value="WARNING">Warning</option>
+            <option value="ERROR">Error</option>
+          </select>
+          <button type="submit">Filter</button>
+        </form>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Level</th>
+            <th>Source</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if logs %}
+            {% for log in logs %}
+            <tr>
+              <td>{{ log.timestamp }}</td>
+              <td class="log-{{ log.level|lower }}">{{ log.level }}</td>
+              <td>{{ log.source }}</td>
+              <td>{{ log.message }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="4" style="text-align:center; color:#777; padding:20px;">
+                No logs found for the selected filter.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect · Pittsburg State University
+      </footer>
+    </main>
+  </body>
+</html>

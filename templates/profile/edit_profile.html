@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile | PittState-Connect{% endblock %}
+
+{% block content %}
+<style>
+  .edit-wrapper {
+    max-width:750px; margin:0 auto; background:#fff;
+    border-radius:10px; padding:35px 40px; box-shadow:0 4px 12px rgba(0,0,0,0.05);
+  }
+  h2 {
+    text-align:center; color:var(--psu-red); margin-top:0; margin-bottom:25px;
+  }
+  form {display:flex; flex-direction:column; gap:20px;}
+  label {font-weight:600; color:#333;}
+  input[type="text"], textarea, input[type="file"], select {
+    padding:10px 12px; border:1px solid #ccc; border-radius:6px;
+    font-size:15px; width:100%;
+  }
+  textarea {resize:vertical; min-height:80px;}
+  input:focus, textarea:focus, select:focus {
+    border-color:var(--psu-red); outline:none;
+  }
+  .section-title {
+    color:var(--psu-red); border-bottom:2px solid var(--psu-gold);
+    padding-bottom:4px; margin-top:25px; font-size:17px;
+  }
+  .preview {text-align:center; margin-top:10px;}
+  .preview img {
+    width:100px; height:100px; border-radius:50%;
+    border:3px solid var(--psu-gold); object-fit:cover;
+  }
+  button {
+    background-color:var(--psu-red); color:#fff; border:none;
+    border-radius:6px; padding:12px 18px; font-weight:600;
+    cursor:pointer; transition:background .3s ease;
+  }
+  button:hover {background-color:#A60D26;}
+  .link {text-align:center; margin-top:20px; font-size:14px;}
+  .link a {color:var(--psu-red); text-decoration:none; font-weight:600;}
+  .link a:hover {color:#A60D26;}
+</style>
+
+<div class="edit-wrapper">
+  <h2>✏️ Edit Profile</h2>
+  <form method="POST" enctype="multipart/form-data" action="{{ url_for('profile.edit_profile') }}">
+    <label>Full Name</label>
+    <input type="text" name="name" value="{{ current_user.name }}" required />
+
+    <div class="section-title">Bio</div>
+    <textarea name="bio">{{ current_user.bio or '' }}</textarea>
+
+    <div class="section-title">Experience</div>
+    <textarea name="experience">{{ current_user.experience or '' }}</textarea>
+
+    <div class="section-title">Education</div>
+    <textarea name="education">{{ current_user.education or '' }}</textarea>
+
+    <div class="section-title">Achievements</div>
+    <textarea name="achievements">{{ current_user.achievements or '' }}</textarea>
+
+    <div class="section-title">Portfolio & Resume</div>
+    <label>Portfolio Link</label>
+    <input type="text" name="portfolio_link" placeholder="https://yourportfolio.com"
+           value="{{ current_user.portfolio_link or '' }}" />
+
+    <label>Upload Resume (PDF)</label>
+    <input type="file" name="resume_file" accept="application/pdf" />
+    {% if current_user.resume_file %}
+      <p>Current Resume:
+        <a href="{{ url_for('static', filename='uploads/' + current_user.resume_file) }}" target="_blank">
+          View PDF
+        </a>
+      </p>
+    {% endif %}
+
+    <div class="section-title">Profile Picture</div>
+    <input type="file" name="profile_picture" accept="image/*" />
+    {% if current_user.profile_picture %}
+      <div class="preview">
+        <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}"
+             alt="Current Profile Picture" />
+      </div>
+    {% endif %}
+
+    <button type="submit">Save Changes</button>
+  </form>
+
+  <div class="link">
+    <a href="{{ url_for('profile.profile') }}">⬅ Back to Profile</a> |
+    <a href="{{ url_for('profile.profile_settings') }}">⚙️ Privacy Settings</a>
+  </div>
+</div>
+{% endblock %}

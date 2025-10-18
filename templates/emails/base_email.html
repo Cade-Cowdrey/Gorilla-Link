@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" style="margin: 0; padding: 0;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}PittState-Connect Notification{% endblock %}</title>
+    {% include 'emails/partials/email_styles.html' %}
+  </head>
+
+  <body style="margin: 0; padding: 0; background-color: #f9f9f9;">
+    <!-- PSU Header -->
+    {% include 'emails/partials/email_header.html' %}
+
+    <!-- Email Body Wrapper -->
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      style="max-width: 640px; margin: 0 auto; background-color: #ffffff;"
+    >
+      <tr>
+        <td align="center" style="padding: 40px 30px;">
+          <div class="content-box">
+            {% block content %}
+            <!-- Default content (if not overridden) -->
+            <h1 class="psu-red">Hello from PittState-Connect</h1>
+            <p>
+              This is a default placeholder. Replace this content by overriding
+              the <code>{% raw %}{% block content %}{% endblock %}{% endraw %}</code>
+              section in your extended email template.
+            </p>
+            {% endblock %}
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- PSU Footer -->
+    {% include 'emails/partials/email_footer.html' %}
+
+    <!-- Plaintext fallback -->
+    <noscript>
+      {% block text_fallback %}
+      This is a plain-text fallback version of the PittState-Connect email.
+      {% endblock %}
+    </noscript>
+  </body>
+</html>

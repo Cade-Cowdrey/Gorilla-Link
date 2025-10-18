@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-2">{{ group.name }}</h2>
+<p class="text-muted">{{ group.topic or 'General' }} • Members: {{ members }}</p>
+{% if group.description %}<p class="mb-3">{{ group.description }}</p>{% endif %}
+
+{% if logged_in %}
+  {% if is_member %}
+    <form method="POST" action="/groups/{{ group.id }}/leave" class="mb-3">
+      <button class="btn btn-outline-secondary">Leave Group</button>
+    </form>
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <form method="POST" action="/groups/{{ group.id }}/message">
+          <textarea name="content" class="form-control mb-2" rows="2" placeholder="Share a resource or ask a question..."></textarea>
+          <button class="btn btn-danger">Post</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <form method="POST" action="/groups/{{ group.id }}/join" class="mb-3">
+      <button class="btn btn-danger">Join Group</button>
+    </form>
+  {% endif %}
+{% endif %}
+
+<h6 class="fw-bold text-danger">Recent Messages</h6>
+{% for m in messages %}
+  <div class="card mb-2 shadow-sm">
+    <div class="card-body">
+      <p class="mb-1">{{ m.content }}</p>
+      <small class="text-muted">{{ m.created_at.strftime('%b %d, %Y %I:%M %p') }}</small>
+    </div>
+  </div>
+{% else %}
+<p>No messages yet.</p>
+{% endfor %}
+{% endblock %}

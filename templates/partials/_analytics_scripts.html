@@ -1,0 +1,69 @@
+<!-- templates/partials/_analytics_scripts.html -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4.3.0/dist/chartjs-chart-wordcloud.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Department Engagement Chart
+  const ctx = document.getElementById("deptEngagementChart")?.getContext("2d");
+  if (ctx) {
+    const labels = {{ depts_table | map(attribute="name") | list | tojson }};
+    const prevData = {{ depts_table | map(attribute="posts_prev") | list | tojson }};
+    const currData = {{ depts_table | map(attribute="posts_curr") | list | tojson }};
+
+    const chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          { label: "Previous 30 Days", data: prevData, backgroundColor: "rgba(186,12,47,0.3)", borderColor: "#BA0C2F", borderWidth: 2 },
+          { label: "Current 30 Days", data: currData, backgroundColor: "rgba(255,210,0,0.4)", borderColor: "#FFD200", borderWidth: 2 }
+        ]
+      },
+      options: {
+        plugins: {
+          title: { display: true, text: "PittState Connect — Department Engagement", color: "#BA0C2F", font: { size: 18, weight: "bold" }},
+          legend: { position: "bottom" }
+        },
+        scales: { y: { beginAtZero: true, title: { display: true, text: "Post Count" } } }
+      },
+      plugins: [{
+        id: "watermark",
+        beforeDraw: (chart) => {
+          const ctx = chart.ctx;
+          const width = chart.width, height = chart.height;
+          ctx.save();
+          ctx.font = "bold 36px Helvetica";
+          ctx.fillStyle = "rgba(255,210,0,0.08)";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.translate(width/2, height/2);
+          ctx.rotate(-Math.PI / 6);
+          ctx.fillText("PittState Connect", 0, 0);
+          ctx.restore();
+        }
+      }]
+    });
+
+    // Save chart image for PDF generation
+    setTimeout(async () => {
+      const imgData = chart.toBase64Image("image/png", 1.0);
+      await fetch("/analytics/insights/upload_chart", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ image: imgData })
+      });
+    }, 1200);
+  }
+
+  // Word Cloud
+  const wc = document.getElementById("wordCloud")?.getContext("2d");
+  if (wc) {
+    const words = {{ wordcloud | tojson }};
+    new Chart(wc, {
+      type: "wordCloud",
+      data: { labels: words.map(w=>w.word), datasets: [{ label: "Trending Terms", data: words.map(w=>w.weight) }] },
+      options: { color: "#BA0C2F", font: { family: "Helvetica" }, plugins: { legend: { display: false } } }
+    });
+  }
+});
+</script>

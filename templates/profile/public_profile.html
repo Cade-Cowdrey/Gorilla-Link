@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.name }} | PittState-Connect</title>
+    <style>
+      :root{--psu-red:#C8102E;--psu-gold:#FFC72C;--psu-bg:#f9f9f9;}
+      body{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--psu-bg);margin:0;color:#333;}
+      header{background:var(--psu-red);color:#fff;padding:20px 40px;text-align:center;font-weight:700;font-size:22px;}
+      main{max-width:800px;margin:60px auto;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);padding:45px 50px;}
+      .profile-photo{text-align:center;margin-bottom:25px;}
+      .profile-photo img{width:130px;height:130px;border-radius:50%;border:4px solid var(--psu-gold);object-fit:cover;}
+      h2{color:var(--psu-red);text-align:center;margin-bottom:10px;}
+      .role{text-align:center;font-weight:600;color:#555;margin-bottom:10px;}
+      .section{margin-top:30px;}
+      .section h3{color:var(--psu-red);border-bottom:2px solid var(--psu-gold);padding-bottom:5px;margin-bottom:10px;}
+      .restricted{background:#fff3cd;border:1px solid #ffeeba;color:#856404;padding:10px;border-radius:6px;margin-top:10px;text-align:center;}
+      .meta{text-align:center;font-size:13px;color:#777;margin-top:30px;}
+      .btn{display:inline-block;padding:10px 18px;border-radius:6px;font-weight:600;text-decoration:none;transition:background .3s ease;}
+      .btn.connect{background:var(--psu-red);color:#fff;}
+      .btn.connect:hover{background:#A60D26;}
+      .btn.message{background:var(--psu-gold);color:#333;}
+      .btn.message:hover{background:#E5B723;}
+      .actions{text-align:center;margin-top:25px;}
+    </style>
+  </head>
+  <body>
+    <header>🦍 PittState-Connect</header>
+    <main>
+      <div class="profile-photo">
+        {% if user.profile_picture %}
+          <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="{{ user.name }}" />
+        {% else %}
+          <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Default Avatar" />
+        {% endif %}
+      </div>
+
+      <h2>{{ user.name }}</h2>
+      <p class="role">{{ user.role or "Student" }}</p>
+
+      <div class="section">
+        <h3>Bio</h3>
+        <p>{{ safe_bio or "No bio provided." }}</p>
+      </div>
+
+      <div class="section">
+        <h3>Experience</h3>
+        <p>{{ safe_experience or "No experience added." }}</p>
+      </div>
+
+      <div class="section">
+        <h3>Education</h3>
+        <p>{{ safe_education or "No education information added." }}</p>
+      </div>
+
+      <div class="section">
+        <h3>Achievements</h3>
+        <p>{{ safe_achievements or "No achievements added." }}</p>
+      </div>
+
+      <div class="section">
+        <h3>Portfolio & Resume</h3>
+        {% if show_portfolio or show_resume %}
+          {% if show_portfolio and user.portfolio_link %}
+            <p><strong>Portfolio:</strong> <a href="{{ user.portfolio_link }}" target="_blank">{{ user.portfolio_link }}</a></p>
+          {% endif %}
+          {% if show_resume and user.resume_file %}
+            <p><strong>Resume:</strong> <a href="{{ url_for('static', filename='uploads/' + user.resume_file) }}" target="_blank">View PDF</a></p>
+          {% elif show_resume %}
+            <p><em>No resume uploaded.</em></p>
+          {% endif %}
+        {% else %}
+          <div class="restricted">🔒 Resume and portfolio hidden by user privacy settings.</div>
+        {% endif %}
+      </div>
+
+      <div class="meta">Member since {{ user.created_at.strftime('%B %Y') }}</div>
+
+      {% if can_connect %}
+      <div class="actions">
+        <a href="{{ url_for('profile.connect', user_id=user.id) }}" class="btn connect">Connect</a>
+        <a href="{{ url_for('messages.start_conversation', user_id=user.id) }}" class="btn message">Message</a>
+      </div>
+      {% endif %}
+    </main>
+  </body>
+</html>

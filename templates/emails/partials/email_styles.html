@@ -1,0 +1,99 @@
+<!-- templates/emails/partials/email_styles.html -->
+<style>
+  /* =======================================================
+     PSU Email Stylesheet — PittState-Connect
+     Shared style system for all transactional and digest emails
+  ======================================================= */
+
+  /* ===== Reset & Base ===== */
+  body, table, td, a {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  table, td { border-collapse: collapse !important; }
+  img { border: 0; line-height: 100%; text-decoration: none; }
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    background-color: #f9f9f9;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* ===== PSU Brand Colors ===== */
+  :root {
+    --psu-red: #C8102E;
+    --psu-red-dark: #A60D26;
+    --psu-gold: #FFC72C;
+    --psu-gray: #f9f9f9;
+    --psu-text: #333333;
+  }
+
+  /* ===== Typography ===== */
+  h1, h2, h3, p {
+    margin: 0;
+    color: var(--psu-text);
+  }
+  h1 { font-size: 26px; font-weight: 700; }
+  h2 { font-size: 20px; font-weight: 600; color: var(--psu-red); }
+  p { font-size: 16px; line-height: 1.6; }
+
+  /* ===== Buttons ===== */
+  .btn-primary {
+    background-color: var(--psu-red);
+    color: #ffffff !important;
+    padding: 14px 26px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: var(--psu-red-dark);
+  }
+
+  /* ===== Sections ===== */
+  .content-box {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin: 0 auto 30px;
+    padding: 25px 30px;
+    max-width: 640px;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    font-size: 13px;
+    color: #777;
+    line-height: 1.6;
+  }
+
+  /* ===== PSU Theming ===== */
+  .psu-red { color: var(--psu-red); }
+  .psu-gold { color: var(--psu-gold); }
+  .psu-link {
+    color: var(--psu-red);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .psu-link:hover { text-decoration: underline; }
+
+  /* ===== Responsive ===== */
+  @media screen and (max-width: 600px) {
+    h1 { font-size: 22px !important; }
+    h2 { font-size: 18px !important; }
+    p { font-size: 15px !important; }
+    .btn-primary { width: 100% !important; text-align: center !important; }
+    .content-box { padding: 20px !important; }
+  }
+
+  /* ===== Accessibility & Dark Mode ===== */
+  @media (prefers-color-scheme: dark) {
+    body { background-color: #121212 !important; color: #e0e0e0 !important; }
+    .content-box { background-color: #1e1e1e !important; }
+    a.btn-primary { background-color: var(--psu-red-dark) !important; }
+    .footer { color: #aaa !important; }
+  }
+</style>

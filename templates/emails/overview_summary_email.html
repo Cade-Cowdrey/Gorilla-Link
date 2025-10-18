@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PittState-Connect | Leadership Analytics Report</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 640px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .header {
+      background-color: #C8102E;
+      padding: 25px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #FFC72C;
+    }
+    .content {
+      padding: 30px 40px;
+      color: #333333;
+    }
+    .content h2 {
+      color: #C8102E;
+      border-bottom: 2px solid #FFC72C;
+      padding-bottom: 5px;
+      margin-top: 0;
+    }
+    .metrics {
+      margin: 15px 0 25px 0;
+    }
+    .metrics p {
+      margin: 6px 0;
+      font-size: 15px;
+    }
+    .highlight {
+      color: #C8102E;
+      font-weight: 600;
+    }
+    .button {
+      display: inline-block;
+      background-color: #C8102E;
+      color: white;
+      text-decoration: none;
+      padding: 10px 22px;
+      border-radius: 6px;
+      margin-top: 15px;
+    }
+    .button:hover {
+      background-color: #a10d22;
+    }
+    .footer {
+      background-color: #f1f1f1;
+      color: #555;
+      font-size: 12px;
+      text-align: center;
+      padding: 15px 10px;
+      border-top: 2px solid #FFC72C;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>🦍 PittState-Connect</h1>
+      <p>Office of Digital Analytics</p>
+    </div>
+
+    <div class="content">
+      <h2>📊 Leadership Analytics Summary</h2>
+      <p>Dear {{ recipient_name }},</p>
+
+      <p>Attached below is your <strong>PittState-Connect Analytics Overview Report</strong> summarizing university engagement, departmental performance, and growth metrics as of <strong>{{ current_date.strftime('%B %d, %Y') }}</strong>.</p>
+
+      <div class="metrics">
+        <p><strong>Total Users:</strong> <span class="highlight">{{ summary.total_users }}</span></p>
+        <p><strong>Active This Week:</strong> <span class="highlight">{{ summary.active_users }}</span></p>
+        <p><strong>Total Departments:</strong> <span class="highlight">{{ summary.total_departments }}</span></p>
+        <p><strong>Average Engagement:</strong> <span class="highlight">{{ "%.2f"|format(summary.avg_engagement) }}</span></p>
+      </div>
+
+      <p>Top performing departments this period:</p>
+      <ul>
+        {% for d in summary.top_departments %}
+          <li>{{ d.name }} — {{ "%.2f"|format(d.avg_engagement) }} engagement</li>
+        {% endfor %}
+      </ul>
+
+      <p style="margin-top: 20px;">For detailed analytics, charts, and visual insights, access your admin dashboard below:</p>
+
+      <a href="{{ url_for('analytics.admin_overview', _external=True) }}" class="button">View Full Dashboard</a>
+
+      <p style="margin-top: 25px;">Thank you for your continued leadership and commitment to Pitt State’s success.</p>
+      <p>— The PittState-Connect Analytics Team</p>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 PittState-Connect | Office of Digital Analytics</p>
+      <p>For internal reporting and authorized personnel only.</p>
+    </div>
+  </div>
+</body>
+</html>

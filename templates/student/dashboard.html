@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-3">My Dashboard</h2>
+  <p>Welcome back, {{ session.get('user',{}).get('name','Gorilla') }}!</p>
+</div>
+{% endblock %}

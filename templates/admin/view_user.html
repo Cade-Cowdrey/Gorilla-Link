@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.name }} | PittState-Connect Admin</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        color: #333;
+      }
+
+      /* ===== Header ===== */
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+      header a {
+        color: #000;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+      header a:hover { background-color: #e6b500; }
+
+      /* ===== Container ===== */
+      main {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      .profile-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 30px 35px;
+        margin-bottom: 30px;
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background-color: var(--psu-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--psu-red);
+        font-weight: bold;
+        font-size: 32px;
+      }
+
+      .profile-info h2 {
+        margin: 0 0 4px;
+        color: var(--psu-red);
+        font-size: 22px;
+      }
+
+      .profile-info p {
+        margin: 3px 0;
+        font-size: 15px;
+        color: #555;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .active { background-color: #2E7D32; color: #fff; }
+      .suspended { background-color: #D32F2F; color: #fff; }
+
+      /* ===== Activity Log ===== */
+      h3 {
+        color: var(--psu-red);
+        border-bottom: 2px solid var(--psu-gold);
+        padding-bottom: 6px;
+        margin-top: 40px;
+      }
+
+      .timeline {
+        list-style: none;
+        padding: 0;
+        margin: 25px 0;
+      }
+
+      .timeline li {
+        background: #fff;
+        margin-bottom: 15px;
+        padding: 15px 20px;
+        border-left: 5px solid var(--psu-gold);
+        border-radius: 6px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+      }
+
+      .timeline li span.date {
+        display: block;
+        font-size: 13px;
+        color: #777;
+        margin-bottom: 4px;
+      }
+
+      .timeline li strong {
+        color: var(--psu-red);
+        font-size: 15px;
+      }
+
+      .buttons {
+        margin-top: 20px;
+      }
+
+      .btn {
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        margin-right: 8px;
+        display: inline-block;
+      }
+
+      .btn-activate { background-color: #2E7D32; color: #fff; }
+      .btn-suspend { background-color: #D32F2F; color: #fff; }
+      .btn-back { background-color: var(--psu-gold); color: #000; }
+
+      .btn:hover { opacity: 0.85; }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        header { flex-direction: column; align-items: flex-start; }
+        header h1 { margin-bottom: 8px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>👁 User Details</h1>
+      <a href="{{ url_for('admin.user_list') }}">⬅ Back to Users</a>
+    </header>
+
+    <main>
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar">{{ user.name[0] }}</div>
+          <div class="profile-info">
+            <h2>{{ user.name }}</h2>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Department:</strong> {{ user.department }}</p>
+            <p><strong>Role:</strong> {{ user.role }}</p>
+            {% if user.active %}
+              <span class="status active">Active</span>
+            {% else %}
+              <span class="status suspended">Suspended</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="buttons">
+          {% if user.active %}
+            <a href="{{ url_for('admin.suspend_user', user_id=user.id) }}" class="btn btn-suspend">🚫 Suspend User</a>
+          {% else %}
+            <a href="{{ url_for('admin.activate_user', user_id=user.id) }}" class="btn btn-activate">✅ Activate User</a>
+          {% endif %}
+          <a href="{{ url_for('admin.user_list') }}" class="btn btn-back">⬅ Back to List</a>
+        </div>
+      </div>
+
+      <h3>Recent Activity</h3>
+      <ul class="timeline">
+        {% for log in activity_logs %}
+          <li>
+            <span class="date">{{ log.date }}</span>
+            <strong>{{ log.action }}</strong><br />
+            {{ log.details }}
+          </li>
+        {% else %}
+          <li>No recent activity recorded.</li>
+        {% endfor %}
+      </ul>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect · Pittsburg State University
+      </footer>
+    </main>
+  </body>
+</html>

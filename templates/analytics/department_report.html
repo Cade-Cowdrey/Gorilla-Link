@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Department Reports | PittState-Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-analytics">
+  <h2>🏫 Department Performance Report</h2>
+
+  <div class="chart-wrapper">
+    <h3>📊 User Count by Department</h3>
+    <canvas id="chart-user-counts" height="300"></canvas>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>🔥 Average Engagement per Department</h3>
+    <canvas id="chart-dept-engagement" height="300"></canvas>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>📈 Department Activity Trend (Past 6 Weeks)</h3>
+    <canvas id="chart-dept-trend" height="300"></canvas>
+  </div>
+
+  <div class="metric-grid">
+    {% for d in departments %}
+    <div class="metric-box">
+      <h3>{{ d.name }}</h3>
+      <p>{{ d.user_count }} users</p>
+      <p>Avg Engagement: {{ "%.2f"|format(d.avg_engagement or 0) }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const deptNames = {{ dept_names|safe }};
+  const userCounts = {{ dept_user_counts|safe }};
+  const deptEngagement = {{ dept_avg_engagement|safe }};
+  const deptTrendData = {{ dept_trend_data|safe }};
+
+  // Bar: User count per department
+  new Chart(document.getElementById("chart-user-counts"), {
+    type: 'bar',
+    data: {
+      labels: deptNames,
+      datasets: [{
+        label: "Users",
+        data: userCounts,
+        backgroundColor: "#FFC72C",
+        borderColor: "#C8102E",
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+
+  // Bar: Engagement per department
+  new Chart(document.getElementById("chart-dept-engagement"), {
+    type: 'bar',
+    data: {
+      labels: deptNames,
+      datasets: [{
+        label: "Avg Engagement",
+        data: deptEngagement,
+        backgroundColor: "rgba(200,16,46,0.8)",
+        borderColor: "#FFC72C",
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+
+  // Line: Weekly trend per department (aggregate)
+  new Chart(document.getElementById("chart-dept-trend"), {
+    type: 'line',
+    data: {
+      labels: deptTrendData.map(d => d.week),
+      datasets: deptTrendData.map(d => ({
+        label: d.name,
+        data: d.trend,
+        borderWidth: 3,
+        fill: false,
+        borderColor: "#" + Math.floor(Math.random()*16777215).toString(16)
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, tension: 0.3 }
+  });
+</script>
+{% endblock %}

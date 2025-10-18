@@ -1,0 +1,43 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Your Jungle Digest • PittState-Connect{% endblock %}
+
+{% block content %}
+<h1 class="psu-red">The Jungle Digest</h1>
+<p>
+  Welcome to this week’s edition of <strong>The Jungle Digest</strong> —
+  your inside look at Pitt State news, events, and community highlights.
+</p>
+
+{% if digest_data %}
+  {% for section in digest_data %}
+  <div class="content-box" style="margin-top:25px; padding:20px; text-align:left;">
+    <h2>{{ section.title }}</h2>
+    <p>{{ section.content }}</p>
+    {% if section.link %}
+    <p style="margin-top:10px;">
+      <a href="{{ section.link }}" class="btn-primary" target="_blank">Read More</a>
+    </p>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="content-box" style="margin-top:25px;">
+    <h2>Stay Tuned!</h2>
+    <p>We’re preparing more exciting updates for the next edition of the Jungle Digest.</p>
+  </div>
+{% endif %}
+
+<p style="margin-top:25px;">
+  For more updates, visit your
+  <a href="https://pittstateconnect.com" class="psu-link">PittState-Connect Dashboard</a>.
+</p>
+{% endblock %}
+
+{% block text_fallback %}
+Your Jungle Digest:
+{% for section in digest_data %}
+- {{ section.title }}: {{ section.content }}
+{% if section.link %} ({{ section.link }}){% endif %}
+{% endfor %}
+{% endblock %}

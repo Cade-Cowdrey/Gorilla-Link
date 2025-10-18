@@ -1,0 +1,25 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}New Notification • PittState-Connect{% endblock %}
+
+{% block content %}
+<h1 class="psu-red">You Have a New Notification</h1>
+<p>{{ message_text }}</p>
+
+{% if action_url %}
+<p style="margin-top:25px;">
+  <a href="{{ action_url }}" class="btn-primary" target="_blank">View Details</a>
+</p>
+{% endif %}
+
+<p style="margin-top:20px;">
+  Log in to your
+  <a href="https://pittstateconnect.com" class="psu-link">PittState-Connect dashboard</a>
+  for full details and updates.
+</p>
+{% endblock %}
+
+{% block text_fallback %}
+Notification: {{ message_text }}
+{% if action_url %} View it here: {{ action_url }}{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }} — Badges{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <h2 class="fw-bold text-danger">{{ user.name }} — Career Badges</h2>
+  {% include "partials/badges_strip.html" with context %}
+</div>
+{% endblock %}

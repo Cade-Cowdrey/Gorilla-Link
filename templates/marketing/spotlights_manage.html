@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Spotlight Manager — Pitt State Connect{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-6 py-12">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-psuRed">Manage Spotlights</h1>
+    <a href="{{ url_for('marketing.create_spotlight') }}" class="bg-psuGold text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition">
+      + New Spotlight
+    </a>
+  </div>
+
+  {% if spotlights %}
+  <div class="grid md:grid-cols-2 gap-8">
+    {% for s in spotlights %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+      <img src="{{ s.image_url or url_for('static', filename='images/default.jpg') }}" class="w-full h-48 object-cover">
+      <div class="p-4">
+        <h2 class="text-xl font-semibold mb-1">{{ s.title }}</h2>
+        <p class="text-gray-600 text-sm mb-3">{{ s.description[:140] }}...</p>
+        <div class="flex justify-between text-sm">
+          <a href="{{ url_for('marketing.edit_spotlight', id=s.id) }}" class="text-psuRed hover:underline">Edit</a>
+          <a href="{{ url_for('marketing.delete_spotlight', id=s.id) }}" class="text-gray-600 hover:underline">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-gray-600 mt-10">
+    <p>No spotlights added yet 🌟</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

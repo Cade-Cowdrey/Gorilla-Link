@@ -1,0 +1,197 @@
+<!-- templates/partials/analytics_insights_body.html -->
+
+<!-- Top controls -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <div class="btn-group" role="group">
+    <a href="{{ url_for('analytics_bp.insights', metric='posts') }}" class="btn btn-sm {% if metric=='posts' %}btn-danger{% else %}btn-outline-danger{% endif %}">Posts</a>
+    <a href="{{ url_for('analytics_bp.insights', metric='events') }}" class="btn btn-sm {% if metric=='events' %}btn-danger{% else %}btn-outline-danger{% endif %}">Events</a>
+    <a href="{{ url_for('analytics_bp.insights', metric='badges') }}" class="btn btn-sm {% if metric=='badges' %}btn-danger{% else %}btn-outline-danger{% endif %}">Badges</a>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mt-md-0">
+    <a href="{{ url_for('analytics_bp.digest_archive_list') }}" class="btn btn-outline-dark btn-sm">🗂️ View Digest Archive</a>
+    <form action="{{ url_for('analytics_bp.send_digest_email') }}" method="POST" class="d-flex flex-wrap gap-2">
+      <input type="email" name="to_email" class="form-control form-control-sm" placeholder="Recipient email" required>
+      <input type="email" name="cc_email" class="form-control form-control-sm" placeholder="CC (optional)">
+      <input type="text" name="subject" class="form-control form-control-sm" value="🦍 The Jungle Digest — Weekly Insights">
+      <button class="btn btn-danger btn-sm" type="submit">📬 Send Jungle Digest</button>
+    </form>
+  </div>
+</div>
+
+<!-- Engagement Overview -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="fw-bold text-danger mb-3">📊 Department Engagement Overview</h5>
+    <canvas id="deptEngagementChart" height="120"></canvas>
+    <p class="small text-muted mt-2 mb-0">Post activity per department (current vs previous 30 days).</p>
+  </div>
+</div>
+
+<!-- Leaderboard -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-warning fw-bold">🏆 Department Leaderboard</div>
+  <div class="card-body table-responsive">
+    <table class="table table-sm align-middle">
+      <thead><tr><th>Department</th><th>Tier</th><th>Posts</th><th>Growth%</th></tr></thead>
+      <tbody>
+        {% for l in leaderboard %}
+        <tr>
+          <td>{{ l.name }}</td>
+          <td><span class="badge bg-{% if l.tier=='Gold' %}warning{% elif l.tier=='Silver' %}secondary{% elif l.tier=='Bronze' %}dark{% else %}light text-dark{% endif %}">{{ l.tier }}</span></td>
+          <td>{{ l.posts }}</td>
+          <td>{{ l.growth_pct }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Sentiment -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-info fw-bold text-white">🙂 Campus Sentiment</div>
+  <div class="card-body">
+    {% if sentiment.has_data %}
+      <p>Positive: <strong>{{ sentiment.positive_pct }}%</strong> • Neutral: <strong>{{ sentiment.neutral_pct }}%</strong> • Negative: <strong>{{ sentiment.negative_pct }}%</strong></p>
+      <div class="progress mb-2">
+        <div class="progress-bar bg-success" style="width: {{ sentiment.positive_pct }}%"></div>
+        <div class="progress-bar bg-secondary" style="width: {{ sentiment.neutral_pct }}%"></div>
+        <div class="progress-bar bg-danger" style="width: {{ sentiment.negative_pct }}%"></div>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Not enough data for sentiment analysis.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- AI Recommendations (simple) -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-dark text-white fw-bold">🧭 AI Recommendations</div>
+  <div class="card-body">
+    <ul class="mb-0">
+      <li>Amplify top-performing departments with homepage spotlights.</li>
+      <li>Schedule a networking event for Starter-tier departments.</li>
+      <li>Run a 1-question pulse survey if Neutral ≥ 60% to spark stories.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 8-Week Heatmap -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-danger text-white fw-bold">🔥 8-Week Engagement Heatmap</div>
+  <div class="card-body">
+    <canvas id="heatmapChart" height="300"></canvas>
+    <p class="small text-muted mt-2 mb-0">Intensity represents department activity per week.</p>
+  </div>
+</div>
+
+<!-- Alumni Impact Map (NEW) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-success text-white fw-bold">🌍 Alumni Impact Map</div>
+  <div class="card-body">
+    <div id="alumniMap" style="width: 100%; height: 420px; border-radius: 6px;"></div>
+    <p class="small text-muted mt-2 mb-0">Explore where PittState alumni work and live. (Demo data shown if profile locations are not set.)</p>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Word Cloud (visual-only) -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-warning fw-bold">💬 Trending Topics Word Cloud</div>
+  <div class="card-body text-center">
+    <canvas id="wordCloud" height="360"></canvas>
+    <p class="small text-muted mt-2 mb-0">Top terms from recent student posts.</p>
+  </div>
+</div>
+
+<!-- Data Table -->
+<div class="card shadow-sm">
+  <div class="card-header bg-light fw-bold">Department Snapshot (Raw Data)</div>
+  <div class="card-body table-responsive">
+    <table class="table table-sm align-middle">
+      <thead class="table-danger">
+        <tr>
+          <th>Department</th><th>Users</th><th>Posts (Prev)</th><th>Posts (Curr)</th><th>Δ</th><th>RSVPs</th><th>Growth%</th><th>Forecast</th><th>Tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in depts_table %}
+        <tr>
+          <td>{{ d.name }}</td><td>{{ d.users }}</td><td>{{ d.posts_prev }}</td><td>{{ d.posts_curr }}</td>
+          <td>{{ d.delta_posts }}</td><td>{{ d.rsvps }}</td><td>{{ d.growth_pct }}%</td><td>{{ d.forecast_next }}</td><td>{{ d.tier }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Shared chart scripts (engagement + wordcloud + watermark + chart upload) -->
+{% include "partials/_analytics_scripts.html" %}
+
+<!-- Heatmap JS (fetches /analytics/heatmap_data) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // Heatmap
+  try {
+    const resp = await fetch("{{ url_for('analytics_bp.heatmap_data') }}");
+    const data = await resp.json();
+    const ctx = document.getElementById("heatmapChart").getContext("2d");
+    const labels = Array.from({length: 8}, (_, i) => `W-${i+1}`);
+    const datasets = data.map((d, idx) => ({
+      label: d.department,
+      data: d.values,
+      backgroundColor: d.values.map(v => `rgba(186,12,47,${0.18 + (v / Math.max(...d.values, 1)) * 0.75})`),
+      borderWidth: 0,
+      barPercentage: 0.9,
+      categoryPercentage: 0.9,
+    }));
+    new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, title: { display: true, text: "Department Activity (Last 8 Weeks)", color: "#BA0C2F", font: { size: 16, weight: "bold" } } },
+        scales: { x: { stacked: true, title: { display: true, text: "Week" }}, y: { stacked: true, title: { display: true, text: "Post Count" }, beginAtZero: true } }
+      }
+    });
+  } catch (err) { console.error("Heatmap error:", err); }
+
+  // Alumni Map
+  try {
+    const map = L.map('alumniMap');
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
+    tiles.addTo(map);
+
+    const res = await fetch("{{ url_for('analytics_bp.alumni_map_data') }}");
+    const pts = await res.json();
+
+    const markers = [];
+    pts.forEach(p => {
+      if (typeof p.lat !== "number" || typeof p.lng !== "number") return;
+      const m = L.marker([p.lat, p.lng]).addTo(map);
+      const lines = [
+        `<strong>${p.name}</strong>`,
+        p.department ? `Dept: ${p.department}` : "",
+        p.grad_year ? `Grad: ${p.grad_year}` : "",
+        p.employer ? `Employer: ${p.employer}` : "",
+        (p.city || p.state) ? `${p.city || ""}${p.city && p.state ? ", " : ""}${p.state || ""}` : ""
+      ].filter(Boolean);
+      m.bindPopup(lines.join("<br>"));
+      markers.push(m);
+    });
+
+    if (markers.length) {
+      const group = L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.2));
+    } else {
+      // Default to Pittsburg, KS
+      map.setView([37.4109, -94.7040], 11);
+      L.marker([37.4109, -94.7040]).addTo(map).bindPopup("<strong>Pittsburg State University</strong><br>Alumni data coming soon.");
+    }
+  } catch (e) { console.error("Alumni map error:", e); }
+});
+</script>

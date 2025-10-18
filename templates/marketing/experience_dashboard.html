@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Experience & Outreach — PittState Connect{% endblock %}
+{% block content %}
+
+<section class="py-5" style="background:#FFC72C;">
+  <div class="container">
+    <h2 class="fw-bold mb-1" style="color:#BA0C2F;">Experience & Outreach</h2>
+    <div class="text-muted">Positive, public-safe campus highlights for PR & admissions.</div>
+  </div>
+</section>
+
+<section class="py-4 bg-white">
+  <div class="container">
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Engagement (30d posts)</div>
+          <div class="fs-3 fw-bold text-danger">{{ engagement_30d }}</div>
+        </div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm text-center"><div class="card-body">
+          <div class="small text-muted">Active Opportunities</div>
+          <div class="fs-3 fw-bold text-danger">{{ active_opportunities }}</div>
+        </div></div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-bold">Growth (New Gorillas)</div>
+          <div class="card-body">
+            <canvas id="expTrend" height="110"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-bold">Featured Spotlights</div>
+          <div class="card-body">
+            <div class="row g-3">
+              {% for s in featured_stories %}
+              <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                  {% if s.image_url %}
+                  <img src="{{ s.image_url }}" class="card-img-top" alt="{{ s.title }}">
+                  {% endif %}
+                  <div class="card-body">
+                    <h6 class="fw-bold text-danger mb-1">{{ s.title }}</h6>
+                    <div class="small text-muted">{{ s.student_name }}{% if s.graduation_year %}, ’{{ s.graduation_year|string|slice(-2) }}{% endif %}</div>
+                    <p class="mb-2 small">{{ s.summary or s.body[:120] ~ ('...' if s.body|length > 120) }}</p>
+                    <a class="btn btn-outline-danger btn-sm" href="{{ url_for('stories_bp.detail', slug=s.slug) }}">Read Story</a>
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div class="col-12 text-muted">No featured stories yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-light fw-bold">Top Hiring Partners</div>
+          <ul class="list-group list-group-flush">
+            {% for company, cnt in partners %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ company }}</span>
+              <span class="badge bg-danger">{{ cnt }}</span>
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">Partner list updates coming soon.</li>
+            {% endfor %}
+          </ul>
+          <div class="card-footer d-flex gap-2 justify-content-end">
+            <a href="{{ url_for('marketing_bp.experience_export_csv') }}" class="btn btn-outline-secondary btn-sm">Export CSV</a>
+            <a href="{{ url_for('marketing_bp.experience_export_pdf') }}" class="btn btn-outline-danger btn-sm">Export PDF</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light fw-bold">Departments on the Move (30d activity)</div>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead><tr><th>Department</th><th class="text-end">Highlights</th></tr></thead>
+              <tbody>
+                {% for name, cnt in dept_activity %}
+                <tr>
+                  <td>{{ name }}</td>
+                  <td class="text-end"><span class="badge bg-danger">{{ cnt }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2" class="text-muted">No recent activity to display.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light fw-bold">Upcoming Events</div>
+          <div class="list-group list-group-flush">
+            {% for e in upcoming_events %}
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <strong class="text-danger">{{ e.title }}</strong>
+                <small class="text-muted">{{ e.start_time.strftime('%b %d, %Y %I:%M %p') }}</small>
+              </div>
+              <div class="small text-muted">{{ e.location or 'TBA' }}</div>
+              <p class="mb-0">{{ e.description or '' }}</p>
+            </div>
+            {% else %}
+            <div class="list-group-item text-muted">No events to show yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script>
+  const labels = {{ trend_labels|tojson }};
+  const values = {{ trend_values|tojson }};
+  new Chart(document.getElementById("expTrend"), {
+    type: "line",
+    data: { labels, datasets: [{
+      label: "New Gorillas",
+      data: values,
+      borderColor: "#BA0C2F",
+      backgroundColor: "rgba(186,12,47,.12)",
+      borderWidth: 2,
+      fill: true,
+      tension: 0.25,
+      pointRadius: 3
+    }]},
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+</script>
+{% endblock %}
+{% endblock %}

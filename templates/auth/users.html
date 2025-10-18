@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}User Management | PittState Connect{% endblock %}
+{% block content %}
+<div class="min-h-[80vh] bg-gray-50 dark:bg-gray-950 py-10 px-6">
+  <div class="max-w-5xl mx-auto bg-white dark:bg-gray-900 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-red-700">User Management</h2>
+      <a href="{{ url_for('admin_dashboard') }}"
+         class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400">← Back to Dashboard</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-100 dark:bg-gray-800">
+          <tr>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Name</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Email</th>
+            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Role</th>
+            <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          {% for u in users %}
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ u.name }}</td>
+            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ u.email }}</td>
+            <td class="px-6 py-4 text-gray-600 dark:text-gray-300 capitalize">{{ u.role }}</td>
+            <td class="px-6 py-4 text-right space-x-3">
+              {% if u.email != "admin@pittstate.edu" %}
+                <a href="{{ url_for('admin_promote_user', user_id=u.id) }}"
+                   class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-semibold">Promote</a>
+                <a href="{{ url_for('admin_delete_user', user_id=u.id) }}"
+                   class="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm font-semibold"
+                   onclick="return confirm('Are you sure you want to delete {{ u.name }}?');">
+                   Delete
+                </a>
+              {% else %}
+                <span class="text-gray-400 text-sm italic">System Admin</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-3">📊 Analytics Dashboard</h2>
+<p class="text-muted mb-3">Filter results, view top performers, and export analytics reports.</p>
+
+<div class="d-flex justify-content-end mb-2">
+  <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-dark">🤖 AI Insights</a>
+</div>
+
+<form class="row g-3 mb-4" method="get" action="{{ url_for('analytics_bp.dashboard') }}">
+  <div class="col-md-3"><label class="form-label">Start Date</label><input type="date" name="start" value="{{ filters.start }}" class="form-control"></div>
+  <div class="col-md-3"><label class="form-label">End Date</label><input type="date" name="end" value="{{ filters.end }}" class="form-control"></div>
+  <div class="col-md-3"><label class="form-label">Department</label>
+    <select name="dept" class="form-select">
+      <option value="all" {% if filters.dept == 'all' %}selected{% endif %}>All</option>
+      {% for d in departments %}
+      <option value="{{ d }}" {% if filters.dept == d %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3 d-flex align-items-end"><button class="btn btn-danger w-100">Apply Filters</button></div>
+</form>
+
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ url_for('analytics_bp.export_csv') }}" class="btn btn-outline-secondary me-2">📤 Export CSV</a>
+  <a href="{{ url_for('analytics_bp.export_pdf') }}" class="btn btn-outline-danger">📄 Export PDF</a>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="fw-bold text-danger">Users</h6><h4>{{ totals.users }}</h4></div></div></div>
+  <div class="col-md-3"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="fw-bold text-danger">Posts</h6><h4>{{ totals.posts }}</h4></div></div></div>
+  <div class="col-md-3"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="fw-bold text-danger">Events</h6><h4>{{ totals.events }}</h4></div></div></div>
+  <div class="col-md-3"><div class="card shadow-sm text-center"><div class="card-body"><h6 class="fw-bold text-danger">Badges</h6><h4>{{ totals.badges }}</h4></div></div></div>
+</div>
+
+<div class="card shadow-sm mb-5"><div class="card-body">
+  <h6 class="fw-bold text-danger mb-3">Users per Department</h6>
+  <canvas id="deptChart" height="120"></canvas>
+</div></div>
+
+<!-- 🏆 Leaderboards -->
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-danger text-white fw-bold">🏅 Top Students</div>
+      <div class="card-body">
+        {% if top_students %}
+        <ol class="mb-0">
+          {% for s in top_students %}
+          <li>{{ s[0] }} — {{ s[1] }} Posts · {{ s[2] }} Badges</li>
+          {% endfor %}
+        </ol>
+        {% else %}<p class="text-muted">No data yet.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-warning fw-bold">🏛️ Top Departments</div>
+      <div class="card-body">
+        {% if top_departments %}
+        <ol class="mb-0">
+          {% for d in top_departments %}
+          <li>{{ d[0] }} — {{ d[1] }} Posts</li>
+          {% endfor %}
+        </ol>
+        {% else %}<p class="text-muted">No data yet.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-success text-white fw-bold">🤝 Top Mentors</div>
+      <div class="card-body">
+        {% if top_mentors %}
+        <ol class="mb-0">
+          {% for m in top_mentors %}
+          <li>{{ m[0] }} — {{ m[1] }} Posts</li>
+          {% endfor %}
+        </ol>
+        {% else %}<p class="text-muted">No data yet.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('deptChart'), {
+  type:'bar',
+  data:{labels:{{ departments|tojson }},datasets:[{label:'Users',data:{{ users_count|tojson }},backgroundColor:'#BA0C2F'}]},
+  options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+});
+</script>
+{% endblock %}

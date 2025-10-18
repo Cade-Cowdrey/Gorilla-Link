@@ -1,0 +1,6 @@
+:root { --psu-crimson:#BA0C2F; --psu-gold:#FFD100; --psu-charcoal:#4D4F53; --psu-light:#EAEAEA; }
+.navbar.bg-danger{ background-color: var(--psu-crimson) !important; }
+.btn-danger{ background-color: var(--psu-crimson); border-color: var(--psu-crimson); }
+.btn-warning{ background-color: var(--psu-gold); border-color: var(--psu-gold); color:#000; }
+a{text-decoration:none;} a:hover{text-decoration:underline;}
+.hero-banner h1{ text-shadow:0 2px 14px rgba(0,0,0,.35); }

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ app_name }} — Faculty & Department Digest</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f9f9fb;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #222;
+  }
+  .wrapper {
+    max-width: 760px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(90deg, #73000a, #c8102e);
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .header img {
+    width: 75px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .header small {
+    display: block;
+    color: #ffc72c;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+  .content {
+    padding: 36px 42px;
+    line-height: 1.7;
+  }
+  .content h2 {
+    color: #73000a;
+    font-size: 20px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #c8102e;
+    display: inline-block;
+    padding-bottom: 4px;
+  }
+  .highlight {
+    background: #f6f6f9;
+    border-left: 4px solid #c8102e;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 26px;
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 22px;
+    margin-top: 16px;
+  }
+  .metric {
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-left: 4px solid #73000a;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .metric strong {
+    display: block;
+    font-size: 20px;
+    color: #c8102e;
+  }
+  .metric span {
+    font-size: 14px;
+    color: #555;
+  }
+  .section {
+    margin-top: 32px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  th {
+    background: #73000a;
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    font-size: 14px;
+  }
+  td {
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    font-size: 14px;
+  }
+  tr:hover td {
+    background: #f8f8f8;
+  }
+  .button {
+    display: inline-block;
+    padding: 12px 26px;
+    background: #c8102e;
+    color: #fff !important;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 24px;
+    transition: background 0.3s ease;
+  }
+  .button:hover {
+    background: #a70e25;
+  }
+  .footer {
+    background: #f1f1f5;
+    text-align: center;
+    padding: 18px;
+    font-size: 13px;
+    color: #666;
+  }
+  .footer a {
+    color: #73000a;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <img src="https://upload.wikimedia.org/wikipedia/en/d/dd/Pittsburg_State_Gorillas_logo.svg" alt="PSU Gorilla" />
+      <h1>{{ app_name }} Faculty Digest</h1>
+      <small>{{ department_name or "Department Overview" }}</small>
+    </div>
+
+    <div class="content">
+      <p>Dear {{ faculty_name or "Department Head" }},</p>
+      <p>
+        Here’s your department’s weekly engagement snapshot across Gorilla-Link —
+        including student activity, mentorship performance, and department-wide highlights.
+      </p>
+
+      <div class="highlight">
+        <strong>🏫 Department Summary</strong>
+        <div class="metrics">
+          <div class="metric">
+            <strong>{{ metrics.total_students or 0 }}</strong>
+            <span>Active Students</span>
+          </div>
+          <div class="metric">
+            <strong>{{ metrics.new_posts or 0 }}</strong>
+            <span>New Posts This Week</span>
+          </div>
+          <div class="metric">
+            <strong>{{ metrics.total_replies or 0 }}</strong>
+            <span>Replies & Comments</span>
+          </div>
+          <div class="metric">
+            <strong>{{ metrics.active_mentorships or 0 }}</strong>
+            <span>Active Mentorships</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📚 Student Highlights</h2>
+        <table>
+          <tr><th>Student</th><th>Highlight</th><th>Date</th></tr>
+          {% for s in student_highlights %}
+          <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.highlight }}</td>
+            <td>{{ s.date.strftime("%b %d, %Y") if s.date else "—" }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3">No student highlights recorded this week.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>🤝 Mentorship Updates</h2>
+        <table>
+          <tr><th>Mentor</th><th>Mentee</th><th>Status</th></tr>
+          {% for m in mentorships %}
+          <tr>
+            <td>{{ m.mentor_name }}</td>
+            <td>{{ m.mentee_name }}</td>
+            <td>{{ m.status or "Active" }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3">No active mentorships at this time.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>🎓 Department Engagement</h2>
+        <table>
+          <tr><th>Category</th><th>Count</th></tr>
+          <tr><td>Events Hosted</td><td>{{ metrics.events_hosted or 0 }}</td></tr>
+          <tr><td>Posts Created</td><td>{{ metrics.new_posts or 0 }}</td></tr>
+          <tr><td>Replies Made</td><td>{{ metrics.total_replies or 0 }}</td></tr>
+          <tr><td>New Connections</td><td>{{ metrics.new_connections or 0 }}</td></tr>
+        </table>
+      </div>
+
+      <p style="text-align:center;">
+        <a href="{{ base_url or '#' }}/admin/digest_archive" class="button">View Full Department Dashboard</a>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© {{ now().year }} Pittsburg State University · Gorilla-Link</p>
+      <p><a href="{{ base_url or '#' }}">Dashboard</a> | <a href="mailto:support@gorillalink.app">Support</a></p>
+    </div>
+  </div>
+</body>
+</html>

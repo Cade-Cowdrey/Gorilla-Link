@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ dept.name }} — Department Portfolio{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-danger fw-bold mb-0">{{ dept.name }}</h2>
+    <a href="{{ url_for('departments_bp.export_department_pdf', dept_id=dept.id) }}" class="btn btn-outline-danger btn-sm">
+      📄 Download Report (PDF)
+    </a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <div class="small text-muted">Total Students</div>
+          <h2 class="fw-bold text-danger">{{ users|length }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <div class="small text-muted">Total Posts</div>
+          <h2 class="fw-bold text-danger">{{ posts_count }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <div class="small text-muted">Posts (30 Days)</div>
+          <h2 class="fw-bold text-danger">{{ posts_recent }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="fw-bold text-danger mb-3">Recent Highlights</h4>
+  {% if recent_posts %}
+    <ul class="list-group shadow-sm mb-4">
+      {% for post in recent_posts %}
+        <li class="list-group-item">
+          <strong>{{ post.author.name if post.author else 'User' }}</strong>:
+          {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+          <br><small class="text-muted">{{ post.created_at.strftime('%b %d, %Y %I:%M %p') }}</small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No recent posts yet for this department.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

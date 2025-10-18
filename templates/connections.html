@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-4">My Connections</h2>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-danger text-white">Accepted</div>
+      <ul class="list-group list-group-flush">
+        {% for u in accepted %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="/profile/{{ u.id }}">{{ u.name }}</a>
+            <small class="text-muted">{{ u.role }}</small>
+          </li>
+        {% else %}
+          <li class="list-group-item">No connections yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-warning">Incoming Requests</div>
+      <ul class="list-group list-group-flush">
+        {% for u in incoming %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="/profile/{{ u.id }}">{{ u.name }}</a>
+            <div>
+              <button class="btn btn-sm btn-success" onclick="respond({{ u.id }}, 'accept')">Accept</button>
+              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="respond({{ u.id }}, 'reject')">Reject</button>
+            </div>
+          </li>
+        {% else %}
+          <li class="list-group-item">No pending requests.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-light">Outgoing Requests</div>
+      <ul class="list-group list-group-flush">
+        {% for u in outgoing %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="/profile/{{ u.id }}">{{ u.name }}</a>
+            <small class="text-muted">Pending</small>
+          </li>
+        {% else %}
+          <li class="list-group-item">No outgoing requests.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+async function respond(senderId, action) {
+  const res = await fetch('/connections/respond', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ sender_id: senderId, action })
+  });
+  const data = await res.json();
+  if (data.status === 'accepted' || data.status === 'rejected') {
+    location.reload();
+  } else {
+    alert(data.error || 'Something went wrong');
+  }
+}
+</script>
+{% endblock %}

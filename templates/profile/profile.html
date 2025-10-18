@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}My Profile | PittState-Connect{% endblock %}
+
+{% block content %}
+<style>
+  .profile-header {
+    text-align:center; margin-bottom:35px;
+  }
+  .profile-header img {
+    width:130px; height:130px; border-radius:50%;
+    border:4px solid var(--psu-gold); object-fit:cover;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  }
+  .profile-header h2 {
+    color:var(--psu-red); margin:15px 0 5px;
+  }
+  .profile-header p.role {
+    font-weight:600; color:#555; margin:0;
+  }
+  .profile-section {
+    background:#fff; border-radius:10px;
+    padding:25px 30px; margin-bottom:25px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  }
+  .profile-section h3 {
+    color:var(--psu-red); border-bottom:2px solid var(--psu-gold);
+    padding-bottom:5px; margin-top:0; margin-bottom:10px;
+  }
+  .profile-section p {line-height:1.6;}
+  .actions {
+    display:flex; flex-wrap:wrap; justify-content:center;
+    gap:15px; margin-top:30px;
+  }
+  .actions a {
+    text-decoration:none; padding:12px 20px;
+    border-radius:6px; font-weight:600; transition:background .3s ease;
+  }
+  .actions a.edit {
+    background-color:var(--psu-red); color:#fff;
+  }
+  .actions a.edit:hover {background-color:#A60D26;}
+  .actions a.settings {
+    background-color:var(--psu-gold); color:#222;
+  }
+  .actions a.settings:hover {background-color:#E5B723;}
+  .no-data {color:#777; font-style:italic;}
+</style>
+
+<div class="profile-header">
+  {% if current_user.profile_picture %}
+    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}" alt="Profile Picture" />
+  {% else %}
+    <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Default Avatar" />
+  {% endif %}
+  <h2>{{ current_user.name }}</h2>
+  <p class="role">{{ current_user.role or "Student" }}</p>
+</div>
+
+<div class="profile-section">
+  <h3>Bio</h3>
+  <p>{{ current_user.bio or "No bio provided." }}</p>
+</div>
+
+<div class="profile-section">
+  <h3>Experience</h3>
+  <p>{{ current_user.experience or "No experience added yet." }}</p>
+</div>
+
+<div class="profile-section">
+  <h3>Education</h3>
+  <p>{{ current_user.education or "No education information added." }}</p>
+</div>
+
+<div class="profile-section">
+  <h3>Achievements</h3>
+  <p>{{ current_user.achievements or "No achievements listed yet." }}</p>
+</div>
+
+<div class="profile-section">
+  <h3>Portfolio & Resume</h3>
+  {% if current_user.portfolio_link %}
+    <p><strong>Portfolio:</strong> <a href="{{ current_user.portfolio_link }}" target="_blank">{{ current_user.portfolio_link }}</a></p>
+  {% else %}
+    <p class="no-data">No portfolio link added.</p>
+  {% endif %}
+  {% if current_user.resume_file %}
+    <p><strong>Resume:</strong> <a href="{{ url_for('static', filename='uploads/' + current_user.resume_file) }}" target="_blank">View PDF</a></p>
+  {% else %}
+    <p class="no-data">No resume uploaded.</p>
+  {% endif %}
+</div>
+
+<div class="actions">
+  <a href="{{ url_for('profile.edit_profile') }}" class="edit">✏️ Edit Profile</a>
+  <a href="{{ url_for('profile.profile_settings') }}" class="settings">⚙️ Privacy Settings</a>
+</div>
+{% endblock %}

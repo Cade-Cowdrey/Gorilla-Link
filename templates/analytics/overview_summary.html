@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Overview Summary | PittState-Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+<style>
+  .summary-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  }
+  .summary-header {
+    text-align: center;
+    border-bottom: 3px solid var(--psu-gold);
+    margin-bottom: 25px;
+  }
+  .summary-header h2 {
+    color: var(--psu-red);
+    margin: 0;
+  }
+  .summary-section {
+    margin-bottom: 25px;
+  }
+  .summary-section h3 {
+    color: var(--psu-red);
+    margin-bottom: 10px;
+    border-left: 5px solid var(--psu-gold);
+    padding-left: 10px;
+  }
+  .summary-section p {
+    margin: 5px 0;
+  }
+  .button-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+  }
+  .action-btn {
+    background-color: var(--psu-red);
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .action-btn:hover {
+    background-color: #a10d22;
+  }
+  .print-btn {
+    background-color: var(--psu-gold);
+    color: #111;
+  }
+  .print-btn:hover {
+    background-color: #e6b800;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="summary-wrapper">
+  <div class="summary-header">
+    <h2>📄 PSU Analytics Overview Summary</h2>
+    <p>As of {{ current_date.strftime('%B %d, %Y') }}</p>
+  </div>
+
+  <div class="summary-section">
+    <h3>General Overview</h3>
+    <p><strong>Total Users:</strong> {{ summary.total_users }}</p>
+    <p><strong>Active This Week:</strong> {{ summary.active_users }}</p>
+    <p><strong>Total Departments:</strong> {{ summary.total_departments }}</p>
+    <p><strong>Average Engagement:</strong> {{ "%.2f"|format(summary.avg_engagement) }}</p>
+  </div>
+
+  <div class="summary-section">
+    <h3>Top Performing Departments</h3>
+    <ul>
+      {% for d in summary.top_departments %}
+        <li>{{ d.name }} — {{ "%.2f"|format(d.avg_engagement) }} engagement</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="summary-section">
+    <h3>Recent Trends</h3>
+    <canvas id="chart-summary-growth" height="250"></canvas>
+  </div>
+
+  <div class="button-row">
+    <button class="action-btn print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <a href="{{ url_for('analytics.overview_summary_pdf') }}" class="action-btn">📥 Export to PDF</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const summaryGrowth = {{ summary.growth_data|safe }};
+
+  new Chart(document.getElementById("chart-summary-growth"), {
+    type: 'line',
+    data: {
+      labels: summaryGrowth.map(d => d.month),
+      datasets: [{
+        label: "User Growth",
+        data: summaryGrowth.map(d => d.count),
+        borderColor: "#C8102E",
+        backgroundColor: "rgba(200,16,46,0.1)",
+        borderWidth: 3,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+</script>
+{% endblock %}

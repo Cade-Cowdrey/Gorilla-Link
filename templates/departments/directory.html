@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Departments Directory — PittState Connect{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-danger mb-0">🏫 Departments Directory</h2>
+    <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger btn-sm">View Analytics</a>
+  </div>
+
+  <p class="text-muted mb-4">
+    Explore all Pitt State academic departments and see real-time career and mentorship insights.
+  </p>
+
+  <div class="row g-3">
+    {% for d in departments %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100 border-0 hover-shadow transition">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="fw-bold text-danger mb-1">{{ d.name }}</h5>
+            {% if d.description %}
+              <p class="text-muted small">{{ d.description[:120] }}{% if d.description|length > 120 %}...{% endif %}</p>
+            {% else %}
+              <p class="text-muted small">Pitt State’s {{ d.name }} department connects students, alumni, and career mentors.</p>
+            {% endif %}
+          </div>
+
+          <!-- Department stats (lazy-loaded style) -->
+          {% set users = d.users %}
+          {% set total_users = users|length %}
+          {% set mentors = users|selectattr('is_mentor')|list %}
+          {% set mentees = users|selectattr('seeking_mentor')|list %}
+          {% set mentor_count = mentors|length %}
+          {% set mentee_count = mentees|length %}
+          {% set jobs = d.jobs if d.jobs is defined else [] %}
+          {% set active_jobs = jobs|selectattr('is_active')|list %}
+          {% set job_count = active_jobs|length %}
+
+          <div class="row text-center mt-2 mb-2">
+            <div class="col-4">
+              <div class="small text-muted">Students</div>
+              <div class="fw-bold text-danger">{{ total_users }}</div>
+            </div>
+            <div class="col-4">
+              <div class="small text-muted">Mentors</div>
+              <div class="fw-bold text-danger">{{ mentor_count }}</div>
+            </div>
+            <div class="col-4">
+              <div class="small text-muted">Jobs</div>
+              <div class="fw-bold text-danger">{{ job_count }}</div>
+            </div>
+          </div>
+
+          <div class="d-grid mt-2">
+            <a
+              href="{{ url_for('departments_bp.detail', dept_id=d.id) }}"
+              class="btn btn-outline-danger btn-sm"
+              >View Portfolio</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+      <div class="alert alert-light border text-muted">No departments available yet.</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(186, 12, 47, 0.2) !important;
+  }
+  .transition {
+    transition: all 0.25s ease-in-out;
+  }
+</style>
+
+{% endblock %}

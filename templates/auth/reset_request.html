@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Reset Password | PittState-Connect{% endblock %}
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f0f0f]">
+  <div class="max-w-md w-full bg-white dark:bg-[#1b1b1b] rounded-2xl shadow-lg p-8 fade-in">
+    <h1 class="text-3xl font-bold text-center text-[#73000a] dark:text-[#FFD700] mb-6">Forgot Your Password?</h1>
+    <p class="text-center text-gray-600 dark:text-gray-300 mb-8">
+      Enter your account email below and we’ll send you a secure reset link.
+    </p>
+
+    <form method="POST" action="{{ url_for('auth.reset_password') }}" class="space-y-5">
+      <div>
+        <label class="block font-semibold mb-1">Email Address</label>
+        <input type="email" name="email" placeholder="you@pittstate.edu" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full mt-4">Send Reset Link</button>
+    </form>
+
+    <p class="text-center text-gray-600 dark:text-gray-300 mt-6">
+      Remembered your password?
+      <a href="{{ url_for('auth.login') }}" class="text-psu-red hover:text-psu-gold font-semibold">Return to Login</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

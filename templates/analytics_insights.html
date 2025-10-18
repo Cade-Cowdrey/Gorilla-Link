@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Analytics Insights | Pitt State{% endblock %}
+{% block content %}
+
+<section class="container mx-auto px-6 py-12">
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-red-700 mb-2">Pitt State Analytics Insights</h1>
+    <p class="text-gray-600 dark:text-gray-400">
+      Campus data, student engagement, and department performance — all visualized in one PSU dashboard.
+    </p>
+  </div>
+
+  <!-- Metrics Summary -->
+  <div class="grid gap-6 md:grid-cols-4 mb-12">
+    <div class="psu-gradient text-white rounded-2xl p-6 shadow-md">
+      <p class="text-sm uppercase opacity-80">Active Departments</p>
+      <h2 class="text-3xl font-bold mt-2">{{ total_departments or '—' }}</h2>
+    </div>
+    <div class="psu-gradient-gold text-white rounded-2xl p-6 shadow-md">
+      <p class="text-sm uppercase opacity-80">Student Engagement</p>
+      <h2 class="text-3xl font-bold mt-2">{{ engagement_rate or '—' }}%</h2>
+    </div>
+    <div class="psu-gradient-dark text-white rounded-2xl p-6 shadow-md">
+      <p class="text-sm uppercase opacity-80">Career Matches</p>
+      <h2 class="text-3xl font-bold mt-2">{{ matches_count or '—' }}</h2>
+    </div>
+    <div class="psu-gradient-gold text-white rounded-2xl p-6 shadow-md">
+      <p class="text-sm uppercase opacity-80">Last Updated</p>
+      <h2 id="updated_at" class="text-lg mt-2 font-semibold">—</h2>
+    </div>
+  </div>
+
+  <!-- Chart & Data Panels -->
+  <div class="grid gap-6 lg:grid-cols-2 mb-12">
+    <div class="psu-card p-6 bg-white dark:bg-gray-800">
+      <h3 class="text-xl font-semibold text-red-700 mb-4">Department Participation</h3>
+      <canvas id="deptChart" height="200"></canvas>
+    </div>
+    <div class="psu-card p-6 bg-white dark:bg-gray-800">
+      <h3 class="text-xl font-semibold text-red-700 mb-4">Student Involvement Over Time</h3>
+      <canvas id="growthChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="psu-card p-6 bg-white dark:bg-gray-800 mb-10">
+    <h3 class="text-xl font-semibold text-red-700 mb-4">Top Performing Departments</h3>
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead>
+        <tr class="bg-gray-50 dark:bg-gray-900">
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Department</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Engagement</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Active Projects</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for d in top_departments %}
+        <tr>
+          <td class="px-4 py-3">{{ d.name }}</td>
+          <td class="px-4 py-3">{{ d.engagement }}%</td>
+          <td class="px-4 py-3">{{ d.projects }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("updated_at").textContent = new Date().toLocaleDateString();
+
+  const deptCtx = document.getElementById("deptChart").getContext("2d");
+  new Chart(deptCtx, {
+    type: "bar",
+    data: {
+      labels: {{ department_names|tojson }},
+      datasets: [{
+        label: "Participation",
+        data: {{ department_participation|tojson }},
+        backgroundColor: "#b91c1c"
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  const growthCtx = document.getElementById("growthChart").getContext("2d");
+  new Chart(growthCtx, {
+    type: "line",
+    data: {
+      labels: {{ months|tojson }},
+      datasets: [{
+        label: "Engagement",
+        data: {{ engagement_growth|tojson }},
+        borderColor: "#facc15",
+        backgroundColor: "rgba(250,204,21,0.2)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+});
+</script>
+
+{% endblock %}

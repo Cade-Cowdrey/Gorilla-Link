@@ -1,0 +1,22 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Student Signup</h2>
+<form method="post" class="form">
+  <label>Name <input type="text" name="name" required></label>
+  <label>Email <input type="email" name="email" required></label>
+  <label>Major <input type="text" name="major" placeholder="e.g., Marketing, Nursing, CS"></label>
+  <label>Expected Grad Year <input type="text" name="grad_year" placeholder="2026"></label>
+  <label>City/Location <input type="text" name="city" placeholder="Pittsburg, KS"></label>
+  <label>LinkedIn URL <input type="url" name="linkedin" placeholder="https://www.linkedin.com/in/you"></label>
+  <fieldset>
+    <legend>What help would you like?</legend>
+    <label><input type="checkbox" name="help_needs" value="Resume review"> Resume review</label>
+    <label><input type="checkbox" name="help_needs" value="Portfolio feedback"> Portfolio feedback</label>
+    <label><input type="checkbox" name="help_needs" value="Mock interview"> Mock interview</label>
+    <label><input type="checkbox" name="help_needs" value="Career advice"> Career advice</label>
+    <label><input type="checkbox" name="help_needs" value="Internship referral"> Internship referral</label>
+  </fieldset>
+  <button class="btn primary" type="submit">Join</button>
+</form>
+{% endblock %}

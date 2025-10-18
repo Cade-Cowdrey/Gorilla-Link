@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Platform Settings | PittState-Connect Admin</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      /* ===== Header ===== */
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      header a {
+        color: #fff;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+
+      header a:hover {
+        background-color: #e6b500;
+      }
+
+      /* ===== Container ===== */
+      main {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      h2 {
+        color: var(--psu-red);
+        border-bottom: 2px solid var(--psu-gold);
+        padding-bottom: 5px;
+        margin-bottom: 25px;
+      }
+
+      form {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 30px 35px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      input[type="color"],
+      input[type="email"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        transition: border 0.2s ease;
+      }
+
+      input:focus {
+        border-color: var(--psu-red);
+        outline: none;
+      }
+
+      button {
+        background-color: var(--psu-red);
+        color: #fff;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #A60D26;
+      }
+
+      .field-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+      }
+
+      .note {
+        font-size: 14px;
+        color: #666;
+        margin-top: -10px;
+        margin-bottom: 20px;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        .field-group {
+          grid-template-columns: 1fr;
+        }
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        header h1 {
+          margin-bottom: 8px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>⚙️ Platform Settings</h1>
+      <a href="{{ url_for('admin.dashboard') }}">⬅ Back to Admin</a>
+    </header>
+
+    <main>
+      <h2>PittState-Connect Configuration</h2>
+
+      <form method="POST" action="{{ url_for('admin.settings') }}">
+        <div class="field-group">
+          <div>
+            <label for="site_name">Platform Name</label>
+            <input
+              type="text"
+              id="site_name"
+              name="site_name"
+              value="{{ settings.site_name }}"
+              required
+            />
+            <p class="note">Displayed on email headers and login pages.</p>
+          </div>
+
+          <div>
+            <label for="primary_color">Primary Theme Color</label>
+            <input
+              type="color"
+              id="primary_color"
+              name="primary_color"
+              value="{{ settings.primary_color }}"
+            />
+            <p class="note">Used for buttons, banners, and accent UI elements.</p>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <label for="mail_from">Default “From” Email</label>
+            <input
+              type="email"
+              id="mail_from"
+              name="mail_from"
+              value="{{ settings.mail_from }}"
+              required
+            />
+            <p class="note">Address used when sending official PSU emails.</p>
+          </div>
+
+          <div>
+            <label for="api_key">API Key</label>
+            <input
+              type="password"
+              id="api_key"
+              name="api_key"
+              value="{{ settings.api_key }}"
+            />
+            <p class="note">Used for secure integrations (e.g., Render, Slack, etc.).</p>
+          </div>
+        </div>
+
+        <button type="submit">💾 Save Settings</button>
+      </form>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect · Pittsburg State University
+      </footer>
+    </main>
+  </body>
+</html>

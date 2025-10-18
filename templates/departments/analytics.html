@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Department Analytics | PittState Connect{% endblock %}
+{% block content %}
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-950 px-6 py-10">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
+      <div>
+        <h1 class="text-4xl font-bold text-psuRed">Department Analytics</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Visualize and compare department engagement data.</p>
+      </div>
+      <a href="{{ url_for('admin_dashboard') }}"
+         class="bg-psuRed text-white px-5 py-2 rounded-lg font-semibold hover:bg-psuGold hover:text-psuRed transition mt-4 md:mt-0">
+        Back to Admin Dashboard
+      </a>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+
+      <!-- Student Distribution -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+        <h2 class="text-2xl font-bold text-psuRed mb-4">Student Distribution by Department</h2>
+        <canvas id="studentChart" height="150"></canvas>
+      </div>
+
+      <!-- Faculty Distribution -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+        <h2 class="text-2xl font-bold text-psuRed mb-4">Faculty Distribution</h2>
+        <canvas id="facultyChart" height="150"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Department Table -->
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+      <h2 class="text-2xl font-bold text-psuRed mb-6">Detailed Department Overview</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 dark:border-gray-800 rounded-xl text-left">
+          <thead class="bg-psuRed text-white">
+            <tr>
+              <th class="py-3 px-5 font-semibold">Department</th>
+              <th class="py-3 px-5 font-semibold">Category</th>
+              <th class="py-3 px-5 font-semibold">Students</th>
+              <th class="py-3 px-5 font-semibold">Faculty</th>
+              <th class="py-3 px-5 font-semibold">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dept in departments %}
+            <tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              <td class="py-3 px-5 font-semibold text-psuRed">{{ dept.name }}</td>
+              <td class="py-3 px-5">{{ dept.category or 'General' }}</td>
+              <td class="py-3 px-5">{{ dept.student_count or 0 }}</td>
+              <td class="py-3 px-5">{{ dept.faculty_count or 0 }}</td>
+              <td class="py-3 px-5 text-sm text-gray-500 dark:text-gray-400">
+                {{ dept.updated_at.strftime('%b %d, %Y') if dept.updated_at else 'N/A' }}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center py-5 text-gray-500 dark:text-gray-400">
+                No department data available.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const studentCtx = document.getElementById('studentChart').getContext('2d');
+new Chart(studentCtx, {
+  type: 'pie',
+  data: {
+    labels: {{ department_names | safe }},
+    datasets: [{
+      label: 'Students',
+      data: {{ student_distribution | safe }},
+      backgroundColor: ['#b22222', '#FFD700', '#8B0000', '#FFCC33', '#D32F2F', '#E0A800'],
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Student Population by Department',
+        color: '#b22222',
+        font: { size: 16, weight: 'bold' }
+      },
+      legend: { labels: { color: '#333' } }
+    }
+  }
+});
+
+const facultyCtx = document.getElementById('facultyChart').getContext('2d');
+new Chart(facultyCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ department_names | safe }},
+    datasets: [{
+      label: 'Faculty',
+      data: {{ faculty_distribution | safe }},
+      backgroundColor: '#b22222',
+      borderRadius: 5,
+      hoverBackgroundColor: '#FFD700'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Faculty per Department',
+        color: '#b22222',
+        font: { size: 16, weight: 'bold' }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#555' } },
+      y: { beginAtZero: true, ticks: { color: '#555' } }
+    }
+  }
+});
+</script>
+
+{% endblock %}

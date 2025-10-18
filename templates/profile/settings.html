@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Privacy Settings | PittState-Connect{% endblock %}
+
+{% block content %}
+<style>
+  .settings-wrapper {
+    max-width:650px; margin:0 auto;
+    background:#fff; border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    padding:40px 45px;
+  }
+  h2 {
+    color:var(--psu-red);
+    text-align:center; margin-top:0; margin-bottom:25px;
+  }
+  form {display:flex; flex-direction:column; gap:25px;}
+  label {font-weight:600; color:#333;}
+  select {
+    padding:10px 12px; border:1px solid #ccc; border-radius:6px;
+    font-size:15px; width:100%;
+  }
+  select:focus {border-color:var(--psu-red); outline:none;}
+  .tip {
+    font-size:13px; color:#555;
+    margin-top:-12px; margin-bottom:8px;
+  }
+  button {
+    background-color:var(--psu-red); color:#fff; border:none;
+    border-radius:6px; padding:12px 18px; font-weight:600;
+    cursor:pointer; transition:background .3s ease;
+  }
+  button:hover {background-color:#A60D26;}
+  .note {
+    background:#fff3cd; color:#856404;
+    padding:10px 15px; border-radius:6px;
+    font-size:14px; margin-bottom:20px;
+    border:1px solid #ffeeba;
+  }
+  .link {
+    text-align:center; margin-top:25px; font-size:14px;
+  }
+  .link a {
+    color:var(--psu-red); font-weight:600; text-decoration:none;
+  }
+  .link a:hover {color:#A60D26;}
+</style>
+
+<div class="settings-wrapper">
+  <h2>⚙️ Privacy Settings</h2>
+
+  <div class="note">
+    Control who can view your uploaded resume and portfolio links on PittState-Connect.  
+    <br>These settings help protect personal data while keeping your professional profile visible to the right people.
+  </div>
+
+  <form method="POST" action="{{ url_for('profile.profile_settings') }}">
+    <div>
+      <label for="resume_visibility">Who can view your resume?</label>
+      <select id="resume_visibility" name="resume_visibility">
+        <option value="Everyone" {% if current_user.resume_visibility == "Everyone" %}selected{% endif %}>Everyone</option>
+        <option value="Admin/Alumni" {% if current_user.resume_visibility == "Admin/Alumni" %}selected{% endif %}>Admins & Alumni Only</option>
+        <option value="Private" {% if current_user.resume_visibility == "Private" %}selected{% endif %}>Only Me</option>
+      </select>
+      <p class="tip">Your resume may include contact details. Restrict visibility if you want to protect personal info.</p>
+    </div>
+
+    <div>
+      <label for="portfolio_visibility">Who can view your portfolio link?</label>
+      <select id="portfolio_visibility" name="portfolio_visibility">
+        <option value="Everyone" {% if current_user.portfolio_visibility == "Everyone" %}selected{% endif %}>Everyone</option>
+        <option value="Admin/Alumni" {% if current_user.portfolio_visibility == "Admin/Alumni" %}selected{% endif %}>Admins & Alumni Only</option>
+        <option value="Private" {% if current_user.portfolio_visibility == "Private" %}selected{% endif %}>Only Me</option>
+      </select>
+      <p class="tip">If your portfolio contains private projects, limit access to trusted viewers.</p>
+    </div>
+
+    <button type="submit">💾 Save Settings</button>
+  </form>
+
+  <div class="link">
+    <a href="{{ url_for('profile.profile') }}">⬅ Back to Profile</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ alumni.name }} · Alumni{% endblock %}
+{% block content %}
+
+<section class="max-w-6xl mx-auto text-center mb-12 px-6">
+  <h1 class="text-4xl font-heading font-bold text-[#660000] dark:text-[#C7A008]">{{ alumni.name }}</h1>
+  <p class="text-lg text-gray-600 dark:text-gray-300">
+    {{ alumni.current_title or "—" }}{% if alumni.current_company %} · {{ alumni.current_company }}{% endif %}
+  </p>
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    {{ alumni.department.name if alumni.department }}{% if alumni.grad_year %} • Class of {{ alumni.grad_year }}{% endif %}
+  </p>
+  <div class="mt-3 text-sm">
+    {% if alumni.city or alumni.state %}<span>📍 {{ alumni.city }}{% if alumni.state %}, {{ alumni.state }}{% endif %}</span>{% endif %}
+    {% if alumni.linkedin_url %} · <a class="text-[#C7A008] hover:underline" href="{{ alumni.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+    {% if alumni.email %} · <a class="text-[#C7A008] hover:underline" href="mailto:{{ alumni.email }}">{{ alumni.email }}</a>{% endif %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-6 mb-16">
+  <!-- Summary -->
+  <div class="card lg:col-span-2">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">About</h2>
+    {% if alumni.achievements and alumni.achievements|length %}
+      <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+        {% for item in alumni.achievements %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-600 dark:text-gray-400">No biography or achievements provided yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Skills -->
+  <div class="card">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">Skills</h2>
+    {% if alumni.skills and alumni.skills|length %}
+      <div class="flex flex-wrap gap-2">
+        {% for s in alumni.skills %}
+          <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{{ s }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-600 dark:text-gray-400">No skills listed.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Employment Timeline -->
+<section class="max-w-6xl mx-auto px-6 mb-20">
+  <div class="card">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-4">Employment History</h2>
+    {% if alumni.employments and alumni.employments|length %}
+      <div class="space-y-4">
+        {% for e in alumni.employments %}
+          <div class="border-b dark:border-gray-700 pb-3">
+            <p class="font-semibold text-gray-900 dark:text-gray-100">
+              {{ e.title or "Role" }}{% if e.company %} @ {{ e.company.name }}{% endif %}
+            </p>
+            <p class="text-sm text-gray-500">
+              {% if e.start_date %}{{ e.start_date.strftime('%b %Y') }}{% endif %} – 
+              {% if e.is_current %}Present{% elif e.end_date %}{{ e.end_date.strftime('%b %Y') }}{% else %}?{% endif %}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-600 dark:text-gray-400">No employment records yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="text-center py-16 mt-10 bg-[#660000] dark:bg-[#111] text-white">
+  <h2 class="text-3xl font-bold mb-4">Stay Connected</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Alumni networks open doors — mentorships, jobs, collaborations. Keep your profile up to date.
+  </p>
+  <a href="{{ url_for('alumni.dashboard') }}" class="btn-secondary">← Back to Alumni Directory</a>
+</section>
+
+{% endblock %}

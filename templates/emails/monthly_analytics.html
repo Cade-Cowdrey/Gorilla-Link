@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ app_name }} — Monthly Analytics Digest</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f9f9fb;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #222;
+  }
+  .wrapper {
+    max-width: 780px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .header {
+    background: linear-gradient(90deg, #73000a, #c8102e);
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .header img {
+    width: 70px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    color: #fff;
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+  }
+  .header small {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ffc72c;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .content {
+    padding: 36px 40px;
+    line-height: 1.7;
+  }
+  .content h2 {
+    font-size: 20px;
+    color: #73000a;
+    border-bottom: 2px solid #c8102e;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 22px;
+    margin-bottom: 30px;
+  }
+  .metric {
+    background: #f6f6f9;
+    border-left: 4px solid #c8102e;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .metric strong {
+    display: block;
+    font-size: 22px;
+    color: #c8102e;
+    margin-bottom: 4px;
+  }
+  .metric span {
+    font-size: 14px;
+    color: #555;
+  }
+  .section {
+    margin-top: 30px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  th {
+    background: #73000a;
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    font-size: 14px;
+  }
+  td {
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    font-size: 14px;
+  }
+  tr:hover td {
+    background: #f8f8f8;
+  }
+  .button {
+    display: inline-block;
+    padding: 12px 26px;
+    background: #c8102e;
+    color: #fff !important;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 24px;
+    transition: background 0.3s ease;
+  }
+  .button:hover {
+    background: #a70e25;
+  }
+  .footer {
+    background: #f1f1f5;
+    text-align: center;
+    padding: 18px;
+    font-size: 13px;
+    color: #666;
+  }
+  .footer a {
+    color: #73000a;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <img src="https://upload.wikimedia.org/wikipedia/en/d/dd/Pittsburg_State_Gorillas_logo.svg" alt="PSU Gorilla" />
+      <h1>{{ app_name }} Monthly Analytics Digest</h1>
+      <small>{{ label or "Performance Overview" }}</small>
+    </div>
+
+    <div class="content">
+      <p>Dear PSU Team,</p>
+      <p>
+        Below is your monthly analytics snapshot for <strong>{{ label }}</strong>.
+        This report summarizes new users, engagement, and top-performing posts
+        across the {{ app_name }} platform.
+      </p>
+
+      <div class="metric-grid">
+        <div class="metric">
+          <strong>{{ metrics.new_users or 0 }}</strong>
+          <span>New Users</span>
+        </div>
+        <div class="metric">
+          <strong>{{ metrics.posts_created or 0 }}</strong>
+          <span>Posts Created</span>
+        </div>
+        <div class="metric">
+          <strong>{{ metrics.replies_created or 0 }}</strong>
+          <span>Replies Posted</span>
+        </div>
+        <div class="metric">
+          <strong>{{ metrics.total_likes or 0 }}</strong>
+          <span>Total Likes</span>
+        </div>
+        <div class="metric">
+          <strong>{{ metrics.total_comments or 0 }}</strong>
+          <span>Total Comments</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🔥 Top Liked Posts</h2>
+        <table>
+          <tr><th>Post Title</th><th>Likes</th><th>Comments</th><th>Date</th></tr>
+          {% for p in top_liked %}
+          <tr>
+            <td>{{ p.title }}</td>
+            <td>{{ p.likes_count }}</td>
+            <td>{{ p.comments_count }}</td>
+            <td>{% if p.timestamp %}{{ p.timestamp.strftime("%b %d, %Y") }}{% else %}-{% endif %}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No top liked posts this month.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>💬 Most Discussed Posts</h2>
+        <table>
+          <tr><th>Post Title</th><th>Comments</th><th>Likes</th><th>Date</th></tr>
+          {% for p in top_commented %}
+          <tr>
+            <td>{{ p.title }}</td>
+            <td>{{ p.comments_count }}</td>
+            <td>{{ p.likes_count }}</td>
+            <td>{% if p.timestamp %}{{ p.timestamp.strftime("%b %d, %Y") }}{% else %}-{% endif %}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No top commented posts this month.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <p style="text-align:center;">
+        <a href="{{ base_url or '#' }}/admin/digest_archive" class="button">View Full Dashboard</a>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© {{ now().year }} Pittsburg State University · Gorilla-Link Analytics</p>
+      <p><a href="{{ base_url or '#' }}">Home</a> | <a href="mailto:support@gorillalink.app">Support</a></p>
+    </div>
+  </div>
+</body>
+</html>

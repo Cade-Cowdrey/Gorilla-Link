@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Manage Stories (Marketing){% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-danger mb-0">🛠 Manage Student Stories</h2>
+    <a href="{{ url_for('stories_bp.list_stories') }}" class="btn btn-outline-secondary btn-sm">View Public</a>
+  </div>
+
+  <!-- Editor -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-bold">{% if edit_story %}Edit Story{% else %}Create Story{% endif %}</div>
+    <form method="post">
+      {% if edit_story %}<input type="hidden" name="id" value="{{ edit_story.id }}">{% endif %}
+      <div class="card-body row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Title</label>
+          <input class="form-control" name="title" value="{{ edit_story.title if edit_story else '' }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Slug (optional)</label>
+          <input class="form-control" name="slug" value="{{ edit_story.slug if edit_story else '' }}" placeholder="auto-generated if blank">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Student Name (optional)</label>
+          <input class="form-control" name="student_name" value="{{ edit_story.student_name if edit_story else '' }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Graduation Year</label>
+          <input class="form-control" name="graduation_year" type="number" value="{{ edit_story.graduation_year if edit_story else '' }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Department</label>
+          <select class="form-select" name="department_id">
+            <option value="">—</option>
+            {% for d in departments %}
+            <option value="{{ d.id }}" {% if edit_story and edit_story.department_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Summary (teaser)</label>
+          <input class="form-control" name="summary" value="{{ edit_story.summary if edit_story else '' }}" maxlength="280">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Body</label>
+          <textarea class="form-control" name="body" rows="8" required>{{ edit_story.body if edit_story else '' }}</textarea>
+        </div>
+        <div class="col-md-9">
+          <label class="form-label">Image URL</label>
+          <input class="form-control" name="image_url" value="{{ edit_story.image_url if edit_story else '' }}" placeholder="https://...">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="featured" name="featured" {% if edit_story and edit_story.featured %}checked{% endif %}>
+            <label class="form-check-label" for="featured">Featured</label>
+          </div>
+        </div>
+        <div class="col-12 d-flex justify-content-end gap-2">
+          <button class="btn btn-danger">{% if edit_story %}Update{% else %}Create{% endif %}</button>
+          {% if edit_story %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('stories_bp.manage') }}">Cancel</a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Existing -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-light fw-bold">Existing Stories</div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Dept</th>
+            <th>Student</th>
+            <th>Featured</th>
+            <th>Published</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in stories %}
+          <tr>
+            <td><a href="{{ url_for('stories_bp.detail', slug=s.slug) }}" target="_blank">{{ s.title }}</a></td>
+            <td>{{ s.department.name if s.department else '—' }}</td>
+            <td>{{ s.student_name or '—' }}</td>
+            <td>{% if s.featured %}<span class="badge bg-warning text-dark">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+            <td>{{ s.published_at.strftime('%b %d, %Y') }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-danger" href="{{ url_for('stories_bp.manage', edit=s.id) }}">Edit</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('stories_bp.toggle_featured', story_id=s.id) }}">Toggle Featured</a>
+              <form class="d-inline" method="post" action="{{ url_for('stories_bp.delete', story_id=s.id) }}" onsubmit="return confirm('Delete this story?');">
+                <button class="btn btn-sm btn-outline-dark">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-muted">No stories yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

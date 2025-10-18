@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="fw-bold text-danger mb-0">{{ user.name }}</h2>
+
+  {% if user.is_mentor %}
+  <span class="badge bg-warning text-dark ms-2">🎓 PSU Verified Mentor</span>
+  {% endif %}
+</div>
+
+<p class="text-muted mb-4">
+  {{ user.major or 'No major listed' }} — {{ user.grad_year or 'N/A' }}
+</p>
+
+<div class="row">
+  <!-- Left column -->
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="fw-bold text-danger">About</h5>
+        <p>{{ user.bio or 'No bio yet.' }}</p>
+
+        {% if is_self %}
+        <form method="POST" action="{{ url_for('profile_bp.edit_profile') }}">
+          <hr>
+          <h6 class="fw-bold text-danger mb-2">Edit Profile</h6>
+
+          <label class="form-label">Bio</label>
+          <textarea name="bio" class="form-control mb-2" rows="2">{{ user.bio or '' }}</textarea>
+
+          <label class="form-label">Major</label>
+          <input type="text" name="major" class="form-control mb-2" value="{{ user.major or '' }}">
+
+          <label class="form-label">Graduation Year</label>
+          <input type="text" name="grad_year" class="form-control mb-2" value="{{ user.grad_year or '' }}">
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="is_mentor" id="isMentor" {% if user.is_mentor %}checked{% endif %}>
+            <label class="form-check-label" for="isMentor">I want to mentor students</label>
+          </div>
+
+          <textarea name="mentor_fields" class="form-control mb-3" rows="2" placeholder="Areas I can mentor (e.g., Accounting internships, LSAT prep)">{{ user.mentor_fields or '' }}</textarea>
+
+          <button class="btn btn-danger w-100">Save Changes</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Suggested connections -->
+    {% if suggested %}
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white fw-bold">Suggested Connections</div>
+      <ul class="list-group list-group-flush">
+        {% for s in suggested %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="/profile/{{ s.id }}" class="text-decoration-none text-dark">{{ s.name }}</a>
+          <small class="text-muted">{{ s.major or 'Student' }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right column -->
+  <div class="col-md-8">
+    <h5 class="fw-bold text-danger mb-3">Recent Posts</h5>
+    {% for post in posts %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold text-danger mb-1">{{ post.title or 'Untitled' }}</h6>
+        {% if post.content %}
+        <p class="mb-1">{{ post.content }}</p>
+        {% endif %}
+        {% if post.image_url %}
+        <img src="{{ post.image_url }}" alt="Post image" class="img-fluid rounded mt-2" style="max-height:300px;object-fit:cover;">
+        {% endif %}
+        <small class="text-muted">{{ post.created_at.strftime('%b %d, %Y') }}</small>
+      </div>
+    </div>
+    {% else %}
+    <p>No posts yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

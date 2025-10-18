@@ -1,0 +1,53 @@
+
+:root {
+  --primary: #b30000; /* Gorilla red */
+  --ink: #222;
+  --muted: #6b7280;
+  --bg: #f7f7f8;
+  --card: #ffffff;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+.container { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+.flex { display: flex; }
+.space-between { justify-content: space-between; }
+.align-center { align-items: center; }
+
+.site-header { background: #fff; border-bottom: 1px solid #eee; }
+.site-header .brand { font-weight: 800; color: var(--ink); text-decoration: none; }
+.site-header nav a { margin-left: 16px; color: var(--ink); text-decoration: none; }
+.site-header nav a:hover { color: var(--primary); }
+
+.site-footer { padding: 32px 0; text-align: center; color: var(--muted); }
+
+.hero { padding: 48px 0; text-align: center; }
+.hero h1 { font-size: 2rem; margin: 0 0 8px; }
+.lead { color: var(--muted); }
+.cta-row { margin-top: 16px; }
+.btn { display: inline-block; padding: 10px 16px; border-radius: 999px; border: 1px solid #ddd; text-decoration: none; color: var(--ink); }
+.btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn + .btn { margin-left: 12px; }
+
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 32px 0; }
+.card { background: var(--card); border: 1px solid #eee; border-radius: var(--radius); padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); position: relative; }
+.badge { position: absolute; top: 12px; right: 12px; background: #f3f4f6; color: #111827; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+
+.form { display: grid; gap: 12px; background: var(--card); padding: 16px; border: 1px solid #eee; border-radius: var(--radius); }
+.form label { display: grid; gap: 6px; font-size: 14px; }
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="url"],
+.form select { padding: 10px 12px; border-radius: 10px; border: 1px solid #ddd; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.filters input, .filters select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 10px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+.flash-wrap { margin: 16px 0; }
+.flash { padding: 10px 12px; border-radius: 8px; }
+.flash.success { background: #e8f5e9; color: #1b5e20; }
+.flash.error { background: #ffebee; color: #b71c1c; }
+
+.small { font-size: 12px; }
+.muted { color: var(--muted); }

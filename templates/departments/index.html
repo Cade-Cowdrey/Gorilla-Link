@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Departments · PittState Connect{% endblock %}
+{% block content %}
+<section>
+  <h1 class="psu-heading">Departments</h1>
+  <p class="subtext">Explore Pitt State academic and student departments.</p>
+
+  <div class="grid-list">
+    {% for dept in departments %}
+      <div class="dept-card">
+        <h2>{{ dept.name }}</h2>
+        <p><strong>Category:</strong> {{ dept.category or 'N/A' }}</p>
+        <p><strong>Students:</strong> {{ dept.student_count or 0 }}</p>
+        <p><em>Created {{ dept.created_at.strftime('%Y-%m-%d') }}</em></p>
+      </div>
+    {% else %}
+      <p>No departments available yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

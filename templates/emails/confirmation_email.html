@@ -1,0 +1,25 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Confirm Your Email | PittState-Connect{% endblock %}
+
+{% block content %}
+<h1 class="psu-red">Confirm Your Email</h1>
+<p>
+  Welcome to <strong>PittState-Connect</strong> — the official network for
+  Pittsburg State University students and alumni.
+  Click the button below to verify your email and activate your account.
+</p>
+
+<p style="margin-top:25px;">
+  <a href="{{ confirm_url }}" class="btn-primary" target="_blank">Confirm Email</a>
+</p>
+
+<p style="margin-top:20px;">
+  This link will expire in 24 hours.  
+  If you didn’t request this, you can safely ignore this message.
+</p>
+{% endblock %}
+
+{% block text_fallback %}
+Confirm your email by visiting this link: {{ confirm_url }}
+{% endblock %}

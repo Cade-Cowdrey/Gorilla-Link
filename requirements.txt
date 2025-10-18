@@ -1,49 +1,72 @@
-# --- Core Framework ---
+# ---------------------------------------------
+# PittState-Connect / Gorilla-Link
+# Full production dependencies
+# ---------------------------------------------
+
 Flask==3.0.3
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
-Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.1.1
-Flask-WTF==1.2.1
+Flask-Migrate==4.0.7
+Flask-Caching==2.1.0
+Flask-Limiter==3.8.0
+Flask-APScheduler==1.13.1
+Flask-Cors==4.0.1
+gunicorn==21.2.0
 
-# --- Database + ORM ---
-SQLAlchemy==2.0.36
-psycopg2-binary==2.9.9
+# Database / ORM
+SQLAlchemy==2.0.44
 alembic==1.17.0
+psycopg2-binary==2.9.9
 greenlet==3.2.4
 
-# --- Security & Validation ---
-bcrypt==4.2.0
-email-validator==2.1.1
+# Caching / Queue
+redis==5.0.3
+cachelib==0.9.0
 
-# --- Environment + Utilities ---
+# Utilities
 python-dotenv==1.0.1
-requests==2.32.3
 typing-extensions==4.15.0
 packaging==25.0
-
-# --- Template + Forms ---
-Jinja2==3.1.4
-WTForms==3.1.2
-MarkupSafe==2.1.5
-itsdangerous==2.2.0
+itsdangerous==2.1.2
+click==8.1.7
+blinker==1.8.2
 Werkzeug==3.0.4
-
-# --- Static Assets / Images ---
-pillow==10.4.0
-
-# --- Server + Deployment ---
-gunicorn==23.0.0
-
-# --- Network + DNS ---
-dnspython==2.8.0
-idna==3.11
-urllib3==2.5.0
-charset-normalizer==3.4.4
-certifi==2025.10.5
-
-# --- Misc ---
-blinker==1.9.0
-click==8.3.0
 Mako==1.3.10
-tomli==2.3.0
+Jinja2==3.1.4
+MarkupSafe==3.0.3
+
+# Schedulers & Time
+APScheduler==3.10.4
+tzlocal==5.3.1
+pytz==2025.2
+python-dateutil==2.9.0.post0
+six==1.17.0
+
+# Email + Report Generation
+reportlab==4.2.2
+pillow==12.0.0
+chardet==5.2.0
+
+# Markdown & Output Formatting
+rich==13.9.4
+markdown-it-py==4.0.0
+Pygments==2.19.2
+mdurl==0.1.2
+
+# Security + Validation
+Deprecated==1.2.18
+ordered-set==4.1.0
+async-timeout==5.0.1
+wrapt==1.17.3
+email-validator==2.2.0
+
+# Optional Dev / Local Debugging
+python-dotenv==1.0.1
+
+# ---------------------------------------------
+# Notes:
+# - Compatible with Render & PostgreSQL
+# - All imports used in app_pro.py, models.py,
+#   and utils modules are satisfied
+# ---------------------------------------------

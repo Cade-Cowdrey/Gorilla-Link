@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>You're Invited: {{ event.title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+    .card { max-width: 620px; background: #fff; margin: 40px auto; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+    .header { background: #A6192E; color: #fff; padding: 25px; text-align: center; }
+    .content { padding: 30px; color: #333; line-height: 1.6; }
+    .btn { display: inline-block; background: #FFC72C; color: black; padding: 10px 20px; border-radius: 6px; font-weight: 600; text-decoration: none; margin-top: 20px; }
+    .footer { background: #fafafa; text-align: center; padding: 15px; color: #777; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>{{ event.title }}</h1>
+    </div>
+    <div class="content">
+      <p>Hi {{ user.first_name }},</p>
+      <p>You're invited to join <strong>{{ event.title }}</strong> — hosted by Pitt State Connect.</p>
+      <p><strong>Date:</strong> {{ event.date.strftime('%B %d, %Y') }}<br>
+         <strong>Time:</strong> {{ event.time }}<br>
+         <strong>Location:</strong> {{ event.location }}</p>
+      <p>{{ event.description }}</p>
+      <a href="{{ url_for('events.view', id=event.id, _external=True) }}" class="btn">View Event</a>
+    </div>
+    <div class="footer">
+      <p>&copy; {{ now().year }} Pitt State Connect | Powered by Gorilla-Link</p>
+    </div>
+  </div>
+</body>
+</html>

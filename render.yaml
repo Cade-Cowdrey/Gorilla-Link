@@ -1,19 +1,63 @@
+# ============================================================
+# 🦍 PittState-Connect | Render Deployment Configuration
+# ============================================================
+
 services:
   - type: web
-    name: gorilla-link
+    name: pittstate-connect
     env: python
-    buildCommand: pip install -r requirements.txt
+    plan: free               # or starter / standard for production
+    buildCommand: |
+      pip install -r requirements.txt
     startCommand: gunicorn app_pro:app
+
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.13
       - key: FLASK_ENV
         value: production
       - key: DATABASE_URL
-        value: postgresql://pittstate_connect_user:jxVmn2hpCGseGjaZ5Ri7TjLZAldP69Lb@dpg-d3lj2smmcj7s739vgqhg-a/pittstate_connect
+        sync: false
       - key: REDIS_URL
-        value: redis://red-d3mq9c15pdvs73bujrg0:6379
+        sync: false
       - key: SECRET_KEY
-        value: gorillalink-devkey-23890
+        sync: false
+      - key: MAIL_SERVER
+        value: smtp.office365.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
       - key: ADMIN_TOKEN
-        value: gorillalink2025
+        sync: false
+
+    # Optional auto-deploy settings
+    autoDeploy: true
+    branch: main
+
+# ============================================================
+# 🕒 Scheduled Tasks (Render CRON Jobs)
+# ============================================================
+
+cronJobs:
+  # Weekly Digest Email — Fridays 9 AM Central
+  - name: weekly-digest
+    schedule: "0 9 * * FRI"
+    timezone: "America/Chicago"
+    command: "python -m tasks.weekly_digest_cron"
+
+  # Daily database analytics snapshot (optional)
+  - name: daily-analytics-refresh
+    schedule: "0 1 * * *"
+    timezone: "America/Chicago"
+    command: "python -m tasks.refresh_analytics"
+
+# ============================================================
+# 📦 Notes:
+# - The CRON job uses your Flask app context and mail config.
+# - Weekly digest sends PSU-branded updates to all users with
+#   @pittstate.edu or other authorized PSU domains.
+# - You can add more CRONs for maintenance, reports, etc.
+# ============================================================

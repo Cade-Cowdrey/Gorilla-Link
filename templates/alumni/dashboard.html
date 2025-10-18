@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Alumni Directory · Gorilla-Link{% endblock %}
+{% block content %}
+
+<section class="max-w-7xl mx-auto text-center mb-12 px-6">
+  <h1 class="text-4xl md:text-5xl font-heading font-bold text-[#660000] dark:text-[#C7A008] mb-4">
+    Alumni Directory
+  </h1>
+  <p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
+    Explore Pitt State alumni across departments, companies, and graduation years.
+  </p>
+</section>
+
+<!-- Filters -->
+<form method="get" class="max-w-7xl mx-auto mb-8 px-6 grid md:grid-cols-4 gap-4">
+  <input name="q" value="{{ q }}" placeholder="Search by name, company, city..."
+         class="border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:text-gray-100">
+  <select name="dept" class="border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:text-gray-100">
+    <option value="">All Departments</option>
+    {% for d in departments %}
+      <option value="{{ d.slug }}" {% if dept == d.slug %}selected{% endif %}>{{ d.name }}</option>
+    {% endfor %}
+  </select>
+  <select name="year" class="border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:text-gray-100">
+    <option value="">All Years</option>
+    {% for y in grad_years %}
+      <option value="{{ y }}" {% if year|int == y %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn-primary">Filter</button>
+</form>
+
+<!-- Grid -->
+<section class="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+  {% for a in alumni %}
+  <a href="{{ url_for('alumni.detail', alumni_id=a.id) }}" class="card block hover:shadow-gold transition">
+    <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008]">{{ a.name }}</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      {{ a.current_title or "—" }}{% if a.current_company %} · {{ a.current_company }}{% endif %}
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      {{ a.department.name if a.department }}{% if a.grad_year %} • Class of {{ a.grad_year }}{% endif %}
+    </p>
+    {% if a.city or a.state %}
+      <p class="text-xs text-gray-400 mt-1">📍 {{ a.city }}{% if a.state %}, {{ a.state }}{% endif %}</p>
+    {% endif %}
+    {% if a.skills and a.skills|length %}
+      <div class="mt-3 flex flex-wrap gap-2">
+        {% for s in a.skills[:4] %}
+          <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{{ s }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </a>
+  {% else %}
+    <p class="text-center text-gray-500 dark:text-gray-400 col-span-full">No alumni found.</p>
+  {% endfor %}
+</section>
+
+<section class="text-center py-16 mt-16 bg-[#660000] dark:bg-[#111] text-white">
+  <h2 class="text-3xl font-bold mb-4">Proud Gorilla Alumni</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Celebrate achievements, discover opportunities, and strengthen the Pitt State network.
+  </p>
+  <a href="{{ url_for('departments.dashboard') }}" class="btn-secondary">View Departments</a>
+</section>
+
+{% endblock %}

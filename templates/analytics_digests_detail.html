@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Jungle Digest Detail -->
+<div class="card shadow-sm mb-4 border-0">
+  <div class="card-header p-0 border-0">
+    <div style="background-color:#BA0C2F; color:#FFD200; padding:1rem; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h3 class="fw-bold mb-0">🦍 The Jungle Digest</h3>
+        <small class="text-light">PittState Connect • {{ entry.created_at.strftime('%B %d, %Y %I:%M %p') }}</small>
+      </div>
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/58/Pittsburg_State_Gorillas_logo.svg/512px-Pittsburg_State_Gorillas_logo.svg.png"
+           alt="PittState Gorilla" width="80" height="80">
+    </div>
+  </div>
+
+  <div class="card-body px-4 pt-3 pb-4" style="background-color:#fff;">
+    <div class="mb-3">
+      <h4 class="fw-bold text-danger mb-1">{{ entry.subject }}</h4>
+      <p class="text-muted mb-1">
+        <strong>To:</strong> {{ entry.to_email }}
+        {% if entry.cc_email %} &nbsp;•&nbsp; <strong>CC:</strong> {{ entry.cc_email }}{% endif %}
+      </p>
+      <p class="small text-secondary mb-0">PDF Size: {{ (entry.pdf_bytes_len / 1024)|round(1) }} KB</p>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+      <a href="{{ url_for('analytics_bp.export_digest_pdf', entry_id=entry.id) }}" 
+         class="btn btn-outline-danger btn-sm">
+        📤 Download as PDF
+      </a>
+    </div>
+
+    <hr class="border-danger opacity-75 mb-4">
+
+    <!-- Digest HTML Preview -->
+    <div class="border rounded-3 p-3 shadow-sm" style="background-color:#fafafa; max-height:75vh; overflow-y:auto;">
+      {{ entry.summary_html|safe }}
+    </div>
+  </div>
+
+  <div class="card-footer text-center border-0" style="background-color:#FFD200;">
+    <span class="fw-bold text-danger">PittState Connect — Fostering Student & Alumni Success</span>
+  </div>
+</div>
+
+<a href="{{ url_for('analytics_bp.digest_archive_list') }}" class="btn btn-outline-danger mt-3">
+  ← Back to Archive
+</a>
+
+{% endblock %}

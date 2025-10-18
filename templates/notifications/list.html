@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-danger mb-3">🔔 Notifications</h3>
+  {% if notifications %}
+  <ul class="list-group shadow">
+    {% for n in notifications %}
+    <li class="list-group-item {% if not n.read %}list-group-item-warning{% endif %}">
+      <div class="d-flex justify-content-between">
+        <div>
+          <strong>{{ n.title }}</strong><br>
+          {{ n.message }}
+        </div>
+        <small class="text-muted">{{ n.sent_at.strftime('%b %d, %Y %H:%M') }}</small>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-muted text-center mt-4">No notifications yet 🎉</p>
+  {% endif %}
+</div>
+{% endblock %}

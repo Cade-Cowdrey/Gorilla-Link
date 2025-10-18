@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Admin Reports Summary | PittState-Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_reports.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="summary-container">
+  <!-- PSU Live Refresh Banner -->
+  <div id="refreshBanner" class="refresh-banner" aria-live="polite">
+    <span class="pulse-dot" aria-hidden="true"></span>
+    <span><strong>Live dashboard:</strong> last updated <span id="lastUpdated">—</span></span>
+    <button id="refreshNowBtn" class="btn-report btn-report-ghost" type="button" title="Refresh now">↻ Refresh</button>
+  </div>
+
+  <h2>📊 PittState-Connect Admin Reports Summary</h2>
+  <p class="text-center text-muted">
+    Real-time engagement analytics & departmental performance — auto-refreshes every 60 seconds.
+  </p>
+  <hr>
+
+  <!-- Chart 1: User Growth -->
+  <div class="chart-card">
+    <h5>📈 User Growth (Last 6 Months)</h5>
+    <canvas id="chartUserGrowth"></canvas>
+  </div>
+
+  <!-- Chart 2: Department Engagement -->
+  <div class="chart-card">
+    <h5>🏫 Average Department Engagement</h5>
+    <canvas id="chartDeptEngagement"></canvas>
+  </div>
+
+  <!-- Chart 3: Active vs Inactive -->
+  <div class="chart-card">
+    <h5>💡 User Activity Breakdown</h5>
+    <canvas id="chartActivity"></canvas>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('analytics.overview_summary') }}" class="btn-report">
+      📄 Export Summary PDF
+    </a>
+  </div>
+</div>
+
+<script>
+  // ---------- Helpers
+  function fmtTime(date = new Date()) {
+    // Local friendly time, e.g., "Oct 17, 2025, 9:04 PM"
+    return date.toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric', minute: '2-digit' });
+  }
+  function setLastUpdated() {
+    document.getElementById('lastUpdated').textContent = fmtTime(new Date());
+  }
+  function triggerBannerPulse() {
+    const banner = document.getElementById('refreshBanner');
+    banner.classList.remove('banner-pulse'); // restart animation
+    // Force reflow
+    void banner.offsetWidth;
+    banner.classList.add('banner-pulse');
+  }
+
+  // ---------- Charts
+  let growthChart, deptChart, activityChart;
+
+  async function loadAnalyticsData(showPulse = true) {
+    try {
+      const res = await fetch("/admin_reports_summary_data", { cache: "no-store" });
+      const data = await res.json();
+
+      const userGrowth = data.user_growth || [];
+      const deptEngagement = data.dept_engagement || [];
+      const activeData = data.active_data || [0, 0];
+
+      // User Growth
+      const growthConfig = {
+        type: "line",
+        data: {
+          labels: userGrowth.map(d => d.month),
+          datasets: [{
+            label: "Total Users",
+            data: userGrowth.map(d => d.count),
+            borderColor: "#C8102E",
+            backgroundColor: "rgba(200,16,46,0.15)",
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      };
+      if (growthChart) { growthChart.data = growthConfig.data; growthChart.update(); }
+      else { growthChart = new Chart(document.getElementById("chartUserGrowth"), growthConfig); }
+
+      // Department Engagement
+      const deptConfig = {
+        type: "bar",
+        data: {
+          labels: deptEngagement.map(d => d.name),
+          datasets: [{
+            label: "Avg Engagement",
+            data: deptEngagement.map(d => d.score),
+            backgroundColor: "#FFC72C",
+            borderColor: "#C8102E",
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, max: 5 } }
+        }
+      };
+      if (deptChart) { deptChart.data = deptConfig.data; deptChart.update(); }
+      else { deptChart = new Chart(document.getElementById("chartDeptEngagement"), deptConfig); }
+
+      // Active vs Inactive
+      const actConfig = {
+        type: "doughnut",
+        data: {
+          labels: ["Active", "Inactive"],
+          datasets: [{
+            data: activeData,
+            backgroundColor: ["#C8102E", "#FFC72C"],
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "bottom", labels: { color: "#333" } } }
+        }
+      };
+      if (activityChart) { activityChart.data = actConfig.data; activityChart.update(); }
+      else { activityChart = new Chart(document.getElementById("chartActivity"), actConfig); }
+
+      // Update banner status
+      setLastUpdated();
+      if (showPulse) triggerBannerPulse();
+    } catch (err) {
+      console.error("Failed to load analytics:", err);
+    }
+  }
+
+  // Initial load + auto-refresh
+  loadAnalyticsData(false);
+  const REFRESH_MS = 60000;
+  setInterval(loadAnalyticsData, REFRESH_MS);
+
+  // Manual refresh button
+  document.getElementById('refreshNowBtn').addEventListener('click', () => loadAnalyticsData());
+</script>
+{% endblock %}

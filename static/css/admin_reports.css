@@ -1,0 +1,156 @@
+/* ============================================================
+   🦍 PittState-Connect | Admin Reports Stylesheet
+   ============================================================ */
+
+:root {
+  --psu-red: #C8102E;
+  --psu-gold: #FFC72C;
+  --psu-light: #f8f8f8;
+  --psu-text: #222;
+}
+
+body {
+  background-color: var(--psu-light);
+  color: var(--psu-text);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ----------------------------------------
+   Live Refresh Banner
+---------------------------------------- */
+.refresh-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #fff6db;
+  border: 1px solid #f2d479;
+  color: #5a4300;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--psu-gold);
+  box-shadow: 0 0 0 rgba(255,199,44, 0.7);
+  animation: dotPulse 2s infinite;
+}
+
+@keyframes dotPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,199,44, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255,199,44, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,199,44, 0); }
+}
+
+/* quick pulse of the whole banner on refresh */
+.banner-pulse {
+  animation: bannerPulse 600ms ease-out;
+}
+
+@keyframes bannerPulse {
+  0%   { transform: scale(1);   background: #fff6db; }
+  40%  { transform: scale(1.01); background: #ffefc0; }
+  100% { transform: scale(1);   background: #fff6db; }
+}
+
+/* ----------------------------------------
+   Summary Container
+---------------------------------------- */
+.summary-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 40px 50px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+  animation: fadeIn 0.5s ease-in;
+}
+
+.summary-container h2 {
+  text-align: center;
+  color: var(--psu-red);
+  margin-bottom: 10px;
+}
+
+.summary-container hr {
+  border-top: 2px solid var(--psu-gold);
+  width: 60%;
+  margin: 20px auto;
+}
+
+/* ----------------------------------------
+   Chart Cards
+---------------------------------------- */
+.chart-card {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px 25px;
+  margin-bottom: 35px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.chart-card h5 {
+  color: var(--psu-red);
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+canvas {
+  max-height: 300px;
+  width: 100%;
+}
+
+/* ----------------------------------------
+   Buttons
+---------------------------------------- */
+.btn-report {
+  display: inline-block;
+  background-color: var(--psu-gold);
+  color: #111;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-report:hover {
+  background-color: #e0b200;
+  color: #000;
+  transform: scale(1.03);
+}
+
+/* Ghost variant for banner button */
+.btn-report-ghost {
+  background: transparent;
+  border: 1px solid #e0b200;
+  color: #5a4300;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+.btn-report-ghost:hover {
+  background: #ffeaa3;
+}
+
+/* ----------------------------------------
+   Animation
+---------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

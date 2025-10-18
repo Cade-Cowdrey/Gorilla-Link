@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}PittState-Connect | Home{% endblock %}
+{% block content %}
+<section class="text-center py-16 bg-gradient-to-b from-[#73000a] via-[#990000] to-[#2c0000] text-white">
+  <div class="max-w-5xl mx-auto px-6">
+    <h1 class="text-5xl font-bold mb-6 tracking-tight">Welcome to <span class="text-yellow-400">PittState-Connect</span></h1>
+    <p class="text-lg leading-relaxed mb-8">
+      A networking and mentorship platform built by students <br>
+      to connect <strong>Gorillas</strong>—students, alumni, and employers—across the world.
+    </p>
+    <a href="{{ url_for('auth.register') }}" class="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition">
+      Join Now
+    </a>
+  </div>
+</section>
+
+<section class="py-20 bg-white text-gray-800">
+  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-10 px-6">
+    <div class="text-center">
+      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Mentorship</h3>
+      <p>Match with PSU alumni and mentors ready to guide your journey.</p>
+    </div>
+    <div class="text-center">
+      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Career Growth</h3>
+      <p>Discover internships, job opportunities, and skill badges that boost your profile.</p>
+    </div>
+    <div class="text-center">
+      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Alumni Network</h3>
+      <p>Reconnect with Gorillas everywhere and give back through mentorship & hiring.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

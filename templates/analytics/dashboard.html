@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Dashboard | PittState-Connect</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ===== Header ===== */
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      header a {
+        color: #fff;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+
+      header a:hover {
+        background-color: #e6b500;
+      }
+
+      /* ===== Main Container ===== */
+      main {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      h2 {
+        color: var(--psu-red);
+        border-bottom: 2px solid var(--psu-gold);
+        padding-bottom: 5px;
+        margin-bottom: 25px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 25px;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+
+      .card h3 {
+        font-size: 18px;
+        color: var(--psu-red);
+        margin-bottom: 10px;
+      }
+
+      .stat-number {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--psu-dark);
+      }
+
+      .chart-placeholder {
+        margin-top: 40px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+
+      .chart-placeholder h3 {
+        color: var(--psu-red);
+        margin-bottom: 15px;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        header h1 {
+          margin-bottom: 8px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>📊 Analytics Dashboard</h1>
+      <a href="{{ url_for('admin.dashboard') }}">⬅ Back to Admin</a>
+    </header>
+
+    <main>
+      <h2>PittState-Connect Performance Overview</h2>
+
+      <!-- Key Stats Grid -->
+      <div class="grid">
+        <div class="card">
+          <h3>Active Users</h3>
+          <div class="stat-number">{{ analytics.active_users or "1,248" }}</div>
+          <p>Users who logged in within the last 30 days.</p>
+        </div>
+
+        <div class="card">
+          <h3>New Registrations</h3>
+          <div class="stat-number">{{ analytics.new_registrations or "312" }}</div>
+          <p>New student and alumni sign-ups this month.</p>
+        </div>
+
+        <div class="card">
+          <h3>Connections Made</h3>
+          <div class="stat-number">{{ analytics.connections_made or "987" }}</div>
+          <p>New student-alumni connections created.</p>
+        </div>
+
+        <div class="card">
+          <h3>Alumni Engagement</h3>
+          <div class="stat-number">{{ analytics.alumni_engagement or "76%" }}</div>
+          <p>Percent of active alumni participating in mentoring or events.</p>
+        </div>
+      </div>
+
+      <!-- Chart Placeholders -->
+      <div class="chart-placeholder">
+        <h3>📈 User Growth Over Time</h3>
+        <p style="color:#555;">(Chart placeholder — integrate Chart.js, Recharts, or Plotly here)</p>
+        <div style="height:250px; background:#f7f7f7; border-radius:6px; margin-top:15px; display:flex; align-items:center; justify-content:center; color:#aaa;">
+          Growth chart coming soon...
+        </div>
+      </div>
+
+      <div class="chart-placeholder" style="margin-top:30px;">
+        <h3>🎓 Department Breakdown</h3>
+        <p style="color:#555;">Distribution of students and alumni by department or major.</p>
+        <div style="height:250px; background:#f7f7f7; border-radius:6px; margin-top:15px; display:flex; align-items:center; justify-content:center; color:#aaa;">
+          Department chart coming soon...
+        </div>
+      </div>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect Analytics · Pittsburg State University
+      </footer>
+    </main>
+  </body>
+</html>

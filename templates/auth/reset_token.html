@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Choose New Password | PittState-Connect{% endblock %}
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f0f0f]">
+  <div class="max-w-md w-full bg-white dark:bg-[#1b1b1b] rounded-2xl shadow-lg p-8 fade-in">
+    <h1 class="text-3xl font-bold text-center text-[#73000a] dark:text-[#FFD700] mb-6">Reset Your Password</h1>
+    <p class="text-center text-gray-600 dark:text-gray-300 mb-8">
+      Enter your new password below to regain access to your account.
+    </p>
+
+    <form method="POST" action="{{ url_for('auth.reset_with_token', token=request.view_args['token']) }}" class="space-y-5">
+      <div>
+        <label class="block font-semibold mb-1">New Password</label>
+        <input type="password" name="password" placeholder="Enter new password" required>
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-1">Confirm New Password</label>
+        <input type="password" name="confirm_password" placeholder="Re-enter password" required>
+      </div>
+
+      <button type="submit" class="btn btn-secondary w-full mt-4">Reset Password</button>
+    </form>
+
+    <p class="text-center text-gray-600 dark:text-gray-300 mt-6">
+      <a href="{{ url_for('auth.login') }}" class="text-psu-red hover:text-psu-gold font-semibold">Return to Login</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

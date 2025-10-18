@@ -1,0 +1,132 @@
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-bold">Engagement by Department (Posts)</div>
+      <div class="card-body">
+        <canvas id="postsByDept" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-bold">Mentors by Department</div>
+      <div class="card-body">
+        <canvas id="mentorsByDept" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-3">
+  <div class="col-lg-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-bold">Active Jobs by Department</div>
+      <div class="card-body">
+        <canvas id="jobsByDept" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script>
+  // PSU brand colors
+  const PSU_RED = "#BA0C2F";
+  const PSU_GOLD = "#FFC72C";
+  const PSU_DARK = "#2b2b2b";
+
+  // Data from server
+  const postsDeptLabels = {{ posts_dept_labels|tojson }};
+  const postsDeptValues = {{ posts_dept_values|tojson }};
+  const mentorDeptLabels = {{ mentor_dept_labels|tojson }};
+  const mentorDeptValues = {{ mentor_dept_values|tojson }};
+  const jobsDeptLabels = {{ jobs_dept_labels|tojson }};
+  const jobsDeptValues = {{ jobs_dept_values|tojson }};
+  const funnelLabels = {{ funnel_labels|tojson }};
+  const funnelValues = {{ funnel_values|tojson }};
+
+  // Bar: Posts by Department
+  new Chart(document.getElementById("postsByDept"), {
+    type: "bar",
+    data: {
+      labels: postsDeptLabels,
+      datasets: [{
+        label: "Posts",
+        data: postsDeptValues,
+        backgroundColor: PSU_RED,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Bar: Mentors by Department
+  new Chart(document.getElementById("mentorsByDept"), {
+    type: "bar",
+    data: {
+      labels: mentorDeptLabels,
+      datasets: [{
+        label: "Mentors",
+        data: mentorDeptValues,
+        backgroundColor: PSU_GOLD,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Bar: Jobs by Department
+  new Chart(document.getElementById("jobsByDept"), {
+    type: "bar",
+    data: {
+      labels: jobsDeptLabels,
+      datasets: [{
+        label: "Active Jobs",
+        data: jobsDeptValues,
+        backgroundColor: PSU_RED,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Horizontal Bar: Funnel approximation
+  new Chart(document.getElementById("funnelChart"), {
+    type: "bar",
+    data: {
+      labels: funnelLabels,
+      datasets: [{
+        label: "Count",
+        data: funnelValues,
+        backgroundColor: [PSU_RED, PSU_GOLD, PSU_RED, PSU_GOLD],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+</script>
+{% endblock %}

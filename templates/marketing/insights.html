@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Marketing Insights — PittState Connect{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h2 class="fw-bold text-danger mb-0">📣 Marketing Insights</h2>
+      <div class="text-muted small">Period: {{ start }} → {{ end }}</div>
+    </div>
+    <form class="d-flex gap-2" method="get">
+      <input class="form-control" type="date" name="start" value="{{ start }}" />
+      <input class="form-control" type="date" name="end" value="{{ end }}" />
+      <button class="btn btn-danger">Apply</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('marketing_bp.insights_csv', start=start, end=end) }}">CSV</a>
+      <a class="btn btn-outline-danger" href="{{ url_for('marketing_bp.insights_pdf', start=start, end=end) }}">PDF</a>
+    </form>
+  </div>
+
+  <!-- Topline Cards -->
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3"><div class="card shadow-sm text-center"><div class="card-body">
+      <div class="small text-muted">Total Users</div><div class="fs-3 fw-bold text-danger">{{ total_users }}</div>
+    </div></div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm text-center"><div class="card-body">
+      <div class="small text-muted">New Users (period)</div><div class="fs-3 fw-bold text-danger">{{ new_users }}</div>
+    </div></div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm text-center"><div class="card-body">
+      <div class="small text-muted">Posts (period)</div><div class="fs-3 fw-bold text-danger">{{ posts_30d }}</div>
+    </div></div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm text-center"><div class="card-body">
+      <div class="small text-muted">Departments</div><div class="fs-3 fw-bold text-danger">{{ total_departments }}</div>
+    </div></div></div>
+  </div>
+
+  <!-- Mentorship + Careers -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card shadow-sm text-center h-100"><div class="card-body">
+      <div class="small text-muted">Mentors</div><div class="fs-3 fw-bold text-danger">{{ total_mentors }}</div>
+    </div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm text-center h-100"><div class="card-body">
+      <div class="small text-muted">Mentees</div><div class="fs-3 fw-bold text-danger">{{ total_mentees }}</div>
+    </div></div></div>
+    <div class="col-md-4"><div class="card shadow-sm text-center h-100"><div class="card-body">
+      <div class="small text-muted">Mentor Matches</div><div class="fs-3 fw-bold text-danger">{{ total_matches }}</div>
+    </div></div></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+      <div class="small text-muted">Active Jobs</div><div class="fs-3 fw-bold text-danger">{{ active_jobs }}</div>
+      <div class="small text-muted">New Jobs (period): <strong>{{ new_jobs_30d }}</strong></div>
+    </div></div></div>
+    <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+      <div class="small text-muted">Marketing Funnel (period)</div>
+      <canvas id="funnelChart" height="120"></canvas>
+    </div></div></div>
+  </div>
+
+  <!-- Charts -->
+  {% include "partials/marketing_charts.html" %}
+
+  <!-- Top Content -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-header bg-light fw-bold">Recent Content Highlights</div>
+    <ul class="list-group list-group-flush">
+      {% for p in top_posts %}
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong>{{ p.author.name if p.author else 'User' }}</strong> —
+            <span class="text-muted">{{ p.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+            <div class="mt-1">{{ p.content[:160] }}{% if p.content|length > 160 %}...{% endif %}</div>
+          </div>
+        </div>
+      </li>
+      {% else %}
+      <li class="list-group-item text-muted">No content in this period.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% endblock %}

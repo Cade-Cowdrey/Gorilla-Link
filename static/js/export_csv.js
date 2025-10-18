@@ -1,0 +1,1 @@
+function exportCSV(kind, token){ window.location = `/admin/export/${kind}?token=${encodeURIComponent(token)}` }

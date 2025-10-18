@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Preview | PittState-Connect Admin</title>
+
+    <!-- PSU Branded Styles -->
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      header .actions a {
+        color: #fff;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: bold;
+        margin-left: 10px;
+        transition: background 0.3s ease;
+      }
+
+      header .actions a:hover {
+        background-color: #e6b500;
+      }
+
+      main {
+        padding: 40px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .preview-frame {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+
+      iframe {
+        width: 100%;
+        height: 85vh;
+        border: none;
+      }
+
+      .info {
+        margin-top: 20px;
+        background-color: #fff8e1;
+        padding: 15px 20px;
+        border-left: 5px solid var(--psu-gold);
+        font-size: 15px;
+        border-radius: 6px;
+      }
+
+      footer {
+        margin-top: 50px;
+        text-align: center;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        header h1 {
+          margin-bottom: 10px;
+        }
+        main {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>📧 Email Template Preview</h1>
+      <div class="actions">
+        <a href="{{ url_for('admin.email_preview', template='confirmation_email') }}">Confirmation</a>
+        <a href="{{ url_for('admin.email_preview', template='password_reset') }}">Password Reset</a>
+        <a href="{{ url_for('admin.email_preview', template='notification') }}">Notification</a>
+        <a href="{{ url_for('admin.email_preview', template='digests/jungle_digest_email') }}">Jungle Digest</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="preview-frame">
+        <iframe src="{{ url_for('admin.render_email_template', template_name=template_name) }}"></iframe>
+      </div>
+
+      <div class="info">
+        <strong>Template:</strong> {{ template_name }}<br />
+        <strong>File Path:</strong> templates/emails/{{ template_name }}.html<br />
+        <strong>Tip:</strong> This live preview loads the actual HTML template rendered in Flask.
+        Use it to test layout, links, and dynamic placeholders before sending to users.
+      </div>
+    </main>
+
+    <footer>
+      &copy; {{ current_year }} PittState-Connect Admin Portal. All rights reserved.
+    </footer>
+  </body>
+</html>

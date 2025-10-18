@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Mentorship Dashboard{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <h2 class="fw-bold text-danger mb-4">🤝 Gorilla Mentorship Hub</h2>
+
+  {% if current_user.is_mentor %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="fw-bold text-danger">Your Mentees</h5>
+      {% if mentees %}
+        <ul class="list-group list-group-flush">
+          {% for m in mentees %}
+          <li class="list-group-item">
+            {{ m.name }} — {{ m.department.name if m.department else 'No Department' }}
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">No mentees yet. Students will be matched soon.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="fw-bold text-danger">Your Mentor</h5>
+      {% if mentor %}
+        <p class="lead mb-1">{{ mentor.name }}</p>
+        <p class="text-muted">{{ mentor.mentor_expertise }}</p>
+        <a href="#" class="btn btn-outline-danger btn-sm">Message {{ mentor.name }}</a>
+      {% else %}
+        <p class="text-muted mb-2">No mentor assigned yet.</p>
+        <a href="{{ url_for('mentorship_bp.match') }}" class="btn btn-danger btn-sm">Find a Mentor</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

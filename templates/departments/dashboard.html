@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Departments · Gorilla-Link{% endblock %}
+{% block content %}
+
+<!-- 🦍 Header -->
+<section class="max-w-7xl mx-auto text-center mb-12 px-6">
+  <h1 class="text-4xl md:text-5xl font-heading font-bold text-[#660000] dark:text-[#C7A008] mb-4">
+    Department Overview
+  </h1>
+  <p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
+    Explore department-level engagement, academic growth, and alumni performance across Pitt State.
+  </p>
+</section>
+
+<!-- ⚙️ Filters -->
+<div class="max-w-7xl mx-auto mb-10 px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div class="flex items-center space-x-2">
+    <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Sort by:</label>
+    <select id="sortSelect" class="border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:text-gray-100">
+      <option value="name">Name (A–Z)</option>
+      <option value="students">Active Students</option>
+      <option value="posts">Posts</option>
+      <option value="engagement">Engagement</option>
+    </select>
+  </div>
+
+  <input id="searchInput" type="text" placeholder="Search departments..."
+         class="border rounded-lg px-3 py-2 text-sm w-full md:w-64 dark:bg-gray-800 dark:text-gray-100">
+</div>
+
+<!-- 🧩 Department Grid -->
+<section id="departmentsGrid" class="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+  {% set departments = [
+      {"name": "Business Management", "students": 243, "posts": 412, "engagement": 91, "jobs": 51},
+      {"name": "Engineering", "students": 201, "posts": 389, "engagement": 88, "jobs": 36},
+      {"name": "Education", "students": 177, "posts": 220, "engagement": 79, "jobs": 14},
+      {"name": "Nursing", "students": 163, "posts": 248, "engagement": 84, "jobs": 27},
+      {"name": "Computer Science", "students": 192, "posts": 334, "engagement": 86, "jobs": 42},
+      {"name": "Psychology", "students": 145, "posts": 185, "engagement": 74, "jobs": 18}
+  ] %}
+
+  {% for dept in departments %}
+  <div class="card hover:shadow-gold transition transform hover:-translate-y-1">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-2">{{ dept.name }}</h2>
+    <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p>👥 Students: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ dept.students }}</span></p>
+      <p>📝 Posts: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ dept.posts }}</span></p>
+      <p>💼 Jobs: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ dept.jobs }}</span></p>
+      <p>📈 Engagement: 
+        <span class="font-semibold text-green-600 dark:text-green-400">{{ dept.engagement }}%</span>
+      </p>
+    </div>
+    <a href="{{ url_for('departments.detail', name=dept.name|lower|replace(' ', '_')) }}"
+       class="btn-primary block text-center">View Details</a>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- 📊 Chart Section -->
+<section class="max-w-7xl mx-auto mt-16 px-6">
+  <div class="card">
+    <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008] mb-4 text-center">
+      Department Engagement Comparison
+    </h3>
+    <canvas id="deptChart" height="180"></canvas>
+  </div>
+</section>
+
+<!-- 🌍 Footer CTA -->
+<section class="text-center py-16 mt-20 bg-[#660000] dark:bg-[#111] text-white">
+  <h2 class="text-3xl font-bold mb-4">Gorilla-Link: Empowering Every Department</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    From classrooms to careers — Gorilla-Link connects Pitt State’s departments with data-driven collaboration.
+  </p>
+  <a href="{{ url_for('analytics.dashboard') }}" class="btn-secondary">Back to Analytics</a>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// 📈 Department Engagement Chart
+const ctx = document.getElementById('deptChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Business', 'Engineering', 'Education', 'Nursing', 'CompSci', 'Psychology'],
+    datasets: [{
+      label: 'Engagement %',
+      data: [91, 88, 79, 84, 86, 74],
+      backgroundColor: ['#660000', '#C7A008', '#882222', '#E5B90B', '#772222', '#B89205'],
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, max: 100 }
+    }
+  }
+});
+
+// 🔍 Sort + Search
+const grid = document.getElementById('departmentsGrid');
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+
+function filterDepartments() {
+  const query = searchInput.value.toLowerCase();
+  grid.querySelectorAll('.card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+searchInput.addEventListener('input', filterDepartments);
+
+sortSelect.addEventListener('change', () => {
+  const cards = Array.from(grid.children);
+  const key = sortSelect.value;
+
+  cards.sort((a, b) => {
+    const getVal = (card, key) => {
+      const text = card.textContent;
+      if (key === 'students') return parseInt(text.match(/Students:\s*(\d+)/)[1]);
+      if (key === 'posts') return parseInt(text.match(/Posts:\s*(\d+)/)[1]);
+      if (key === 'engagement') return parseInt(text.match(/(\d+)%/)[1]);
+      return card.querySelector('h2').textContent;
+    };
+    const valA = getVal(a, key);
+    const valB = getVal(b, key);
+    return typeof valA === 'number' ? valB - valA : valA.localeCompare(valB);
+  });
+
+  cards.forEach(c => grid.appendChild(c));
+});
+</script>
+{% endblock %}

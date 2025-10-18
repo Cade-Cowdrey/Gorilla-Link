@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Alumni Signup</h2>
+<form method="post" class="form">
+  <label>Name <input type="text" name="name" required></label>
+  <label>Email <input type="email" name="email" required></label>
+  <label>Major <input type="text" name="major" placeholder="Your PSU major"></label>
+  <label>Grad Year <input type="text" name="grad_year" placeholder="2019"></label>
+  <label>Current Job Title <input type="text" name="current_job" placeholder="e.g., Product Manager"></label>
+  <label>Company <input type="text" name="company" placeholder="e.g., Cerner"></label>
+  <label>City/Location <input type="text" name="city" placeholder="Kansas City, MO"></label>
+  <label>LinkedIn URL <input type="url" name="linkedin" placeholder="https://www.linkedin.com/in/you"></label>
+  <fieldset>
+    <legend>Ways you can help</legend>
+    <label><input type="checkbox" name="help_offers" value="Resume review"> Resume review</label>
+    <label><input type="checkbox" name="help_offers" value="Coffee chat"> Coffee chat</label>
+    <label><input type="checkbox" name="help_offers" value="Mock interview"> Mock interview</label>
+    <label><input type="checkbox" name="help_offers" value="Internship referral"> Internship referral</label>
+    <label><input type="checkbox" name="help_offers" value="Career talk"> Career talk</label>
+  </fieldset>
+  <label>Availability (e.g., 1 hr/month) <input type="text" name="availability" placeholder="1–2 hrs / month"></label>
+  <button class="btn primary" type="submit">Join</button>
+</form>
+{% endblock %}

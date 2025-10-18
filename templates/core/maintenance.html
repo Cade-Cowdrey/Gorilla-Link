@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Maintenance | PittState-Connect{% endblock %}
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f0f0f]">
+  <div class="max-w-lg w-full bg-white dark:bg-[#1b1b1b] rounded-2xl shadow-xl p-10 text-center fade-in">
+    <img src="{{ url_for('static', filename='images/psu-logo.png') }}" alt="Pitt State Logo" class="mx-auto mb-6 h-20">
+    <h1 class="text-3xl font-bold text-[#73000A] dark:text-[#FFD700] mb-4">We'll Be Back Soon!</h1>
+    <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+      PittState-Connect is currently undergoing scheduled maintenance and system improvements.
+      <br><br>
+      We’re making things even better for our students, alumni, and staff.
+    </p>
+    <div class="bg-[#73000A]/10 dark:bg-[#FFD700]/10 rounded-xl p-4 mb-6">
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        Thank you for your patience and understanding.  
+        <br>
+        Our servers will be back online shortly.
+      </p>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      For urgent issues, please contact
+      <a href="mailto:support@pittstateconnect.com" class="text-[#73000A] dark:text-[#FFD700] font-semibold hover:underline">
+        support@pittstateconnect.com
+      </a>
+    </p>
+    <div class="mt-4">
+      <button onclick="window.location.reload()" class="bg-[#FFD700] text-[#73000A] font-semibold px-6 py-2 rounded-lg hover:bg-[#e6c200]">
+        Retry
+      </button>
+    </div>
+  </div>
+</section>
+{% endblock %}

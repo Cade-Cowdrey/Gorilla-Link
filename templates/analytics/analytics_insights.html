@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="analytics-wrapper">
+  <h2>📊 Analytics Insights</h2>
+
+  <div class="metric-cards">
+    <div class="metric-card">
+      <h3>Profile Views</h3>
+      <p>{{ analytics.profile_views or 0 }}</p>
+    </div>
+    <div class="metric-card">
+      <h3>Connections</h3>
+      <p>{{ analytics.connections_count or 0 }}</p>
+    </div>
+    <div class="metric-card">
+      <h3>Engagement Score</h3>
+      <p>{{ "%.1f"|format(analytics.engagement_score or 0) }}</p>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <h3>Profile Views Over Time</h3>
+    <canvas id="chart-profile-views" height="350"></canvas>
+  </div>
+
+  <div class="chart-section">
+    <h3>Engagement Trend</h3>
+    <canvas id="chart-engagement" height="350"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const profileViewsData = {{ profile_views_data|safe }};
+  const engagementData = {{ engagement_data|safe }};
+
+  new Chart(document.getElementById("chart-profile-views"), {
+    type: 'line',
+    data: {
+      labels: profileViewsData.map(e => e.date),
+      datasets: [{
+        label: "Profile Views",
+        data: profileViewsData.map(e => e.count),
+        borderColor: "#C8102E",
+        backgroundColor: "rgba(200,16,46,0.1)",
+        borderWidth: 3,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false}
+  });
+
+  new Chart(document.getElementById("chart-engagement"), {
+    type: 'bar',
+    data: {
+      labels: engagementData.map(e => e.date),
+      datasets: [{
+        label: "Engagement Score",
+        data: engagementData.map(e => e.score),
+        backgroundColor: "#FFC72C",
+        borderColor: "#C8102E",
+        borderWidth: 1
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false}
+  });
+</script>
+{% endblock %}

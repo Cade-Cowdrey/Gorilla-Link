@@ -1,0 +1,38 @@
+PittState-Connect Weekly Digest
+---------------------------------------------
+{{ current_date.strftime('%B %d, %Y') }}
+
+Hello {{ recipient_name }},
+
+Here’s your weekly summary from PittState-Connect!
+
+🔥 Top Posts:
+{% if top_posts %}
+{% for post in top_posts %}
+- {{ post.author }} — "{{ post.title }}"
+  {{ post.snippet }}
+{% endfor %}
+{% else %}
+No new posts this week.
+{% endif %}
+
+🎓 Upcoming Events:
+{% if events %}
+{% for e in events %}
+- {{ e.title }} on {{ e.date }} at {{ e.location }}
+  {{ e.description }}
+{% endfor %}
+{% else %}
+No events scheduled this week.
+{% endif %}
+
+📈 Quick Stats:
+- New Users: {{ stats.new_users }}
+- Active This Week: {{ stats.active_users }}
+- Average Engagement: {{ "%.2f"|format(stats.avg_engagement) }}
+
+Log in to view more:
+{{ url_for('core.home', _external=True) }}
+
+🦍 PittState-Connect | Office of Digital Analytics
+For internal university use only.

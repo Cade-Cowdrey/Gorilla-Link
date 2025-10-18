@@ -1,0 +1,119 @@
+/* ===========================================
+   Pitt State Connect · Gorilla Link
+   TailwindCSS Input File
+   =========================================== */
+
+/* Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================
+   PSU COLOR & FONT PRESETS
+   =========================================== */
+@layer base {
+  :root {
+    --psu-red: #660000;
+    --psu-gold: #c7a008;
+    --psu-gray: #f2f2f2;
+    --psu-dark: #1a1a1a;
+    --psu-yellow: #e6c744;
+    --psu-cream: #fff9e6;
+  }
+
+  body {
+    @apply font-sans bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-heading text-psu-red dark:text-psu-gold;
+  }
+
+  a {
+    @apply text-psu-red hover:text-psu-gold transition-colors duration-150;
+  }
+
+  button {
+    @apply bg-psu-red text-white font-semibold rounded-lg px-4 py-2 hover:bg-psu-gold hover:text-psu-dark transition duration-200;
+  }
+}
+
+/* ===========================================
+   COMPONENT STYLES
+   =========================================== */
+@layer components {
+  /* 🧭 Navbar */
+  .navbar {
+    @apply bg-psu-red dark:bg-psu-dark text-white flex justify-between items-center px-6 py-4 shadow-md sticky top-0 z-50;
+  }
+
+  .navbar a {
+    @apply text-white hover:text-psu-gold transition;
+  }
+
+  /* 🧱 Card Base */
+  .psu-card {
+    @apply bg-white dark:bg-psu-dark rounded-2xl shadow-psu-card p-6 hover:shadow-psu-hover transition-shadow duration-300;
+  }
+
+  /* 💬 Button Variants */
+  .btn-primary {
+    @apply bg-psu-red text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-psu-gold hover:text-psu-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-psu-gold text-psu-dark font-semibold px-5 py-2 rounded-lg shadow hover:bg-psu-yellow hover:text-black;
+  }
+
+  /* 🧭 Footer */
+  .psu-footer {
+    @apply bg-psu-red dark:bg-psu-dark text-gray-200 py-8 text-center text-sm;
+  }
+
+  /* 💡 Card Titles */
+  .card-title {
+    @apply font-heading text-lg text-psu-red dark:text-psu-gold mb-2;
+  }
+
+  /* 📊 Dashboard Widgets */
+  .dashboard-widget {
+    @apply psu-card flex flex-col items-center justify-center p-6;
+  }
+}
+
+/* ===========================================
+   UTILITIES & DARK MODE FIXES
+   =========================================== */
+@layer utilities {
+  .hover-underline {
+    @apply hover:underline hover:decoration-psu-gold hover:decoration-2;
+  }
+
+  .dark-glow {
+    @apply dark:shadow-[0_0_10px_rgba(199,160,8,0.3)];
+  }
+
+  .gold-border {
+    @apply border border-psu-gold rounded-lg;
+  }
+
+  .glass-bg {
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-in-out both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

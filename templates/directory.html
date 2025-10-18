@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Alumni Directory · PittState Connect{% endblock %}
+{% block content %}
+<section>
+  <h1 class="psu-heading">Alumni Directory</h1>
+  <p class="subtext">Connect with proud Gorilla graduates around the world.</p>
+
+  <div class="grid-list">
+    {% for alum in alumni %}
+      <div class="alum-card">
+        <h2>{{ alum.name }}</h2>
+        <p>{{ alum.position }} at {{ alum.company }}</p>
+        <p>Graduated: {{ alum.grad_year }}</p>
+        <p>Email: {{ alum.email }}</p>
+      </div>
+    {% else %}
+      <p>No alumni entries yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

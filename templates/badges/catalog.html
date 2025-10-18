@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Career Badges{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <h2 class="fw-bold text-danger">Career Milestone Badges</h2>
+  <p class="text-muted">Motivating progress from first resume to first job.</p>
+  <div class="row g-3">
+    {% for b in badges %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        {% if b.icon %}<img src="{{ url_for('static', filename=b.icon) }}" class="card-img-top" alt="{{ b.name }}">{% endif %}
+        <div class="card-body">
+          <h5 class="fw-bold">{{ b.name }}</h5>
+          <p class="text-muted small mb-0">{{ b.description }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

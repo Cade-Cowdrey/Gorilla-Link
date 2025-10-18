@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎓 Pitt State Weekly Student Digest</title>
+  <style>
+    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f4f6; margin: 0; padding: 0; color: #333; }
+    .wrapper { max-width: 720px; margin: 2rem auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .header { background: #8B0000; color: #fff; text-align: center; padding: 2rem 1rem; }
+    .header h1 { margin: 0; font-size: 1.8rem; }
+    .header p { color: #E0B300; margin-top: .5rem; }
+    .content { padding: 2rem; }
+    h2 { color: #8B0000; border-bottom: 2px solid #E0B300; padding-bottom: .4rem; }
+    .card { margin: 1rem 0; padding: 1rem; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+    a.button { display: inline-block; background: #E0B300; color: #8B0000; text-decoration: none; padding: .8rem 1.6rem; border-radius: 8px; font-weight: bold; margin-top: 1rem; }
+    .footer { text-align: center; padding: 1.2rem; background: #f9f9f9; color: #555; font-size: .9rem; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>🎓 Weekly Student Digest</h1>
+      <p>{{ date }} | Pitt State Connect</p>
+    </div>
+    <div class="content">
+      <h2>📢 New Posts</h2>
+      {% for post in posts %}
+      <div class="card">
+        <strong>{{ post.title }}</strong><br>
+        <p>{{ post.content[:200] }}...</p>
+      </div>
+      {% else %}
+      <p>No new posts this week.</p>
+      {% endfor %}
+
+      <h2>💼 Featured Jobs & Internships</h2>
+      {% for job in jobs %}
+      <div class="card">
+        <strong>{{ job.title }}</strong> — {{ job.company }}<br>
+        <em>{{ job.location }}</em>
+      </div>
+      {% else %}
+      <p>No new job listings this week.</p>
+      {% endfor %}
+
+      <h2>🤝 Mentorship Opportunities</h2>
+      {% for m in mentorships %}
+      <div class="card">
+        <strong>{{ m.title }}</strong> with {{ m.mentor_name }}<br>
+        <em>{{ m.field }}</em>
+      </div>
+      {% else %}
+      <p>No open mentorships right now — check back soon!</p>
+      {% endfor %}
+
+      <div style="text-align:center;">
+        <a href="https://gorillalink.com" class="button">Open Gorilla-Link</a>
+      </div>
+    </div>
+    <div class="footer">🐾 Gorilla-Link | Pitt State Connect</div>
+  </div>
+</body>
+</html>

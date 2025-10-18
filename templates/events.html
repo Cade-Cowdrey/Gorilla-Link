@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-3">Campus Events</h2>
+
+{% if logged_in %}
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('events_bp.create_event') }}">
+      <h6 class="fw-bold text-danger mb-3">Create Event</h6>
+      <input class="form-control mb-2" name="title" placeholder="Title" required>
+      <input class="form-control mb-2" type="datetime-local" name="start_time" required>
+      <input class="form-control mb-2" name="location" placeholder="Location">
+      <textarea class="form-control mb-2" name="description" rows="2" placeholder="Description"></textarea>
+      <button class="btn btn-danger">Create</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% for e in events %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5 class="fw-bold text-danger mb-1">{{ e.title }}</h5>
+    <small class="text-muted">
+      {{ e.start_time.strftime('%b %d, %Y %I:%M %p') }} • {{ e.location or 'TBA' }}
+    </small>
+    {% if e.description %}<p class="mt-2">{{ e.description }}</p>{% endif %}
+    {% if logged_in %}
+    <form method="POST" action="{{ url_for('events_bp.rsvp', event_id=e.id) }}" class="d-flex gap-2">
+      <input type="hidden" name="status" value="going">
+      <button class="btn btn-sm btn-outline-danger">RSVP: Going</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<p>No events yet.</p>
+{% endfor %}
+{% endblock %}

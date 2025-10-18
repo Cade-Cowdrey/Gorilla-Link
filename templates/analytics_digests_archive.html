@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-2">🗂️ Jungle Digest Archive</h2>
+<p class="text-muted mb-3">
+  View all previously sent Jungle Digest reports and summaries.
+</p>
+
+{% include "partials/analytics_digest_archive_body.html" %}
+
+<a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger mt-3">← Back to Insights</a>
+{% endblock %}

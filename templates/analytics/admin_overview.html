@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics Overview | PittState-Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-analytics">
+  <h2>🧰 Admin Analytics Overview</h2>
+
+  <div class="metric-grid">
+    <div class="metric-box">
+      <h3>Total Users</h3>
+      <p>{{ metrics.total_users }}</p>
+    </div>
+    <div class="metric-box">
+      <h3>Active This Week</h3>
+      <p>{{ metrics.active_users }}</p>
+    </div>
+    <div class="metric-box">
+      <h3>Total Departments</h3>
+      <p>{{ metrics.total_departments }}</p>
+    </div>
+    <div class="metric-box">
+      <h3>Avg Engagement</h3>
+      <p>{{ "%.2f"|format(metrics.avg_engagement) }}</p>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>📈 User Growth (Past 6 Months)</h3>
+    <canvas id="chart-user-growth" height="300"></canvas>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>🏫 Department Distribution</h3>
+    <canvas id="chart-departments" height="300"></canvas>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>🔥 Average Engagement by Department</h3>
+    <canvas id="chart-engagement" height="300"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const userGrowth = {{ user_growth|safe }};
+  const departmentLabels = {{ dept_labels|safe }};
+  const departmentCounts = {{ dept_counts|safe }};
+  const engagementLabels = {{ dept_engagement_labels|safe }};
+  const engagementScores = {{ dept_engagement_scores|safe }};
+
+  new Chart(document.getElementById("chart-user-growth"), {
+    type: 'line',
+    data: {
+      labels: userGrowth.map(d => d.month),
+      datasets: [{
+        label: "New Users",
+        data: userGrowth.map(d => d.count),
+        borderColor: "#C8102E",
+        backgroundColor: "rgba(200,16,46,0.1)",
+        borderWidth: 3,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("chart-departments"), {
+    type: 'pie',
+    data: {
+      labels: departmentLabels,
+      datasets: [{
+        data: departmentCounts,
+        backgroundColor: ["#C8102E", "#FFC72C", "#333", "#B6B6B6"],
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("chart-engagement"), {
+    type: 'bar',
+    data: {
+      labels: engagementLabels,
+      datasets: [{
+        label: "Avg Engagement",
+        data: engagementScores,
+        backgroundColor: "#FFC72C",
+        borderColor: "#C8102E",
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+</script>
+{% endblock %}

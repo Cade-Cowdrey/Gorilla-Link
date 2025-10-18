@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-3">My Gorilla Badges</h2>
+<p class="text-muted mb-3">Total Points: <strong>{{ total_points }}</strong></p>
+
+<div class="row">
+  {% for b in badges %}
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold text-danger">{{ b.name }}</h6>
+        <p class="mb-1">{{ b.description }}</p>
+        <small class="text-muted">+{{ b.points }} pts • {{ b.earned_at }}</small>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p>No badges yet — complete actions like posting, connecting, or RSVPing to events.</p>
+  {% endfor %}
+</div>
+{% endblock %}

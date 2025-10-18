@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found | PittState-Connect{% endblock %}
+{% block content %}
+<section class="flex flex-col items-center justify-center text-center py-32 text-gray-700">
+  <h1 class="text-6xl font-bold text-[#73000a] mb-4">404</h1>
+  <p class="text-lg mb-6">Oops! The page you’re looking for doesn’t exist.</p>
+  <a href="{{ url_for('core.home') }}" class="text-yellow-500 hover:underline">Return Home</a>
+</section>
+{% endblock %}

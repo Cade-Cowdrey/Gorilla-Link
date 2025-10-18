@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold text-danger mb-4">AI Career Assistant</h2>
+<div class="row">
+  <div class="col-md-7">
+    <form method="POST" class="card shadow-sm mb-3 p-3">
+      <label class="fw-bold mb-2">Ask anything about careers, internships, courses, or alumni</label>
+      <textarea name="question" class="form-control mb-3" rows="3" placeholder="e.g., Best internships for {{ user.major }} majors near Kansas City?"></textarea>
+      <button class="btn btn-danger">Ask</button>
+    </form>
+
+    {% if answer %}
+    <div class="card shadow-sm p-3">
+      <h6 class="fw-bold text-danger">Assistant Reply</h6>
+      <pre class="mb-0" style="white-space:pre-wrap">{{ answer }}</pre>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white">Recent Advice</div>
+      <ul class="list-group list-group-flush">
+        {% for item in history %}
+        <li class="list-group-item">
+          <div class="small text-muted">{{ item.created_at.strftime('%b %d, %Y %I:%M %p') }}</div>
+          <div class="fw-bold">Q: {{ item.question }}</div>
+          <div>A: {{ item.response }}</div>
+        </li>
+        {% else %}
+        <li class="list-group-item">No advice yet. Ask your first question!</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

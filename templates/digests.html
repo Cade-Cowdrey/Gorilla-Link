@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="fw-bold text-danger">🐾 The Jungle Report</h1>
+  <a href="{{ url_for('digest_bp.jungle_report_pdf') }}" class="btn btn-outline-danger fw-semibold">
+    📄 Download as PDF
+  </a>
+</div>
+
+<p class="text-muted mb-4">Your personalized PittState Connect digest — {{ now.strftime('%B %d, %Y') }}</p>
+
+<div class="row g-4">
+
+  <!-- Posts -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-danger text-white fw-bold">Recent Posts</div>
+      <div class="card-body">
+        {% if posts %}
+          {% for p in posts %}
+            <div class="mb-3">
+              <h6 class="mb-1">{{ p.title or "Untitled" }}</h6>
+              <p class="small text-muted mb-1">{{ p.author.name if p.author else 'Unknown' }} — {{ p.created_at.strftime('%b %d') }}</p>
+              <p>{{ p.content|truncate(100) }}</p>
+            </div>
+            {% if not loop.last %}<hr>{% endif %}
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No recent posts yet — try sharing something!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Events -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-warning fw-bold">Upcoming Events</div>
+      <div class="card-body">
+        {% if events %}
+          <ul class="list-group list-group-flush">
+            {% for e in events %}
+              <li class="list-group-item">
+                <strong>{{ e.title }}</strong><br>
+                <span class="text-muted small">{{ e.start_time.strftime('%b %d %I:%M %p') }} — {{ e.location or 'TBA' }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No events in the next two weeks.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Groups -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-success text-white fw-bold">Your Groups</div>
+      <div class="card-body">
+        {% if groups %}
+          <ul class="list-unstyled mb-0">
+            {% for g in groups %}
+              <li class="mb-2"><strong>{{ g.name }}</strong> – <span class="text-muted">{{ g.topic or 'General Discussion' }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">You’re not in any groups yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-info fw-bold">Your Badges</div>
+      <div class="card-body">
+        {% if badges %}
+          {% for b in badges %}
+            <div class="mb-2"><strong>{{ b.name }}</strong> – <span class="text-muted small">{{ b.earned_at }}</span><br>{{ b.description }}</div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No badges yet — participate to earn some!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Career Tip -->
+  <div class="col-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-body text-center py-4">
+        <h5 class="fw-bold text-danger mb-2">🎓 Career Tip of the Week</h5>
+        <p class="lead mb-0">{{ tip }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

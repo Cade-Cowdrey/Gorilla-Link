@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Upcoming Events — PittState Connect{% endblock %}
+{% block content %}
+<section class="py-5" style="background:#FFC72C;">
+  <div class="container">
+    <h2 class="fw-bold" style="color:#BA0C2F;">Upcoming Events</h2>
+    <p class="mb-0">Job fairs, alumni mixers, workshops, and more.</p>
+  </div>
+</section>
+<section class="py-4 bg-white">
+  <div class="container">
+    <div class="list-group">
+      {% for e in items %}
+      <a class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1 text-danger">{{ e.title }}</h5>
+          <small class="text-muted">{{ e.start_time.strftime('%b %d, %Y %I:%M %p') }}</small>
+        </div>
+        <p class="mb-1">{{ e.description or '' }}</p>
+        <small class="text-muted">{{ e.location or 'TBA' }}</small>
+      </a>
+      {% else %}
+      <div class="text-muted">No upcoming events yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ faculty.name }} · Faculty{% endblock %}
+{% block content %}
+
+<section class="max-w-6xl mx-auto text-center px-6 mt-12 mb-12">
+  <h1 class="text-4xl md:text-5xl font-heading font-bold text-[#660000] dark:text-[#C7A008]">{{ faculty.name }}</h1>
+  <p class="text-lg text-gray-600 dark:text-gray-300">{{ faculty.title }}</p>
+  <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+    {{ faculty.department.name if faculty.department }} Department
+  </p>
+  <div class="text-sm text-gray-500 dark:text-gray-400">
+    {% if faculty.email %}
+      <a href="mailto:{{ faculty.email }}" class="text-[#C7A008] hover:underline">{{ faculty.email }}</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-6 mb-20">
+  <div class="card lg:col-span-2">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">Biography</h2>
+    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ faculty.bio or "No bio available." }}</p>
+
+    {% if faculty.research_interests %}
+      <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008] mt-6 mb-2">Research Interests</h3>
+      <p class="text-gray-700 dark:text-gray-300">{{ faculty.research_interests }}</p>
+    {% endif %}
+
+    {% if faculty.publications and faculty.publications|length %}
+      <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008] mt-6 mb-2">Publications</h3>
+      <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+        {% for pub in faculty.publications %}
+          <li>{{ pub.title }} ({{ pub.year or "n.d." }})</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">Courses</h2>
+    {% if faculty.courses and faculty.courses|length %}
+      <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+        {% for c in faculty.courses %}
+          <li>{{ c.code }} — {{ c.name }} ({{ c.semester }})</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-600 dark:text-gray-400">No courses listed.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="text-center py-16 mt-20 bg-[#660000] dark:bg-[#111] text-white">
+  <h2 class="text-3xl font-bold mb-4">Connect with Alumni</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Discover alumni from {{ faculty.department.name if faculty.department else "this department" }}
+    who pursued related fields.
+  </p>
+  <a href="{{ url_for('alumni.dashboard', dept=faculty.department.slug if faculty.department else '') }}"
+     class="btn-secondary">View Related Alumni →</a>
+</section>
+
+{% endblock %}

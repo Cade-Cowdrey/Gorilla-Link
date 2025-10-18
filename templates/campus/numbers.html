@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Campus in Numbers — PittState Connect{% endblock %}
+{% block content %}
+
+<div class="container my-4 text-center">
+  <h2 class="fw-bold text-danger mb-3">🎓 PittState Connect — Campus in Numbers</h2>
+  <p class="text-muted mb-4">Real-time overview of engagement, mentorship, and career outcomes across all departments.</p>
+
+  <div class="row g-4 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.users }}">0</h4>
+          <div class="small text-muted">Students</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.mentors }}">0</h4>
+          <div class="small text-muted">Mentors</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.jobs }}">0</h4>
+          <div class="small text-muted">Active Jobs</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.departments }}">0</h4>
+          <div class="small text-muted">Departments</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.alumni }}">0</h4>
+          <div class="small text-muted">Alumni</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h4 class="fw-bold text-danger" data-count="{{ stats.posts }}">0</h4>
+          <div class="small text-muted">Posts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Hiring Departments -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-bold">Top Hiring Departments</div>
+    <ul class="list-group list-group-flush">
+      {% for name, count in dept_job_data %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ name }}</span><span class="badge bg-danger">{{ count }}</span>
+      </li>
+      {% else %}
+      <li class="list-group-item text-muted">No department data available.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <a href="{{ url_for('campus_bp.export_campus_pdf') }}" class="btn btn-outline-danger">
+    📄 Download Full Report (PDF)
+  </a>
+</div>
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const counters = document.querySelectorAll("[data-count]");
+    counters.forEach(el => {
+      const target = +el.getAttribute("data-count");
+      let count = 0;
+      const step = Math.ceil(target / 60);
+      const timer = setInterval(() => {
+        count += step;
+        if (count >= target) {
+          count = target;
+          clearInterval(timer);
+        }
+        el.textContent = count.toLocaleString();
+      }, 20);
+    });
+  });
+</script>
+{% endblock %}

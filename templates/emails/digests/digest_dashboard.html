@@ -1,0 +1,71 @@
+<!-- ==========================================================
+Gorilla-Link / PSU Connect
+templates/emails/digests/digest_dashboard.html
+Admin Digest Management Dashboard
+========================================================== -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📬 Digest Dashboard | Gorilla-Link</title>
+  <style>
+    body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f6; margin: 0; color: #333; }
+    .wrapper { max-width: 950px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; }
+    h1 { color: #8b0000; margin-bottom: .5rem; }
+    .summary { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .card { flex: 1; background: #fafafa; border: 1px solid #eee; border-radius: 8px; text-align: center; padding: 1rem; }
+    .card h3 { margin: 0; color: #8b0000; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: .7rem 1rem; border-bottom: 1px solid #eee; text-align: left; }
+    th { background: #8b0000; color: #fff; }
+    tr:hover { background: #fafafa; }
+    .actions { margin-top: 2rem; text-align: center; }
+    button { background: #8b0000; color: #fff; border: none; padding: .6rem 1.2rem; border-radius: 6px; cursor: pointer; margin: 0 .3rem; }
+    button:hover { background: #a20000; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>📬 Digest Management</h1>
+    <p>Send and review automated weekly and monthly email digests.</p>
+
+    <div class="summary">
+      <div class="card"><h3>{{ total_sent }}</h3><p>Total Sent</p></div>
+      <div class="card"><h3>{{ success_count }}</h3><p>Success</p></div>
+      <div class="card"><h3>{{ fail_count }}</h3><p>Failed</p></div>
+    </div>
+
+    <div class="actions">
+      <button onclick="triggerDigest('students')">Send Student Digest</button>
+      <button onclick="triggerDigest('alumni')">Send Alumni Digest</button>
+      <button onclick="triggerDigest('faculty')">Send Faculty Digest</button>
+      <button onclick="triggerDigest('analytics')">Send Monthly Analytics</button>
+    </div>
+
+    <h2>📜 Recent Digest Logs</h2>
+    <table>
+      <tr><th>Type</th><th>Subject</th><th>Recipients</th><th>Status</th><th>Date</th><th>Preview</th></tr>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.digest_type }}</td>
+        <td>{{ log.subject }}</td>
+        <td>{{ log.recipients_count }}</td>
+        <td>{{ log.status }}</td>
+        <td>{{ log.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+        <td><a href="/digests/html/{{ log.id }}">View</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <script>
+    async function triggerDigest(type) {
+      const res = await fetch(`/digests/send/${type}`, { method: "POST" });
+      const data = await res.json();
+      alert(data.message || "Triggered!");
+      location.reload();
+    }
+  </script>
+</body>
+</html>

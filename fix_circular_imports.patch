@@ -1,0 +1,143 @@
+# ==========================================================
+# 🦍 Gorilla-Link Patch — Fix Circular Imports (Render build)
+# ==========================================================
+
+--- a/blueprints/api/routes.py
++++ b/blueprints/api/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/badges/routes.py
++++ b/blueprints/badges/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/campus/routes.py
++++ b/blueprints/campus/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/events/routes.py
++++ b/blueprints/events/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/map/routes.py
++++ b/blueprints/map/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/marketing/routes.py
++++ b/blueprints/marketing/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/mentorship/routes.py
++++ b/blueprints/mentorship/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+--- a/blueprints/stories/routes.py
++++ b/blueprints/stories/routes.py
+@@ -1,2 +1,3 @@
+-from app_pro import db, cache
++from extensions import db, cache
+
+# ---------------------- Seeder scripts ----------------------
+
+--- a/seed_addons.py
++++ b/seed_addons.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Seed logic here
+
+--- a/seed_alumni.py
++++ b/seed_alumni.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Seed logic here
+
+--- a/seed_check.py
++++ b/seed_check.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Seed logic here
+
+--- a/seed_data.py
++++ b/seed_data.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Seed logic here
+
+--- a/seed_departments_faculty.py
++++ b/seed_departments_faculty.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Seed logic here
+
+--- a/verify_seed_data.py
++++ b/verify_seed_data.py
+@@ -1,2 +1,6 @@
+-from app_pro import db
++from extensions import db
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Verify data logic here
+
+# ---------------------- Utility scripts ----------------------
+
+--- a/scripts/daily_stats_rollup.py
++++ b/scripts/daily_stats_rollup.py
+@@ -1,2 +1,6 @@
+-from app_pro import db, cache
++from extensions import db, cache
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Rollup logic here
+
+--- a/scripts/send_daily_summary.py
++++ b/scripts/send_daily_summary.py
+@@ -1,2 +1,6 @@
+-from app_pro import db, cache
++from extensions import db, cache
++from app_pro import create_app
++
++app = create_app()
++with app.app_context():
++    # Summary logic here

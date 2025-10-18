@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Templates | PittState-Connect Admin</title>
+
+    <style>
+      :root {
+        --psu-red: #C8102E;
+        --psu-gold: #FFC72C;
+        --psu-bg: #f9f9f9;
+        --psu-dark: #1b1b1b;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--psu-bg);
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: var(--psu-red);
+        color: #fff;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      header a {
+        color: #fff;
+        background-color: var(--psu-gold);
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+
+      header a:hover {
+        background-color: #e6b500;
+      }
+
+      main {
+        max-width: 1000px;
+        margin: 40px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 30px 40px;
+      }
+
+      h2 {
+        color: var(--psu-red);
+        border-bottom: 2px solid var(--psu-gold);
+        padding-bottom: 6px;
+        margin-bottom: 25px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        color: #333;
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background-color: #fafafa;
+      }
+
+      .actions a {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
+        margin-right: 8px;
+        transition: background 0.2s ease;
+      }
+
+      .preview-btn {
+        background-color: var(--psu-red);
+        color: #fff;
+      }
+      .preview-btn:hover {
+        background-color: #A60D26;
+      }
+
+      .test-btn {
+        background-color: var(--psu-gold);
+        color: #000;
+      }
+      .test-btn:hover {
+        background-color: #e6b500;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      @media screen and (max-width: 700px) {
+        main {
+          padding: 20px;
+        }
+
+        table, th, td {
+          font-size: 14px;
+        }
+
+        .actions a {
+          display: block;
+          margin: 6px 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>📧 Email Templates</h1>
+      <a href="{{ url_for('admin.dashboard') }}">⬅ Back to Dashboard</a>
+    </header>
+
+    <main>
+      <h2>PittState-Connect Email Templates</h2>
+
+      <p style="margin-bottom:25px; color:#555;">
+        Below is a list of all PSU-branded email templates currently configured
+        in your system. You can <strong>preview</strong> each email,
+        or send a <strong>test message</strong> to verify how it looks in real inboxes.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35%;">Template Name</th>
+            <th style="width: 35%;">File</th>
+            <th style="width: 30%;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for template in templates %}
+          <tr>
+            <td>{{ template.name }}</td>
+            <td><code>emails/{{ template.file }}.html</code></td>
+            <td class="actions">
+              <a
+                href="{{ url_for('admin.email_preview', template=template.file) }}"
+                class="preview-btn"
+              >Preview</a>
+
+              <form
+                action="{{ url_for('admin.send_test_email', template_name=template.file) }}"
+                method="post"
+                style="display:inline-block;"
+              >
+                <input
+                  type="email"
+                  name="recipient_email"
+                  placeholder="test@pittstate.edu"
+                  required
+                  style="padding:7px 10px; border-radius:5px; border:1px solid #ccc; font-size:14px;"
+                />
+                <button type="submit" class="test-btn">Send Test</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <footer>
+        &copy; {{ current_year }} PittState-Connect Admin Portal. All rights reserved.
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+{% block content %}
+<section class="hero"><h1>Find Alumni Mentors</h1><p class="tag">Search by department, city, or company.</p></section>
+<section>
+  <form method="get" class="searchbar">
+    <input type="text" name="search" placeholder="Search name, company, or keyword" value="{{ request.args.get('search','') }}">
+    <input type="text" name="major" placeholder="Department" value="{{ request.args.get('major','') }}">
+    <input type="text" name="city" placeholder="City" value="{{ request.args.get('city','') }}">
+    <button class="btn" type="submit">Filter</button>
+  </form>
+  <div class="grid3">
+    {% for p in people %}
+      <div class="card">
+        <h3>{{ p.name }}</h3>
+        <p class="tag">{{ p.major }} {% if p.grad_year %}• {{ p.grad_year }}{% endif %}</p>
+        {% if p.current_job or p.company %}<p>{{ p.current_job }} {% if p.company %}@ {{ p.company }}{% endif %}</p>{% endif %}
+        {% if p.city %}<p class="small">{{ p.city }}</p>{% endif %}
+        {% if p.help_offers %}<p><strong>Offers:</strong> {{ p.help_offers }}</p>{% endif %}
+        {% if p.linkedin %}<p><a class="btn" href="{{ p.linkedin }}" target="_blank" rel="noopener">LinkedIn</a></p>{% endif %}
+      </div>
+    {% else %}<p>No results yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

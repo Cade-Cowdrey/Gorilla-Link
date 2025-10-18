@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ department.name }} · Pitt State Connect{% endblock %}
+{% block content %}
+
+<section class="max-w-6xl mx-auto text-center px-6 mt-12 mb-12">
+  <h1 class="text-4xl md:text-5xl font-heading font-bold text-[#660000] dark:text-[#C7A008] mb-3">
+    {{ department.name }}
+  </h1>
+  <p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
+    {{ department.description or "Explore this department’s programs, faculty, and alumni achievements." }}
+  </p>
+  <div class="text-gray-500 dark:text-gray-400 text-sm mt-4">
+    <span>📞 {{ department.phone or "(620) 235-4000" }}</span> ·
+    <a href="mailto:{{ department.contact_email }}" class="text-[#C7A008] hover:underline">
+      {{ department.contact_email }}
+    </a>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="max-w-6xl mx-auto grid md:grid-cols-4 gap-6 text-center mb-16 px-6">
+  <div class="card"><h3 class="text-2xl font-bold text-[#660000] dark:text-[#C7A008]">{{ department.students }}</h3><p>Students</p></div>
+  <div class="card"><h3 class="text-2xl font-bold text-[#660000] dark:text-[#C7A008]">{{ department.alumni }}</h3><p>Alumni</p></div>
+  <div class="card"><h3 class="text-2xl font-bold text-[#660000] dark:text-[#C7A008]">{{ department.jobs }}</h3><p>Job Postings</p></div>
+  <div class="card"><h3 class="text-2xl font-bold text-[#660000] dark:text-[#C7A008]">{{ department.engagement }}%</h3><p>Engagement</p></div>
+</section>
+
+<!-- Faculty -->
+<section class="max-w-7xl mx-auto mb-20 px-6">
+  <h2 class="text-3xl font-bold text-[#660000] dark:text-[#C7A008] mb-6">Faculty Members</h2>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for f in department.faculty %}
+      <a href="{{ url_for('faculty.detail', faculty_id=f.id) }}" class="card block hover:shadow-gold transition">
+        <h3 class="font-semibold text-lg text-[#660000] dark:text-[#C7A008]">{{ f.name }}</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ f.title or "Faculty Member" }}</p>
+        {% if f.email %}<p class="text-xs text-gray-400 mt-2">{{ f.email }}</p>{% endif %}
+      </a>
+    {% else %}
+      <p class="text-gray-500 dark:text-gray-400">No faculty listed yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- CTA: Connect with Alumni -->
+<section class="text-center py-16 bg-[#660000] dark:bg-[#111] text-white">
+  <h2 class="text-3xl font-bold mb-4">Connect with Alumni</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Explore {{ department.name }} graduates and see their career paths.
+  </p>
+  <a href="{{ url_for('alumni.dashboard', dept=department.slug) }}" class="btn-secondary">
+    View {{ department.name }} Alumni →
+  </a>
+</section>
+
+{% endblock %}
