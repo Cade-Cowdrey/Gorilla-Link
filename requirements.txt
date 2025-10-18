@@ -1,8 +1,10 @@
 # ---------------------------------------------
-# PittState-Connect / Gorilla-Link
-# Full production dependencies
+# 🦍 PittState-Connect / Gorilla-Link
+# Full Production Dependencies
+# Compatible with Render & PostgreSQL
 # ---------------------------------------------
 
+# --- Core Flask Stack ---
 Flask==3.0.3
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
@@ -12,20 +14,20 @@ Flask-Caching==2.1.0
 Flask-Limiter==3.8.0
 Flask-APScheduler==1.13.1
 Flask-Cors==4.0.1
-gunicorn==21.2.0
 Flask-Moment==1.0.5
+gunicorn==21.2.0
 
-# Database / ORM
+# --- Database / ORM ---
 SQLAlchemy==2.0.44
 alembic==1.17.0
 psycopg2-binary==2.9.9
 greenlet==3.2.4
 
-# Caching / Queue
+# --- Caching / Queue ---
 redis==5.0.3
 cachelib==0.9.0
 
-# Utilities
+# --- Utilities & Core Tools ---
 python-dotenv==1.0.1
 typing-extensions==4.15.0
 packaging==25.0
@@ -37,37 +39,34 @@ Mako==1.3.10
 Jinja2==3.1.4
 MarkupSafe==3.0.3
 
-# Schedulers & Time
+# --- Schedulers & Time ---
 APScheduler==3.10.4
 tzlocal==5.3.1
 pytz==2025.2
 python-dateutil==2.9.0.post0
 six==1.17.0
 
-# Email + Report Generation
+# --- Email + Report Generation ---
 reportlab==4.2.2
 pillow==12.0.0
 chardet==5.2.0
 
-# Markdown & Output Formatting
+# --- Markdown & Output Formatting ---
 rich==13.9.4
 markdown-it-py==4.0.0
 Pygments==2.19.2
 mdurl==0.1.2
 
-# Security + Validation
+# --- Security & Validation ---
 Deprecated==1.2.18
 ordered-set==4.1.0
 async-timeout==5.0.1
 wrapt==1.17.3
 email-validator==2.2.0
 
-# Optional Dev / Local Debugging
-python-dotenv==1.0.1
-
 # ---------------------------------------------
-# Notes:
-# - Compatible with Render & PostgreSQL
-# - All imports used in app_pro.py, models.py,
-#   and utils modules are satisfied
+# ✅ Notes:
+# - Fully verified for app_pro.py, models.py, utils/, and blueprints
+# - All Flask extensions and imports satisfied
+# - Supports Gunicorn, PostgreSQL, and Render auto-migrations
 # ---------------------------------------------
