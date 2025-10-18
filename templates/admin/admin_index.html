@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Admin Template Preview | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- 🧠 ADMIN TEMPLATE PREVIEW DASHBOARD -->
+<section class="min-h-[85vh] bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="max-w-6xl mx-auto bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-psu-gold/30 p-10">
+
+    <!-- HEADER -->
+    <div class="text-center mb-12">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
+           alt="PSU Logo" class="mx-auto mb-4 w-24 md:w-28">
+      <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-2">
+        PittState-Connect Admin Template Dashboard
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        A visual directory of all administrative dashboards, analytics pages, and management templates — designed for PSU leadership and internal testing.
+      </p>
+    </div>
+
+    <!-- TABLE -->
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-left text-gray-800 dark:text-gray-200">
+        <thead class="bg-psu-crimson text-white">
+          <tr>
+            <th class="py-3 px-4 rounded-tl-lg">Category</th>
+            <th class="py-3 px-4">Template Name</th>
+            <th class="py-3 px-4">Description</th>
+            <th class="py-3 px-4 rounded-tr-lg">Preview</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+
+          <!-- DASHBOARDS -->
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Dashboards</td>
+            <td class="py-3 px-4">admin_dashboard.html</td>
+            <td class="py-3 px-4">Main administrative overview dashboard</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.dashboard') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Dashboards</td>
+            <td class="py-3 px-4">analytics_dashboard.html</td>
+            <td class="py-3 px-4">University-wide engagement and usage metrics</td>
+            <td class="py-3 px-4"><a href="{{ url_for('analytics.dashboard') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Dashboards</td>
+            <td class="py-3 px-4">insights_dashboard.html</td>
+            <td class="py-3 px-4">Data insights and trends visualization</td>
+            <td class="py-3 px-4"><a href="{{ url_for('analytics.insights') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <!-- MANAGEMENT -->
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Management</td>
+            <td class="py-3 px-4">user_management.html</td>
+            <td class="py-3 px-4">Manage users, roles, and permissions</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.user_management') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Management</td>
+            <td class="py-3 px-4">departments_admin.html</td>
+            <td class="py-3 px-4">Admin view of departments and faculty</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.departments') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Management</td>
+            <td class="py-3 px-4">event_management.html</td>
+            <td class="py-3 px-4">Admin panel for creating and moderating PSU events</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.events') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <!-- REPORTING -->
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Reporting</td>
+            <td class="py-3 px-4">reports_overview.html</td>
+            <td class="py-3 px-4">Summary of engagement, alumni, and department reports</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.reports') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Reporting</td>
+            <td class="py-3 px-4">audit_log.html</td>
+            <td class="py-3 px-4">System-wide action logs and administrative activity</td>
+            <td class="py-3 px-4"><a href="{{ url_for('admin.audit_log') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <!-- ANALYTICS -->
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Analytics</td>
+            <td class="py-3 px-4">campus_numbers.html</td>
+            <td class="py-3 px-4">Interactive visual dashboard of campus-wide numbers</td>
+            <td class="py-3 px-4"><a href="{{ url_for('campus.numbers_public') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Analytics</td>
+            <td class="py-3 px-4">user_badges.html</td>
+            <td class="py-3 px-4">Visual listing of student/alumni achievement badges</td>
+            <td class="py-3 px-4"><a href="{{ url_for('badges.user_badges') }}" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RETURN -->
+    <div class="text-center mt-10">
+      <a href="{{ url_for('core.home') }}" 
+         class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
+         Return to Dashboard
+      </a>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
