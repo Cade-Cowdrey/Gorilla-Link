@@ -1,0 +1,12 @@
+Hi {{ user.name }},
+
+This is a friendly reminder about your upcoming event:
+
+{{ event.title }}
+When: {{ event.start_date.strftime('%b %d, %Y') }}
+Where: {{ event.location }}
+
+View the event details:
+{{ url_for('events.event_detail', event_id=event.id, _external=True) }}
+
+Stay connected — PittState-Connect keeps you in the loop.
