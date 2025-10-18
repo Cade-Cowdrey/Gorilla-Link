@@ -5,24 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}PittState-Connect · Gorilla-Link{% endblock %}</title>
 
-  <!-- Tailwind CDN (Render-compatible) -->
+  <!-- 🧠 Tailwind (Render-Compatible CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 🎨 PSU Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu_logo.png') }}" />
 
   {% block head %}{% endblock %}
 </head>
 
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50 flex flex-col min-h-screen transition-colors duration-300">
 
-  <!-- 🔺 PSU Navbar -->
-  <header class="bg-[#660000] text-white shadow-md">
+  <!-- 🔶 Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- 🦍 PSU Navbar -->
+  <header class="bg-[#660000] text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <!-- Logo + Title -->
       <div class="flex items-center gap-3">
         <img src="{{ url_for('static', filename='img/psu_logo.png') }}" alt="PSU Logo" class="w-10 h-10" />
-        <a href="{{ url_for('core.home') }}" class="text-2xl font-bold tracking-tight text-[#FFD700]">
+        <a href="{{ url_for('core.home') }}" class="text-2xl font-bold tracking-tight text-[#FFD700] hover:text-yellow-300">
           PittState-Connect
         </a>
       </div>
+
+      <!-- Desktop Nav -->
       <nav class="hidden md:flex gap-6 text-sm font-semibold">
         <a href="{{ url_for('feed.dashboard') }}" class="hover:text-[#FFD700] transition">Dashboard</a>
         <a href="{{ url_for('alumni.details') }}" class="hover:text-[#FFD700] transition">Alumni</a>
@@ -30,10 +39,22 @@
         <a href="{{ url_for('career.dashboard') }}" class="hover:text-[#FFD700] transition">Careers</a>
         <a href="{{ url_for('auth.login') }}" class="hover:text-[#FFD700] transition">Login</a>
       </nav>
-      <button id="mobile-menu-btn" class="md:hidden text-[#FFD700] focus:outline-none">
-        ☰
-      </button>
+
+      <!-- Right Side Controls -->
+      <div class="flex items-center gap-3">
+        <!-- 🌙 Dark Mode Toggle -->
+        <button id="theme-toggle" class="text-[#FFD700] text-xl focus:outline-none hover:scale-110 transition-transform">
+          🌙
+        </button>
+
+        <!-- 📱 Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden text-[#FFD700] focus:outline-none text-2xl">
+          ☰
+        </button>
+      </div>
     </div>
+
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden flex-col px-6 pb-4 space-y-2 bg-[#550000] text-sm">
       <a href="{{ url_for('feed.dashboard') }}" class="block hover:text-[#FFD700]">Dashboard</a>
       <a href="{{ url_for('alumni.details') }}" class="block hover:text-[#FFD700]">Alumni</a>
@@ -43,8 +64,8 @@
     </div>
   </header>
 
-  <!-- ✨ Page Content -->
-  <main class="flex-grow">{% block content %}{% endblock %}</main>
+  <!-- 📄 Main Content -->
+  <main class="flex-grow fade-in">{% block content %}{% endblock %}</main>
 
   <!-- 🦍 PSU Footer -->
   <footer class="bg-[#660000] text-white py-8 mt-16">
@@ -54,17 +75,58 @@
         © {{ current_year|default(2025) }} PittState-Connect. All rights reserved.<br />
         Built by PSU Students · Empowering Gorillas Everywhere 🦍
       </p>
+      <div class="mt-4">
+        <a href="https://www.pittstate.edu" target="_blank" class="text-[#FFD700] hover:underline">
+          Visit Official PSU Website
+        </a>
+      </div>
     </div>
   </footer>
 
-  <!-- 🔧 Mobile Menu Toggle Script -->
+  <!-- ⚙️ Scripts -->
   <script>
-    const btn = document.getElementById("mobile-menu-btn");
+    /* ================================
+       🪄 Mobile Menu Toggle
+    ================================= */
+    const menuBtn = document.getElementById("mobile-menu-btn");
     const menu = document.getElementById("mobile-menu");
-    btn.addEventListener("click", () => {
+    menuBtn.addEventListener("click", () => {
       menu.classList.toggle("hidden");
     });
-  </script>
 
+    /* ================================
+       🌗 Dark Mode Toggle
+    ================================= */
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    // Load saved mode
+    if (localStorage.getItem("theme") === "dark") {
+      body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+      if (body.classList.contains("dark")) {
+        themeToggle.textContent = "☀️";
+        localStorage.setItem("theme", "dark");
+      } else {
+        themeToggle.textContent = "🌙";
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    /* ================================
+       🟨 Scroll Progress Bar
+    ================================= */
+    const scrollProgress = document.getElementById("scroll-progress");
+    window.addEventListener("scroll", () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      scrollProgress.style.width = scrollPercent + "%";
+    });
+  </script>
 </body>
 </html>
