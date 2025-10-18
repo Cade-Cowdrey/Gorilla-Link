@@ -1,0 +1,25 @@
+Good Morning, {{ user.name }} 🦍
+
+Here’s your PittState-Connect Daily Digest — a quick look at what’s new.
+
+{% if posts %}
+📣 New Posts:
+{% for post in posts %}
+- {{ post.title or post.content[:40] }}...
+  Link: {{ url_for('feed.post_detail', post_id=post.id, _external=True) }}
+{% endfor %}
+{% else %}
+No new posts today.
+{% endif %}
+
+{% if events %}
+🎟️ Upcoming Events:
+{% for event in events %}
+- {{ event.title }} — {{ event.start_date.strftime('%b %d') }}
+  Link: {{ url_for('events.event_detail', event_id=event.id, _external=True) }}
+{% endfor %}
+{% else %}
+No new events scheduled today.
+{% endif %}
+
+PittState-Connect • Building stronger Gorilla Networks™
