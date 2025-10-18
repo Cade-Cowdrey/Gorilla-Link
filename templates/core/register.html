@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Register | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- 🦍 Registration Section -->
+<section class="min-h-[85vh] flex items-center justify-center bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="bg-white dark:bg-[#1a1a1a] shadow-2xl rounded-2xl max-w-3xl w-full p-10 border border-psu-gold/30">
+    
+    <div class="text-center mb-10">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
+           alt="PSU Logo" class="mx-auto mb-4 w-20 md:w-24">
+      <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-2">
+        Join PittState-Connect
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300">
+        Connect with Gorillas across generations. Build your profile and start networking today.
+      </p>
+    </div>
+
+    <!-- 🧾 Registration Form -->
+    <form method="POST" action="{{ url_for('core.register') }}">
+      {{ form.hidden_tag() if form else '' }}
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label for="first_name" class="block text-sm font-medium mb-1">First Name</label>
+          <input type="text" id="first_name" name="first_name" required
+                 class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+        </div>
+        <div>
+          <label for="last_name" class="block text-sm font-medium mb-1">Last Name</label>
+          <input type="text" id="last_name" name="last_name" required
+                 class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <label for="email" class="block text-sm font-medium mb-1">University Email</label>
+        <input type="email" id="email" name="email" required
+               class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+        <p class="text-xs text-gray-500 mt-1">Use your official Pittsburg State University email.</p>
+      </div>
+
+      <div class="mt-6">
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <input type="password" id="password" name="password" required minlength="8"
+               class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+        <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters long.</p>
+      </div>
+
+      <div class="mt-6">
+        <label for="department" class="block text-sm font-medium mb-1">Department / Major</label>
+        <select id="department" name="department"
+                class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+          <option value="">Select Department</option>
+          <option>Business Administration</option>
+          <option>Computer Science</option>
+          <option>Education</option>
+          <option>Engineering Technology</option>
+          <option>Health Sciences</option>
+          <option>Fine Arts</option>
+        </select>
+      </div>
+
+      <div class="mt-6">
+        <label class="block text-sm font-medium mb-1">Account Type</label>
+        <div class="flex items-center gap-6 mt-2">
+          <label class="flex items-center gap-2">
+            <input type="radio" name="role" value="student" checked>
+            <span>Student</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="role" value="alumni">
+            <span>Alumni</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="role" value="faculty">
+            <span>Faculty</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center">
+        <button type="submit"
+                class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all">
+          Create Account
+        </button>
+      </div>
+
+      <p class="text-sm text-center text-gray-600 dark:text-gray-400 mt-6">
+        Already have an account? 
+        <a href="{{ url_for('auth.login') if 'auth.login' in current_app.view_functions else url_for('core.contact') }}"
+           class="text-psu-gold hover:underline">Sign in here</a>.
+      </p>
+    </form>
+  </div>
+</section>
+
+{% endblock %}
