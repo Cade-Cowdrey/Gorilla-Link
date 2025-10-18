@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Verification Failed | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- ❌ EMAIL VERIFICATION FAILED SECTION -->
+<section class="min-h-[85vh] flex items-center justify-center bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="bg-white dark:bg-[#1a1a1a] shadow-2xl rounded-2xl max-w-md w-full p-10 border border-psu-gold/30 text-center">
+
+    <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+         alt="PSU Logo" class="mx-auto mb-6 w-20 md:w-24">
+
+    <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-4">
+      Verification Link Invalid or Expired
+    </h1>
+
+    <p class="text-gray-700 dark:text-gray-300 mb-8">
+      The verification link you clicked is no longer valid.  
+      It may have expired or already been used to activate your account.
+    </p>
+
+    <div class="flex flex-col items-center gap-4">
+      <a href="{{ url_for('auth.resend_verification') if 'auth.resend_verification' in current_app.view_functions else url_for('core.contact') }}"
+         class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
+        Resend Verification Email
+      </a>
+      <a href="{{ url_for('auth.login') }}"
+         class="border border-psu-gold text-psu-gold font-semibold px-8 py-3 rounded-lg hover:bg-psu-gold hover:text-black transition-all w-full md:w-auto">
+        Go to Login
+      </a>
+    </div>
+
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-8">
+      Still having trouble? Contact 
+      <a href="mailto:support@pittstateconnect.com" class="text-psu-gold hover:underline">support@pittstateconnect.com</a>.
+    </p>
+  </div>
+</section>
+
+{% endblock %}
