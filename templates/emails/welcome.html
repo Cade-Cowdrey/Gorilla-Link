@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to PittState-Connect!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fafafa; color: #222; }
+    .card { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px; padding: 30px; border: 2px solid #660000; }
+    h1 { color: #660000; }
+    .cta { background: #FFCC00; color: #660000; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Welcome, {{ user.name }}!</h1>
+    <p>You're officially part of <strong>PittState-Connect</strong> — the networking community built for Gorillas helping Gorillas.</p>
+    <p>Explore your dashboard, meet alumni, and start your journey today.</p>
+    <p style="text-align:center;">
+      <a class="cta" href="{{ url_for('core.home', _external=True) }}">Visit Your Dashboard</a>
+    </p>
+    <hr>
+    <p style="font-size: 13px; color: #777;">PittState-Connect © {{ 2025 }} • Pittsburg State University</p>
+  </div>
+</body>
+</html>
