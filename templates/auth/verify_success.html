@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Email Verified | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- ✉️ EMAIL VERIFICATION SUCCESS SECTION -->
+<section class="min-h-[85vh] flex items-center justify-center bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="bg-white dark:bg-[#1a1a1a] shadow-2xl rounded-2xl max-w-md w-full p-10 border border-psu-gold/30 text-center">
+
+    <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+         alt="PSU Logo" class="mx-auto mb-6 w-20 md:w-24">
+
+    <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-4">
+      Email Verified Successfully
+    </h1>
+
+    <p class="text-gray-700 dark:text-gray-300 mb-8">
+      Your email has been verified and your PittState-Connect account is now active!  
+      You can log in to start building connections, exploring opportunities, and joining the Gorilla Network.
+    </p>
+
+    <div class="flex flex-col items-center gap-4">
+      <a href="{{ url_for('auth.login') }}"
+         class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all w-full md:w-auto">
+        Go to Login
+      </a>
+      <a href="{{ url_for('core.home') }}"
+         class="border border-psu-gold text-psu-gold font-semibold px-8 py-3 rounded-lg hover:bg-psu-gold hover:text-black transition-all w-full md:w-auto">
+        Return Home
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
