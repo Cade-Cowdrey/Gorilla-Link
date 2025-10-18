@@ -1,27 +1,19 @@
-# ==========================================
-# 🦍 Gorilla-Link: Render Deployment Config
-# ==========================================
-
 services:
   - type: web
     name: gorilla-link
     env: python
-    plan: free
-    autoDeploy: true
-
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app  # ✅ Correct for your structure
-
+    startCommand: gunicorn app_pro:app
     envVars:
-      - key: FLASK_ENV
-        value: production
       - key: PYTHON_VERSION
         value: 3.10.13
+      - key: FLASK_ENV
+        value: production
       - key: DATABASE_URL
-        sync: false
+        value: postgresql://pittstate_connect_user:jxVmn2hpCGseGjaZ5Ri7TjLZAldP69Lb@dpg-d3lj2smmcj7s739vgqhg-a/pittstate_connect
       - key: REDIS_URL
-        sync: false
+        value: redis://red-d3mq9c15pdvs73bujrg0:6379
       - key: SECRET_KEY
-        generateValue: true
+        value: gorillalink-devkey-23890
       - key: ADMIN_TOKEN
-        sync: false
+        value: gorillalink2025
