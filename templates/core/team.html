@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Our Team · PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- 🦍 Hero -->
+<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
+  <div class="max-w-5xl mx-auto">
+    <img
+      src="{{ url_for('static', filename='img/psu_logo.png') }}"
+      alt="PSU Logo"
+      class="mx-auto mb-6 w-28 h-auto"
+    />
+    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
+      The <span class="text-[#FFD700]">PittState-Connect</span> Team
+    </h1>
+    <p class="text-lg max-w-3xl mx-auto text-gray-100 leading-relaxed">
+      Driven by innovation, powered by Gorillas — meet the students,
+      alumni, and advisors building the digital future of PSU.
+    </p>
+  </div>
+</section>
+
+<!-- 💼 Team Grid -->
+<section class="py-20 bg-gray-50 text-gray-800 fade-in">
+  <div class="max-w-6xl mx-auto text-center">
+    <h2 class="text-4xl font-bold mb-10 text-[#660000]">
+      Meet the Minds Behind the Mission
+    </h2>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 px-6">
+      <!-- Cade Cowdrey -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/cade_profile.png') }}"
+          alt="Cade Cowdrey"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">Cade Cowdrey</h3>
+        <p class="text-gray-700 mb-2">Founder & Lead Developer</p>
+        <p class="text-sm text-gray-500">
+          Creator of Gorilla-Link · Innovator behind PittState-Connect
+        </p>
+      </div>
+
+      <!-- Student Development Team -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/student_team.png') }}"
+          alt="Student Team"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">Student Developers</h3>
+        <p class="text-gray-700 mb-2">PSU Computer Science Collaborators</p>
+        <p class="text-sm text-gray-500">
+          Designing, coding, and testing features that drive PSU’s innovation.
+        </p>
+      </div>
+
+      <!-- Faculty Advisors -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/faculty_advisor.png') }}"
+          alt="Faculty Advisors"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">Faculty & Advisors</h3>
+        <p class="text-gray-700 mb-2">Mentors & Academic Support</p>
+        <p class="text-sm text-gray-500">
+          Guiding students with real-world insight and professional mentorship.
+        </p>
+      </div>
+
+      <!-- Alumni Network -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/alumni_team.png') }}"
+          alt="Alumni Network"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">PSU Alumni Partners</h3>
+        <p class="text-gray-700 mb-2">Industry Mentors</p>
+        <p class="text-sm text-gray-500">
+          Offering internships, career advice, and global networking support.
+        </p>
+      </div>
+
+      <!-- Marketing & Media -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/marketing_team.png') }}"
+          alt="Marketing Team"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">Marketing & Outreach</h3>
+        <p class="text-gray-700 mb-2">Design & Communications</p>
+        <p class="text-sm text-gray-500">
+          Sharing PittState-Connect’s vision through campaigns, media, and design.
+        </p>
+      </div>
+
+      <!-- Render/Deployment Ops -->
+      <div class="team-card">
+        <img
+          src="{{ url_for('static', filename='img/devops_team.png') }}"
+          alt="DevOps"
+          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000]">Deployment & Systems</h3>
+        <p class="text-gray-700 mb-2">Render & Database Ops</p>
+        <p class="text-sm text-gray-500">
+          Maintaining uptime, security, and performance for the PSU platform.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🌟 CTA -->
+<section class="bg-[#660000] text-white py-20 text-center fade-in">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">
+      Join the Next Generation of PSU Innovators
+    </h2>
+    <p class="text-gray-100 mb-8">
+      We’re always looking for passionate students and alumni who want to
+      contribute to PittState-Connect’s growth.
+    </p>
+    <a href="{{ url_for('auth.register') }}" class="psu-btn">Become a Collaborator</a>
+  </div>
+</section>
+
+<!-- ✨ Scroll Reveal -->
+<script>
+  const fadeEls = document.querySelectorAll(".fade-in");
+  const reveal = () => {
+    const trigger = window.innerHeight * 0.9;
+    fadeEls.forEach((el) => {
+      const top = el.getBoundingClientRect().top;
+      if (top < trigger) el.classList.add("visible");
+    });
+  };
+  window.addEventListener("scroll", reveal);
+  window.addEventListener("load", reveal);
+</script>
+
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.7s ease-out;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .team-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.75rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .team-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
+  }
+</style>
+{% endblock %}
