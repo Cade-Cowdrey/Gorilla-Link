@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}System-Wide Template Master Index | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- 🗂️ MASTER TEMPLATE INDEX -->
+<section class="min-h-[85vh] bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="max-w-5xl mx-auto bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-psu-gold/30 p-10">
+
+    <!-- HEADER -->
+    <div class="text-center mb-12">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+           alt="PSU Logo" class="mx-auto mb-4 w-24 md:w-28">
+      <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-2">
+        PittState-Connect Template Master Index
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        Centralized dashboard linking to all PSU-branded templates — including Email, Notification, and Admin systems.
+      </p>
+    </div>
+
+    <!-- GRID OF TEMPLATE HUBS -->
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <!-- EMAIL HUB -->
+      <div class="bg-gray-100 dark:bg-[#222] border border-psu-gold/40 rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-all">
+        <img src="{{ url_for('static', filename='images/email_icon.png') }}" alt="Email Templates" class="mx-auto mb-4 w-16 h-16">
+        <h2 class="text-2xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Email Templates</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          All PSU-branded system emails for verification, password reset, and user engagement.
+        </p>
+        <a href="{{ url_for('core.email_previews') }}"
+           class="bg-psu-gold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
+           Open Email Index
+        </a>
+      </div>
+
+      <!-- AUTH / NOTIFICATION HUB -->
+      <div class="bg-gray-100 dark:bg-[#222] border border-psu-gold/40 rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-all">
+        <img src="{{ url_for('static', filename='images/notification_icon.png') }}" alt="Notifications" class="mx-auto mb-4 w-16 h-16">
+        <h2 class="text-2xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Auth & Notifications</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          On-site pages for verification, resets, deactivation, reactivation, and more.
+        </p>
+        <a href="{{ url_for('auth.notifications_index') }}"
+           class="bg-psu-gold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
+           Open Notification Index
+        </a>
+      </div>
+
+      <!-- ADMIN HUB -->
+      <div class="bg-gray-100 dark:bg-[#222] border border-psu-gold/40 rounded-xl shadow-lg p-6 text-center hover:shadow-2xl transition-all">
+        <img src="{{ url_for('static', filename='images/admin_icon.png') }}" alt="Admin Templates" class="mx-auto mb-4 w-16 h-16">
+        <h2 class="text-2xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Admin Templates</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          Administrative dashboards, analytics, and reporting views for PSU leadership.
+        </p>
+        <a href="{{ url_for('admin.admin_index') }}"
+           class="bg-psu-gold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
+           Open Admin Index
+        </a>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center mt-16">
+      <p class="text-gray-600 dark:text-gray-400">
+        Need to return to the main dashboard?  
+        <a href="{{ url_for('core.home') }}" class="text-psu-gold hover:underline">Back to Home</a>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
