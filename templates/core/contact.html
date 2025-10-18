@@ -1,156 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Contact · PittState-Connect{% endblock %}
-
+{% block title %}Contact | PittState-Connect{% endblock %}
 {% block content %}
-<!-- 🎓 Hero Section -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
-  <div class="max-w-5xl mx-auto">
-    <img
-      src="{{ url_for('static', filename='img/psu_logo.png') }}"
-      alt="PSU Logo"
-      class="mx-auto mb-6 w-28 h-auto"
-    />
-    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
-      Contact <span class="text-[#FFD700]">PittState-Connect</span>
-    </h1>
-    <p class="text-lg max-w-3xl mx-auto text-gray-100 leading-relaxed">
-      Have questions, ideas, or partnership requests?  
-      We’d love to hear from you and collaborate to empower Gorillas everywhere.
-    </p>
-  </div>
-</section>
+<section class="py-16 bg-white dark:bg-[#0f0f0f] text-gray-900 dark:text-gray-100">
+  <div class="container mx-auto px-6 md:px-12 lg:px-24">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-psu-gold mb-4">Contact Us</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        Have a question, suggestion, or partnership idea? We’d love to hear from you.
+        Let’s build the next generation of Gorilla networking — together.
+      </p>
+    </div>
 
-<!-- ✉️ Contact Form -->
-<section class="py-20 bg-gray-50 text-gray-800 fade-in">
-  <div class="max-w-5xl mx-auto px-6">
-    <h2 class="text-3xl font-bold text-center text-[#660000] mb-12">
-      Get in Touch With Us
-    </h2>
+    <div class="grid md:grid-cols-2 gap-10">
+      <div>
+        <h2 class="text-2xl font-semibold text-psu-gold mb-3">Reach Out Directly</h2>
+        <ul class="space-y-3 text-gray-700 dark:text-gray-300">
+          <li><strong>Email:</strong> <a href="mailto:support@pittstateconnect.com" class="text-psu-gold hover:underline">support@pittstateconnect.com</a></li>
+          <li><strong>Phone:</strong> (620) 235-XXXX</li>
+          <li><strong>Office:</strong> 1701 S Broadway St, Pittsburg, KS 66762</li>
+        </ul>
 
-    <form
-      method="POST"
-      action="{{ url_for('core.contact') }}"
-      class="bg-white rounded-2xl shadow-lg p-8 max-w-3xl mx-auto"
-    >
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="mb-6 text-center text-green-600 font-semibold">
-            {{ messages[0] }}
+        <div class="mt-8">
+          <h2 class="text-2xl font-semibold text-psu-gold mb-3">Follow Us</h2>
+          <div class="flex space-x-4 text-psu-gold text-2xl">
+            <a href="#" class="hover:text-psu-crimson"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="hover:text-psu-crimson"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="hover:text-psu-crimson"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="hover:text-psu-crimson"><i class="fab fa-twitter"></i></a>
           </div>
-        {% endif %}
-      {% endwith %}
-
-      <div class="grid md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#FFD700] focus:outline-none"
-            placeholder="Your Name"
-          />
-        </div>
-
-        <div>
-          <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#FFD700] focus:outline-none"
-            placeholder="you@pittstate.edu"
-          />
         </div>
       </div>
 
-      <div class="mb-6">
-        <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
-        <input
-          id="subject"
-          name="subject"
-          type="text"
-          required
-          class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#FFD700] focus:outline-none"
-          placeholder="Message Subject"
-        />
+      <div>
+        <h2 class="text-2xl font-semibold text-psu-gold mb-3">Send Us a Message</h2>
+        <form method="POST" action="{{ url_for('core.contact') }}" class="space-y-4">
+          <div>
+            <label for="name" class="block text-sm font-medium mb-1">Full Name</label>
+            <input id="name" name="name" type="text" required
+                   class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a1a] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1">Email Address</label>
+            <input id="email" name="email" type="email" required
+                   class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a1a] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
+          </div>
+          <div>
+            <label for="message" class="block text-sm font-medium mb-1">Message</label>
+            <textarea id="message" name="message" rows="5" required
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1a1a] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold"></textarea>
+          </div>
+          <button type="submit"
+                  class="bg-psu-gold text-black font-semibold px-6 py-2 rounded-lg hover:bg-yellow-500 transition-all">
+            Send Message
+          </button>
+        </form>
       </div>
-
-      <div class="mb-6">
-        <label for="message" class="block text-sm font-semibold text-gray-700 mb-2">Message</label>
-        <textarea
-          id="message"
-          name="message"
-          rows="5"
-          required
-          class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#FFD700] focus:outline-none"
-          placeholder="Type your message here..."
-        ></textarea>
-      </div>
-
-      <div class="text-center">
-        <button
-          type="submit"
-          class="psu-btn"
-        >
-          Send Message ✉️
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </section>
-
-<!-- 📍 Contact Info -->
-<section class="py-16 bg-white text-center fade-in">
-  <div class="max-w-4xl mx-auto">
-    <h3 class="text-3xl font-bold mb-6 text-[#660000]">Visit or Connect</h3>
-    <p class="text-gray-700 mb-4">
-      Pittsburg State University · 1701 S Broadway St, Pittsburg, KS 66762
-    </p>
-    <p class="text-gray-700">
-      Email: <a href="mailto:info@pittstate-connect.com" class="text-[#660000] font-semibold hover:underline">info@pittstate-connect.com</a>
-      <br />
-      Phone: <span class="text-gray-800 font-semibold">(620) 235-XXXX</span>
-    </p>
-  </div>
-</section>
-
-<!-- 🦍 CTA -->
-<section class="bg-[#660000] text-white py-20 text-center fade-in">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">Let’s Build the Future of PSU Together</h2>
-    <p class="text-gray-100 mb-8">
-      Whether you’re a student, alumni, faculty, or partner — PittState-Connect is your hub for growth and innovation.
-    </p>
-    <a href="{{ url_for('auth.register') }}" class="psu-btn">Join the Network</a>
-  </div>
-</section>
-
-<!-- ✨ Scroll Fade-In Script -->
-<script>
-  const fadeEls = document.querySelectorAll('.fade-in');
-  const reveal = () => {
-    const trigger = window.innerHeight * 0.9;
-    fadeEls.forEach(el => {
-      const top = el.getBoundingClientRect().top;
-      if (top < trigger) el.classList.add('visible');
-    });
-  };
-  window.addEventListener('scroll', reveal);
-  window.addEventListener('load', reveal);
-</script>
-
-<style>
-  .fade-in {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: all 0.7s ease-out;
-  }
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-</style>
 {% endblock %}
