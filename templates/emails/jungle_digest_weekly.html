@@ -1,0 +1,20 @@
+{% extends 'emails/_base_digest.html' %}
+
+{% block content %}
+<h2 style="color:#660000;">🎓 Alumni Spotlight: {{ alumni.name }}</h2>
+<p>{{ alumni.story }}</p>
+
+<h2 style="color:#660000;">💼 Career Highlights</h2>
+<ul>
+  {% for job in jobs %}
+  <li><strong>{{ job.title }}</strong> — {{ job.department.name }}</li>
+  {% endfor %}
+</ul>
+
+<h2 style="color:#660000;">🎟️ Upcoming Events</h2>
+<ul>
+  {% for event in events %}
+  <li><a href="{{ url_for('events.event_detail', event_id=event.id, _external=True) }}" style="color:#660000;">{{ event.title }}</a> — {{ event.start_date.strftime('%b %d') }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}
