@@ -1,25 +1,27 @@
 # ============================================================
-# 🦍 Gorilla-Link / PittState-Connect — Render Deployment Config
+# 🦍 Gorilla-Link | PittState-Connect
+# Render Deployment Configuration (Root Layout Version)
 # ============================================================
 
 services:
   - type: web
     name: gorilla-link
     env: python
-    plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-    startCommand: gunicorn src.app_pro:app
+    plan: free  # or "starter"/"standard" for production scaling
+
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_pro:app --timeout 120 --workers 3 --threads 2
+
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.13
       - key: FLASK_ENV
         value: production
-      - key: SECRET_KEY
-        sync: false
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
         sync: false
       - key: ADMIN_TOKEN
         sync: false
@@ -33,26 +35,29 @@ services:
         sync: false
       - key: MAIL_PASSWORD
         sync: false
+
     autoDeploy: true
     branch: main
 
 # ============================================================
-# 🕒 Scheduled Tasks (CRON Jobs)
+# 🕒 Scheduled Jobs (optional)
 # ============================================================
 cronJobs:
+  # Weekly PSU-branded digest email
   - name: weekly-digest
     schedule: "0 9 * * FRI"
     timezone: "America/Chicago"
     command: "python -m tasks.weekly_digest_cron"
 
+  # Daily analytics snapshot
   - name: daily-analytics-refresh
     schedule: "0 1 * * *"
     timezone: "America/Chicago"
     command: "python -m tasks.refresh_analytics"
 
 # ============================================================
-# 📦 Notes:
-# - PSU-branded templates + CSS will now load correctly.
-# - The `src` prefix ensures Render locates your app.
-# - CRON jobs use your existing PSU email + analytics code.
+# 📝 Notes:
+# - Your Flask app now runs from app_pro.py in project root.
+# - Static and template folders are automatically detected.
+# - PSU-branded UI will now load properly.
 # ============================================================
