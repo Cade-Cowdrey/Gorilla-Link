@@ -19,6 +19,16 @@ def about():
 def team():
     return render_template("core/team.html")
 
+# 💼 Careers Page
+@core.route("/careers")
+def careers():
+    return render_template("core/careers.html")
+
+# 🎉 Events Page
+@core.route("/events")
+def events():
+    return render_template("core/events.html")
+
 # ✉️ Contact Page
 @core.route("/contact", methods=["GET", "POST"])
 def contact():
