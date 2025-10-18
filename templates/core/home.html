@@ -1,33 +1,95 @@
 {% extends "base.html" %}
-{% block title %}PittState-Connect | Home{% endblock %}
+{% block title %}PittState Connect · Gorilla-Link{% endblock %}
+
 {% block content %}
-<section class="text-center py-16 bg-gradient-to-b from-[#73000a] via-[#990000] to-[#2c0000] text-white">
-  <div class="max-w-5xl mx-auto px-6">
-    <h1 class="text-5xl font-bold mb-6 tracking-tight">Welcome to <span class="text-yellow-400">PittState-Connect</span></h1>
-    <p class="text-lg leading-relaxed mb-8">
-      A networking and mentorship platform built by students <br>
-      to connect <strong>Gorillas</strong>—students, alumni, and employers—across the world.
+<section class="bg-[#660000] text-white py-20 px-6 text-center">
+  <div class="max-w-5xl mx-auto">
+    <img
+      src="{{ url_for('static', filename='img/psu_logo.png') }}"
+      alt="PittState Logo"
+      class="mx-auto mb-6 w-32 h-auto"
+    />
+    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
+      Welcome to <span class="text-[#FFD700]">PittState-Connect</span>
+    </h1>
+    <p class="text-lg max-w-3xl mx-auto text-gray-100">
+      The official networking hub for Pittsburg State University —
+      connecting students, alumni, faculty, and partners in one powerful community.
     </p>
-    <a href="{{ url_for('auth.register') }}" class="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition">
-      Join Now
-    </a>
+    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+      <a
+        href="{{ url_for('feed.dashboard') }}"
+        class="bg-[#FFD700] text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition"
+      >
+        🎓 Student Dashboard
+      </a>
+      <a
+        href="{{ url_for('alumni.details') }}"
+        class="border border-yellow-400 text-yellow-400 font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 hover:text-[#660000] transition"
+      >
+        🦍 Alumni Network
+      </a>
+    </div>
   </div>
 </section>
 
-<section class="py-20 bg-white text-gray-800">
-  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-10 px-6">
-    <div class="text-center">
-      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Mentorship</h3>
-      <p>Match with PSU alumni and mentors ready to guide your journey.</p>
+<section class="py-20 bg-gray-50 text-gray-800">
+  <div class="max-w-6xl mx-auto text-center">
+    <h2 class="text-4xl font-bold mb-8 text-[#660000]">
+      Empowering the Next Generation of Gorillas
+    </h2>
+    <div class="grid md:grid-cols-3 gap-8 px-6">
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <img
+          src="{{ url_for('static', filename='img/mentorship_icon.png') }}"
+          alt="Mentorship"
+          class="w-16 h-16 mx-auto mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000] mb-2">Mentorship</h3>
+        <p>
+          Connect with alumni mentors across industries who can guide you through academics, careers, and leadership.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <img
+          src="{{ url_for('static', filename='img/opportunity_icon.png') }}"
+          alt="Opportunities"
+          class="w-16 h-16 mx-auto mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000] mb-2">Opportunities</h3>
+        <p>
+          Discover internships, research projects, and job openings tailored to PSU students and recent graduates.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <img
+          src="{{ url_for('static', filename='img/engagement_icon.png') }}"
+          alt="Engagement"
+          class="w-16 h-16 mx-auto mb-4"
+        />
+        <h3 class="text-xl font-semibold text-[#660000] mb-2">Engagement</h3>
+        <p>
+          Stay informed on events, alumni spotlights, and PSU community news with the Jungle Report & Digest.
+        </p>
+      </div>
     </div>
-    <div class="text-center">
-      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Career Growth</h3>
-      <p>Discover internships, job opportunities, and skill badges that boost your profile.</p>
-    </div>
-    <div class="text-center">
-      <h3 class="text-xl font-semibold mb-2 text-[#73000a]">Alumni Network</h3>
-      <p>Reconnect with Gorillas everywhere and give back through mentorship & hiring.</p>
-    </div>
+  </div>
+</section>
+
+<section class="bg-[#660000] text-white py-20 px-6 text-center">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">Join the PSU Network</h2>
+    <p class="text-gray-100 mb-8">
+      Whether you’re a student, alumni, or faculty — PittState-Connect helps you grow, collaborate, and give back.
+    </p>
+    <a
+      href="{{ url_for('auth.register') }}"
+      class="bg-[#FFD700] text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition"
+    >
+      Create Your Account
+    </a>
   </div>
 </section>
 {% endblock %}
