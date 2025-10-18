@@ -20,6 +20,14 @@ __pycache__/
 *.rej
 *.old
 
+# Bytecode cache from tools and compilers
+*.pyc
+__pycache__/
+
+# Logs and local reports
+logs/
+reports/
+
 # Flask instance / temp data
 instance/
 .env
