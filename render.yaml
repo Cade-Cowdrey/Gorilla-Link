@@ -9,11 +9,9 @@ services:
     plan: free
     autoDeploy: true
 
-    # 🏗️ Build and Start
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app
+    startCommand: gunicorn app_pro:app  # ✅ Correct for your structure
 
-    # 🌐 Environment Variables
     envVars:
       - key: FLASK_ENV
         value: production
@@ -27,14 +25,3 @@ services:
         generateValue: true
       - key: ADMIN_TOKEN
         sync: false
-
-    # 📁 Directories to ignore when caching builds
-    ignorePaths:
-      - nodes/
-      - python/
-      - .venv/
-      - __pycache__/
-      - *.pyc
-      - *.pyo
-      - *.log
-      - migrations/versions/__pycache__/
