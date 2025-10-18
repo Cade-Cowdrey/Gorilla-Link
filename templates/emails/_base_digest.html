@@ -1,0 +1,17 @@
+{% include 'emails/partials/_header.html' %}
+<div style="font-family:Arial,sans-serif;background:#fff;padding:25px;border-radius:10px;margin:20px auto;max-width:700px;">
+  <h1 style="color:#660000; text-align:center;">🦍 The Gorilla Digest</h1>
+  <p style="text-align:center; color:#555;">A weekly snapshot of life, leadership, and learning at Pittsburg State University</p>
+  <hr style="border:none; border-top:2px solid #FFCC00; margin:20px 0;">
+
+  {% block content %}
+  <!-- Insert your digest content sections here -->
+  {% endblock %}
+
+  <hr style="border:none; border-top:2px solid #FFCC00; margin:20px 0;">
+  <p style="font-size:13px; color:#777; text-align:center;">
+    Want to submit something for next week’s digest?  
+    <a href="{{ url_for('core.contact', _external=True) }}" style="color:#660000;text-decoration:none;">Contact the PSU Communications Team</a>.
+  </p>
+</div>
+{% include 'emails/partials/_footer.html' %}
