@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Email Template Preview | PittState-Connect{% endblock %}
+{% block content %}
+
+<!-- 📨 EMAIL TEMPLATE INDEX -->
+<section class="min-h-[85vh] bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
+  <div class="max-w-5xl mx-auto bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-psu-gold/30 p-10">
+
+    <div class="text-center mb-12">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
+           alt="PSU Logo" class="mx-auto mb-4 w-24 md:w-28">
+      <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-2">
+        PittState-Connect Email Template Directory
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        A visual index of all PSU-branded system emails — for testing, quality assurance, and design reference.
+      </p>
+    </div>
+
+    <!-- TEMPLATE TABLE -->
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-left text-gray-800 dark:text-gray-200">
+        <thead class="bg-psu-crimson text-white">
+          <tr>
+            <th class="py-3 px-4 rounded-tl-lg">Category</th>
+            <th class="py-3 px-4">Template Name</th>
+            <th class="py-3 px-4">Description</th>
+            <th class="py-3 px-4 rounded-tr-lg">Preview</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          <!-- PASSWORD / ACCOUNT -->
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Auth / Password</td>
+            <td class="py-3 px-4">reset_password_email.html</td>
+            <td class="py-3 px-4">Password reset link and instructions</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/reset_password_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Auth / Account</td>
+            <td class="py-3 px-4">account_verification_email.html</td>
+            <td class="py-3 px-4">Verify email after registration</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/account_verification_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Account</td>
+            <td class="py-3 px-4">reactivation_email.html</td>
+            <td class="py-3 px-4">Reactivation link after deactivation</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/reactivation_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Account</td>
+            <td class="py-3 px-4">reactivated_email.html</td>
+            <td class="py-3 px-4">Welcome-back email after reactivation</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/reactivated_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Account</td>
+            <td class="py-3 px-4">account_deleted_email.html</td>
+            <td class="py-3 px-4">Confirmation after permanent account deletion</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/account_deleted_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">User Experience</td>
+            <td class="py-3 px-4">farewell_email.html</td>
+            <td class="py-3 px-4">Follow-up farewell message encouraging reconnection</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/farewell_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+
+          <tr>
+            <td class="py-3 px-4 font-semibold text-psu-gold">Welcome</td>
+            <td class="py-3 px-4">welcome_email.html</td>
+            <td class="py-3 px-4">Sent after successful registration</td>
+            <td class="py-3 px-4"><a href="{{ url_for('static', filename='emails/welcome_email.html') }}" target="_blank" class="text-psu-gold hover:underline">Preview</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-center mt-10">
+      <a href="{{ url_for('core.home') }}" 
+         class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
+         Return to Dashboard
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
