@@ -1,63 +1,44 @@
-# ============================================================
-# 🦍 Gorilla-Link | PittState-Connect
-# Render Deployment Configuration (Root Layout Version)
-# ============================================================
-
 services:
   - type: web
-    name: gorilla-link
+    name: pittstate-connect
     env: python
-    plan: free  # or "starter"/"standard" for production scaling
+    plan: free
+    region: oregon
 
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app --timeout 120 --workers 3 --threads 2
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      flask db upgrade || true
+
+    startCommand: |
+      gunicorn --worker-class gevent --workers=3 --timeout 300 app_pro:create_app
 
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.13
       - key: FLASK_ENV
         value: production
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
       - key: SECRET_KEY
         sync: false
-      - key: ADMIN_TOKEN
+      - key: DATABASE_URL
         sync: false
       - key: MAIL_SERVER
-        value: smtp.office365.com
+        value: smtp.gmail.com
       - key: MAIL_PORT
-        value: 587
+        value: "587"
       - key: MAIL_USE_TLS
-        value: true
+        value: "True"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
         sync: false
+      - key: MAIL_DEFAULT_SENDER
+        value: noreply@pittstateconnect.edu
+      - key: APP_URL
+        value: https://pittstateconnect.onrender.com
+      - key: ADMIN_TOKEN
+        sync: false
 
-    autoDeploy: true
-    branch: main
-
-# ============================================================
-# 🕒 Scheduled Jobs (optional)
-# ============================================================
-cronJobs:
-  # Weekly PSU-branded digest email
-  - name: weekly-digest
-    schedule: "0 9 * * FRI"
-    timezone: "America/Chicago"
-    command: "python -m tasks.weekly_digest_cron"
-
-  # Daily analytics snapshot
-  - name: daily-analytics-refresh
-    schedule: "0 1 * * *"
-    timezone: "America/Chicago"
-    command: "python -m tasks.refresh_analytics"
-
-# ============================================================
-# 📝 Notes:
-# - Your Flask app now runs from app_pro.py in project root.
-# - Static and template folders are automatically detected.
-# - PSU-branded UI will now load properly.
-# ============================================================
+databases:
+  - name: pittstate_connect
+    plan: free
