@@ -1,48 +1,70 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}PittState-Connect{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-  <link rel="icon" href="{{ url_for('static', filename='images/psu-favicon.png') }}">
-  <script>
-    function toggleTheme() {
-      const html = document.documentElement;
-      const theme = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      html.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-    }
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
-    });
-  </script>
+  <title>{% block title %}PittState-Connect · Gorilla-Link{% endblock %}</title>
+
+  <!-- Tailwind CDN (Render-compatible) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu_logo.png') }}" />
+
+  {% block head %}{% endblock %}
 </head>
 
-<body class="font-sans bg-gray-50 dark:bg-[#0f0f0f] text-gray-800 dark:text-gray-200 min-h-screen flex flex-col">
-  <header class="bg-[#73000A] text-white py-4 shadow-md">
-    <div class="container mx-auto flex justify-between items-center px-4">
-      <a href="{{ url_for('index') }}" class="text-xl font-bold tracking-wide">PittState-Connect</a>
-      <nav class="space-x-4 hidden sm:flex">
-        {% if current_user.is_authenticated %}
-          <a href="{{ url_for('feed.index') }}" class="hover:text-[#FFD700]">Dashboard</a>
-          <a href="{{ url_for('auth.logout') }}" class="hover:text-[#FFD700]">Logout</a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="hover:text-[#FFD700]">Login</a>
-          <a href="{{ url_for('auth.register') }}" class="hover:text-[#FFD700]">Register</a>
-        {% endif %}
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+  <!-- 🔺 PSU Navbar -->
+  <header class="bg-[#660000] text-white shadow-md">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <div class="flex items-center gap-3">
+        <img src="{{ url_for('static', filename='img/psu_logo.png') }}" alt="PSU Logo" class="w-10 h-10" />
+        <a href="{{ url_for('core.home') }}" class="text-2xl font-bold tracking-tight text-[#FFD700]">
+          PittState-Connect
+        </a>
+      </div>
+      <nav class="hidden md:flex gap-6 text-sm font-semibold">
+        <a href="{{ url_for('feed.dashboard') }}" class="hover:text-[#FFD700] transition">Dashboard</a>
+        <a href="{{ url_for('alumni.details') }}" class="hover:text-[#FFD700] transition">Alumni</a>
+        <a href="{{ url_for('events.dashboard') }}" class="hover:text-[#FFD700] transition">Events</a>
+        <a href="{{ url_for('career.dashboard') }}" class="hover:text-[#FFD700] transition">Careers</a>
+        <a href="{{ url_for('auth.login') }}" class="hover:text-[#FFD700] transition">Login</a>
       </nav>
-      <button onclick="toggleTheme()" class="ml-3 text-sm bg-[#FFD700] text-[#73000A] font-semibold px-3 py-1 rounded-lg">☀︎ / ☾</button>
+      <button id="mobile-menu-btn" class="md:hidden text-[#FFD700] focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden flex-col px-6 pb-4 space-y-2 bg-[#550000] text-sm">
+      <a href="{{ url_for('feed.dashboard') }}" class="block hover:text-[#FFD700]">Dashboard</a>
+      <a href="{{ url_for('alumni.details') }}" class="block hover:text-[#FFD700]">Alumni</a>
+      <a href="{{ url_for('events.dashboard') }}" class="block hover:text-[#FFD700]">Events</a>
+      <a href="{{ url_for('career.dashboard') }}" class="block hover:text-[#FFD700]">Careers</a>
+      <a href="{{ url_for('auth.login') }}" class="block hover:text-[#FFD700]">Login</a>
     </div>
   </header>
 
-  <main class="flex-1 container mx-auto px-4 py-10 fade-in">
-    {% block content %}{% endblock %}
-  </main>
+  <!-- ✨ Page Content -->
+  <main class="flex-grow">{% block content %}{% endblock %}</main>
 
-  <footer class="bg-[#1b1b1b] text-gray-400 text-center py-6 text-sm">
-    © {{ now().year }} PittState-Connect · Built by PSU Students · All Rights Reserved.
+  <!-- 🦍 PSU Footer -->
+  <footer class="bg-[#660000] text-white py-8 mt-16">
+    <div class="max-w-6xl mx-auto text-center text-sm">
+      <p class="text-[#FFD700] font-semibold mb-2">Pittsburg State University · Gorilla-Link</p>
+      <p class="text-gray-300">
+        © {{ current_year|default(2025) }} PittState-Connect. All rights reserved.<br />
+        Built by PSU Students · Empowering Gorillas Everywhere 🦍
+      </p>
+    </div>
   </footer>
+
+  <!-- 🔧 Mobile Menu Toggle Script -->
+  <script>
+    const btn = document.getElementById("mobile-menu-btn");
+    const menu = document.getElementById("mobile-menu");
+    btn.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
+    });
+  </script>
+
 </body>
 </html>
