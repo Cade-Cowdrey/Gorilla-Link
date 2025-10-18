@@ -1,6 +1,8 @@
+{% include 'emails/partials/_header.txt' %}
+
 Good Morning, {{ user.name }} 🦍
 
-Here’s your PittState-Connect Daily Digest — a quick look at what’s new.
+Here’s your PittState-Connect Daily Digest — quick updates and new opportunities.
 
 {% if posts %}
 📣 New Posts:
@@ -22,4 +24,4 @@ No new posts today.
 No new events scheduled today.
 {% endif %}
 
-PittState-Connect • Building stronger Gorilla Networks™
+{% include 'emails/partials/_footer.txt' %}
