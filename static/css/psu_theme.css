@@ -1,223 +1,195 @@
-/* ======================================================
-🦍 PittState-Connect | PSU Branding Stylesheet
-Author: Cade Cowdrey
-Purpose: Global theme overrides for PSU crimson + gold
-====================================================== */
+/* ============================================================
+   🎓 PittState-Connect Theme (psu-theme.css)
+   Tailwind extension for PSU branding and custom UI styling
+   ============================================================ */
 
-/* 🎨 Core Brand Palette */
+/* ---------- 🦍 PSU Color Palette ---------- */
 :root {
-  --psu-crimson: #660000;
-  --psu-dark-crimson: #4a0000;
-  --psu-gold: #ffd700;
-  --psu-light-gold: #ffe666;
-  --psu-gray-bg: #f8f8f8;
-  --psu-text-dark: #222;
-  --psu-text-light: #fff;
-  --psu-shadow: rgba(0, 0, 0, 0.15);
+  --psu-gold: #E5B700;       /* Official PSU Gold */
+  --psu-crimson: #990000;    /* Official PSU Crimson */
+  --psu-gray: #f5f5f5;       /* Light Gray background */
+  --psu-dark: #0e0e0e;       /* Dark background */
+  --psu-text-dark: #222222;
+  --psu-text-light: #f9f9f9;
 }
 
-/* 🖋️ Base Typography */
-body {
-  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: var(--psu-text-dark);
-  background-color: var(--psu-gray-bg);
-  scroll-behavior: smooth;
+/* Tailwind color utility bindings */
+.text-psu-gold { color: var(--psu-gold); }
+.text-psu-crimson { color: var(--psu-crimson); }
+
+.bg-psu-gold { background-color: var(--psu-gold); }
+.bg-psu-crimson { background-color: var(--psu-crimson); }
+
+.border-psu-gold { border-color: var(--psu-gold); }
+.border-psu-crimson { border-color: var(--psu-crimson); }
+
+/* Hover & focus states */
+.hover\:text-psu-gold:hover { color: var(--psu-gold); }
+.hover\:bg-psu-gold:hover { background-color: var(--psu-gold); }
+.hover\:text-psu-crimson:hover { color: var(--psu-crimson); }
+.hover\:bg-psu-crimson:hover { background-color: var(--psu-crimson); }
+
+/* ---------- 🌗 Dark Mode ---------- */
+.dark {
+  background-color: var(--psu-dark);
+  color: var(--psu-text-light);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Poppins", "Segoe UI", Roboto, sans-serif;
-  font-weight: 700;
-  color: var(--psu-crimson);
+.dark a { color: var(--psu-gold); }
+.dark .hover\:text-psu-gold:hover { color: #ffcc33; }
+.dark .hover\:bg-psu-gold:hover { background-color: #ffcc33; }
+
+/* ---------- 🧭 Navbar ---------- */
+nav a {
+  transition: color 0.25s ease, background-color 0.25s ease;
 }
 
-a {
-  color: var(--psu-crimson);
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
-}
-
-a:hover {
+nav a.active,
+nav a[aria-current="page"] {
   color: var(--psu-gold);
-}
-
-/* 🧭 Navbar */
-header {
-  box-shadow: 0 3px 6px var(--psu-shadow);
-}
-
-header a {
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
-header a:hover {
-  color: var(--psu-gold);
+nav {
+  backdrop-filter: blur(10px);
 }
 
-/* 🔘 Buttons */
-.btn, button, .psu-btn {
-  background-color: var(--psu-gold);
-  color: var(--psu-crimson);
-  border: none;
-  border-radius: 9999px;
-  padding: 0.6rem 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn:hover, button:hover, .psu-btn:hover {
-  background-color: var(--psu-light-gold);
-  transform: translateY(-1px);
-}
-
-/* 🟨 Secondary Buttons (outline style) */
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--psu-gold);
-  color: var(--psu-gold);
-}
-
-.btn-outline:hover {
-  background: var(--psu-gold);
-  color: var(--psu-crimson);
-}
-
-/* 🧩 Cards */
-.card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 6px var(--psu-shadow);
-  padding: 1.5rem;
-  transition: all 0.25s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 10px var(--psu-shadow);
-}
-
-/* 🗂️ Dashboard Boxes */
-.dashboard-card {
-  border-left: 5px solid var(--psu-gold);
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  transition: 0.3s;
-}
-
-.dashboard-card:hover {
-  border-left-color: var(--psu-light-gold);
-  box-shadow: 0 3px 8px var(--psu-shadow);
-}
-
-/* 📰 Digest & Feed Panels */
-.feed-post, .digest-card {
-  border: 1px solid #eaeaea;
-  background: #fff;
-  padding: 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.feed-post:hover, .digest-card:hover {
-  box-shadow: 0 4px 10px var(--psu-shadow);
-}
-
-/* 🧠 Analytics Highlights */
-.stats-card {
-  background: linear-gradient(135deg, var(--psu-crimson), var(--psu-dark-crimson));
-  color: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  text-align: center;
-}
-
-.stats-card h3 {
-  color: var(--psu-gold);
-  font-size: 1.25rem;
-}
-
-/* 🧭 Footer */
+/* ---------- 🦶 Footer ---------- */
 footer {
-  background-color: var(--psu-crimson);
-  color: #fff;
-  text-align: center;
-  padding: 2rem 1rem;
   font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
 
 footer a {
-  color: var(--psu-gold);
-  font-weight: 500;
+  transition: color 0.25s ease;
 }
 
 footer a:hover {
-  text-decoration: underline;
+  color: var(--psu-gold);
 }
 
-/* 🌗 Dark Mode Support (optional enhancement) */
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #111;
-    color: #ddd;
-  }
-
-  header, footer {
-    background-color: var(--psu-dark-crimson);
-  }
-
-  .card, .dashboard-card {
-    background: #1a1a1a;
-    color: #f3f3f3;
-  }
-
-  .btn, .psu-btn {
-    background-color: var(--psu-gold);
-    color: #000;
-  }
+/* ---------- 🧱 Cards, Buttons, Inputs ---------- */
+.card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* ✨ Utility Enhancements */
-.shadow-gorilla {
-  box-shadow: 0 8px 20px rgba(102, 0, 0, 0.3);
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
 }
 
-.text-gold {
-  color: var(--psu-gold) !important;
+.dark .card {
+  background-color: #1a1a1a;
+  color: var(--psu-text-light);
+  box-shadow: 0 4px 25px rgba(255,255,255,0.05);
 }
 
-.bg-gold {
-  background-color: var(--psu-gold) !important;
+/* Buttons */
+.btn-primary {
+  background-color: var(--psu-gold);
+  color: black;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  transition: all 0.3s ease;
 }
 
-.bg-crimson {
-  background-color: var(--psu-crimson) !important;
+.btn-primary:hover {
+  background-color: #ffcc33;
+  transform: translateY(-2px);
 }
 
-/* 🧾 Scroll Progress Bar */
-#scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 4px;
-  width: 0%;
-  background: var(--psu-gold);
-  z-index: 9999;
-  transition: width 0.2s ease-out;
+.btn-outline {
+  border: 2px solid var(--psu-gold);
+  color: var(--psu-gold);
+  background-color: transparent;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  transition: all 0.3s ease;
 }
 
-/* 🪄 Animation Enhancements */
+.btn-outline:hover {
+  background-color: var(--psu-gold);
+  color: black;
+}
+
+/* Inputs and textareas */
+input, textarea, select {
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  padding: 0.6rem 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--psu-gold);
+  box-shadow: 0 0 0 3px rgba(229,183,0,0.3);
+}
+
+/* ---------- 📜 Headings ---------- */
+h1, h2, h3, h4, h5 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: var(--psu-crimson);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4 {
+  color: var(--psu-gold);
+}
+
+/* ---------- 💫 Animations ---------- */
 .fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeIn 0.6s ease forwards;
+  animation: fadeIn 0.8s ease forwards;
 }
 
 @keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 🔝 Scroll to Top Button ---------- */
+#scrollTopBtn {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#scrollTopBtn:hover {
+  transform: translateY(-3px);
+}
+
+/* ---------- 🧩 Utilities ---------- */
+.section {
+  padding: 4rem 1rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--psu-crimson);
+}
+
+.dark .section-title {
+  color: var(--psu-gold);
+}
+
+/* ---------- 🦍 PSU Custom Branding Touch ---------- */
+.gold-divider {
+  height: 4px;
+  width: 80px;
+  background-color: var(--psu-gold);
+  margin: 1rem auto;
+  border-radius: 2px;
+}
+
+.hero-bg {
+  background-image: linear-gradient(rgba(153,0,0,0.8), rgba(0,0,0,0.7)),
+                    url('/static/images/psu_campus_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white;
 }
