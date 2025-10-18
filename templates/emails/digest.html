@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Your PittState-Connect Daily Digest</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fafafa; }
+    .card { max-width: 650px; margin: 40px auto; background: #fff; padding: 25px; border-radius: 10px; border: 2px solid #660000; }
+    h1 { color: #660000; }
+    h3 { margin-top: 20px; color: #333; }
+    .link { color: #660000; text-decoration: none; font-weight: bold; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Good Morning, {{ user.name }} 🦍</h1>
+    <p>Here’s your PittState-Connect Daily Digest — a quick look at new opportunities and updates.</p>
+
+    {% if posts %}
+      <h3>📣 New Posts</h3>
+      <ul>
+        {% for post in posts %}
+          <li><a class="link" href="{{ url_for('feed.post_detail', post_id=post.id, _external=True) }}">{{ post.title or post.content[:40] }}...</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No new posts today.</p>
+    {% endif %}
+
+    {% if events %}
+      <h3>🎟️ Upcoming Events</h3>
+      <ul>
+        {% for event in events %}
+          <li><a class="link" href="{{ url_for('events.event_detail', event_id=event.id, _external=True) }}">{{ event.title }}</a> — {{ event.start_date.strftime('%b %d') }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No new events scheduled today.</p>
+    {% endif %}
+
+    <hr>
+    <p style="font-size:12px; color:#777;">PittState-Connect • Building stronger Gorilla Networks™</p>
+  </div>
+</body>
+</html>
