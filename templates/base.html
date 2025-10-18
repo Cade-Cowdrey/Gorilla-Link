@@ -1,132 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}PittState-Connect · Gorilla-Link{% endblock %}</title>
-
-  <!-- 🧠 Tailwind (Render-Compatible CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- 🎨 PSU Theme -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu_logo.png') }}" />
-
-  {% block head %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/psu_logo.png') }}">
+  <script src="https://kit.fontawesome.com/a2e0b6a05b.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/psu-theme.css') }}" rel="stylesheet">
 </head>
 
-<body class="bg-gray-50 flex flex-col min-h-screen transition-colors duration-300">
+<body class="bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 flex flex-col min-h-screen">
 
-  <!-- 🔶 Scroll Progress Bar -->
-  <div id="scroll-progress"></div>
+  <!-- 🌟 Navbar -->
+  <nav class="bg-psu-crimson dark:bg-[#1a1a1a] text-white shadow-lg">
+    <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+      <a href="{{ url_for('core.home') }}" class="flex items-center space-x-2">
+        <img src="{{ url_for('static', filename='images/psu_logo.png') }}" alt="PSU Logo" class="h-10 w-10">
+        <span class="font-bold text-xl tracking-wide">PittState-Connect</span>
+      </a>
 
-  <!-- 🦍 PSU Navbar -->
-  <header class="bg-[#660000] text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-      <!-- Logo + Title -->
-      <div class="flex items-center gap-3">
-        <img src="{{ url_for('static', filename='img/psu_logo.png') }}" alt="PSU Logo" class="w-10 h-10" />
-        <a href="{{ url_for('core.home') }}" class="text-2xl font-bold tracking-tight text-[#FFD700] hover:text-yellow-300">
-          PittState-Connect
-        </a>
+      <!-- Desktop Links -->
+      <div class="hidden md:flex space-x-6 text-sm font-medium">
+        <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
+        <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a>
+        <a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a>
+        <a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a>
+        <a href="{{ url_for('core.about') }}" class="hover:text-psu-gold">About</a>
+        <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
       </div>
 
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex gap-6 text-sm font-semibold">
-        <a href="{{ url_for('feed.dashboard') }}" class="hover:text-[#FFD700] transition">Dashboard</a>
-        <a href="{{ url_for('alumni.details') }}" class="hover:text-[#FFD700] transition">Alumni</a>
-        <a href="{{ url_for('events.dashboard') }}" class="hover:text-[#FFD700] transition">Events</a>
-        <a href="{{ url_for('career.dashboard') }}" class="hover:text-[#FFD700] transition">Careers</a>
-        <a href="{{ url_for('auth.login') }}" class="hover:text-[#FFD700] transition">Login</a>
-      </nav>
-
-      <!-- Right Side Controls -->
-      <div class="flex items-center gap-3">
-        <!-- 🌙 Dark Mode Toggle -->
-        <button id="theme-toggle" class="text-[#FFD700] text-xl focus:outline-none hover:scale-110 transition-transform">
-          🌙
+      <!-- Right Controls -->
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all" title="Toggle dark mode">
+          <i class="fas fa-sun hidden dark:inline text-psu-gold"></i>
+          <i class="fas fa-moon inline dark:hidden"></i>
         </button>
-
-        <!-- 📱 Mobile Menu Button -->
-        <button id="mobile-menu-btn" class="md:hidden text-[#FFD700] focus:outline-none text-2xl">
-          ☰
+        <button id="menuBtn" class="md:hidden p-2 rounded bg-white/10 hover:bg-white/20">
+          <i class="fas fa-bars"></i>
         </button>
       </div>
     </div>
 
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden flex-col px-6 pb-4 space-y-2 bg-[#550000] text-sm">
-      <a href="{{ url_for('feed.dashboard') }}" class="block hover:text-[#FFD700]">Dashboard</a>
-      <a href="{{ url_for('alumni.details') }}" class="block hover:text-[#FFD700]">Alumni</a>
-      <a href="{{ url_for('events.dashboard') }}" class="block hover:text-[#FFD700]">Events</a>
-      <a href="{{ url_for('career.dashboard') }}" class="block hover:text-[#FFD700]">Careers</a>
-      <a href="{{ url_for('auth.login') }}" class="block hover:text-[#FFD700]">Login</a>
+    <div id="mobileMenu" class="hidden flex-col space-y-3 bg-[#2b2b2b] text-white px-6 py-4 md:hidden">
+      <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
+      <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a>
+      <a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a>
+      <a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a>
+      <a href="{{ url_for('core.about') }}" class="hover:text-psu-gold">About</a>
+      <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
     </div>
-  </header>
+  </nav>
 
-  <!-- 📄 Main Content -->
-  <main class="flex-grow fade-in">{% block content %}{% endblock %}</main>
+  <!-- 📄 Page Content -->
+  <main class="flex-grow">
+    {% block content %}{% endblock %}
+  </main>
 
-  <!-- 🦍 PSU Footer -->
-  <footer class="bg-[#660000] text-white py-8 mt-16">
-    <div class="max-w-6xl mx-auto text-center text-sm">
-      <p class="text-[#FFD700] font-semibold mb-2">Pittsburg State University · Gorilla-Link</p>
-      <p class="text-gray-300">
-        © {{ current_year|default(2025) }} PittState-Connect. All rights reserved.<br />
-        Built by PSU Students · Empowering Gorillas Everywhere 🦍
-      </p>
-      <div class="mt-4">
-        <a href="https://www.pittstate.edu" target="_blank" class="text-[#FFD700] hover:underline">
-          Visit Official PSU Website
-        </a>
+  <!-- ⚙️ Footer -->
+  <footer class="bg-psu-crimson dark:bg-[#111111] text-gray-100 py-10 mt-10 border-t border-psu-gold/20">
+    <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-6 md:space-y-0">
+      <!-- Left -->
+      <div>
+        <h3 class="font-bold text-xl text-psu-gold mb-2">PittState-Connect</h3>
+        <p class="text-sm text-gray-200">
+          Connecting students, alumni, and employers through innovation and Gorilla pride.
+        </p>
       </div>
+
+      <!-- Center Links -->
+      <div class="flex flex-wrap justify-center space-x-6 text-sm">
+        <a href="{{ url_for('core.privacy') }}" class="hover:text-psu-gold">Privacy Policy</a>
+        <a href="{{ url_for('core.terms') }}" class="hover:text-psu-gold">Terms of Service</a>
+        <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
+      </div>
+
+      <!-- Right Social Icons -->
+      <div class="flex space-x-4 text-lg text-psu-gold">
+        <a href="#" class="hover:text-yellow-400"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="hover:text-yellow-400"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="hover:text-yellow-400"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-gray-400 text-xs mt-8">
+      <p>© {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by Gorilla-Link</p>
     </div>
   </footer>
 
-  <!-- ⚙️ Scripts -->
+  <!-- 🔝 Scroll to Top -->
+  <button id="scrollTopBtn" class="fixed bottom-6 right-6 bg-psu-gold text-black p-3 rounded-full shadow-lg hover:bg-yellow-400 transition-all hidden">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- 🧠 Scripts -->
   <script>
-    /* ================================
-       🪄 Mobile Menu Toggle
-    ================================= */
-    const menuBtn = document.getElementById("mobile-menu-btn");
-    const menu = document.getElementById("mobile-menu");
-    menuBtn.addEventListener("click", () => {
-      menu.classList.toggle("hidden");
-    });
-
-    /* ================================
-       🌗 Dark Mode Toggle
-    ================================= */
-    const themeToggle = document.getElementById("theme-toggle");
-    const body = document.body;
-
-    // Load saved mode
-    if (localStorage.getItem("theme") === "dark") {
-      body.classList.add("dark");
-      themeToggle.textContent = "☀️";
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     }
 
-    themeToggle.addEventListener("click", () => {
-      body.classList.toggle("dark");
-      if (body.classList.contains("dark")) {
-        themeToggle.textContent = "☀️";
-        localStorage.setItem("theme", "dark");
-      } else {
-        themeToggle.textContent = "🌙";
-        localStorage.setItem("theme", "light");
-      }
+    // Dark mode toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle?.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme',
+        document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
 
-    /* ================================
-       🟨 Scroll Progress Bar
-    ================================= */
-    const scrollProgress = document.getElementById("scroll-progress");
-    window.addEventListener("scroll", () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.body.scrollHeight - window.innerHeight;
-      const scrollPercent = (scrollTop / docHeight) * 100;
-      scrollProgress.style.width = scrollPercent + "%";
+    // Scroll to top
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('hidden', window.scrollY < 400);
     });
+    scrollBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   </script>
 </body>
 </html>
