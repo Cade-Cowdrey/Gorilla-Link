@@ -1,140 +1,150 @@
-<!-- ==========================================================
-Gorilla-Link / Pitt State Connect
-templates/emails/welcome_email.html
-Branded Welcome Email for New Users
-========================================================== -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐾 Welcome to Gorilla-Link!</title>
+  <title>Welcome to PittState-Connect</title>
   <style>
+    /* === General Styling === */
     body {
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #f4f4f6;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 0;
-      color: #333;
+      background-color: #f5f5f5;
+      color: #222;
     }
-    .wrapper {
-      max-width: 700px;
-      margin: 2rem auto;
-      background: #fff;
-      border-radius: 14px;
+    a { color: #990000; text-decoration: none; }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid rgba(229,183,0,0.2);
     }
     .header {
-      background: #8b0000;
-      color: #fff;
+      background-color: #990000;
       text-align: center;
-      padding: 2.2rem 1rem;
+      padding: 25px;
+    }
+    .header img {
+      width: 80px;
+      height: auto;
     }
     .header h1 {
-      margin: 0;
-      font-size: 1.9rem;
+      color: #E5B700;
+      margin: 10px 0 0;
+      font-size: 24px;
+      font-weight: 700;
       letter-spacing: 0.5px;
     }
-    .header p {
-      margin-top: .5rem;
-      font-size: 1rem;
-      color: #ffe680;
-    }
     .content {
-      padding: 2rem;
-      line-height: 1.6;
+      padding: 30px;
+      text-align: left;
     }
     .content h2 {
-      color: #8b0000;
-      margin-bottom: .5rem;
+      color: #990000;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 15px;
     }
-    .button {
+    .content p {
+      color: #333;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .btn-start {
       display: inline-block;
-      background: #e0b300;
-      color: #8b0000;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 0.8rem 1.8rem;
-      border-radius: 8px;
-      margin: 1.5rem 0;
-      font-size: 1.1rem;
+      background-color: #E5B700;
+      color: #000;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px 24px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
     }
-    .button:hover {
-      background: #ffcc33;
-    }
-    .section {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: #fafafa;
-      border-radius: 8px;
-      border: 1px solid #eee;
+    .btn-start:hover {
+      background-color: #ffd633;
     }
     .footer {
-      background: #fafafa;
+      background-color: #fafafa;
       color: #555;
+      font-size: 13px;
       text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      border-top: 1px solid #eee;
+      padding: 20px;
+      border-top: 1px solid rgba(0,0,0,0.05);
     }
-    .footer a {
-      color: #8b0000;
-      text-decoration: none;
-      font-weight: bold;
+    .footer a { color: #990000; }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #0e0e0e; color: #f9f9f9; }
+      .email-container { background-color: #1a1a1a; color: #f9f9f9; }
+      .content p { color: #ddd; }
+      .footer { background-color: #111; color: #aaa; }
     }
   </style>
 </head>
+
 <body>
-  <div class="wrapper">
+  <div class="email-container">
+
+    <!-- HEADER -->
     <div class="header">
-      <h1>Welcome to Gorilla-Link!</h1>
-      <p>Pitt State Connect — Empowering Students & Alumni</p>
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png', _external=True) }}" alt="PSU Logo" />
+      <h1>PittState-Connect</h1>
     </div>
 
+    <!-- CONTENT -->
     <div class="content">
-      <h2>Hi {{ user.name }},</h2>
+      <h2>Welcome to the Gorilla Network!</h2>
+      <p>Hello {{ user.first_name if user else 'Gorilla' }},</p>
+
       <p>
-        Welcome to <strong>Gorilla-Link</strong> — the official Pitt State platform that connects
-        <strong>students, alumni, faculty, and employers</strong> in one place.
+        We’re excited to have you join the <strong>PittState-Connect</strong> community — where students, alumni, 
+        and faculty come together to collaborate, share opportunities, and grow the Gorilla family.
       </p>
 
-      <div class="section">
-        <h3>🎓 Explore Your Dashboard</h3>
-        <p>
-          Discover personalized resources, job postings, and mentorship opportunities that help you
-          grow your professional network and career.
-        </p>
-        <div style="text-align:center;">
-          <a href="https://gorillalink.com/dashboard" class="button">Open My Dashboard</a>
-        </div>
-      </div>
+      <p>
+        Here’s what you can do right away:
+      </p>
+      <ul style="margin-left:20px; color:#333; line-height:1.6;">
+        <li>🎓 Build your profile and showcase your experiences.</li>
+        <li>🤝 Connect with mentors, classmates, and alumni.</li>
+        <li>💼 Explore career and internship opportunities.</li>
+        <li>📅 Stay informed about campus events and workshops.</li>
+      </ul>
 
-      <div class="section">
-        <h3>💼 Career & Mentorship</h3>
-        <p>
-          Connect with experienced alumni, apply for internships, and take advantage of new job listings
-          across Pitt State’s extended community.
-        </p>
-      </div>
+      <p style="text-align:center; margin-top:30px;">
+        <a href="{{ url_for('core.home', _external=True) }}" class="btn-start" target="_blank">Go to PittState-Connect</a>
+      </p>
 
-      <div class="section">
-        <h3>🐾 Stay Updated</h3>
-        <p>
-          You’ll receive weekly digests about posts, job openings, and campus news — plus monthly analytics summaries if you’re part of a department or faculty team.
-        </p>
-      </div>
+      <p style="margin-top:30px;">
+        If you ever need help or have suggestions, we’d love to hear from you at 
+        <a href="mailto:support@pittstateconnect.com">support@pittstateconnect.com</a>.
+      </p>
 
-      <p style="margin-top:1.5rem;">
-        Thank you for joining the <strong>Pitt State Gorilla-Link Network</strong> — where opportunity meets connection.
+      <p style="margin-top:30px;">
+        Welcome aboard — and remember, once a Gorilla, always a Gorilla.  
+      </p>
+
+      <p>
+        With pride,<br>
+        <strong>The PittState-Connect Team</strong><br>
+        <span style="color:#990000;">Pittsburg State University</span>
       </p>
     </div>
 
+    <!-- FOOTER -->
     <div class="footer">
-      <p>🐾 <strong>Gorilla-Link</strong> | Pitt State Connect</p>
-      <p><a href="https://gorillalink.com">Visit Gorilla-Link</a></p>
+      <p>
+        You’re receiving this email because you created an account on
+        <a href="{{ url_for('core.home', _external=True) }}">PittState-Connect</a>.<br>
+        Need assistance? Contact <a href="mailto:support@pittstateconnect.com">support@pittstateconnect.com</a>.
+      </p>
+      <p>© {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by Gorilla-Link</p>
     </div>
+
   </div>
 </body>
 </html>
