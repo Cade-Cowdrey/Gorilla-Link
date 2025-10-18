@@ -1,0 +1,104 @@
+# ===============================
+# 🐍 PYTHON / FLASK
+# ===============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.tmp
+*.log
+*.sqlite3
+*.db
+*.pid
+*.seed
+*.cache
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
+*.old
+
+# Flask instance / temp data
+instance/
+.env
+.env.*
+*.env
+*.flaskenv
+
+# Virtual environments
+venv/
+.venv/
+env/
+.envrc
+*.egg-info/
+dist/
+build/
+
+# Alembic migration cache
+migrations/__pycache__/
+migrations/versions/__pycache__/
+migrations/versions/*.pyc
+
+# ===============================
+# ⚙️  FRONTEND / NODE
+# ===============================
+node_modules/
+nodes/
+*.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+*.tar
+*.zip
+*.gz
+*.bz2
+*.tgz
+*.7z
+
+# Prevent huge Node binaries
+nodes/**/bin/node
+
+# ===============================
+# 🧰  IDE & OS FILES
+# ===============================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# ===============================
+# 📦  RENDER DEPLOYMENT
+# ===============================
+.env.production
+.env.development
+.env.test
+*.bak
+*.tmp
+use-dev.sh
+use-prod.sh
+
+# ===============================
+# 🖼️  MEDIA (handled by Git LFS)
+# ===============================
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.pdf
+*.mp4
+*.mov
+
+# ===============================
+# 🧪  TESTS / MISC
+# ===============================
+coverage/
+pytest_cache/
+*.coverage
