@@ -1,9 +1,15 @@
+# ============================================================
+# 🦍 Gorilla-Link / PittState-Connect — Render Deployment Config
+# ============================================================
+
 services:
   - type: web
     name: gorilla-link
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: gunicorn src.app_pro:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.13
@@ -17,3 +23,36 @@ services:
         sync: false
       - key: ADMIN_TOKEN
         sync: false
+      - key: MAIL_SERVER
+        value: smtp.office365.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+    autoDeploy: true
+    branch: main
+
+# ============================================================
+# 🕒 Scheduled Tasks (CRON Jobs)
+# ============================================================
+cronJobs:
+  - name: weekly-digest
+    schedule: "0 9 * * FRI"
+    timezone: "America/Chicago"
+    command: "python -m tasks.weekly_digest_cron"
+
+  - name: daily-analytics-refresh
+    schedule: "0 1 * * *"
+    timezone: "America/Chicago"
+    command: "python -m tasks.refresh_analytics"
+
+# ============================================================
+# 📦 Notes:
+# - PSU-branded templates + CSS will now load correctly.
+# - The `src` prefix ensures Render locates your app.
+# - CRON jobs use your existing PSU email + analytics code.
+# ============================================================
