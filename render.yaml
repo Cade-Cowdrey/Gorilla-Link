@@ -1,0 +1,40 @@
+# ==========================================
+# 🦍 Gorilla-Link: Render Deployment Config
+# ==========================================
+
+services:
+  - type: web
+    name: gorilla-link
+    env: python
+    plan: free
+    autoDeploy: true
+
+    # 🏗️ Build and Start
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_pro:app
+
+    # 🌐 Environment Variables
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_TOKEN
+        sync: false
+
+    # 📁 Directories to ignore when caching builds
+    ignorePaths:
+      - nodes/
+      - python/
+      - .venv/
+      - __pycache__/
+      - *.pyc
+      - *.pyo
+      - *.log
+      - migrations/versions/__pycache__/
