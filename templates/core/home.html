@@ -3,7 +3,7 @@
 
 {% block content %}
 <!-- 🦍 PSU Hero Section -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center">
+<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
   <div class="max-w-5xl mx-auto">
     <img
       src="{{ url_for('static', filename='img/psu_logo.png') }}"
@@ -13,26 +13,27 @@
     <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
       Welcome to <span class="text-[#FFD700]">PittState-Connect</span>
     </h1>
-    <p class="text-lg max-w-3xl mx-auto text-gray-100">
-      The official networking hub for Pittsburg State University —
-      connecting students, alumni, faculty, and partners in one powerful community.
+    <p class="text-lg max-w-3xl mx-auto text-gray-100 mb-8">
+      The official networking hub for Pittsburg State University — connecting students,
+      alumni, faculty, and partners in one powerful community.
     </p>
-    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4 fade-in">
       <a
         href="{{ url_for('feed.dashboard') }}"
-        class="bg-[#FFD700] text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition"
+        class="psu-btn"
       >
         🎓 Student Dashboard
       </a>
       <a
         href="{{ url_for('alumni.details') }}"
-        class="border border-yellow-400 text-yellow-400 font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 hover:text-[#660000] transition"
+        class="btn-outline"
       >
         🦍 Alumni Network
       </a>
       <a
         href="{{ url_for('auth.register') }}"
-        class="bg-yellow-400 text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition"
+        class="psu-btn"
       >
         ✨ Join Now
       </a>
@@ -42,12 +43,13 @@
 
 <!-- 💼 PSU Feature Highlights -->
 <section class="py-20 bg-gray-50 text-gray-800">
-  <div class="max-w-6xl mx-auto text-center">
+  <div class="max-w-6xl mx-auto text-center fade-in">
     <h2 class="text-4xl font-bold mb-8 text-[#660000]">
       Empowering the Next Generation of Gorillas
     </h2>
     <div class="grid md:grid-cols-3 gap-8 px-6">
-      <div class="bg-white rounded-2xl shadow-md p-6">
+      <!-- Mentorship -->
+      <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-gorilla transition-all duration-300 fade-in">
         <img
           src="{{ url_for('static', filename='img/mentorship_icon.png') }}"
           alt="Mentorship"
@@ -59,7 +61,8 @@
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md p-6">
+      <!-- Opportunities -->
+      <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-gorilla transition-all duration-300 fade-in">
         <img
           src="{{ url_for('static', filename='img/opportunity_icon.png') }}"
           alt="Opportunities"
@@ -71,7 +74,8 @@
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md p-6">
+      <!-- Engagement -->
+      <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-gorilla transition-all duration-300 fade-in">
         <img
           src="{{ url_for('static', filename='img/engagement_icon.png') }}"
           alt="Engagement"
@@ -86,8 +90,33 @@
   </div>
 </section>
 
+<!-- 🧠 Success Section -->
+<section class="bg-white py-20 px-6 fade-in">
+  <div class="max-w-6xl mx-auto text-center">
+    <h2 class="text-4xl font-bold mb-6 text-[#660000]">Why Join PittState-Connect?</h2>
+    <div class="grid md:grid-cols-2 gap-10 mt-10 text-left">
+      <div class="card fade-in">
+        <h3 class="text-2xl font-semibold text-[#660000] mb-3">🎯 For Students</h3>
+        <ul class="list-disc ml-5 space-y-2 text-gray-700">
+          <li>Access mentorship from successful PSU alumni.</li>
+          <li>Find jobs, internships, and research opportunities.</li>
+          <li>Grow your professional network before graduation.</li>
+        </ul>
+      </div>
+      <div class="card fade-in">
+        <h3 class="text-2xl font-semibold text-[#660000] mb-3">🦍 For Alumni</h3>
+        <ul class="list-disc ml-5 space-y-2 text-gray-700">
+          <li>Mentor students and give back to the PSU community.</li>
+          <li>Post opportunities and hire talented Gorillas.</li>
+          <li>Stay engaged with events and PSU updates.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 🌟 PSU Call To Action -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center">
+<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
   <div class="max-w-4xl mx-auto">
     <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">Join the PSU Network</h2>
     <p class="text-gray-100 mb-8">
@@ -95,10 +124,39 @@
     </p>
     <a
       href="{{ url_for('auth.register') }}"
-      class="bg-[#FFD700] text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition"
+      class="psu-btn"
     >
       Create Your Account
     </a>
   </div>
 </section>
+
+<!-- ✨ Scroll Reveal Script -->
+<script>
+  const revealElements = document.querySelectorAll('.fade-in');
+
+  const revealOnScroll = () => {
+    const trigger = window.innerHeight * 0.9;
+    revealElements.forEach(el => {
+      const top = el.getBoundingClientRect().top;
+      if (top < trigger) el.classList.add('visible');
+    });
+  };
+
+  window.addEventListener('scroll', revealOnScroll);
+  window.addEventListener('load', revealOnScroll);
+</script>
+
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.7s ease-out;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
 {% endblock %}
