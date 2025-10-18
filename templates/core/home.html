@@ -2,6 +2,7 @@
 {% block title %}PittState Connect · Gorilla-Link{% endblock %}
 
 {% block content %}
+<!-- 🦍 PSU Hero Section -->
 <section class="bg-[#660000] text-white py-20 px-6 text-center">
   <div class="max-w-5xl mx-auto">
     <img
@@ -29,10 +30,17 @@
       >
         🦍 Alumni Network
       </a>
+      <a
+        href="{{ url_for('auth.register') }}"
+        class="bg-yellow-400 text-[#660000] font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition"
+      >
+        ✨ Join Now
+      </a>
     </div>
   </div>
 </section>
 
+<!-- 💼 PSU Feature Highlights -->
 <section class="py-20 bg-gray-50 text-gray-800">
   <div class="max-w-6xl mx-auto text-center">
     <h2 class="text-4xl font-bold mb-8 text-[#660000]">
@@ -78,6 +86,7 @@
   </div>
 </section>
 
+<!-- 🌟 PSU Call To Action -->
 <section class="bg-[#660000] text-white py-20 px-6 text-center">
   <div class="max-w-4xl mx-auto">
     <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">Join the PSU Network</h2>
