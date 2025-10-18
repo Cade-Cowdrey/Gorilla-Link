@@ -1,7 +1,7 @@
+{% include 'emails/partials/_header.txt' %}
+
 📣 Official PittState-Connect Announcement
 
 {{ message }}
 
-This message was sent to all active PittState-Connect users.
-
-© 2025 Pittsburg State University
+{% include 'emails/partials/_footer.txt' %}
