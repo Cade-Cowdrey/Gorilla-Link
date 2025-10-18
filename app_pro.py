@@ -1,105 +1,92 @@
-# ---------------------------------------------
-#  PittState-Connect / Gorilla-Link
-#  APP_PRO.PY — PSU Final (UI + API ready)
-# ---------------------------------------------
+# ============================================================
+# 🦍 Gorilla-Link / PittState-Connect
+# Production Flask App Entrypoint (Render-Ready)
+# ============================================================
+
 import os
-from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from flask_caching import Cache
-from flask_apscheduler import APScheduler
+from flask_mail import Mail
+from flask_cors import CORS
 from dotenv import load_dotenv
-from models import db, User
-from utils.mail_util import init_mail
 
+# ============================================================
+# 🔧 Environment setup
+# ============================================================
 load_dotenv()
 
-def create_app():
-    app = Flask(__name__)
+# Explicitly tell Flask where to find PSU-branded static + templates
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 
-    # Core config
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# ============================================================
+# ⚙️ Flask App Factory
+# ============================================================
+app = Flask(
+    __name__,
+    static_folder=STATIC_DIR,
+    template_folder=TEMPLATE_DIR
+)
 
-    # Mail
-    app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
-    app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
+# ============================================================
+# 🗄️ Configurations
+# ============================================================
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///data.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey")
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.office365.com")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME", "")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD", "")
 
-    # Cache (Redis)
-    app.config["CACHE_TYPE"] = "RedisCache"
-    app.config["CACHE_REDIS_URL"] = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# ============================================================
+# 🧩 Extensions
+# ============================================================
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+login_manager = LoginManager(app)
+mail = Mail(app)
+CORS(app)
 
-    # Extensions
-    db.init_app(app)
-    Migrate(app, db)
-    Cache(app)
-    scheduler = APScheduler()
-    scheduler.init_app(app)
-    scheduler.start()
-    init_mail(app)
-
-    # Login
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = "auth.login"
-    login_manager.login_message_category = "info"
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-
-    # Jinja global for now()
-    @app.context_processor
-    def inject_now():
-        return {"now": datetime.utcnow}
-
-    # Error handlers
-    @app.errorhandler(404)
-    def not_found(e):
-        return render_template("core/404.html"), 404
-
-    @app.errorhandler(500)
-    def internal_error(e):
-        db.session.rollback()
-        return render_template("core/500.html"), 500
-
-    # Auto-register blueprints (aligned to your repo)
+# ============================================================
+# 📦 Blueprint Auto-Loader
+# ============================================================
+def register_blueprints():
+    from pathlib import Path
     import importlib
-    blueprints = [
-        "auth", "admin", "core", "feed", "career", "analytics", "departments",
-        "campus", "alumni", "connections", "mentorship", "portfolio", "stories",
-        "opportunities", "map", "engagement", "profile", "badges", "events",
-        "notifications", "students", "api", "marketing", "digests", "groups"
-    ]
-    for bp_name in blueprints:
-        try:
-            module = importlib.import_module(f"blueprints.{bp_name}.routes")
-            blueprint = getattr(module, f"{bp_name}_bp", None)
-            if blueprint:
-                app.register_blueprint(blueprint)
-                print(f"✅ Loaded blueprint package: {bp_name}")
-            else:
-                print(f"⚠️  Skipped blueprint {bp_name}: missing {bp_name}_bp in routes.py")
-        except Exception as e:
-            print(f"⚠️  Skipped blueprint {bp_name}: {e}")
 
-    # Root route (+ optional maintenance)
-    @app.route("/")
-    def index():
-        if os.getenv("MAINTENANCE_MODE", "off").lower() == "on":
-            return render_template("core/maintenance.html"), 503
-        return render_template("core/home.html")
+    blueprints_path = Path(BASE_DIR) / "blueprints"
+    if not blueprints_path.exists():
+        print("⚠️  No blueprints directory found.")
+        return
 
-    return app
+    for module in blueprints_path.iterdir():
+        if module.is_dir() and (module / "__init__.py").exists():
+            try:
+                bp = importlib.import_module(f"blueprints.{module.name}")
+                if hasattr(bp, "bp"):
+                    app.register_blueprint(bp.bp)
+                    print(f"✅ Registered blueprint: {module.name}")
+            except Exception as e:
+                print(f"❌ Failed to register {module.name}: {e}")
 
-app = create_app()
+register_blueprints()
 
+# ============================================================
+# 👤 Login & Routes
+# ============================================================
+login_manager.login_view = "auth.login"
+
+@app.route("/")
+def index():
+    return "<h1>🦍 Gorilla-Link (PSU Branded Site)</h1><p>Flask app running successfully.</p>"
+
+# ============================================================
+# 🚀 App Export
+# ============================================================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000)
