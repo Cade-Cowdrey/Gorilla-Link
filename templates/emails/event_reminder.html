@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Event Reminder</title>
-  <style>
-    body { font-family: Verdana, sans-serif; background: #fdfdfd; }
-    .card { max-width: 600px; margin: 40px auto; background: #fff; padding: 25px; border-radius: 10px; border: 2px solid #FFCC00; }
-    h2 { color: #660000; }
-    .cta { background: #660000; color: #fff; padding: 10px 22px; text-decoration: none; border-radius: 5px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>Hi {{ user.name }}, don’t forget your event!</h2>
-    <p><strong>{{ event.title }}</strong><br>
-       {{ event.start_date.strftime('%b %d, %Y') }} @ {{ event.location }}</p>
-    <p style="text-align:center;">
-      <a class="cta" href="{{ url_for('events.event_detail', event_id=event.id, _external=True) }}">View Event Details</a>
-    </p>
-    <hr>
-    <p style="font-size:12px; color:#777;">Stay connected — PittState-Connect keeps you in the loop.</p>
-  </div>
-</body>
-</html>
+{% include 'emails/partials/_header.html' %}
+<div style="font-family:Verdana,sans-serif;background:#fff;padding:25px;border-radius:10px;margin:20px auto;max-width:600px;">
+  <h2 style="color:#660000;">Hi {{ user.name }}, don’t forget your event!</h2>
+  <p><strong>{{ event.title }}</strong><br>
+     {{ event.start_date.strftime('%b %d, %Y') }} @ {{ event.location }}</p>
+  <p style="text-align:center;">
+    <a href="{{ url_for('events.event_detail', event_id=event.id, _external=True) }}" style="background:#660000;color:#fff;padding:10px 22px;text-decoration:none;border-radius:5px;">View Event Details</a>
+  </p>
+</div>
+{% include 'emails/partials/_footer.html' %}
