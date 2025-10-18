@@ -1,0 +1,10 @@
+Welcome to PittState-Connect, {{ user.name }}!
+
+You're officially part of the PSU Gorilla Network — a community where Gorillas help Gorillas.
+
+Start exploring your dashboard, meet alumni, and discover new opportunities.
+
+Visit your dashboard:
+{{ url_for('core.home', _external=True) }}
+
+PittState-Connect © 2025 • Pittsburg State University
