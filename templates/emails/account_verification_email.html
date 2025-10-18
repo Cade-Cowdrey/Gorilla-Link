@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm Your Account | PittState-Connect</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #222;
+    }
+    a { color: #990000; text-decoration: none; }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid rgba(229,183,0,0.2);
+    }
+    .header {
+      background-color: #990000;
+      text-align: center;
+      padding: 25px;
+    }
+    .header img {
+      width: 80px;
+      height: auto;
+    }
+    .header h1 {
+      color: #E5B700;
+      margin: 10px 0 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .content {
+      padding: 30px;
+      text-align: left;
+    }
+    .content h2 {
+      color: #990000;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    .content p {
+      color: #333;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .btn-confirm {
+      display: inline-block;
+      background-color: #E5B700;
+      color: #000;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px 24px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .btn-confirm:hover {
+      background-color: #ffd633;
+    }
+    .footer {
+      background-color: #fafafa;
+      color: #555;
+      font-size: 13px;
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .footer a { color: #990000; }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #0e0e0e; color: #f9f9f9; }
+      .email-container { background-color: #1a1a1a; color: #f9f9f9; }
+      .content p { color: #ddd; }
+      .footer { background-color: #111; color: #aaa; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="email-container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png', _external=True) }}" alt="PSU Logo" />
+      <h1>PittState-Connect</h1>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>Confirm Your Email</h2>
+      <p>Hello {{ user.first_name if user else 'Gorilla' }},</p>
+
+      <p>
+        Thank you for registering with <strong>PittState-Connect</strong> — the official networking platform for 
+        students, alumni, and faculty at Pittsburg State University.
+      </p>
+
+      <p>
+        To activate your account, please confirm your email address by clicking the button below.  
+        This step ensures your account’s security and helps us keep our Gorilla community authentic.
+      </p>
+
+      <p style="text-align:center;">
+        <a href="{{ confirm_url }}" class="btn-confirm" target="_blank">Confirm My Account</a>
+      </p>
+
+      <p>
+        If you didn’t create this account, please ignore this message.  
+        The link will expire in 24 hours for your security.
+      </p>
+
+      <p style="margin-top:30px;">
+        With pride,<br>
+        <strong>The PittState-Connect Team</strong><br>
+        <span style="color:#990000;">Pittsburg State University</span>
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p>
+        You’re receiving this email because you signed up for an account on
+        <a href="{{ url_for('core.home', _external=True) }}">PittState-Connect</a>.<br>
+        Need help? Contact <a href="mailto:support@pittstateconnect.com">support@pittstateconnect.com</a>.
+      </p>
+      <p>© {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by Gorilla-Link</p>
+    </div>
+
+  </div>
+</body>
+</html>
