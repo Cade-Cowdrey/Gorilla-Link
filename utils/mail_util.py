@@ -1,103 +1,88 @@
+import os
 from flask_mail import Message
-from flask import render_template, url_for, current_app
+from flask import current_app, render_template
 from extensions import mail
-from datetime import datetime
 
-# ------------------------------------------------
-# PSU-BRANDED EMAIL UTILITIES
-# ------------------------------------------------
 
-def send_verification_email(user, token):
-    verify_url = url_for('auth.verify_email', token=token, _external=True)
-    html = render_template(
-        'emails/account_verification_email.html',
-        user=user,
-        verify_url=verify_url,
-        current_year=datetime.now().year
-    )
+# -------------------------------------------------
+# ✉️ GENERIC EMAIL SENDER
+# -------------------------------------------------
+def send_email(subject, recipients, html_body, text_body=None):
+    """
+    Core email utility for PittState-Connect.
+    Sends both HTML and plain text emails via Flask-Mail.
+    """
+    if not recipients:
+        current_app.logger.warning("No recipients specified for email.")
+        return
+
     msg = Message(
-        subject="Verify Your PittState-Connect Account 🦍",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
+        subject=f"📣 {subject} | PittState-Connect",
+        recipients=recipients,
+        sender=current_app.config.get("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.edu"),
     )
-    mail.send(msg)
+
+    msg.html = html_body
+    msg.body = text_body or "View this message in HTML format."
+
+    try:
+        mail.send(msg)
+        current_app.logger.info(f"✅ Email sent to {recipients}")
+    except Exception as e:
+        current_app.logger.error(f"❌ Failed to send email: {e}")
 
 
-def send_reset_password_email(user, token):
-    reset_url = url_for('auth.reset_password', token=token, _external=True)
-    html = render_template(
-        'emails/reset_password_email.html',
-        user=user,
-        reset_url=reset_url,
-        current_year=datetime.now().year
-    )
-    msg = Message(
-        subject="Reset Your Password | PittState-Connect",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
-    )
-    mail.send(msg)
+# -------------------------------------------------
+# 📨 WELCOME / CONFIRMATION EMAIL
+# -------------------------------------------------
+def send_welcome_email(user):
+    """Sends PSU-branded welcome / verification email."""
+    html_body = render_template("emails/welcome.html", user=user)
+    text_body = f"""
+Welcome to PittState-Connect, {user.name}!
+
+You're now part of the official PSU networking community — where Gorillas help Gorillas.
+Visit your dashboard: {os.getenv('APP_URL', 'https://pittstateconnect.onrender.com')}
+"""
+    send_email("Welcome to PittState-Connect!", [user.email], html_body, text_body)
 
 
-def send_reactivation_email(user, token):
-    reactivate_url = url_for('auth.reactivate_account', token=token, _external=True)
-    html = render_template(
-        'emails/reactivation_email.html',
-        user=user,
-        reactivate_url=reactivate_url,
-        current_year=datetime.now().year
-    )
-    msg = Message(
-        subject="Reactivate Your Account | PittState-Connect",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
-    )
-    mail.send(msg)
+# -------------------------------------------------
+# 🔐 PASSWORD RESET EMAIL
+# -------------------------------------------------
+def send_password_reset_email(user, token):
+    """Sends PSU-branded password reset email with secure link."""
+    reset_url = f"{os.getenv('APP_URL', 'https://pittstateconnect.onrender.com')}/reset-password/{token}"
+    html_body = render_template("emails/password_reset.html", user=user, reset_url=reset_url)
+    text_body = f"Reset your password by visiting: {reset_url}"
+    send_email("Password Reset Request", [user.email], html_body, text_body)
 
 
-def send_reactivated_email(user):
-    html = render_template(
-        'emails/reactivated_email.html',
-        user=user,
-        current_year=datetime.now().year
-    )
-    msg = Message(
-        subject="Welcome Back to PittState-Connect 🦍",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
-    )
-    mail.send(msg)
+# -------------------------------------------------
+# 🧾 ADMIN ANNOUNCEMENT EMAIL
+# -------------------------------------------------
+def send_admin_announcement(subject, message, recipients):
+    """Sends admin-level announcement to multiple users."""
+    html_body = render_template("emails/announcement.html", message=message)
+    text_body = message
+    send_email(subject, recipients, html_body, text_body)
 
 
-def send_account_deleted_email(user):
-    html = render_template(
-        'emails/account_deleted_email.html',
-        user=user,
-        current_year=datetime.now().year
-    )
-    msg = Message(
-        subject="Your PittState-Connect Account Has Been Deleted 🕊️",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
-    )
-    mail.send(msg)
+# -------------------------------------------------
+# 🗓️ EVENT REMINDER EMAIL
+# -------------------------------------------------
+def send_event_reminder(user, event):
+    """Sends upcoming event reminder email."""
+    html_body = render_template("emails/event_reminder.html", user=user, event=event)
+    text_body = f"Reminder: {event.title} at {event.location} on {event.start_date.strftime('%b %d, %Y')}."
+    send_email(f"Event Reminder: {event.title}", [user.email], html_body, text_body)
 
 
-def send_farewell_email(user):
-    html = render_template(
-        'emails/farewell_email.html',
-        user=user,
-        current_year=datetime.now().year
-    )
-    msg = Message(
-        subject="Farewell from PittState-Connect ❤️",
-        recipients=[user.email],
-        html=html,
-        sender="support@pittstateconnect.com"
-    )
-    mail.send(msg)
+# -------------------------------------------------
+# 📬 DAILY DIGEST (OPTIONAL)
+# -------------------------------------------------
+def send_daily_digest(user, posts, events):
+    """Sends PSU-branded daily digest email summarizing new posts and events."""
+    html_body = render_template("emails/digest.html", user=user, posts=posts, events=events)
+    text_body = f"View today's PittState-Connect digest at {os.getenv('APP_URL', 'https://pittstateconnect.onrender.com')}"
+    send_email("Your PittState-Connect Daily Digest", [user.email], html_body, text_body)
