@@ -34,7 +34,7 @@ def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
 
     # -----------------------------------------------------
-    # Configurations
+    # Configuration
     # -----------------------------------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
@@ -59,8 +59,8 @@ def create_app():
     cache.init_app(app)
     limiter.init_app(app)
     scheduler.init_app(app)
-    CORS(app)
     moment.init_app(app)
+    CORS(app)
 
     logging.basicConfig(level=logging.INFO)
     app.logger.info("✅ Extensions initialized successfully.")
@@ -73,7 +73,7 @@ def create_app():
         app.register_blueprint(core_bp, url_prefix="/")
         app.logger.info("✅ Loaded blueprint: core")
     except Exception as e:
-        app.logger.error(f"⚠️ Failed to load blueprint core: {e}")
+        app.logger.error(f"⚠️ Failed to load core blueprint: {e}")
 
     blueprint_modules = [
         "admin", "analytics", "alumni", "auth", "badges", "career", "campus",
@@ -92,7 +92,7 @@ def create_app():
             app.logger.warning(f"⚠️ Skipped blueprint {bp_name}: {e}")
 
     # -----------------------------------------------------
-    # Start Scheduler
+    # Scheduler
     # -----------------------------------------------------
     try:
         scheduler.start()
@@ -101,7 +101,7 @@ def create_app():
         app.logger.warning(f"⚠️ Scheduler start skipped: {e}")
 
     # -----------------------------------------------------
-    # Health Route
+    # Health Check
     # -----------------------------------------------------
     @app.route("/status")
     def status():
@@ -115,11 +115,13 @@ def create_app():
 
 
 # -----------------------------------------------------
-# Render Entry Point Fix
+# ✅ Global app variable for Gunicorn
 # -----------------------------------------------------
-# ✅ Gunicorn expects a global 'app' variable.
-app = create_app()  # critical for Render deployment
+app = create_app()  # 👈 THIS IS THE FIX
 
+# -----------------------------------------------------
+# Local Development Entry Point
+# -----------------------------------------------------
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
