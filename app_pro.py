@@ -1,101 +1,135 @@
+# ---------------------------------------------------------
+# 🦍 PittState-Connect / Gorilla-Link
+# Application Factory (Production Entrypoint)
+# ---------------------------------------------------------
 import os
-from flask import Flask, render_template, redirect, url_for
-from extensions import init_extensions, db
-from datetime import datetime
+from flask import Flask
+from extensions import db, mail, migrate, login_manager, cache
+from utils.mail_util import send_email
 
-# -------------------------------------------------
-# 🧩 BLUEPRINT IMPORTS
-# -------------------------------------------------
-from blueprints.core.routes import core
-from blueprints.feed.routes import feed
-from blueprints.careers.routes import careers
-from blueprints.alumni.routes import alumni
-from blueprints.profile.routes import profile
-from blueprints.badges.routes import badges
-from blueprints.notifications.routes import notifications
-from blueprints.events.routes import events
-from blueprints.auth.routes import auth
-from blueprints.analytics.routes import analytics
-from blueprints.admin.routes import admin
-
-
-# -------------------------------------------------
-# ⚙️ APP FACTORY
-# -------------------------------------------------
+# ---------------------------------------------------------
+# Factory Function
+# ---------------------------------------------------------
 def create_app():
-    """Creates and configures the Flask app for PittState-Connect (production)."""
-    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app = Flask(__name__)
 
-    # ---------------------------------------------
-    # 🔒 CONFIGURATION
-    # ---------------------------------------------
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///pittstate_connect.db")
+    # -----------------------------------------------------
+    # Configuration
+    # -----------------------------------------------------
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
 
-    # Mail (PSU branded)
-    app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+    # Mail Configuration
+    app.config["MAIL_SERVER"] = "smtp.gmail.com"
+    app.config["MAIL_PORT"] = 587
     app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME", "noreply@pittstateconnect.edu")
-    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD", "")
-    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.edu")
+    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+    app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
+        "MAIL_DEFAULT_SENDER", "no-reply@pittstateconnect.edu"
+    )
 
-    # CORS / JSON
-    app.config["JSON_SORT_KEYS"] = False
+    # -----------------------------------------------------
+    # Initialize Extensions
+    # -----------------------------------------------------
+    db.init_app(app)
+    migrate.init_app(app, db)
+    mail.init_app(app)
+    login_manager.init_app(app)
+    cache.init_app(app)
 
-    # Initialize extensions
-    init_extensions(app)
+    # -----------------------------------------------------
+    # Import Models (register for migrations)
+    # -----------------------------------------------------
+    from models import (
+        User,
+        Department,
+        Post,
+        Comment,
+        Event,
+        Notification,
+        Badge,
+        AuditLog,
+    )
 
-    # ---------------------------------------------
-    # 📦 BLUEPRINT REGISTRATION
-    # ---------------------------------------------
-    app.register_blueprint(core, url_prefix="/")
-    app.register_blueprint(feed, url_prefix="/")
-    app.register_blueprint(careers, url_prefix="/")
-    app.register_blueprint(alumni, url_prefix="/")
-    app.register_blueprint(profile, url_prefix="/")
-    app.register_blueprint(badges, url_prefix="/")
-    app.register_blueprint(notifications, url_prefix="/")
-    app.register_blueprint(events, url_prefix="/")
-    app.register_blueprint(auth, url_prefix="/")
-    app.register_blueprint(analytics, url_prefix="/")
-    app.register_blueprint(admin, url_prefix="/")
+    # -----------------------------------------------------
+    # Register Blueprints
+    # -----------------------------------------------------
+    from blueprints import (
+        admin,
+        alumni,
+        analytics,
+        auth,
+        badges,
+        campus,
+        career,
+        careers,
+        core,
+        departments,
+        digests,
+        engagement,
+        events,
+        feed,
+        groups,
+        map,
+        marketing,
+        mentorship,
+        notifications,
+        opportunities,
+        portfolio,
+        profile,
+        stories,
+        students,
+        connections,
+    )
 
-    # ---------------------------------------------
-    # 🧭 ERROR HANDLERS (PSU-BRANDED)
-    # ---------------------------------------------
-    @app.errorhandler(404)
-    def not_found_error(error):
-        return render_template("404.html"), 404
+    blueprints = [
+        admin,
+        alumni,
+        analytics,
+        auth,
+        badges,
+        campus,
+        career,
+        careers,
+        core,
+        departments,
+        digests,
+        engagement,
+        events,
+        feed,
+        groups,
+        map,
+        marketing,
+        mentorship,
+        notifications,
+        opportunities,
+        portfolio,
+        profile,
+        stories,
+        students,
+        connections,
+    ]
 
-    @app.errorhandler(500)
-    def internal_error(error):
-        db.session.rollback()
-        return render_template("500.html"), 500
+    for bp in blueprints:
+        try:
+            app.register_blueprint(bp.routes.__getattribute__(f"{bp.__name__}_bp"))
+            print(f"✅ Loaded blueprint package: {bp.__name__}")
+        except Exception as e:
+            print(f"⚠️  Skipped blueprint {bp.__name__}: {e}")
 
-    # ---------------------------------------------
-    # 🔗 DEFAULT ROUTE
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # Root Route
+    # -----------------------------------------------------
     @app.route("/")
-    def root_redirect():
-        """Redirect base domain to home."""
-        return redirect(url_for("core.home"))
-
-    # ---------------------------------------------
-    # ✅ HEALTH CHECK (Render)
-    # ---------------------------------------------
-    @app.route("/health")
-    def health_check():
-        return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+    def index():
+        return "<h2>🦍 PittState-Connect is running successfully on Render!</h2>"
 
     return app
 
 
-# -------------------------------------------------
-# 🚀 PRODUCTION ENTRYPOINT
-# -------------------------------------------------
-if __name__ == "__main__":
-    app = create_app()
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# ---------------------------------------------------------
+# Gunicorn Entrypoint
+# ---------------------------------------------------------
+app = create_app()
