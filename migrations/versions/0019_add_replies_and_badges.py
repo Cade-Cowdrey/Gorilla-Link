@@ -1,47 +1,42 @@
-"""Add replies and badges models"""
+"""Add reply_count to posts and quality-of-life fields to badges."""
 
 from alembic import op
 import sqlalchemy as sa
 
-# Revision identifiers
 revision = "0019_add_replies_and_badges"
-down_revision = "0018_add_replies_badges"
+down_revision = "0018_add_reply_model"
 branch_labels = None
 depends_on = None
 
 
+def _has_column(conn, table: str, column: str) -> bool:
+    insp = sa.inspect(conn)
+    cols = [c["name"] for c in insp.get_columns(table)] if table in insp.get_table_names() else []
+    return column in cols
+
+
 def upgrade():
-    op.create_table(
-        "replies",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id")),
-        sa.Column("post_id", sa.Integer(), sa.ForeignKey("posts.id")),
-        sa.Column("message_id", sa.Integer(), sa.ForeignKey("messages.id")),
-        sa.Column("parent_id", sa.Integer(), sa.ForeignKey("replies.id")),
-        sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("timestamp", sa.DateTime(), nullable=False),
-    )
+    bind = op.get_bind()
 
-    op.create_table(
-        "career_badges",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("name", sa.String(length=120), nullable=False),
-        sa.Column("description", sa.Text()),
-        sa.Column("icon", sa.String(length=255)),
-        sa.Column("category", sa.String(length=120)),
-        sa.Column("created_at", sa.DateTime()),
-    )
+    if "posts" in sa.inspect(bind).get_table_names() and not _has_column(bind, "posts", "reply_count"):
+        op.add_column("posts", sa.Column("reply_count", sa.Integer, server_default="0", nullable=False))
 
-    op.create_table(
-        "user_badges",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id")),
-        sa.Column("badge_id", sa.Integer(), sa.ForeignKey("career_badges.id")),
-        sa.Column("earned_at", sa.DateTime()),
-    )
+    # badges.slug (+ unique) and badges.is_active (if missing)
+    if "badges" in sa.inspect(bind).get_table_names():
+        if not _has_column(bind, "badges", "slug"):
+            op.add_column("badges", sa.Column("slug", sa.String(120), unique=True))
+        if not _has_column(bind, "badges", "is_active"):
+            op.add_column("badges", sa.Column("is_active", sa.Boolean, server_default=sa.text("true")))
 
 
 def downgrade():
-    op.drop_table("user_badges")
-    op.drop_table("career_badges")
-    op.drop_table("replies")
+    bind = op.get_bind()
+
+    if "posts" in sa.inspect(bind).get_table_names() and _has_column(bind, "posts", "reply_count"):
+        op.drop_column("posts", "reply_count")
+
+    if "badges" in sa.inspect(bind).get_table_names():
+        if _has_column(bind, "badges", "is_active"):
+            op.drop_column("badges", "is_active")
+        if _has_column(bind, "badges", "slug"):
+            op.drop_column("badges", "slug")
