@@ -43,13 +43,15 @@ def create_app():
     app.config["MAIL_USE_TLS"] = True
     app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
     app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstate-connect.com")
+    app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
+        "MAIL_DEFAULT_SENDER", "no-reply@pittstate-connect.com"
+    )
 
     # --- Logging ---
     logging.basicConfig(level=logging.INFO)
     app.logger.setLevel(logging.INFO)
 
-    # --- Extensions ---
+    # --- Initialize Extensions ---
     CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
@@ -58,14 +60,34 @@ def create_app():
     cache.init_app(app)
     limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
     moment.init_app(app)
-
     scheduler.api_enabled = True
     scheduler.init_app(app)
     scheduler.start()
     app.logger.info("✅ Scheduler started successfully.")
 
-    # --- Blueprint Auto-Loader ---
+    # ---------------------------------------------------------
+    # 🧍 Flask-Login Setup
+    # ---------------------------------------------------------
+    from models import User  # ✅ make sure your User model exists in models.py
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Flask-Login user loader: loads user by ID."""
+        try:
+            return User.query.get(int(user_id))
+        except Exception as e:
+            app.logger.warning(f"⚠️ Failed to load user {user_id}: {e}")
+            return None
+
+    login_manager.login_view = "auth.login"
+    login_manager.login_message_category = "info"
+    app.logger.info("✅ Flask-Login user_loader registered successfully.")
+
+    # ---------------------------------------------------------
+    # 🧠 Auto-Load All Blueprints
+    # ---------------------------------------------------------
     from importlib import import_module
+
     blueprints = [
         "core", "admin", "analytics", "alumni", "auth", "badges", "career", "campus",
         "connections", "departments", "digests", "engagement", "events", "feed", "groups",
@@ -87,20 +109,14 @@ def create_app():
         except Exception as e:
             app.logger.warning(f"⚠️ Skipped blueprint {bp_name}: {e}")
 
-    app.logger.info("✅ All blueprints processed successfully.")
-
-    # --- Flask-Login defaults ---
-    login_manager.login_view = "auth.login"
-    login_manager.login_message_category = "info"
-
-    # --- Flask-Moment (for dynamic time support) ---
-    app.logger.info("✅ Flask-Moment initialized successfully.")
-
-    # --- Routes health check ---
+    # ---------------------------------------------------------
+    # 🧾 Health Check
+    # ---------------------------------------------------------
     @app.route("/health")
     def health():
         return "✅ PittState-Connect running", 200
 
+    app.logger.info("✅ Flask-Moment initialized successfully.")
     return app
 
 
