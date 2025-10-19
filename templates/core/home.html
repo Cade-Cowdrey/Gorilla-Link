@@ -10,12 +10,11 @@
     <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
          alt="Pitt State Logo" 
          class="mx-auto mb-6 w-24 md:w-32 drop-shadow-lg">
-
     <h1 class="text-4xl md:text-6xl font-bold text-psu-gold mb-4">
       Welcome to PittState-Connect
     </h1>
     <p class="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
-      Empowering <span class="text-psu-gold font-semibold">Gorillas</span> to connect, collaborate, 
+      Empowering <span class="text-psu-gold font-semibold">Gorillas</span> to connect, collaborate,
       and create lifelong opportunities — bridging students, alumni, and the community.
     </p>
 
@@ -33,8 +32,8 @@
   <h2 class="section-title">Our Mission</h2>
   <div class="gold-divider"></div>
   <p class="max-w-3xl mx-auto text-gray-700 dark:text-gray-300 mt-4 text-lg">
-    PittState-Connect is built by Gorillas, for Gorillas. Our mission is to strengthen the connection 
-    between students, alumni, and faculty by creating an ecosystem of mentorship, networking, 
+    PittState-Connect is built by Gorillas, for Gorillas. Our mission is to strengthen the connection
+    between students, alumni, and faculty by creating an ecosystem of mentorship, networking,
     and opportunity sharing — all centered on Pittsburg State University’s legacy of excellence.
   </p>
 </section>
@@ -94,7 +93,7 @@
 <section class="section bg-psu-crimson text-center text-white fade-in">
   <h2 class="text-3xl md:text-4xl font-bold mb-4 text-psu-gold">Join the Gorilla Network Today</h2>
   <p class="max-w-2xl mx-auto text-gray-200 mb-8">
-    Be part of the movement that connects generations of PSU Gorillas — empowering success, mentorship, 
+    Be part of the movement that connects generations of PSU Gorillas — empowering success, mentorship,
     and lifelong friendships through PittState-Connect.
   </p>
   <a href="{{ url_for('auth.register') if has_register else url_for('core.contact') }}"
