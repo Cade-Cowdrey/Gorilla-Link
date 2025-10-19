@@ -1,14 +1,10 @@
-"""Seed demo notifications (likes, comments, connections)
-
-Revision ID: 0008_seed_notifications
-Revises: 0007_seed_events
-Create Date: 2025-10-14
-"""
-
+"""Seed PSU notifications"""
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.orm import Session
 from datetime import datetime
 
+# Revision identifiers, used by Alembic.
 revision = "0008_seed_notifications"
 down_revision = "0007_seed_events"
 branch_labels = None
@@ -16,68 +12,68 @@ depends_on = None
 
 
 def upgrade():
-    connection = op.get_bind()
-    now = datetime.utcnow()
+    bind = op.get_bind()
+    session = Session(bind=bind)
 
-    user_map = {
-        row["email"]: row["id"]
-        for row in connection.execute(sa.text("SELECT id, email FROM users"))
-    }
+    notifications_table = sa.table(
+        "notifications",
+        sa.column("user_id", sa.Integer),
+        sa.column("message", sa.String),
+        sa.column("link", sa.String),
+        sa.column("timestamp", sa.DateTime),
+        sa.column("is_read", sa.Boolean),
+    )
 
-    post_map = {
-        row["title"]: row["id"]
-        for row in connection.execute(sa.text("SELECT id, title FROM posts"))
-    }
-
-    notifications = [
-        # Likes
+    existing_msgs = [r[0] for r in session.execute(sa.text("SELECT message FROM notifications")).all()]
+    new_notifications = [
         {
-            "user_email": "sarah.thompson@alumni.pittstate.edu",
-            "message": "liked your post 'Looking for summer internship advice!'",
-            "link": f"/posts/{post_map.get('Looking for summer internship advice!')}",
-            "recipient_email": "cvandenberg@pittstate.edu",
+            "user_id": 1,
+            "message": "🎉 Welcome to PittState-Connect! Start exploring your new dashboard.",
+            "link": "/feed",
+            "timestamp": datetime.utcnow(),
+            "is_read": False,
         },
         {
-            "user_email": "hdavis@alumni.pittstate.edu",
-            "message": "liked your post 'Networking with healthcare alumni'",
-            "link": f"/posts/{post_map.get('Networking with healthcare alumni')}",
-            "recipient_email": "abrooks@pittstate.edu",
+            "user_id": 2,
+            "message": "🏫 The Faculty Innovation Summit is next week — RSVP now!",
+            "link": "/events",
+            "timestamp": datetime.utcnow(),
+            "is_read": False,
         },
-        # Comments
         {
-            "user_email": "mrodriguez@alumni.pittstate.edu",
-            "message": "commented on your post 'Accounting internship openings?'",
-            "link": f"/posts/{post_map.get('Accounting internship openings?')}",
-            "recipient_email": "jcarter@pittstate.edu",
+            "user_id": 3,
+            "message": "💼 Career & Internship Fair opens soon! Update your profile for recruiters.",
+            "link": "/careers",
+            "timestamp": datetime.utcnow(),
+            "is_read": False,
         },
-        # Connections
         {
-            "user_email": "sarah.thompson@alumni.pittstate.edu",
-            "message": "accepted your connection request",
-            "link": "/connections",
-            "recipient_email": "cvandenberg@pittstate.edu",
+            "user_id": 4,
+            "message": "🏅 You earned the ‘Gorilla Pride’ badge for campus involvement!",
+            "link": "/badges/dashboard",
+            "timestamp": datetime.utcnow(),
+            "is_read": False,
+        },
+        {
+            "user_id": 5,
+            "message": "🦍 Your weekly digest is ready. Stay connected with PSU updates!",
+            "link": "/notifications",
+            "timestamp": datetime.utcnow(),
+            "is_read": False,
         },
     ]
 
-    for note in notifications:
-        if user_map.get(note["user_email"]) and user_map.get(note["recipient_email"]):
-            connection.execute(
-                sa.text(
-                    """
-                    INSERT INTO notifications (sender_id, recipient_id, message, link, created_at, is_read)
-                    VALUES (:sender_id, :recipient_id, :message, :link, :created_at, false);
-                    """
-                ),
-                {
-                    "sender_id": user_map[note["user_email"]],
-                    "recipient_id": user_map[note["recipient_email"]],
-                    "message": note["message"],
-                    "link": note["link"],
-                    "created_at": now,
-                },
-            )
+    for n in new_notifications:
+        if n["message"] not in existing_msgs:
+            session.execute(notifications_table.insert().values(**n))
+
+    session.commit()
+    print("✅ Seeded PSU demo notifications successfully.")
 
 
 def downgrade():
-    connection = op.get_bind()
-    connection.execute(sa.text("DELETE FROM notifications;"))
+    bind = op.get_bind()
+    session = Session(bind=bind)
+    session.execute(sa.text("DELETE FROM notifications WHERE message LIKE '🎉 Welcome to PittState%' OR message LIKE '🏫 The Faculty%' OR message LIKE '💼 Career%' OR message LIKE '🏅 You earned%' OR message LIKE '🦍 Your weekly digest%';"))
+    session.commit()
+    print("🧹 Removed PSU demo notifications.")
