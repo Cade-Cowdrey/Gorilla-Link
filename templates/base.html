@@ -1,102 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}PittState-Connect{% endblock %}</title>
-  <link rel="icon" href="{{ url_for('static', filename='images/psu_logo_large.png') }}">
-  <meta name="description" content="PittState-Connect | Official networking platform for Pittsburg State University students, alumni, and faculty.">
-  
-  <!-- Tailwind CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}PittState-Connect{% endblock %}</title>
 
-  <!-- Font Awesome for icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='images/psu_logo_small.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
 
-  <!-- Custom PSU Theme -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+    <!-- Tailwind CDN for fallback -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/7c8b5f4a5b.js" crossorigin="anonymous"></script>
 
-  <!-- Smooth fade-in animation -->
-  <style>
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-    .fade-in { animation: fadeIn 0.8s ease-in-out both; }
-    @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
-    .section { padding: 6rem 1.5rem; }
-    .section-title { font-size: 2rem; font-weight: 700; color: #750014; }
-    .gold-divider { width: 60px; height: 4px; background: #FFD700; margin: 1rem auto; border-radius: 2px; }
-    .btn-primary { background-color: #FFD700; color: #000; font-weight: 600; border-radius: 0.5rem; }
-    .btn-primary:hover { background-color: #e6c200; }
-    .btn-outline { border: 2px solid #FFD700; color: #FFD700; font-weight: 600; border-radius: 0.5rem; }
-    .btn-outline:hover { background-color: #FFD700; color: #000; }
-  </style>
+    <!-- Include Flask-Moment for dynamic year/time -->
+    {{ moment.include_moment() }}
+  </head>
 
-  {% block head %}{% endblock %}
-</head>
+  <body class="bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans flex flex-col min-h-screen">
+    <!-- NAVBAR -->
+    <header class="bg-psu-crimson text-white shadow-lg">
+      <nav class="container mx-auto flex justify-between items-center py-4 px-6">
+        <div class="flex items-center gap-3">
+          <img src="{{ url_for('static', filename='images/psu_logo_small.png') }}" alt="PSU Logo" class="w-8 h-8" />
+          <a href="{{ url_for('core.home') }}" class="font-bold text-lg tracking-wide">PittState-Connect</a>
+        </div>
+        <ul class="hidden md:flex gap-6 text-sm font-medium">
+          <li><a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a></li>
+          <li><a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a></li>
+          <li><a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a></li>
+          <li><a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a></li>
+          <li><a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
 
-<body class="bg-white text-gray-900 dark:bg-[#0a0a0a] dark:text-gray-100 flex flex-col min-h-screen">
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow">
+      {% block content %}{% endblock %}
+    </main>
 
-  <!-- 🌐 NAVBAR -->
-  <header class="bg-psu-crimson text-white shadow-md fixed top-0 w-full z-50">
-    <nav class="container mx-auto flex justify-between items-center px-6 py-3">
-      <div class="flex items-center space-x-3">
-        <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" alt="PSU Logo" class="w-10 h-10">
-        <a href="{{ url_for('core.home') }}" class="text-xl font-semibold text-white hover:text-psu-gold transition">PittState-Connect</a>
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-300 text-center py-8 mt-12">
+      <div class="container mx-auto px-6">
+        <p class="text-lg font-semibold text-psu-gold mb-2">Pittsburg State University</p>
+        <p class="text-sm text-gray-400 mb-4">Connecting Gorillas for a lifetime of success.</p>
+        <p class="text-sm text-gray-300">
+          © {{ moment().format("YYYY") }} Pittsburg State University — PittState-Connect. All rights reserved.
+        </p>
       </div>
-      <ul class="hidden md:flex space-x-6 text-sm font-medium">
-        <li><a href="{{ url_for('core.home') }}" class="hover:text-psu-gold transition">Home</a></li>
-        <li><a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold transition">Careers</a></li>
-        <li><a href="{{ url_for('core.events') }}" class="hover:text-psu-gold transition">Events</a></li>
-        <li><a href="{{ url_for('core.team') }}" class="hover:text-psu-gold transition">Team</a></li>
-        <li><a href="{{ url_for('core.status') }}" class="hover:text-psu-gold transition">Status</a></li>
-      </ul>
-      <div class="flex items-center space-x-3">
-        <!-- Dark mode toggle -->
-        <button id="themeToggle" class="text-white hover:text-psu-gold text-lg">
-          <i id="themeIcon" class="fas fa-moon"></i>
-        </button>
-      </div>
-    </nav>
-  </header>
+    </footer>
 
-  <!-- Add top spacing for fixed nav -->
-  <div class="pt-20"></div>
-
-  <!-- 🧱 MAIN CONTENT -->
-  <main class="flex-1">
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- ⚙️ FOOTER -->
-  <footer class="bg-psu-crimson text-gray-200 py-8 mt-12">
-    <div class="container mx-auto text-center space-y-3">
-      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" alt="PSU Logo" class="mx-auto w-12 h-12 mb-2 opacity-90">
-      <p class="text-sm text-gray-300">© {{ now().year }} Pittsburg State University — PittState-Connect. All rights reserved.</p>
-      <p class="text-sm">
-        <a href="https://www.pittstate.edu" class="text-psu-gold hover:underline" target="_blank">Official PSU Website</a>
-      </p>
-    </div>
-  </footer>
-
-  <!-- 🌗 DARK MODE SCRIPT -->
-  <script>
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-
-    if (localStorage.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      themeIcon.classList.replace('fa-moon', 'fa-sun');
-    }
-
-    themeToggle.addEventListener('click', () => {
-      const html = document.documentElement;
-      html.classList.toggle('dark');
-      const darkMode = html.classList.contains('dark');
-      localStorage.theme = darkMode ? 'dark' : 'light';
-      themeIcon.classList.toggle('fa-moon', !darkMode);
-      themeIcon.classList.toggle('fa-sun', darkMode);
-    });
-  </script>
-
-</body>
+    <!-- Dark Mode Toggle -->
+    <script>
+      const toggle = document.createElement("button");
+      toggle.innerText = "🌞/🌙";
+      toggle.className =
+        "fixed bottom-5 right-5 bg-psu-gold text-black rounded-full px-4 py-2 shadow-lg hover:bg-yellow-400 transition";
+      toggle.onclick = () => {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          document.documentElement.classList.contains("dark") ? "dark" : "light"
+        );
+      };
+      document.body.appendChild(toggle);
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+  </body>
 </html>
