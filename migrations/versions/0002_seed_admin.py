@@ -1,42 +1,48 @@
-"""Seed default System Admin account"""
+"""Seed initial admin role and account."""
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.sql import table, column
+from datetime import datetime
 from werkzeug.security import generate_password_hash
 
-
-# Revision identifiers
-revision = '0002_seed_admin'
-down_revision = '0001_initial_full'
+revision = "0002_seed_admin"
+down_revision = "0001_initial_full"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    # Define a lightweight users table reference (to insert data)
-    users = table(
-        'users',
-        column('name', sa.String),
-        column('email', sa.String),
-        column('password_hash', sa.String),
-        column('role', sa.String)
+    bind = op.get_bind()
+
+    roles = [
+        ("Admin", "System administrator with full access."),
+        ("Faculty", "PSU faculty member."),
+        ("Student", "Current student."),
+        ("Alumni", "Pitt State alumnus/alumna."),
+    ]
+
+    for name, desc in roles:
+        bind.execute(
+            sa.text("INSERT INTO roles (name, description, created_at) VALUES (:n, :d, :c)"),
+            {"n": name, "d": desc, "c": datetime.utcnow()},
+        )
+
+    admin_email = "admin@pittstate-connect.edu"
+    password_hash = generate_password_hash("gorillalink2025")
+
+    bind.execute(
+        sa.text(
+            """
+            INSERT INTO users (first_name, last_name, email, password_hash, role_id, is_active, created_at)
+            VALUES ('System', 'Admin', :e, :p, 
+                (SELECT id FROM roles WHERE name='Admin'), true, :c)
+            """
+        ),
+        {"e": admin_email, "p": password_hash, "c": datetime.utcnow()},
     )
-
-    # Pre-hash the default password using Werkzeug
-    password_hash = generate_password_hash("Admin123!")
-
-    op.bulk_insert(users, [
-        {
-            'name': 'System Admin',
-            'email': 'admin@pittstate.edu',
-            'password_hash': password_hash,
-            'role': 'admin'
-        }
-    ])
 
 
 def downgrade():
-    # Remove admin user if rolling back
-    conn = op.get_bind()
-    conn.execute(sa.text("DELETE FROM users WHERE email='admin@pittstate.edu'"))
+    bind = op.get_bind()
+    bind.execute(sa.text("DELETE FROM users WHERE email='admin@pittstate-connect.edu'"))
+    bind.execute(sa.text("DELETE FROM roles"))
