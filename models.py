@@ -59,6 +59,22 @@ class Post(db.Model):
     user = db.relationship("User", backref="posts")
 
 
+# ---------- Events ----------
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.String(150))
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime)
+    organizer_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    department_id = db.Column(db.Integer, db.ForeignKey("department.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    organizer = db.relationship("User", backref="events_created")
+    department = db.relationship("Department", backref="events")
+
+
 # ---------- Mentorship ----------
 class Mentorship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
