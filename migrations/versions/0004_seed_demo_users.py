@@ -1,59 +1,52 @@
-"""Seed demo departments, users, and analytics"""
-from datetime import datetime
+"""Seed demo users for testing (students, faculty, alumni)."""
+
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.orm import Session
-from app_pro import db
-from models import Department, User, UserAnalytics
-import random
+from datetime import datetime
+from werkzeug.security import generate_password_hash
 
-# revision identifiers
-revision = '0004_seed_demo_users'
-down_revision = '0003_seed_departments'
+revision = "0004_seed_demo_users"
+down_revision = "0003_seed_departments"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
     bind = op.get_bind()
-    session = Session(bind=bind)
-
-    departments = [
-        Department(name="Computer Science & Technology", description="Tech-driven innovation."),
-        Department(name="Education", description="Preparing future teachers."),
-        Department(name="Business & Entrepreneurship", description="Leaders in business."),
-        Department(name="Nursing", description="Healthcare professionals."),
-    ]
-    session.add_all(departments)
-    session.commit()
 
     users = [
-        User(name="Cade Cowdrey", email="ccowdrey@pittstate.edu", role="Admin", department=departments[0]),
-        User(name="Emily Johnson", email="ejohnson@pittstate.edu", role="Student", department=departments[0]),
-        User(name="Jacob Miller", email="jmiller@pittstate.edu", role="Student", department=departments[2]),
-        User(name="Sarah Brown", email="sbrown@pittstate.edu", role="Alumni", department=departments[1]),
-        User(name="Dr. Alan White", email="awhite@pittstate.edu", role="Faculty", department=departments[3]),
+        ("Cade", "Cowdrey", "cade.cowdrey@pittstate.edu", "Student", "Department of Computer Science"),
+        ("Emily", "Thompson", "emily.thompson@pittstate.edu", "Faculty", "College of Education"),
+        ("Jordan", "Reed", "jordan.reed@pittstatealumni.com", "Alumni", "Kelce College of Business"),
+        ("Taylor", "Nguyen", "taylor.nguyen@pittstate.edu", "Student", "College of Technology"),
     ]
 
-    for user in users:
-        analytics = UserAnalytics(
-            user=user,
-            profile_views=random.randint(20, 150),
-            connections_count=random.randint(1, 15),
-            engagement_score=round(random.uniform(1.0, 5.0), 2),
-            last_active=datetime.utcnow()
+    for first, last, email, role_name, dept_name in users:
+        password_hash = generate_password_hash("gorillalink2025")
+        bind.execute(
+            sa.text(
+                """
+                INSERT INTO users (first_name, last_name, email, password_hash, role_id, department_id, created_at)
+                VALUES (
+                    :f, :l, :e, :p,
+                    (SELECT id FROM roles WHERE name = :r),
+                    (SELECT id FROM departments WHERE name = :d),
+                    :c
+                )
+                """
+            ),
+            {
+                "f": first,
+                "l": last,
+                "e": email,
+                "p": password_hash,
+                "r": role_name,
+                "d": dept_name,
+                "c": datetime.utcnow(),
+            },
         )
-        session.add(user)
-        session.add(analytics)
-
-    session.commit()
-    print("✅ Seeded demo departments, users, and analytics successfully.")
 
 
 def downgrade():
     bind = op.get_bind()
-    session = Session(bind=bind)
-    session.query(UserAnalytics).delete()
-    session.query(User).delete()
-    session.query(Department).delete()
-    session.commit()
+    bind.execute(sa.text("DELETE FROM users WHERE email LIKE '%@pittstate%'"))
