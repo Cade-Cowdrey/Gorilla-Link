@@ -1,175 +1,127 @@
 {% extends "base.html" %}
-{% block title %}Events & Campus Life · PittState-Connect{% endblock %}
-
+{% block title %}Events | PittState-Connect{% endblock %}
 {% block content %}
-<!-- 🦍 Hero -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
-  <div class="max-w-5xl mx-auto">
-    <img
-      src="{{ url_for('static', filename='img/psu_logo.png') }}"
-      alt="PSU Logo"
-      class="mx-auto mb-6 w-28 h-auto"
-    />
-    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
-      PSU Events & Campus Life
+
+<!-- 🏫 HERO SECTION -->
+<section class="hero-bg relative flex flex-col justify-center items-center text-center py-28 px-6 md:px-12 fade-in">
+  <div class="bg-black/50 absolute inset-0"></div>
+  <div class="relative z-10 max-w-3xl">
+    <h1 class="text-4xl md:text-6xl font-bold text-psu-gold mb-4">
+      Upcoming Events
     </h1>
-    <p class="text-lg max-w-3xl mx-auto text-gray-100 leading-relaxed">
-      Stay connected with upcoming campus events, alumni mixers, workshops, and networking sessions
-      that bring the Gorilla community together.
+    <p class="text-lg md:text-xl text-gray-200 leading-relaxed">
+      Stay connected with <span class="text-psu-gold font-semibold">Pitt State</span> —  
+      explore upcoming networking events, alumni reunions, workshops, and career fairs 
+      that bring Gorillas together.
     </p>
   </div>
 </section>
 
-<!-- 📅 Featured Events -->
-<section class="py-20 bg-gray-50 text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto text-center">
-    <h2 class="text-4xl font-bold mb-10 text-[#660000]">Upcoming Events</h2>
+<!-- 📅 FEATURED EVENTS -->
+<section class="section bg-gray-50 dark:bg-[#121212] fade-in">
+  <h2 class="section-title">Featured Events</h2>
+  <div class="gold-divider"></div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
-      <div class="event-card">
-        <img
-          src="{{ url_for('static', filename='img/event_careerfair.png') }}"
-          alt="Career Fair"
-          class="rounded-t-2xl w-full h-48 object-cover"
-        />
-        <div class="p-6">
-          <h3 class="text-xl font-semibold text-[#660000]">Fall Career Fair 2025</h3>
-          <p class="text-sm text-gray-500 mb-3">📍 Bicknell Center — Oct 28, 2025</p>
-          <p class="text-gray-700 mb-4">
-            Meet recruiters, employers, and PSU alumni looking to hire top Gorilla talent.
-          </p>
-          <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">Learn More</a>
-        </div>
-      </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12 container mx-auto px-6">
+    <!-- Event Card 1 -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/events/alumni_reunion.jpg') }}" 
+           alt="Alumni Reunion" 
+           class="rounded-lg mb-4 w-full h-48 object-cover shadow-lg">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Annual Alumni Reunion</h3>
+      <p class="text-gray-500 dark:text-gray-300 text-sm mt-1">November 8, 2025 • PSU Ballroom</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Celebrate Gorilla pride and reconnect with alumni from every generation.  
+        Includes dinner, networking, and student showcases.
+      </p>
+      <a href="#" class="btn-primary mt-4 inline-block">Register</a>
+    </div>
 
-      <div class="event-card">
-        <img
-          src="{{ url_for('static', filename='img/event_alumni.png') }}"
-          alt="Alumni Mixer"
-          class="rounded-t-2xl w-full h-48 object-cover"
-        />
-        <div class="p-6">
-          <h3 class="text-xl font-semibold text-[#660000]">Alumni Networking Mixer</h3>
-          <p class="text-sm text-gray-500 mb-3">📍 Overman Student Center — Nov 10, 2025</p>
-          <p class="text-gray-700 mb-4">
-            Connect with PSU graduates and industry mentors during an evening of collaboration and inspiration.
-          </p>
-          <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">RSVP</a>
-        </div>
-      </div>
+    <!-- Event Card 2 -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/events/career_fair.jpg') }}" 
+           alt="Career Fair" 
+           class="rounded-lg mb-4 w-full h-48 object-cover shadow-lg">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">PSU Career & Internship Fair</h3>
+      <p class="text-gray-500 dark:text-gray-300 text-sm mt-1">October 25, 2025 • Bicknell Center</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Meet top employers, connect with alumni recruiters, and explore full-time, part-time, and internship opportunities.
+      </p>
+      <a href="#" class="btn-primary mt-4 inline-block">Learn More</a>
+    </div>
 
-      <div class="event-card">
-        <img
-          src="{{ url_for('static', filename='img/event_innovation.png') }}"
-          alt="Innovation Summit"
-          class="rounded-t-2xl w-full h-48 object-cover"
-        />
-        <div class="p-6">
-          <h3 class="text-xl font-semibold text-[#660000]">PSU Innovation Summit</h3>
-          <p class="text-sm text-gray-500 mb-3">📍 Kansas Technology Center — Dec 3, 2025</p>
-          <p class="text-gray-700 mb-4">
-            A showcase of student and alumni startups, AI projects, and emerging technologies built at PSU.
-          </p>
-          <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">View Agenda</a>
-        </div>
-      </div>
+    <!-- Event Card 3 -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/events/mentorship_mixer.jpg') }}" 
+           alt="Mentorship Mixer" 
+           class="rounded-lg mb-4 w-full h-48 object-cover shadow-lg">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Mentorship Mixer</h3>
+      <p class="text-gray-500 dark:text-gray-300 text-sm mt-1">December 2, 2025 • Kelce Hall</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        An evening designed to connect PSU students with alumni mentors and industry leaders.  
+        Light refreshments provided.
+      </p>
+      <a href="#" class="btn-primary mt-4 inline-block">RSVP</a>
     </div>
   </div>
 </section>
 
-<!-- 🗓️ Event Categories -->
-<section class="py-20 bg-white text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto text-center">
-    <h2 class="text-3xl font-bold mb-10 text-[#660000]">Event Categories</h2>
-    <div class="grid md:grid-cols-4 gap-8 px-6">
-      <div class="category-card">
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">🎓 Academic</h3>
-        <p>Workshops, research expos, and faculty-led lectures.</p>
-      </div>
-      <div class="category-card">
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">💼 Career</h3>
-        <p>Internship fairs, recruiter visits, and resume-building sessions.</p>
-      </div>
-      <div class="category-card">
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">🤝 Alumni</h3>
-        <p>Networking mixers, alumni panels, and mentoring meetups.</p>
-      </div>
-      <div class="category-card">
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">🏆 Campus Life</h3>
-        <p>Club events, social nights, and student organization spotlights.</p>
-      </div>
+<!-- 🗓️ CALENDAR GRID -->
+<section class="section bg-white dark:bg-[#0f0f0f] fade-in text-center">
+  <h2 class="section-title">Campus Calendar</h2>
+  <div class="gold-divider"></div>
+  <p class="max-w-3xl mx-auto text-gray-700 dark:text-gray-300 mt-4 text-lg">
+    Explore a variety of events happening across campus — from academic workshops to social gatherings.
+  </p>
+
+  <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-12 container mx-auto px-6">
+
+    <div class="card">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Entrepreneurship Workshop</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Oct 21, 2025 • Kelce Hall</p>
+      <p class="mt-2 text-gray-700 dark:text-gray-300 text-sm">
+        Learn how to pitch, network, and build your business idea with PSU alumni entrepreneurs.
+      </p>
     </div>
+
+    <div class="card">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Gorilla Gala Fundraiser</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Nov 10, 2025 • Overman Student Center</p>
+      <p class="mt-2 text-gray-700 dark:text-gray-300 text-sm">
+        Join PSU leaders, donors, and alumni for a night of celebration and impact.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Tech Career Meetup</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Nov 18, 2025 • Online</p>
+      <p class="mt-2 text-gray-700 dark:text-gray-300 text-sm">
+        A virtual meetup for PSU Computer Science students to connect with tech alumni and recruiters.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Gorilla Giving Day</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Dec 12, 2025 • Campuswide</p>
+      <p class="mt-2 text-gray-700 dark:text-gray-300 text-sm">
+        Join thousands of Gorillas giving back — every dollar supports scholarships and PSU initiatives.
+      </p>
+    </div>
+
   </div>
 </section>
 
-<!-- 🦍 Call to Action -->
-<section class="bg-[#660000] text-white py-20 text-center fade-in">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">Host or Promote an Event</h2>
-    <p class="text-gray-100 mb-8">
-      Are you organizing a PSU-related event, mixer, or student activity?  
-      Submit your details to have it featured on PittState-Connect.
-    </p>
-    <a href="{{ url_for('auth.register') }}" class="psu-btn">Submit an Event</a>
-  </div>
+<!-- 💛 CALL TO ACTION -->
+<section class="section bg-psu-crimson text-center text-white fade-in">
+  <h2 class="text-3xl md:text-4xl font-bold mb-4 text-psu-gold">Host or Share an Event</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Want to organize a Pitt State networking night, career event, or alumni meetup?  
+    Share your event and inspire more Gorilla connections.
+  </p>
+  <a href="{{ url_for('core.contact') if 'core.contact' in current_app.view_functions else url_for('core.status') }}" 
+     class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg shadow hover:bg-yellow-500 transition-all">
+     Submit Event
+  </a>
 </section>
 
-<!-- ✨ Scroll Reveal -->
-<script>
-  const fadeEls = document.querySelectorAll(".fade-in");
-  const reveal = () => {
-    const trigger = window.innerHeight * 0.9;
-    fadeEls.forEach((el) => {
-      const top = el.getBoundingClientRect().top;
-      if (top < trigger) el.classList.add("visible");
-    });
-  };
-  window.addEventListener("scroll", reveal);
-  window.addEventListener("load", reveal);
-</script>
-
-<style>
-  .fade-in {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: all 0.7s ease-out;
-  }
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .event-card {
-    background: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .event-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-  }
-  .category-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.75rem;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.12);
-  }
-  .psu-btn {
-    background: #FFD700;
-    color: #660000;
-    font-weight: 600;
-    border-radius: 9999px;
-    padding: 0.75rem 1.5rem;
-    transition: background 0.3s ease;
-  }
-  .psu-btn:hover {
-    background: #facc15;
-  }
-</style>
 {% endblock %}
