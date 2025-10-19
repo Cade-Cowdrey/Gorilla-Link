@@ -1,18 +1,9 @@
-"""add missing models for groups/stories/badges/achievements/feedback/audit/analytics/rsvps/dms
-
-Revision ID: 0014_add_missing_models
-Revises: 0013_init_core_models
-Create Date: 2025-10-16
-"""
+"""Add missing auxiliary models: badges, digests, audit logs, and meta info."""
 from alembic import op
 import sqlalchemy as sa
+from datetime import datetime
 
-try:
-    from sqlalchemy.dialects import postgresql
-    JSONB = postgresql.JSONB
-except Exception:
-    JSONB = sa.JSON
-
+# Revision identifiers
 revision = "0014_add_missing_models"
 down_revision = "0013_init_core_models"
 branch_labels = None
@@ -20,141 +11,112 @@ depends_on = None
 
 
 def upgrade():
-    # stories
+    # --- BADGES TABLE ---
     op.create_table(
-        "stories",
+        "badges",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("title", sa.String(180), nullable=False),
-        sa.Column("body", sa.Text()),
-        sa.Column("author_id", sa.Integer),
-        sa.Column("department_id", sa.Integer),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("published", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column("name", sa.String(100), nullable=False),
+        sa.Column("description", sa.Text),
+        sa.Column("icon", sa.String(255)),
+        sa.Column("category", sa.String(100), default="achievement"),
+        sa.Column("created_at", sa.DateTime, default=datetime.utcnow),
     )
-    op.create_index("ix_stories_title", "stories", ["title"])
-    op.create_index("ix_stories_published", "stories", ["published"])
-    op.create_index("ix_stories_created_at", "stories", ["created_at"])
 
-    # achievements & badges
-    op.create_table(
-        "achievements",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("code", sa.String(80), nullable=False),
-        sa.Column("title", sa.String(160), nullable=False),
-        sa.Column("description", sa.Text()),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-    )
-    op.create_index("ix_achievements_code", "achievements", ["code"], unique=True)
-
-    op.create_table(
-        "user_achievements",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("user_id", sa.Integer, nullable=False),
-        sa.Column("achievement_id", sa.Integer, nullable=False),
-        sa.Column("awarded_at", sa.DateTime(), nullable=False),
-        sa.UniqueConstraint("user_id", "achievement_id", name="uq_user_achievement"),
-    )
-    op.create_index("ix_user_achievements_user", "user_achievements", ["user_id"])
-    op.create_index("ix_user_achievements_ach", "user_achievements", ["achievement_id"])
-    op.create_index("ix_user_achievements_awarded_at", "user_achievements", ["awarded_at"])
-
-    op.create_table(
-        "career_badges",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("slug", sa.String(80), nullable=False),
-        sa.Column("label", sa.String(120), nullable=False),
-        sa.Column("description", sa.Text()),
-    )
-    op.create_index("ix_career_badges_slug", "career_badges", ["slug"], unique=True)
-
+    # --- USER BADGES TABLE ---
     op.create_table(
         "user_badges",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("user_id", sa.Integer, nullable=False),
-        sa.Column("badge_id", sa.Integer, nullable=False),
-        sa.Column("granted_at", sa.DateTime(), nullable=False),
+        sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("badge_id", sa.Integer, sa.ForeignKey("badges.id", ondelete="CASCADE")),
+        sa.Column("awarded_at", sa.DateTime, default=datetime.utcnow),
         sa.UniqueConstraint("user_id", "badge_id", name="uq_user_badge"),
     )
-    op.create_index("ix_user_badges_user", "user_badges", ["user_id"])
-    op.create_index("ix_user_badges_badge", "user_badges", ["badge_id"])
 
-    # event RSVPs
+    # --- DIGESTS TABLE ---
     op.create_table(
-        "event_attendees",
+        "digests",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("event_id", sa.Integer, nullable=False),
-        sa.Column("user_id", sa.Integer, nullable=False),
-        sa.Column("status", sa.String(20), nullable=False, server_default="going"),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.UniqueConstraint("event_id", "user_id", name="uq_event_user"),
+        sa.Column("title", sa.String(255), nullable=False),
+        sa.Column("content", sa.Text, nullable=False),
+        sa.Column("category", sa.String(100), default="general"),
+        sa.Column("published_at", sa.DateTime, default=datetime.utcnow),
+        sa.Column("author_id", sa.Integer, sa.ForeignKey("users.id", ondelete="SET NULL")),
     )
-    op.create_index("ix_event_attendees_event_status", "event_attendees", ["event_id", "status"])
 
-    # groups
+    # --- DIGEST LOGS (email sending logs) ---
     op.create_table(
-        "groups",
+        "digest_logs",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("name", sa.String(140), nullable=False),
-        sa.Column("description", sa.Text()),
-        sa.Column("created_by_id", sa.Integer),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("digest_id", sa.Integer, sa.ForeignKey("digests.id", ondelete="CASCADE")),
+        sa.Column("recipient_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("status", sa.String(50), default="sent"),
+        sa.Column("sent_at", sa.DateTime, default=datetime.utcnow),
     )
-    op.create_index("ix_groups_name", "groups", ["name"], unique=True)
-    op.create_index("ix_groups_created_at", "groups", ["created_at"])
 
+    # --- AUDIT LOGS TABLE ---
     op.create_table(
-        "group_members",
+        "audit_logs",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("group_id", sa.Integer, nullable=False),
-        sa.Column("user_id", sa.Integer, nullable=False),
-        sa.Column("role", sa.String(40), nullable=False, server_default="member"),
-        sa.Column("joined_at", sa.DateTime(), nullable=False),
-        sa.UniqueConstraint("group_id", "user_id", name="uq_group_user"),
+        sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="SET NULL")),
+        sa.Column("action", sa.String(255), nullable=False),
+        sa.Column("target_table", sa.String(100)),
+        sa.Column("target_id", sa.Integer),
+        sa.Column("timestamp", sa.DateTime, default=datetime.utcnow),
+        sa.Column("details", sa.Text),
     )
-    op.create_index("ix_group_members_group_id", "group_members", ["group_id"])
-    op.create_index("ix_group_members_user_id", "group_members", ["user_id"])
-    op.create_index("ix_group_members_role", "group_members", ["role"])
-    op.create_index("ix_group_members_joined_at", "group_members", ["joined_at"])
 
+    # --- META INFO (branding/system constants) ---
     op.create_table(
-        "group_messages",
+        "meta_info",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("group_id", sa.Integer, nullable=False),
-        sa.Column("sender_id", sa.Integer, nullable=False),
-        sa.Column("body", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("key", sa.String(100), nullable=False, unique=True),
+        sa.Column("value", sa.String(500)),
+        sa.Column("last_updated", sa.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow),
     )
-    op.create_index("ix_group_messages_group_time", "group_messages", ["group_id", "created_at"])
 
-    # analytics (dept/year)
-    op.create_table(
-        "analytics_records",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("department_id", sa.Integer, nullable=False),
-        sa.Column("year", sa.Integer, nullable=False),
-        sa.Column("placements", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("avg_salary", sa.Integer),
-        sa.Column("engagement_rate", sa.Float()),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.UniqueConstraint("department_id", "year", name="uq_analytics_dept_year"),
-    )
-    op.create_index("ix_analytics_dept_year", "analytics_records", ["department_id", "year"])
-    op.create_index("ix_analytics_created_at", "analytics_records", ["created_at"])
-    op.create_index("ix_analytics_updated_at", "analytics_records", ["updated_at"])
+    # --- Seed Default PSU Badges ---
+    bind = op.get_bind()
+    existing_badges = bind.execute(sa.text("SELECT COUNT(*) FROM badges")).scalar() if bind else 0
+    if existing_badges == 0:
+        badges = [
+            ("Founder", "Original Gorilla-Link creator", "fa-crown"),
+            ("Mentor", "Guided another student", "fa-handshake"),
+            ("Leader", "Hosted a PSU campus event", "fa-users"),
+            ("Career Climber", "Applied for 3+ internships", "fa-briefcase"),
+            ("Connector", "Formed 5+ new PSU connections", "fa-network-wired"),
+        ]
+        for name, desc, icon in badges:
+            bind.execute(sa.text("""
+                INSERT INTO badges (name, description, icon, category, created_at)
+                VALUES (:name, :desc, :icon, 'achievement', :created)
+            """), {"name": name, "desc": desc, "icon": icon, "created": datetime.utcnow()})
+        print("🏅 Seeded default PSU badge set.")
+
+    # --- Seed PSU Meta Info ---
+    existing_meta = bind.execute(sa.text("SELECT COUNT(*) FROM meta_info")).scalar() if bind else 0
+    if existing_meta == 0:
+        meta_defaults = {
+            "platform_name": "PittState-Connect",
+            "theme_color": "#DAA520",
+            "institution": "Pittsburg State University",
+            "tagline": "Connecting Gorillas for Life",
+            "email_support": "support@pittstate-connect.edu",
+        }
+        for k, v in meta_defaults.items():
+            bind.execute(sa.text("""
+                INSERT INTO meta_info (key, value, last_updated)
+                VALUES (:k, :v, :now)
+            """), {"k": k, "v": v, "now": datetime.utcnow()})
+        print("🎓 Seeded PSU meta branding defaults.")
+
+    print("✅ Added all auxiliary PSU models (badges, digests, logs, meta info).")
 
 
 def downgrade():
-    for name in [
-        "analytics_records",
-        "group_messages",
-        "group_members",
-        "groups",
-        "event_attendees",
-        "user_badges",
-        "career_badges",
-        "user_achievements",
-        "achievements",
-        "stories",
-    ]:
-        op.drop_table(name)
+    op.drop_table("meta_info")
+    op.drop_table("audit_logs")
+    op.drop_table("digest_logs")
+    op.drop_table("digests")
+    op.drop_table("user_badges")
+    op.drop_table("badges")
+    print("🧹 Removed auxiliary PSU models.")
