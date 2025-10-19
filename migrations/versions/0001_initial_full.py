@@ -1,70 +1,54 @@
-"""Initial full schema for PittState Connect"""
+"""Initial full schema setup for PittState-Connect / Gorilla-Link."""
+
 from alembic import op
 import sqlalchemy as sa
+from datetime import datetime
 
-# revision identifiers, used by Alembic.
-revision = '0001_initial_full'
+# Revision identifiers
+revision = "0001_initial_full"
 down_revision = None
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    # Create users table
+    # --- ROLES ---
     op.create_table(
-        'users',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.String(100), nullable=False),
-        sa.Column('email', sa.String(150), unique=True, nullable=False),
-        sa.Column('password_hash', sa.String(256)),
-        sa.Column('role', sa.String(50), default='student'),
-        sa.Column('created_at', sa.DateTime, server_default=sa.func.now())
+        "roles",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("name", sa.String(50), unique=True, nullable=False),
+        sa.Column("description", sa.Text),
+        sa.Column("created_at", sa.DateTime, default=datetime.utcnow),
     )
 
-    # Create departments table
+    # --- USERS ---
     op.create_table(
-        'departments',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.String(120), nullable=False),
-        sa.Column('category', sa.String(100)),
-        sa.Column('student_count', sa.Integer, default=0),
-        sa.Column('created_at', sa.DateTime, server_default=sa.func.now())
+        "users",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("first_name", sa.String(50), nullable=False),
+        sa.Column("last_name", sa.String(50), nullable=False),
+        sa.Column("email", sa.String(120), unique=True, nullable=False),
+        sa.Column("password_hash", sa.String(255), nullable=False),
+        sa.Column("role_id", sa.Integer, sa.ForeignKey("roles.id")),
+        sa.Column("department_id", sa.Integer),
+        sa.Column("bio", sa.Text),
+        sa.Column("profile_image", sa.String(255)),
+        sa.Column("is_active", sa.Boolean, default=True),
+        sa.Column("created_at", sa.DateTime, default=datetime.utcnow),
     )
 
-    # Create opportunities table
+    # --- DEPARTMENTS ---
     op.create_table(
-        'opportunities',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('title', sa.String(150), nullable=False),
-        sa.Column('description', sa.Text),
-        sa.Column('department_id', sa.Integer, sa.ForeignKey('departments.id')),
-        sa.Column('created_at', sa.DateTime, server_default=sa.func.now())
-    )
-
-    # Create alumni table
-    op.create_table(
-        'alumni',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.String(120), nullable=False),
-        sa.Column('company', sa.String(150)),
-        sa.Column('position', sa.String(150)),
-        sa.Column('grad_year', sa.Integer),
-        sa.Column('created_at', sa.DateTime, server_default=sa.func.now())
-    )
-
-    # Create activity_logs table
-    op.create_table(
-        'activity_logs',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id')),
-        sa.Column('action', sa.String(200), nullable=False),
-        sa.Column('timestamp', sa.DateTime, server_default=sa.func.now())
+        "departments",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("name", sa.String(100), nullable=False, unique=True),
+        sa.Column("description", sa.Text),
+        sa.Column("head_id", sa.Integer, sa.ForeignKey("users.id", ondelete="SET NULL")),
+        sa.Column("created_at", sa.DateTime, default=datetime.utcnow),
     )
 
 
 def downgrade():
-    op.drop_table('activity_logs')
-    op.drop_table('alumni')
-    op.drop_table('opportunities')
-    op.drop_table('departments')
-    op.drop_table('users')
+    op.drop_table("departments")
+    op.drop_table("users")
+    op.drop_table("roles")
