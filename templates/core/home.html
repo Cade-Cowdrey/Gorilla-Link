@@ -10,6 +10,7 @@
     <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
          alt="Pitt State Logo" 
          class="mx-auto mb-6 w-24 md:w-32 drop-shadow-lg">
+
     <h1 class="text-4xl md:text-6xl font-bold text-psu-gold mb-4">
       Welcome to PittState-Connect
     </h1>
@@ -21,7 +22,7 @@
     <div class="flex flex-col sm:flex-row justify-center gap-4">
       <a href="{{ url_for('core.careers') }}" 
          class="btn-primary text-base px-8 py-3 shadow-lg">Explore Careers</a>
-      <a href="{{ url_for('auth.register') }}" 
+      <a href="{{ url_for('auth.register') if has_register else url_for('core.contact') }}" 
          class="btn-outline text-base px-8 py-3">Join Now</a>
     </div>
   </div>
@@ -96,7 +97,7 @@
     Be part of the movement that connects generations of PSU Gorillas — empowering success, mentorship, 
     and lifelong friendships through PittState-Connect.
   </p>
-  <a href="{{ url_for('auth.register') }}"
+  <a href="{{ url_for('auth.register') if has_register else url_for('core.contact') }}"
      class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg shadow hover:bg-yellow-500 transition-all">
     Get Started
   </a>
