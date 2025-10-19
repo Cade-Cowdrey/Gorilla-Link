@@ -1,33 +1,34 @@
-"""add_digest_archive
+"""Create digests_archive table (safe if already exists)."""
 
-Revision ID: 0022_add_digest_archive
-Revises: 0019_add_replies_and_badges
-Create Date: 2025-10-17
-"""
 from alembic import op
 import sqlalchemy as sa
 
-revision = "0022_add_digest_archive"
-down_revision = "0019_add_replies_and_badges"
+revision = "0022_add_digests_archive"
+down_revision = "0021_add_likes_model"
 branch_labels = None
 depends_on = None
 
+
+def _table_exists(conn, name: str) -> bool:
+    return name in sa.inspect(conn).get_table_names()
+
+
 def upgrade():
+    bind = op.get_bind()
+    if _table_exists(bind, "digests_archive"):
+        return
+
     op.create_table(
-        "digest_archive",
+        "digests_archive",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("month_label", sa.String(80), index=True),
-        sa.Column("start_dt", sa.DateTime),
-        sa.Column("end_dt", sa.DateTime),
-        sa.Column("metrics_json", sa.JSON),
-        sa.Column("recipients", sa.Text),
-        sa.Column("html_snapshot", sa.Text),
-        sa.Column("sent_at", sa.DateTime),
-        sa.Column("created_by_id", sa.Integer, sa.ForeignKey("users.id")),
-        sa.Column("created_via", sa.String(40), default="auto"),
-        sa.Column("resent_at", sa.DateTime),
-        sa.Column("resent_by_id", sa.Integer, sa.ForeignKey("users.id")),
+        sa.Column("digest_id", sa.Integer, sa.ForeignKey("digests.id", ondelete="CASCADE")),
+        sa.Column("snapshot", sa.Text, nullable=False),  # JSON text snapshot
+        sa.Column("archived_at", sa.DateTime, server_default=sa.text("CURRENT_TIMESTAMP")),
+        sa.Index("ix_digests_archive_digest_id", "digest_id"),
     )
 
+
 def downgrade():
-    op.drop_table("digest_archive")
+    bind = op.get_bind()
+    if _table_exists(bind, "digests_archive"):
+        op.drop_table("digests_archive")
