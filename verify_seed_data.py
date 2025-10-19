@@ -1,101 +1,96 @@
-# verify_seed_data.py
 """
-VERIFY SEED DATA for Gorilla-Link / PittState Connect
------------------------------------------------------
-✅ Read-only sanity check — no DB writes or deletions.
-✅ Confirms demo records exist for departments, users, profiles, careers,
-   events, analytics, and badges.
+verify_seed_data.py
+----------------------------------------------------
+Utility script to verify seeded demo data for PittState-Connect.
+
+Checks all core tables created by Alembic migrations up to 0025.
+Run this inside Render or locally after `flask db upgrade`.
+
+Usage:
+    $ python verify_seed_data.py
+----------------------------------------------------
 """
 
-from app_pro import create_app, db
+import os
+from datetime import datetime
+from rich.console import Console
+from rich.table import Table
+from app_pro import app, db
 from models import (
     User,
-    Profile,
-    Department,
-    Career,
+    Job,
     Event,
-    AnalyticsRecord,
-    CareerBadge,
-    UserBadge,
+    Connection,
+    DigestArchive,
+    EmailDigestLog,
 )
 
-app = create_app()
+console = Console()
+
+def check_table(model, label):
+    """Count rows in a given table safely."""
+    try:
+        count = db.session.query(model).count()
+        console.print(f"✅ [bold green]{label}[/bold green]: {count} records found")
+        return count
+    except Exception as e:
+        console.print(f"❌ [bold red]{label}[/bold red]: Error -> {e}")
+        return 0
 
 
-def check_count(model, name: str, min_expected: int = 1):
-    count = model.query.count()
-    if count >= min_expected:
-        print(f"✅ {name}: {count} record(s) found")
-    else:
-        print(f"⚠️  {name}: only {count} found (expected ≥ {min_expected})")
-    return count
+def main():
+    console.print("\n[bold cyan]🔍 Verifying PittState-Connect Demo Data[/bold cyan]")
+    console.print(f"🕒 {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n")
 
-
-def verify():
     with app.app_context():
-        print("\n🔍 Verifying Gorilla-Link demo seed data...\n")
+        table = Table(title="PittState-Connect Seed Data Verification")
+        table.add_column("Table", justify="left", style="bold yellow")
+        table.add_column("Count", justify="center")
+        table.add_column("Status", justify="left")
 
-        ok = True
+        # Check all relevant tables
+        tables_to_check = [
+            (User, "Users"),
+            (Connection, "Connections"),
+            (Job, "Jobs"),
+            (Event, "Events"),
+            (DigestArchive, "Digest Archives"),
+            (EmailDigestLog, "Email Digest Logs"),
+        ]
 
-        # 1️⃣ Departments
-        dept_count = check_count(Department, "Departments", 4)
-        if dept_count < 4:
-            ok = False
+        for model, label in tables_to_check:
+            try:
+                count = db.session.query(model).count()
+                status = "[green]OK[/green]" if count > 0 else "[red]Empty[/red]"
+                table.add_row(label, str(count), status)
+            except Exception as e:
+                table.add_row(label, "Error", f"[red]{e}[/red]")
 
-        # 2️⃣ Users
-        user_count = check_count(User, "Users", 3)
-        for email in ["admin@gorillalink.com", "student@gorillalink.com", "alumni@gorillalink.com"]:
-            user = User.query.filter_by(email=email).first()
-            if user:
-                print(f"   • Found {email} (role={user.role})")
-            else:
-                print(f"   ⚠️ Missing {email}")
-                ok = False
+        console.print(table)
 
-        # 3️⃣ Profiles
-        profile_count = check_count(Profile, "Profiles", 3)
-        if profile_count < 3:
-            ok = False
+        # Show quick validation summary
+        console.print("\n[bold white on blue] Summary [/bold white on blue]")
+        console.print("✅ If all tables show non-zero counts, your demo data is loaded correctly.")
+        console.print("⚠️ If any table is empty, run `flask db upgrade` again or check seed migration logs.\n")
 
-        # 4️⃣ Careers
-        career_count = check_count(Career, "Careers", 3)
-        if career_count < 3:
-            ok = False
+        # Optional detailed view of top jobs and events
+        try:
+            jobs = Job.query.limit(3).all()
+            if jobs:
+                console.print("\n💼 [bold cyan]Top Demo Jobs:[/bold cyan]")
+                for j in jobs:
+                    console.print(f"  • {j.title} at {j.company} ({j.location})")
 
-        # 5️⃣ Events
-        event_count = check_count(Event, "Events", 2)
-        if event_count < 2:
-            ok = False
+            events = Event.query.limit(3).all()
+            if events:
+                console.print("\n🎟️ [bold cyan]Upcoming Demo Events:[/bold cyan]")
+                for e in events:
+                    console.print(f"  • {e.title} — {e.location} on {e.event_date.strftime('%Y-%m-%d') if e.event_date else 'TBA'}")
+        except Exception as e:
+            console.print(f"\n⚠️ Error fetching sample records: {e}")
 
-        # 6️⃣ Analytics
-        analytics_count = check_count(AnalyticsRecord, "Analytics Records", 4)
-        if analytics_count < 4:
-            ok = False
-
-        # 7️⃣ Badges
-        badge_count = check_count(CareerBadge, "Career Badges", 3)
-        if badge_count < 3:
-            ok = False
-
-        # 8️⃣ Admin Badge
-        admin = User.query.filter_by(email="admin@gorillalink.com").first()
-        badge = CareerBadge.query.filter_by(slug="resume-ready").first()
-        if admin and badge:
-            has_badge = UserBadge.query.filter_by(user_id=admin.id, badge_id=badge.id).first()
-            if has_badge:
-                print(f"🏅 Admin has Resume Ready badge ✅")
-            else:
-                print(f"⚠️  Admin missing Resume Ready badge")
-                ok = False
-
-        # ✅ Final result
-        print("\n-------------------------------------------")
-        if ok:
-            print("🎉 All demo data verified successfully!")
-        else:
-            print("⚠️  Some demo data is missing or incomplete. Run seed_addons.py again.")
-        print("-------------------------------------------\n")
+    console.print("\n[green]Verification complete.[/green]\n")
 
 
 if __name__ == "__main__":
-    verify()
+    main()
