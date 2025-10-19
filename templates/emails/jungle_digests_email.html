@@ -1,66 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pitt State Connect — Daily Digest</title>
-  <style>
-    body { font-family: 'Arial', sans-serif; background: #fafafa; color: #222; margin:0; padding:0; }
-    .container { max-width: 700px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .header { background: #660000; color: #fff; padding: 20px 30px; }
-    .header h1 { margin: 0; font-size: 22px; }
-    .content { padding: 30px; }
-    .section { margin-bottom: 25px; }
-    .section h2 { color: #660000; font-size: 18px; margin-bottom: 8px; }
-    .section p { margin: 0 0 10px 0; color: #444; }
-    .footer { background: #f3f3f3; padding: 20px 30px; font-size: 13px; text-align: center; color: #666; }
-    a.button { display:inline-block; background:#C7A008; color:#000; padding:10px 18px; text-decoration:none; border-radius:5px; font-weight:bold; }
-    a.button:hover { background:#e6c744; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Faculty Digest | PittState-Connect</title>
+<style>
+  body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  .email-container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .header {
+    background: #c8102e;
+    color: #ffd700;
+    text-align: center;
+    padding: 24px;
+  }
+  .content {
+    padding: 30px;
+  }
+  h1, h2, h3 {
+    color: #c8102e;
+  }
+  a {
+    color: #c8102e;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .footer {
+    background: #f4f4f4;
+    text-align: center;
+    padding: 16px;
+    font-size: 13px;
+    color: #777;
+  }
+  .section {
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #fafafa;
+    border-left: 4px solid #c8102e;
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 6px;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
+  <div class="email-container">
     <div class="header">
-      <h1>🐾 Pitt State Connect — Daily Gorilla Digest</h1>
+      <h1>📊 Weekly Faculty Digest</h1>
+      <p>PittState-Connect | Empowering Gorillas Everywhere</p>
     </div>
     <div class="content">
-      <p>Good morning, <strong>{{ user.first_name if user else 'Gorilla' }}</strong>!</p>
-      <p>Here’s what’s happening today across the Pitt State Connect network:</p>
+      <p>Dear {{ user.first_name }},</p>
+      <p>Here’s your weekly PittState-Connect faculty digest featuring the latest campus updates, posts, and events.</p>
+
+      <div class="section">
+        <h2>📰 Recent Posts</h2>
+        {% for post in posts %}
+          <div class="card">
+            <strong>{{ post.user.first_name }} {{ post.user.last_name }}</strong> posted:<br>
+            <em>{{ post.content }}</em>
+          </div>
+        {% else %}
+          <p>No recent posts this week.</p>
+        {% endfor %}
+      </div>
 
       <div class="section">
         <h2>📅 Upcoming Events</h2>
         {% for event in events %}
-          <p><strong>{{ event.title }}</strong> — {{ event.date.strftime('%b %d') }} at {{ event.location }}</p>
+          <div class="card">
+            <strong>{{ event.title }}</strong><br>
+            {{ event.date.strftime("%B %d, %Y") }} — {{ event.location or "TBA" }}<br>
+            <em>{{ event.description or "No description provided." }}</em>
+          </div>
         {% else %}
-          <p>No new events scheduled today.</p>
+          <p>No upcoming events scheduled.</p>
         {% endfor %}
       </div>
 
       <div class="section">
-        <h2>💬 Mentorship Activity</h2>
-        {% if mentorship_updates %}
-          {% for update in mentorship_updates %}
-            <p>{{ update }}</p>
+        <h2>🏫 Department Highlights</h2>
+        <ul>
+          {% for dept in departments %}
+          <li><strong>{{ dept.name }}</strong>: {{ dept.description or "No updates available." }}</li>
+          {% else %}
+          <li>No department updates at this time.</li>
           {% endfor %}
-        {% else %}
-          <p>No new mentorship updates.</p>
-        {% endif %}
+        </ul>
       </div>
 
-      <div class="section">
-        <h2>🏆 Campus Spotlights</h2>
-        {% for spotlight in spotlights %}
-          <p><strong>{{ spotlight.title }}</strong>: {{ spotlight.summary }}</p>
-        {% else %}
-          <p>No new spotlights today — stay tuned!</p>
-        {% endfor %}
-      </div>
-
-      <p style="margin-top:25px;">
-        <a href="https://gorillalink.com" class="button">Visit Your Dashboard</a>
-      </p>
+      <p>Thank you for inspiring excellence across Pitt State!</p>
+      <p>🦍 <strong>The PittState-Connect Team</strong></p>
     </div>
     <div class="footer">
-      <p>© {{ now().year }} Pitt State Connect | Gorilla Link Team</p>
+      <p>© 2025 PittState-Connect | Powered by Gorilla-Link</p>
+      <p><a href="https://pittstateconnect.com">Visit the platform</a></p>
     </div>
   </div>
 </body>
