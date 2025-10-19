@@ -1,195 +1,242 @@
 /* ============================================================
-   🎓 PittState-Connect Theme (psu-theme.css)
-   Tailwind extension for PSU branding and custom UI styling
+   🏫 PittState-Connect Theme Styles
+   ------------------------------------------------------------
+   Author: Cade Cowdrey
+   Project: PittState-Connect / Gorilla-Link
+   Purpose: Official PSU-branded Tailwind-enhanced theme
    ============================================================ */
 
-/* ---------- 🦍 PSU Color Palette ---------- */
+/* ---------- 🎨 COLOR VARIABLES ---------- */
 :root {
-  --psu-gold: #E5B700;       /* Official PSU Gold */
-  --psu-crimson: #990000;    /* Official PSU Crimson */
-  --psu-gray: #f5f5f5;       /* Light Gray background */
-  --psu-dark: #0e0e0e;       /* Dark background */
-  --psu-text-dark: #222222;
-  --psu-text-light: #f9f9f9;
+  --psu-crimson: #750014;
+  --psu-gold: #FFD700;
+  --psu-dark-bg: #0a0a0a;
+  --psu-gray: #f5f5f5;
+  --text-light: #f9fafb;
+  --text-dark: #1a1a1a;
 }
 
-/* Tailwind color utility bindings */
-.text-psu-gold { color: var(--psu-gold); }
-.text-psu-crimson { color: var(--psu-crimson); }
-
-.bg-psu-gold { background-color: var(--psu-gold); }
-.bg-psu-crimson { background-color: var(--psu-crimson); }
-
-.border-psu-gold { border-color: var(--psu-gold); }
-.border-psu-crimson { border-color: var(--psu-crimson); }
-
-/* Hover & focus states */
-.hover\:text-psu-gold:hover { color: var(--psu-gold); }
-.hover\:bg-psu-gold:hover { background-color: var(--psu-gold); }
-.hover\:text-psu-crimson:hover { color: var(--psu-crimson); }
-.hover\:bg-psu-crimson:hover { background-color: var(--psu-crimson); }
-
-/* ---------- 🌗 Dark Mode ---------- */
-.dark {
-  background-color: var(--psu-dark);
-  color: var(--psu-text-light);
+/* ---------- 🩶 UNIVERSAL RESET ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.dark a { color: var(--psu-gold); }
-.dark .hover\:text-psu-gold:hover { color: #ffcc33; }
-.dark .hover\:bg-psu-gold:hover { background-color: #ffcc33; }
-
-/* ---------- 🧭 Navbar ---------- */
-nav a {
-  transition: color 0.25s ease, background-color 0.25s ease;
+html {
+  scroll-behavior: smooth;
 }
 
-nav a.active,
-nav a[aria-current="page"] {
-  color: var(--psu-gold);
-  font-weight: 600;
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--psu-gray);
+  color: var(--text-dark);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-nav {
-  backdrop-filter: blur(10px);
+/* ---------- 🌙 DARK MODE ---------- */
+.dark body {
+  background-color: var(--psu-dark-bg);
+  color: var(--text-light);
 }
 
-/* ---------- 🦶 Footer ---------- */
-footer {
-  font-size: 0.9rem;
-  letter-spacing: 0.02em;
+/* ---------- 🧭 NAVBAR ---------- */
+header {
+  background-color: var(--psu-crimson);
 }
 
-footer a {
-  transition: color 0.25s ease;
+header a {
+  color: white;
+  text-decoration: none;
 }
 
-footer a:hover {
+header a:hover {
   color: var(--psu-gold);
 }
 
-/* ---------- 🧱 Cards, Buttons, Inputs ---------- */
-.card {
-  background-color: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* ---------- 🦍 HERO SECTION ---------- */
+.hero-bg {
+  background: url("../images/psu_campus_bg.jpg") center/cover no-repeat;
+  position: relative;
+  color: white;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
 }
 
-.dark .card {
-  background-color: #1a1a1a;
-  color: var(--psu-text-light);
-  box-shadow: 0 4px 25px rgba(255,255,255,0.05);
-}
-
-/* Buttons */
-.btn-primary {
-  background-color: var(--psu-gold);
-  color: black;
-  font-weight: 600;
-  border-radius: 0.5rem;
-  padding: 0.6rem 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background-color: #ffcc33;
-  transform: translateY(-2px);
-}
-
-.btn-outline {
-  border: 2px solid var(--psu-gold);
-  color: var(--psu-gold);
-  background-color: transparent;
-  border-radius: 0.5rem;
-  padding: 0.6rem 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-outline:hover {
-  background-color: var(--psu-gold);
-  color: black;
-}
-
-/* Inputs and textareas */
-input, textarea, select {
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-  padding: 0.6rem 0.9rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--psu-gold);
-  box-shadow: 0 0 0 3px rgba(229,183,0,0.3);
-}
-
-/* ---------- 📜 Headings ---------- */
-h1, h2, h3, h4, h5 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  color: var(--psu-crimson);
-}
-
-.dark h1, .dark h2, .dark h3, .dark h4 {
+.hero-bg h1 {
+  font-size: 3rem;
+  font-weight: 700;
   color: var(--psu-gold);
 }
 
-/* ---------- 💫 Animations ---------- */
-.fade-in {
-  animation: fadeIn 0.8s ease forwards;
+.hero-bg p {
+  color: #e5e5e5;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ---------- 🔝 Scroll to Top Button ---------- */
-#scrollTopBtn {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-#scrollTopBtn:hover {
-  transform: translateY(-3px);
-}
-
-/* ---------- 🧩 Utilities ---------- */
+/* ---------- 🧱 SECTIONS ---------- */
 .section {
-  padding: 4rem 1rem;
+  padding: 6rem 1.5rem;
 }
 
 .section-title {
   font-size: 2rem;
   font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
   color: var(--psu-crimson);
+  text-align: center;
 }
 
-.dark .section-title {
+.gold-divider {
+  width: 60px;
+  height: 4px;
+  background-color: var(--psu-gold);
+  border-radius: 2px;
+  margin: 1rem auto;
+}
+
+/* ---------- 💬 BUTTONS ---------- */
+.btn-primary {
+  background-color: var(--psu-gold);
+  color: #000;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #e6c200;
+}
+
+.btn-outline {
+  border: 2px solid var(--psu-gold);
+  color: var(--psu-gold);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: var(--psu-gold);
+  color: #000;
+}
+
+/* ---------- 🧾 CARDS ---------- */
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card {
+  background-color: #111;
+  color: var(--text-light);
+}
+
+/* ---------- 🦶 FOOTER ---------- */
+footer {
+  background-color: var(--psu-crimson);
+  color: #e5e5e5;
+  text-align: center;
+}
+
+footer a {
   color: var(--psu-gold);
 }
 
-/* ---------- 🦍 PSU Custom Branding Touch ---------- */
-.gold-divider {
-  height: 4px;
-  width: 80px;
-  background-color: var(--psu-gold);
-  margin: 1rem auto;
-  border-radius: 2px;
+footer a:hover {
+  text-decoration: underline;
 }
 
-.hero-bg {
-  background-image: linear-gradient(rgba(153,0,0,0.8), rgba(0,0,0,0.7)),
-                    url('/static/images/psu_campus_bg.jpg');
-  background-size: cover;
-  background-position: center;
-  color: white;
+/* ---------- ✨ ANIMATIONS ---------- */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 📈 STAT COUNTERS ---------- */
+.section .grid div h3 {
+  color: var(--psu-gold);
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.section .grid div p {
+  color: #555;
+}
+
+.dark .section .grid div p {
+  color: #ccc;
+}
+
+/* ---------- 🌓 DARK MODE ELEMENTS ---------- */
+.dark .btn-primary {
+  background-color: var(--psu-gold);
+  color: #000;
+}
+
+.dark .btn-outline {
+  border-color: var(--psu-gold);
+  color: var(--psu-gold);
+}
+
+.dark .btn-outline:hover {
+  background-color: var(--psu-gold);
+  color: #000;
+}
+
+/* ---------- 📱 RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+  .card {
+    padding: 1.25rem;
+  }
+  .hero-bg h1 {
+    font-size: 2.25rem;
+  }
+}
+
+/* ---------- 🧩 UTILITIES ---------- */
+.text-psu-gold {
+  color: var(--psu-gold);
+}
+
+.text-psu-crimson {
+  color: var(--psu-crimson);
+}
+
+.bg-psu-crimson {
+  background-color: var(--psu-crimson);
+}
+
+.bg-psu-gold {
+  background-color: var(--psu-gold);
+}
+
+.shadow-lg-gorilla {
+  box-shadow: 0 8px 20px rgba(117, 0, 20, 0.35);
 }
