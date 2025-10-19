@@ -1,128 +1,85 @@
-import os
-from flask import current_app, render_template
-from flask_mail import Message
-from extensions import mail
+"""
+utils.mail_util
+Safe mail utilities that won't break imports in production without SMTP.
+They log actions and return True. If Flask-Mail is configured, they attempt to send.
+"""
+
+from typing import Iterable, Optional
+import logging
+from flask import current_app
+
+try:
+    from flask_mail import Message
+    mail_available = True
+except Exception:  # pragma: no cover
+    Message = object  # type: ignore
+    mail_available = False
 
 
-# -------------------------------------------------------------
-# 🏫 PSU-Branded Mail Utility for PittState-Connect
-# -------------------------------------------------------------
-
-def send_email(subject, recipients, html_body, sender=None):
-    """Universal helper to send PSU-branded emails with Flask-Mail."""
+def _send(subject: str, recipients: Iterable[str], body: str, html: Optional[str] = None) -> bool:
+    """Internal helper: try to send via Flask-Mail; otherwise just log."""
     try:
-        if not mail:
-            raise RuntimeError("Flask-Mail not initialized yet.")
-        msg = Message(
-            subject=subject,
-            recipients=recipients if isinstance(recipients, list) else [recipients],
-            sender=sender or os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstate-connect.com"),
-        )
-        msg.html = html_body
+        app = current_app._get_current_object()  # raises if no app context
+    except Exception:
+        logging.getLogger(__name__).warning("mail_util called without app context; logging only.")
+        logging.getLogger(__name__).info("MAIL FAKED: %s -> %s\n%s", subject, list(recipients), body)
+        return True
+
+    logger = app.logger
+
+    if not mail_available or "mail" not in app.extensions:
+        logger.info("📧 (fake) %s -> %s", subject, list(recipients))
+        logger.debug("Body: %s", body)
+        return True
+
+    try:
+        mail = app.extensions["mail"]
+        msg = Message(subject=subject, recipients=list(recipients), body=body, html=html)
         mail.send(msg)
-        current_app.logger.info(f"📧 Sent email '{subject}' to {recipients}")
-    except Exception as e:
-        current_app.logger.warning(f"⚠️ Email send failed ({subject}): {e}")
+        logger.info("📧 Sent: %s -> %s", subject, list(recipients))
+        return True
+    except Exception as e:  # pragma: no cover
+        logger.exception("Failed to send email: %s", e)
+        return False
 
 
-# -------------------------------------------------------------
-# 🔐 1. Verification Email
-# -------------------------------------------------------------
-def send_verification_email(user_email, token=None):
-    """Send account verification email to new users."""
-    verification_link = f"{os.getenv('BASE_URL', 'https://pittstate-connect.onrender.com')}/verify/{token or 'demo-token'}"
-    html = render_template(
-        "emails/verification_email.html",
-        verification_link=verification_link,
-        user_email=user_email,
-    )
-    send_email("Verify Your PittState-Connect Account", user_email, html)
+# ---- Public functions expected by blueprints ----
+
+def send_welcome_email(email: str, name: str = "Gorilla") -> bool:
+    subject = "Welcome to PittState-Connect 🎉"
+    body = f"Hi {name},\n\nWelcome to PittState-Connect!\n\n— PSU Team"
+    return _send(subject, [email], body)
 
 
-# -------------------------------------------------------------
-# 🔑 2. Password Reset Email
-# -------------------------------------------------------------
-def send_password_reset_email(user_email, reset_token):
-    """Send password reset link."""
-    reset_link = f"{os.getenv('BASE_URL', 'https://pittstate-connect.onrender.com')}/reset/{reset_token}"
-    html = render_template(
-        "emails/reset_password_email.html",
-        reset_link=reset_link,
-        user_email=user_email,
-    )
-    send_email("Reset Your PittState-Connect Password", user_email, html)
+def send_verification_email(email: str, token: str) -> bool:
+    verify_url = f"https://pittstate-connect.onrender.com/verify/{token}"
+    subject = "Verify your PittState-Connect email"
+    body = f"Click to verify: {verify_url}"
+    html = f'<p>Click to verify: <a href="{verify_url}">{verify_url}</a></p>'
+    return _send(subject, [email], body, html)
 
 
-# -------------------------------------------------------------
-# 📰 3. Weekly Digest Email (Alumni + Students)
-# -------------------------------------------------------------
-def send_weekly_digest_alumni(alumni_email_list=None):
-    """Send PSU-branded weekly digest summary to alumni."""
-    if not alumni_email_list:
-        alumni_email_list = ["demo_alumni@pittstate.edu"]
-
-    html = render_template(
-        "emails/jungle_digest_email.html",
-        digest_title="This Week in Gorilla Nation 🦍",
-        summary_points=[
-            "🎓 New mentorships formed between alumni and students",
-            "🏢 Career board: 12 new internship listings",
-            "📅 Campus events this week at PSU",
-        ],
-        footer_note="Stay connected. Stay a Gorilla.",
-    )
-    send_email("Your Weekly PittState-Connect Digest", alumni_email_list, html)
+def send_password_reset_email(email: str, token: str) -> bool:
+    reset_url = f"https://pittstate-connect.onrender.com/reset/{token}"
+    subject = "Reset your PittState-Connect password"
+    body = f"Reset link: {reset_url}"
+    html = f'<p>Reset link: <a href="{reset_url}">{reset_url}</a></p>'
+    return _send(subject, [email], body, html)
 
 
-# -------------------------------------------------------------
-# ✉️ 4. General-purpose Mailer for Admins
-# -------------------------------------------------------------
-def send_admin_announcement(subject, body, recipients):
-    """Allow admin announcements with PSU header/footer."""
-    html = f"""
-    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fafafa;">
-        <h2 style="color:#990000;">{subject}</h2>
-        <p style="font-size:16px; color:#333;">{body}</p>
-        <hr style="border:1px solid #d4af37;">
-        <footer style="font-size:14px; color:#666;">
-            Sent via <strong>PittState-Connect</strong><br>
-            Pittsburg State University 🦍
-        </footer>
-    </div>
-    """
-    send_email(subject, recipients, html)
+def send_weekly_digest_students(recipients: Iterable[str]) -> bool:
+    subject = "Weekly Student Digest"
+    body = "Here are this week’s highlights for students."
+    return _send(subject, recipients, body)
 
 
-# -------------------------------------------------------------
-# 🧩 5. Safe Fallback Stubs
-# -------------------------------------------------------------
-def safe_stub_log(name):
-    """Logs that a stub mailer was called instead of real function."""
-    current_app.logger.info(f"[MAIL STUB] '{name}' called safely — no action taken.")
+def send_weekly_digest_alumni(recipients: Iterable[str]) -> bool:
+    subject = "Weekly Alumni Digest"
+    body = "Here are this week’s highlights for alumni."
+    return _send(subject, recipients, body)
 
 
-# If any imports in blueprints expect these names, ensure they exist:
-def send_verification_email_stub(user_email: str):
-    safe_stub_log("send_verification_email_stub")
-
-
-def send_weekly_digest_alumni_stub():
-    safe_stub_log("send_weekly_digest_alumni_stub")
-
-
-# For backward compatibility with older imports:
-if "send_verification_email" not in globals():
-    send_verification_email = send_verification_email_stub
-
-if "send_weekly_digest_alumni" not in globals():
-    send_weekly_digest_alumni = send_weekly_digest_alumni_stub
-
-
-# -------------------------------------------------------------
-# ✅ Optional test route (can remove in production)
-# -------------------------------------------------------------
-def test_mail_system():
-    """Quick test utility for debugging Render mail integration."""
-    demo_html = "<p>This is a <strong>PittState-Connect</strong> test email.</p>"
-    send_email("PittState-Connect Test Email", "you@pittstate.edu", demo_html)
-    return "✅ Mail system tested (check logs or inbox)."
+def send_faculty_digest(recipients: Iterable[str]) -> bool:
+    subject = "Weekly Faculty Digest"
+    body = "Here are this week’s highlights for faculty."
+    return _send(subject, recipients, body)
