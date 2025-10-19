@@ -1,0 +1,26 @@
+🌴 JUNGLE DIGEST — WEEKLY HIGHLIGHTS
+PittState-Connect | Pittsburg State University
+
+Hey {{ user.first_name or "Gorilla" }},
+
+Here’s your weekly Jungle Digest — a quick look at what’s new around PittState-Connect!
+
+🔥 TOP HIGHLIGHTS
+-----------------
+• New Jobs & Internships:
+  Explore exclusive openings for PSU students & alumni, updated weekly.
+• Upcoming Events:
+  From networking nights to alumni meetups and career fairs — don’t miss what’s next.
+• Spotlight Story:
+  Discover how fellow Gorillas are making an impact across the country and beyond!
+
+OPEN PITTSATE-CONNECT
+---------------------
+👉 https://pittstate-connect.onrender.com
+
+Stay connected. Stay golden. Stay a Gorilla. 🦍
+
+You’re receiving this email because you’re part of the PittState-Connect community.
+Pittsburg State University • Pittsburg, Kansas 66762
+
+© {{ now().year }} PittState-Connect. All rights reserved.
