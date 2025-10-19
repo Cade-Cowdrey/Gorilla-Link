@@ -24,24 +24,18 @@ migrate = Migrate()
 mail = Mail()
 cache = Cache()
 moment = Moment()
-
-# -----------------------------------------------------
-# Scheduler (for digests, etc.)
-# -----------------------------------------------------
 scheduler = APScheduler()
-
-# -----------------------------------------------------
-# Limiter (Rate Limiting)
-# -----------------------------------------------------
 limiter = Limiter(key_func=get_remote_address, default_limits=["1000 per day", "200 per hour"])
 
 # -----------------------------------------------------
-# Create Application Factory
+# Application Factory
 # -----------------------------------------------------
 def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
 
-    # Load environment config
+    # -----------------------------------------------------
+    # Configurations
+    # -----------------------------------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "DATABASE_URL",
@@ -68,14 +62,11 @@ def create_app():
     CORS(app)
     moment.init_app(app)
 
-    # -----------------------------------------------------
-    # Logging
-    # -----------------------------------------------------
     logging.basicConfig(level=logging.INFO)
     app.logger.info("✅ Extensions initialized successfully.")
 
     # -----------------------------------------------------
-    # Register Blueprints (Core First)
+    # Register Blueprints
     # -----------------------------------------------------
     try:
         from blueprints.core.routes import core_bp
@@ -85,30 +76,10 @@ def create_app():
         app.logger.error(f"⚠️ Failed to load blueprint core: {e}")
 
     blueprint_modules = [
-        "admin",
-        "analytics",
-        "alumni",
-        "auth",
-        "badges",
-        "career",
-        "campus",
-        "connections",
-        "departments",
-        "digests",
-        "engagement",
-        "events",
-        "feed",
-        "groups",
-        "map",
-        "marketing",
-        "mentorship",
-        "notifications",
-        "opportunities",
-        "portfolio",
-        "profile",
-        "students",
-        "stories",
-        "api",
+        "admin", "analytics", "alumni", "auth", "badges", "career", "campus",
+        "connections", "departments", "digests", "engagement", "events", "feed",
+        "groups", "map", "marketing", "mentorship", "notifications",
+        "opportunities", "portfolio", "profile", "students", "stories", "api"
     ]
 
     for bp_name in blueprint_modules:
@@ -121,7 +92,7 @@ def create_app():
             app.logger.warning(f"⚠️ Skipped blueprint {bp_name}: {e}")
 
     # -----------------------------------------------------
-    # Scheduler Start
+    # Start Scheduler
     # -----------------------------------------------------
     try:
         scheduler.start()
@@ -130,7 +101,7 @@ def create_app():
         app.logger.warning(f"⚠️ Scheduler start skipped: {e}")
 
     # -----------------------------------------------------
-    # Root Health Check
+    # Health Route
     # -----------------------------------------------------
     @app.route("/status")
     def status():
@@ -144,9 +115,11 @@ def create_app():
 
 
 # -----------------------------------------------------
-# Run App
+# Render Entry Point Fix
 # -----------------------------------------------------
+# ✅ Gunicorn expects a global 'app' variable.
+app = create_app()  # critical for Render deployment
+
 if __name__ == "__main__":
-    app = create_app()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
