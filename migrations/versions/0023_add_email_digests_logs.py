@@ -1,38 +1,37 @@
-"""Add email digest logs table for tracking sent digests
-
-Revision ID: 0023_add_email_digest_logs
-Revises: 0019_add_replies_and_badges
-Create Date: 2025-10-17 21:15:00.000000
-"""
+"""Add email_digest_logs table for outbound digest send attempts."""
 
 from alembic import op
 import sqlalchemy as sa
-from datetime import datetime
 
-# Revision identifiers, used by Alembic.
-revision = "0023_add_email_digest_logs"
-down_revision = "0019_add_replies_and_badges"
+revision = "0023_add_email_digests_logs"
+down_revision = "0022_add_digests_archive"
 branch_labels = None
 depends_on = None
 
 
+def _table_exists(conn, name: str) -> bool:
+    return name in sa.inspect(conn).get_table_names()
+
+
 def upgrade():
+    bind = op.get_bind()
+    if _table_exists(bind, "email_digest_logs"):
+        return
+
     op.create_table(
         "email_digest_logs",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("digest_type", sa.String(120), nullable=False),  # student, alumni, faculty, analytics, etc.
-        sa.Column("subject", sa.String(255), nullable=False),
-        sa.Column("recipients_count", sa.Integer, nullable=False, default=0),
-        sa.Column("status", sa.String(50), nullable=False, default="pending"),  # success / failed
-        sa.Column("details", sa.Text),
-        sa.Column("created_at", sa.DateTime, default=datetime.utcnow, nullable=False),
+        sa.Column("recipient_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("template", sa.String(100), nullable=False),  # e.g., 'weekly', 'faculty', etc.
+        sa.Column("status", sa.String(50), server_default="queued"),
+        sa.Column("error", sa.Text),
+        sa.Column("sent_at", sa.DateTime, server_default=sa.text("CURRENT_TIMESTAMP")),
+        sa.Index("ix_email_digest_logs_recipient", "recipient_id"),
+        sa.Index("ix_email_digest_logs_template", "template"),
     )
-
-    op.create_index("ix_email_digest_logs_type", "email_digest_logs", ["digest_type"])
-    op.create_index("ix_email_digest_logs_created_at", "email_digest_logs", ["created_at"])
 
 
 def downgrade():
-    op.drop_index("ix_email_digest_logs_created_at", table_name="email_digest_logs")
-    op.drop_index("ix_email_digest_logs_type", table_name="email_digest_logs")
-    op.drop_table("email_digest_logs")
+    bind = op.get_bind()
+    if _table_exists(bind, "email_digest_logs"):
+        op.drop_table("email_digest_logs")
