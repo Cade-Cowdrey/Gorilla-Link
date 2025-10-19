@@ -1,51 +1,101 @@
+# ---------------------------------------------------------
+# 🦍 PittState-Connect / Gorilla-Link
+# Central Configuration Module (Production + Local)
+# ---------------------------------------------------------
 import os
 from datetime import timedelta
 
-def _bool(v, default=False):
-    if v is None:
-        return default
-    return str(v).strip().lower() in {"1", "true", "yes", "on"}
 
-class BaseConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME_IN_PROD")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///pittstate.db")
+class Config:
+    """Base configuration shared across environments."""
+
+    # -----------------------------------------------------
+    # Core Flask Settings
+    # -----------------------------------------------------
+    SECRET_KEY = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Sessions / cookies
+    # -----------------------------------------------------
+    # Database
+    # -----------------------------------------------------
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL", "sqlite:///local_dev.db"
+    )
+
+    # -----------------------------------------------------
+    # Mail Settings
+    # -----------------------------------------------------
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "False").lower() == "true"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv(
+        "MAIL_DEFAULT_SENDER", "no-reply@pittstateconnect.edu"
+    )
+
+    # -----------------------------------------------------
+    # Redis / Caching
+    # -----------------------------------------------------
+    REDIS_URL = os.getenv("REDIS_URL")
+
+    if REDIS_URL:
+        CACHE_TYPE = "RedisCache"
+        CACHE_REDIS_URL = REDIS_URL
+        CACHE_DEFAULT_TIMEOUT = 600  # 10 minutes
+    else:
+        CACHE_TYPE = "SimpleCache"
+        CACHE_DEFAULT_TIMEOUT = 300  # 5 minutes
+
+    # -----------------------------------------------------
+    # Flask-Limiter (Rate Limiting)
+    # -----------------------------------------------------
+    RATELIMIT_STORAGE_URL = REDIS_URL or "memory://"
+    RATELIMIT_DEFAULT = "1000 per hour"
+
+    # -----------------------------------------------------
+    # Security / Sessions
+    # -----------------------------------------------------
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
+    SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
-    # Redis-backed sessions (optional)
-    SESSION_TYPE = "filesystem"  # switch to "redis" if you wire it up in code
-    SESSION_USE_SIGNER = True
+    # -----------------------------------------------------
+    # Scheduler (for digests, cleanup, etc.)
+    # -----------------------------------------------------
+    SCHEDULER_API_ENABLED = True
+    SCHEDULER_TIMEZONE = "America/Chicago"
 
-    # Mail (if used)
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
-    MAIL_USE_TLS = _bool(os.getenv("MAIL_USE_TLS", "true"), True)
-    MAIL_USE_SSL = _bool(os.getenv("MAIL_USE_SSL", "false"), False)
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "PittState Connect <noreply@pittstate.edu>")
+    # -----------------------------------------------------
+    # Branding / Metadata
+    # -----------------------------------------------------
+    APP_NAME = "PittState-Connect"
+    ORGANIZATION = "Pittsburg State University"
+    SUPPORT_EMAIL = "support@pittstateconnect.edu"
 
-    # OAuth
-    OAUTH_ALLOWED_DOMAIN = os.getenv("OAUTH_ALLOWED_DOMAIN", "gus.pittstate.edu")
-    OAUTH_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID", "")
-    OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "")
 
-    # Ratelimits
-    RATELIMIT_DEFAULT = os.getenv("RATELIMIT_DEFAULT", "200/hour")
-
-    # App
-    SITE_NAME = "PittState Connect"
-
-class DevConfig(BaseConfig):
-    DEBUG = True
-
-class ProdConfig(BaseConfig):
+class ProductionConfig(Config):
+    """Production environment configuration."""
     DEBUG = False
+    TESTING = False
 
+
+class DevelopmentConfig(Config):
+    """Local development configuration."""
+    DEBUG = True
+    TESTING = True
+    SQLALCHEMY_ECHO = True
+    CACHE_TYPE = "SimpleCache"
+
+
+# ---------------------------------------------------------
+# Helper function
+# ---------------------------------------------------------
 def get_config():
+    """Returns the correct config class based on environment."""
     env = os.getenv("FLASK_ENV", "production").lower()
-    return DevConfig if env.startswith("dev") else ProdConfig
+    if env == "development":
+        return DevelopmentConfig
+    return ProductionConfig
