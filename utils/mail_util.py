@@ -8,10 +8,8 @@ from extensions import mail
 import os
 
 
-# ---------------------------------------------------------
-# 🔧 Helper: Send a generic email
-# ---------------------------------------------------------
 def send_email(subject, recipients, html_body, text_body=None):
+    """Generic email sender."""
     msg = Message(
         subject,
         recipients=recipients,
@@ -48,7 +46,7 @@ def send_password_reset_email(user, token):
 
 
 # ---------------------------------------------------------
-# 🎉 Welcome Email (after verification)
+# 🎉 Welcome Email
 # ---------------------------------------------------------
 def send_welcome_email(user):
     html_body = render_template("emails/welcome.html", user=user)
@@ -57,17 +55,15 @@ def send_welcome_email(user):
 
 
 # ---------------------------------------------------------
-# 📰 Weekly Digest Emails (Alumni + General)
+# 📰 Weekly Digest Emails
 # ---------------------------------------------------------
 def send_weekly_digest_alumni(user, posts, events):
-    """Placeholder for alumni digest system — prevents import errors."""
     html_body = render_template("emails/alumni_digest.html", user=user, posts=posts, events=events)
     text_body = render_template("emails/plain/alumni_digest.txt", user=user, posts=posts, events=events)
     send_email("Your PittState Alumni Weekly Digest", [user.email], html_body, text_body)
 
 
-def send_weekly_digest_general(user, posts, events):
-    """General student digest placeholder."""
-    html_body = render_template("emails/general_digest.html", user=user, posts=posts, events=events)
-    text_body = render_template("emails/plain/general_digest.txt", user=user, posts=posts, events=events)
+def send_weekly_digest_students(user, posts, events):
+    html_body = render_template("emails/students_digest.html", user=user, posts=posts, events=events)
+    text_body = render_template("emails/plain/students_digest.txt", user=user, posts=posts, events=events)
     send_email("Your PittState Weekly Digest", [user.email], html_body, text_body)
