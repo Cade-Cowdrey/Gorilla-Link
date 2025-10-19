@@ -1,8 +1,64 @@
 {% extends "base.html" %}
-{% block title %}{{ user.name }} — Badges{% endblock %}
+{% block title %}Badges & Achievements | PittState-Connect{% endblock %}
 {% block content %}
-<div class="container my-4">
-  <h2 class="fw-bold text-danger">{{ user.name }} — Career Badges</h2>
-  {% include "partials/badges_strip.html" with context %}
-</div>
+<section class="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-[#1a1a1a] dark:via-[#121212] dark:to-black py-16">
+  <div class="max-w-6xl mx-auto px-6">
+    <h1 class="text-4xl font-extrabold text-center text-psu-gold mb-8">
+      🏅 PittState-Connect Badges & Achievements
+    </h1>
+    <p class="text-center text-gray-600 dark:text-gray-300 mb-10">
+      Celebrate excellence across the Pitt State community!  
+      View student, alumni, and faculty achievements below.
+    </p>
+
+    <div class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8">
+      {% for user in users %}
+      <div class="rounded-2xl bg-white dark:bg-neutral-900 shadow-lg hover:shadow-xl transition p-6 border border-gray-200 dark:border-neutral-800">
+        <div class="flex flex-col items-center">
+          <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-psu-gold mb-4">
+            <img src="{{ user.profile_image or url_for('static', filename='img/default_profile.png') }}"
+                 alt="{{ user.first_name }} {{ user.last_name }}"
+                 class="object-cover w-full h-full">
+          </div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ user.first_name }} {{ user.last_name }}
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.role|capitalize }}</p>
+
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            {% if user.role == "alumni" %}
+              <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">
+                🎓 Alumni Excellence
+              </span>
+            {% elif user.role == "faculty" %}
+              <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                📚 Faculty Mentor
+              </span>
+            {% elif user.role == "student" %}
+              <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                🌱 Student Leader
+              </span>
+            {% else %}
+              <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-medium">
+                🦍 Community Member
+              </span>
+            {% endif %}
+          </div>
+
+          <a href="{{ url_for('badges_bp.award_badge', user_id=user.id, badge_name='Gorilla Pride') }}"
+             class="mt-5 inline-block bg-psu-gold hover:bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
+            Award "Gorilla Pride" Badge
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if not users %}
+    <p class="text-center text-gray-500 dark:text-gray-400 mt-12">
+      No users found. Start connecting to earn badges!
+    </p>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}
