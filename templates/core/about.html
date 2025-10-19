@@ -1,47 +1,124 @@
 {% extends "base.html" %}
 {% block title %}About | PittState-Connect{% endblock %}
 {% block content %}
-<section class="py-16 bg-gray-50 dark:bg-[#121212] text-gray-800 dark:text-gray-100">
-  <div class="container mx-auto px-6 md:px-12 lg:px-24">
-    <div class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold text-psu-gold mb-4">About PittState-Connect</h1>
-      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        PittState-Connect is a digital bridge built by students, alumni, and faculty of Pittsburg State University — 
-        connecting Gorillas across generations through mentorship, networking, and shared opportunity.
-      </p>
+
+<!-- 🦍 HERO SECTION -->
+<section class="hero-bg relative flex flex-col justify-center items-center text-center py-28 px-6 md:px-12 fade-in">
+  <div class="bg-black/50 absolute inset-0"></div>
+  <div class="relative z-10 max-w-3xl">
+    <h1 class="text-4xl md:text-6xl font-bold text-psu-gold mb-4">
+      About PittState-Connect
+    </h1>
+    <p class="text-lg md:text-xl text-gray-200 leading-relaxed">
+      Uniting <span class="text-psu-gold font-semibold">students, alumni, and faculty</span> 
+      across generations of Gorillas — building a stronger PSU community through 
+      collaboration, mentorship, and opportunity.
+    </p>
+  </div>
+</section>
+
+<!-- 🎓 OUR STORY -->
+<section class="section bg-gray-50 dark:bg-[#121212] text-center fade-in">
+  <h2 class="section-title">Our Story</h2>
+  <div class="gold-divider"></div>
+  <div class="max-w-4xl mx-auto mt-6 text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+    <p>
+      <strong>PittState-Connect</strong> began as a passion project by students and alumni 
+      who wanted to strengthen the connection between Pittsburg State University and its 
+      growing global network of graduates. What started as a simple directory evolved 
+      into a full-fledged platform that celebrates the Gorilla spirit — empowering users 
+      to share stories, post opportunities, and foster lifelong mentorships.
+    </p>
+    <p class="mt-6">
+      Every feature is designed to make networking easier, communication more meaningful, 
+      and success stories more visible — all while upholding the proud tradition of 
+      excellence that defines PSU.
+    </p>
+  </div>
+</section>
+
+<!-- 🤝 OUR MISSION -->
+<section class="section bg-white dark:bg-[#0f0f0f] fade-in">
+  <h2 class="section-title">Our Mission</h2>
+  <div class="gold-divider"></div>
+  <div class="max-w-3xl mx-auto text-center text-gray-700 dark:text-gray-300 text-lg mt-4 leading-relaxed">
+    <p>
+      To build a thriving digital ecosystem that connects every member of the 
+      <span class="text-psu-crimson font-semibold">Gorilla Family</span> — 
+      from current students seeking guidance to alumni offering opportunities, 
+      and faculty inspiring both.
+    </p>
+    <p class="mt-4">
+      By bridging these communities, we’re not just fostering connections — 
+      we’re creating a network that lasts far beyond graduation.
+    </p>
+  </div>
+</section>
+
+<!-- 🧩 OUR VALUES -->
+<section class="section bg-gray-50 dark:bg-[#121212] fade-in">
+  <h2 class="section-title">Our Core Values</h2>
+  <div class="gold-divider"></div>
+
+  <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-12 px-6 text-center">
+    <div class="card">
+      <i class="fas fa-handshake text-4xl text-psu-gold mb-3"></i>
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Community</h3>
+      <p>We believe in strengthening the Gorilla bond between students, alumni, and PSU supporters worldwide.</p>
     </div>
-
-    <div class="grid md:grid-cols-2 gap-10">
-      <div>
-        <h2 class="text-2xl font-semibold text-psu-gold mb-3">Our Mission</h2>
-        <p class="text-gray-700 dark:text-gray-300 mb-6">
-          Our goal is to empower every Gorilla with meaningful professional connections and opportunities — 
-          ensuring that Pittsburg State’s legacy of excellence continues long after graduation. 
-          By leveraging technology and community, PittState-Connect transforms networking into an active partnership.
-        </p>
-
-        <h2 class="text-2xl font-semibold text-psu-gold mb-3">Our Vision</h2>
-        <p class="text-gray-700 dark:text-gray-300 mb-6">
-          We envision a connected university ecosystem where students, alumni, and employers collaborate to 
-          grow careers, businesses, and the region. PittState-Connect acts as the central hub for mentorship, 
-          job matching, and event engagement — all driven by PSU pride.
-        </p>
-      </div>
-
-      <div class="flex items-center justify-center">
-        <img src="{{ url_for('static', filename='images/psu_about_team.jpg') }}" 
-             alt="PittState-Connect Team"
-             class="rounded-2xl shadow-lg border-4 border-psu-gold/30 w-full md:w-4/5" />
-      </div>
+    <div class="card">
+      <i class="fas fa-lightbulb text-4xl text-psu-gold mb-3"></i>
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Innovation</h3>
+      <p>We use technology to simplify networking, amplify opportunity, and highlight PSU excellence.</p>
     </div>
-
-    <div class="mt-16 text-center">
-      <h2 class="text-2xl font-semibold text-psu-gold mb-3">Built With Pride</h2>
-      <p class="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-        PittState-Connect is powered by innovation, fueled by Gorilla spirit, and designed to strengthen 
-        the bond between Pittsburg State University and its incredible community of students, alumni, and partners.
-      </p>
+    <div class="card">
+      <i class="fas fa-heart text-4xl text-psu-gold mb-3"></i>
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold mb-2">Integrity</h3>
+      <p>We commit to transparency, respect, and purpose in everything we do — on and off campus.</p>
     </div>
   </div>
 </section>
+
+<!-- 🌎 IMPACT -->
+<section class="section bg-white dark:bg-[#0f0f0f] text-center fade-in">
+  <h2 class="section-title">Our Impact</h2>
+  <div class="gold-divider"></div>
+  <p class="max-w-3xl mx-auto text-gray-700 dark:text-gray-300 text-lg leading-relaxed mt-4">
+    Since its inception, PittState-Connect has helped thousands of Gorillas reconnect, 
+    collaborate, and grow together — strengthening PSU’s reputation and reach across industries 
+    and generations.
+  </p>
+  <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto mt-12 text-center">
+    <div>
+      <h3 class="text-4xl font-bold text-psu-gold">10K+</h3>
+      <p class="text-gray-600 dark:text-gray-300 mt-2">Alumni Reached</p>
+    </div>
+    <div>
+      <h3 class="text-4xl font-bold text-psu-gold">2K+</h3>
+      <p class="text-gray-600 dark:text-gray-300 mt-2">Mentorship Matches</p>
+    </div>
+    <div>
+      <h3 class="text-4xl font-bold text-psu-gold">800+</h3>
+      <p class="text-gray-600 dark:text-gray-300 mt-2">Career Posts Shared</p>
+    </div>
+    <div>
+      <h3 class="text-4xl font-bold text-psu-gold">100+</h3>
+      <p class="text-gray-600 dark:text-gray-300 mt-2">Campus Events Hosted</p>
+    </div>
+  </div>
+</section>
+
+<!-- 💌 CALL TO ACTION -->
+<section class="section bg-psu-crimson text-center text-white fade-in">
+  <h2 class="text-3xl md:text-4xl font-bold mb-4 text-psu-gold">Be Part of the Legacy</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Join the growing community of Gorillas supporting one another through PittState-Connect.
+    Whether you’re a student, alumni, or faculty member — your story is part of ours.
+  </p>
+  <a href="{{ url_for('core.careers') }}" 
+     class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg shadow hover:bg-yellow-500 transition-all">
+     Get Involved
+  </a>
+</section>
+
 {% endblock %}
