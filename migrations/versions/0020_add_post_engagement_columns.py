@@ -1,43 +1,40 @@
-"""Add likes_count and comments_count columns to posts, backfill comments_count"""
+"""Add engagement columns to posts: views_count, shares_count, saves_count, last_interacted_at."""
 
 from alembic import op
 import sqlalchemy as sa
 
-# Revision identifiers, used by Alembic.
 revision = "0020_add_post_engagement_columns"
 down_revision = "0019_add_replies_and_badges"
 branch_labels = None
 depends_on = None
 
 
+def _has_column(conn, table: str, column: str) -> bool:
+    insp = sa.inspect(conn)
+    cols = [c["name"] for c in insp.get_columns(table)] if table in insp.get_table_names() else []
+    return column in cols
+
+
 def upgrade():
-    # Add new engagement columns
-    op.add_column("posts", sa.Column("likes_count", sa.Integer(), nullable=False, server_default="0"))
-    op.add_column("posts", sa.Column("comments_count", sa.Integer(), nullable=False, server_default="0"))
+    bind = op.get_bind()
+    if "posts" not in sa.inspect(bind).get_table_names():
+        return
 
-    # Backfill comments_count from replies if replies table exists
-    conn = op.get_bind()
-    try:
-        conn.execute(sa.text("""
-            UPDATE posts
-            SET comments_count = COALESCE(src.cnt, 0)
-            FROM (
-                SELECT post_id, COUNT(*)::int AS cnt
-                FROM replies
-                WHERE post_id IS NOT NULL
-                GROUP BY post_id
-            ) AS src
-            WHERE posts.id = src.post_id;
-        """))
-    except Exception as e:
-        print(f"⚠️ Skipped backfill due to missing replies table: {e}")
-
-    # Remove server defaults now that columns are populated
-    op.alter_column("posts", "likes_count", server_default=None)
-    op.alter_column("posts", "comments_count", server_default=None)
+    if not _has_column(bind, "posts", "views_count"):
+        op.add_column("posts", sa.Column("views_count", sa.Integer, server_default="0", nullable=False))
+    if not _has_column(bind, "posts", "shares_count"):
+        op.add_column("posts", sa.Column("shares_count", sa.Integer, server_default="0", nullable=False))
+    if not _has_column(bind, "posts", "saves_count"):
+        op.add_column("posts", sa.Column("saves_count", sa.Integer, server_default="0", nullable=False))
+    if not _has_column(bind, "posts", "last_interacted_at"):
+        op.add_column("posts", sa.Column("last_interacted_at", sa.DateTime))
 
 
 def downgrade():
-    # Drop the new columns if rolled back
-    op.drop_column("posts", "comments_count")
-    op.drop_column("posts", "likes_count")
+    bind = op.get_bind()
+    if "posts" not in sa.inspect(bind).get_table_names():
+        return
+
+    for col in ["last_interacted_at", "saves_count", "shares_count", "views_count"]:
+        if _has_column(bind, "posts", col):
+            op.drop_column("posts", col)
