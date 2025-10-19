@@ -1,12 +1,21 @@
 services:
+  # ==========================================================
+  # 🦍 Main Web Service — PittState-Connect
+  # ==========================================================
   - type: web
     name: pittstate-connect
     env: python
+    plan: free
+    region: ohio
+
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app_pro:app --timeout 120 --workers 3 --threads 2
+
     envVars:
       - key: FLASK_ENV
         value: production
+      - key: FLASK_APP
+        value: app_pro.py
       - key: PYTHON_VERSION
         value: 3.10.13
       - key: DATABASE_URL
@@ -29,16 +38,60 @@ services:
         sync: false
       - key: SERVER_NAME
         value: pittstate-connect.onrender.com
-      - key: FLASK_APP
-        value: app_pro.py
 
-    # Run after every successful deploy — ensures demo data is ready
-    postDeployCommand: |
-      echo "🔍 Running PittState-Connect verification..."
-      python verify_seed_data.py --fix
-
-    # Optional health check endpoint (optional but recommended)
     healthCheckPath: /status
 
+    postDeployCommand: |
+      echo "🔍 Running PittState-Connect database verification..."
+      python verify_seed_data.py --fix
+      echo "✅ Post-deploy data check completed successfully."
+
+  # ==========================================================
+  # ⚙️ Background Worker — Email Digests / Scheduler / Analytics
+  # ==========================================================
+  - type: worker
+    name: pittstate-connect-worker
+    env: python
     plan: free
     region: ohio
+
+    buildCommand: pip install -r requirements.txt
+    startCommand: python worker.py
+
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: DATABASE_URL
+        fromService:
+          type: web
+          name: pittstate-connect
+          property: env.DATABASE_URL
+      - key: REDIS_URL
+        fromService:
+          type: web
+          name: pittstate-connect
+          property: env.REDIS_URL
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: pittstate-connect
+          property: env.SECRET_KEY
+      - key: MAIL_USERNAME
+        fromService:
+          type: web
+          name: pittstate-connect
+          property: env.MAIL_USERNAME
+      - key: MAIL_PASSWORD
+        fromService:
+          type: web
+          name: pittstate-connect
+          property: env.MAIL_PASSWORD
+
+databases:
+  - name: pittstate-connect-db
+    plan: free
+    region: ohio
+    databaseName: pittstate_connect
+    user: pittstate_connect_user
