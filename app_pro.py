@@ -1,127 +1,113 @@
-# -----------------------------------------------------
-# 🦍 PittState-Connect / Gorilla-Link
-# Flask Production App — PSU Branded (Render Compatible)
-# -----------------------------------------------------
-
+import os
+import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 from flask_mail import Mail
+from flask_login import LoginManager
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_apscheduler import APScheduler
-from flask_cors import CORS
 from flask_moment import Moment
-import os
-import logging
 
-# -----------------------------------------------------
-# Extensions
-# -----------------------------------------------------
+# -------------------------------------------------------------
+# 🧩 Extensions
+# -------------------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
+login_manager = LoginManager()
 cache = Cache()
-moment = Moment()
 scheduler = APScheduler()
-limiter = Limiter(key_func=get_remote_address, default_limits=["1000 per day", "200 per hour"])
+moment = Moment()
 
-# -----------------------------------------------------
-# Application Factory
-# -----------------------------------------------------
+
+# -------------------------------------------------------------
+# ⚙️ Application Factory
+# -------------------------------------------------------------
 def create_app():
-    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app = Flask(__name__, static_folder="static", template_folder="templates")
 
-    # -----------------------------------------------------
-    # Configuration
-    # -----------------------------------------------------
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
+    # --- Configuration ---
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-key")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:password@localhost/pittstate_connect"
+        "DATABASE_URL", "sqlite:///pittstate_connect.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["CACHE_TYPE"] = "RedisCache"
+    app.config["CACHE_REDIS_URL"] = os.getenv("REDIS_URL", "redis://localhost:6379")
     app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
     app.config["MAIL_USE_TLS"] = True
     app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
     app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-    app.config["CACHE_TYPE"] = "RedisCache"
-    app.config["CACHE_REDIS_URL"] = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstate-connect.com")
 
-    # -----------------------------------------------------
-    # Initialize Extensions
-    # -----------------------------------------------------
+    # --- Logging ---
+    logging.basicConfig(level=logging.INFO)
+    app.logger.setLevel(logging.INFO)
+
+    # --- Extensions ---
+    CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+    login_manager.init_app(app)
     cache.init_app(app)
-    limiter.init_app(app)
-    scheduler.init_app(app)
+    limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
     moment.init_app(app)
-    CORS(app)
 
-    logging.basicConfig(level=logging.INFO)
-    app.logger.info("✅ Extensions initialized successfully.")
+    scheduler.api_enabled = True
+    scheduler.init_app(app)
+    scheduler.start()
+    app.logger.info("✅ Scheduler started successfully.")
 
-    # -----------------------------------------------------
-    # Register Blueprints
-    # -----------------------------------------------------
-    try:
-        from blueprints.core.routes import core_bp
-        app.register_blueprint(core_bp, url_prefix="/")
-        app.logger.info("✅ Loaded blueprint: core")
-    except Exception as e:
-        app.logger.error(f"⚠️ Failed to load core blueprint: {e}")
-
-    blueprint_modules = [
-        "admin", "analytics", "alumni", "auth", "badges", "career", "campus",
-        "connections", "departments", "digests", "engagement", "events", "feed",
-        "groups", "map", "marketing", "mentorship", "notifications",
-        "opportunities", "portfolio", "profile", "students", "stories", "api"
+    # --- Blueprint Auto-Loader ---
+    from importlib import import_module
+    blueprints = [
+        "core", "admin", "analytics", "alumni", "auth", "badges", "career", "campus",
+        "connections", "departments", "digests", "engagement", "events", "feed", "groups",
+        "map", "marketing", "mentorship", "notifications", "opportunities", "portfolio",
+        "profile", "students", "stories", "api"
     ]
 
-    for bp_name in blueprint_modules:
+    for bp_name in blueprints:
         try:
-            module = __import__(f"blueprints.{bp_name}.routes", fromlist=[f"{bp_name}_bp"])
-            bp = getattr(module, f"{bp_name}_bp")
-            app.register_blueprint(bp, url_prefix=f"/{bp_name}")
-            app.logger.info(f"✅ Loaded blueprint package: {bp_name}")
+            module = import_module(f"blueprints.{bp_name}.routes")
+            for attr in dir(module):
+                if attr.endswith("_bp"):
+                    bp = getattr(module, attr)
+                    app.register_blueprint(bp)
+                    app.logger.info(f"✅ Loaded blueprint package: {bp_name}")
+                    break
+            else:
+                app.logger.warning(f"⚠️ Skipped blueprint {bp_name}: no *_bp found")
         except Exception as e:
             app.logger.warning(f"⚠️ Skipped blueprint {bp_name}: {e}")
 
-    # -----------------------------------------------------
-    # Scheduler
-    # -----------------------------------------------------
-    try:
-        scheduler.start()
-        app.logger.info("✅ Scheduler started successfully.")
-    except Exception as e:
-        app.logger.warning(f"⚠️ Scheduler start skipped: {e}")
+    app.logger.info("✅ All blueprints processed successfully.")
 
-    # -----------------------------------------------------
-    # Health Check
-    # -----------------------------------------------------
-    @app.route("/status")
-    def status():
-        return (
-            "✅ PittState-Connect is live — blueprints loaded successfully.",
-            200,
-            {"Content-Type": "text/plain"},
-        )
+    # --- Flask-Login defaults ---
+    login_manager.login_view = "auth.login"
+    login_manager.login_message_category = "info"
+
+    # --- Flask-Moment (for dynamic time support) ---
+    app.logger.info("✅ Flask-Moment initialized successfully.")
+
+    # --- Routes health check ---
+    @app.route("/health")
+    def health():
+        return "✅ PittState-Connect running", 200
 
     return app
 
 
-# -----------------------------------------------------
-# ✅ Global app variable for Gunicorn
-# -----------------------------------------------------
-app = create_app()  # 👈 THIS IS THE FIX
+# -------------------------------------------------------------
+# 🧠 App Instance for Render / Gunicorn
+# -------------------------------------------------------------
+app = create_app()
 
-# -----------------------------------------------------
-# Local Development Entry Point
-# -----------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
