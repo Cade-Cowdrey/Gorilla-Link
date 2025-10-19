@@ -21,8 +21,8 @@
     <div class="flex flex-col sm:flex-row justify-center gap-4">
       <a href="{{ url_for('core.careers') }}" 
          class="btn-primary text-base px-8 py-3 shadow-lg">Explore Careers</a>
-      <a href="{{ url_for('core.about') }}" 
-         class="btn-outline text-base px-8 py-3">Learn More</a>
+      <a href="{{ url_for('auth.register') }}" 
+         class="btn-outline text-base px-8 py-3">Join Now</a>
     </div>
   </div>
 </section>
@@ -96,7 +96,7 @@
     Be part of the movement that connects generations of PSU Gorillas — empowering success, mentorship, 
     and lifelong friendships through PittState-Connect.
   </p>
-  <a href="{{ url_for('core.register') if 'core.register' in current_app.view_functions else url_for('core.contact') }}"
+  <a href="{{ url_for('auth.register') }}"
      class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg shadow hover:bg-yellow-500 transition-all">
     Get Started
   </a>
