@@ -1,125 +1,102 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}PittState-Connect{% endblock %}</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/psu_logo.png') }}">
-  <script src="https://kit.fontawesome.com/a2e0b6a05b.js" crossorigin="anonymous"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-  <link href="{{ url_for('static', filename='css/psu-theme.css') }}" rel="stylesheet">
+  <link rel="icon" href="{{ url_for('static', filename='images/psu_logo_large.png') }}">
+  <meta name="description" content="PittState-Connect | Official networking platform for Pittsburg State University students, alumni, and faculty.">
+  
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom PSU Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+
+  <!-- Smooth fade-in animation -->
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+    .fade-in { animation: fadeIn 0.8s ease-in-out both; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    .section { padding: 6rem 1.5rem; }
+    .section-title { font-size: 2rem; font-weight: 700; color: #750014; }
+    .gold-divider { width: 60px; height: 4px; background: #FFD700; margin: 1rem auto; border-radius: 2px; }
+    .btn-primary { background-color: #FFD700; color: #000; font-weight: 600; border-radius: 0.5rem; }
+    .btn-primary:hover { background-color: #e6c200; }
+    .btn-outline { border: 2px solid #FFD700; color: #FFD700; font-weight: 600; border-radius: 0.5rem; }
+    .btn-outline:hover { background-color: #FFD700; color: #000; }
+  </style>
+
+  {% block head %}{% endblock %}
 </head>
 
-<body class="bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 flex flex-col min-h-screen">
+<body class="bg-white text-gray-900 dark:bg-[#0a0a0a] dark:text-gray-100 flex flex-col min-h-screen">
 
-  <!-- 🌟 Navbar -->
-  <nav class="bg-psu-crimson dark:bg-[#1a1a1a] text-white shadow-lg">
-    <div class="container mx-auto px-6 py-3 flex justify-between items-center">
-      <a href="{{ url_for('core.home') }}" class="flex items-center space-x-2">
-        <img src="{{ url_for('static', filename='images/psu_logo.png') }}" alt="PSU Logo" class="h-10 w-10">
-        <span class="font-bold text-xl tracking-wide">PittState-Connect</span>
-      </a>
-
-      <!-- Desktop Links -->
-      <div class="hidden md:flex space-x-6 text-sm font-medium">
-        <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
-        <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a>
-        <a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a>
-        <a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a>
-        <a href="{{ url_for('core.about') }}" class="hover:text-psu-gold">About</a>
-        <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
-      </div>
-
-      <!-- Right Controls -->
+  <!-- 🌐 NAVBAR -->
+  <header class="bg-psu-crimson text-white shadow-md fixed top-0 w-full z-50">
+    <nav class="container mx-auto flex justify-between items-center px-6 py-3">
       <div class="flex items-center space-x-3">
-        <button id="themeToggle" class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all" title="Toggle dark mode">
-          <i class="fas fa-sun hidden dark:inline text-psu-gold"></i>
-          <i class="fas fa-moon inline dark:hidden"></i>
-        </button>
-        <button id="menuBtn" class="md:hidden p-2 rounded bg-white/10 hover:bg-white/20">
-          <i class="fas fa-bars"></i>
+        <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" alt="PSU Logo" class="w-10 h-10">
+        <a href="{{ url_for('core.home') }}" class="text-xl font-semibold text-white hover:text-psu-gold transition">PittState-Connect</a>
+      </div>
+      <ul class="hidden md:flex space-x-6 text-sm font-medium">
+        <li><a href="{{ url_for('core.home') }}" class="hover:text-psu-gold transition">Home</a></li>
+        <li><a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold transition">Careers</a></li>
+        <li><a href="{{ url_for('core.events') }}" class="hover:text-psu-gold transition">Events</a></li>
+        <li><a href="{{ url_for('core.team') }}" class="hover:text-psu-gold transition">Team</a></li>
+        <li><a href="{{ url_for('core.status') }}" class="hover:text-psu-gold transition">Status</a></li>
+      </ul>
+      <div class="flex items-center space-x-3">
+        <!-- Dark mode toggle -->
+        <button id="themeToggle" class="text-white hover:text-psu-gold text-lg">
+          <i id="themeIcon" class="fas fa-moon"></i>
         </button>
       </div>
-    </div>
+    </nav>
+  </header>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="hidden flex-col space-y-3 bg-[#2b2b2b] text-white px-6 py-4 md:hidden">
-      <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
-      <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a>
-      <a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a>
-      <a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a>
-      <a href="{{ url_for('core.about') }}" class="hover:text-psu-gold">About</a>
-      <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
-    </div>
-  </nav>
+  <!-- Add top spacing for fixed nav -->
+  <div class="pt-20"></div>
 
-  <!-- 📄 Page Content -->
-  <main class="flex-grow">
+  <!-- 🧱 MAIN CONTENT -->
+  <main class="flex-1">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ⚙️ Footer -->
-  <footer class="bg-psu-crimson dark:bg-[#111111] text-gray-100 py-10 mt-10 border-t border-psu-gold/20">
-    <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-6 md:space-y-0">
-      <!-- Left -->
-      <div>
-        <h3 class="font-bold text-xl text-psu-gold mb-2">PittState-Connect</h3>
-        <p class="text-sm text-gray-200">
-          Connecting students, alumni, and employers through innovation and Gorilla pride.
-        </p>
-      </div>
-
-      <!-- Center Links -->
-      <div class="flex flex-wrap justify-center space-x-6 text-sm">
-        <a href="{{ url_for('core.privacy') }}" class="hover:text-psu-gold">Privacy Policy</a>
-        <a href="{{ url_for('core.terms') }}" class="hover:text-psu-gold">Terms of Service</a>
-        <a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a>
-      </div>
-
-      <!-- Right Social Icons -->
-      <div class="flex space-x-4 text-lg text-psu-gold">
-        <a href="#" class="hover:text-yellow-400"><i class="fab fa-linkedin"></i></a>
-        <a href="#" class="hover:text-yellow-400"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="hover:text-yellow-400"><i class="fab fa-instagram"></i></a>
-      </div>
-    </div>
-
-    <div class="text-center text-gray-400 text-xs mt-8">
-      <p>© {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by Gorilla-Link</p>
+  <!-- ⚙️ FOOTER -->
+  <footer class="bg-psu-crimson text-gray-200 py-8 mt-12">
+    <div class="container mx-auto text-center space-y-3">
+      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" alt="PSU Logo" class="mx-auto w-12 h-12 mb-2 opacity-90">
+      <p class="text-sm text-gray-300">© {{ now().year }} Pittsburg State University — PittState-Connect. All rights reserved.</p>
+      <p class="text-sm">
+        <a href="https://www.pittstate.edu" class="text-psu-gold hover:underline" target="_blank">Official PSU Website</a>
+      </p>
     </div>
   </footer>
 
-  <!-- 🔝 Scroll to Top -->
-  <button id="scrollTopBtn" class="fixed bottom-6 right-6 bg-psu-gold text-black p-3 rounded-full shadow-lg hover:bg-yellow-400 transition-all hidden">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-
-  <!-- 🧠 Scripts -->
+  <!-- 🌗 DARK MODE SCRIPT -->
   <script>
-    // Mobile menu toggle
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (menuBtn) {
-      menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-    }
-
-    // Dark mode toggle
     const themeToggle = document.getElementById('themeToggle');
-    themeToggle?.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme',
-        document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    });
-    if (localStorage.getItem('theme') === 'dark') {
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (localStorage.theme === 'dark') {
       document.documentElement.classList.add('dark');
+      themeIcon.classList.replace('fa-moon', 'fa-sun');
     }
 
-    // Scroll to top
-    const scrollBtn = document.getElementById('scrollTopBtn');
-    window.addEventListener('scroll', () => {
-      scrollBtn.classList.toggle('hidden', window.scrollY < 400);
+    themeToggle.addEventListener('click', () => {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      const darkMode = html.classList.contains('dark');
+      localStorage.theme = darkMode ? 'dark' : 'light';
+      themeIcon.classList.toggle('fa-moon', !darkMode);
+      themeIcon.classList.toggle('fa-sun', darkMode);
     });
-    scrollBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   </script>
+
 </body>
 </html>
