@@ -1,168 +1,119 @@
 {% extends "base.html" %}
-{% block title %}Our Team · PittState-Connect{% endblock %}
-
+{% block title %}Our Team | PittState-Connect{% endblock %}
 {% block content %}
-<!-- 🦍 Hero -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
-  <div class="max-w-5xl mx-auto">
-    <img
-      src="{{ url_for('static', filename='img/psu_logo.png') }}"
-      alt="PSU Logo"
-      class="mx-auto mb-6 w-28 h-auto"
-    />
-    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
-      The <span class="text-[#FFD700]">PittState-Connect</span> Team
+
+<!-- 🦍 HERO SECTION -->
+<section class="hero-bg relative flex flex-col justify-center items-center text-center py-28 px-6 md:px-12 fade-in">
+  <div class="bg-black/50 absolute inset-0"></div>
+  <div class="relative z-10 max-w-3xl">
+    <h1 class="text-4xl md:text-6xl font-bold text-psu-gold mb-4">
+      Meet the Team
     </h1>
-    <p class="text-lg max-w-3xl mx-auto text-gray-100 leading-relaxed">
-      Driven by innovation, powered by Gorillas — meet the students,
-      alumni, and advisors building the digital future of PSU.
+    <p class="text-lg md:text-xl text-gray-200 leading-relaxed">
+      The passionate Gorillas behind PittState-Connect — dedicated to building the future 
+      of networking, mentorship, and opportunity at <span class="text-psu-gold font-semibold">Pittsburg State University</span>.
     </p>
   </div>
 </section>
 
-<!-- 💼 Team Grid -->
-<section class="py-20 bg-gray-50 text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto text-center">
-    <h2 class="text-4xl font-bold mb-10 text-[#660000]">
-      Meet the Minds Behind the Mission
-    </h2>
+<!-- 👥 TEAM SECTION -->
+<section class="section bg-gray-50 dark:bg-[#121212] fade-in">
+  <h2 class="section-title">Leadership & Development</h2>
+  <div class="gold-divider"></div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 px-6">
-      <!-- Cade Cowdrey -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/cade_profile.png') }}"
-          alt="Cade Cowdrey"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">Cade Cowdrey</h3>
-        <p class="text-gray-700 mb-2">Founder & Lead Developer</p>
-        <p class="text-sm text-gray-500">
-          Creator of Gorilla-Link · Innovator behind PittState-Connect
-        </p>
-      </div>
+  <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-12 container mx-auto px-6">
 
-      <!-- Student Development Team -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/student_team.png') }}"
-          alt="Student Team"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">Student Developers</h3>
-        <p class="text-gray-700 mb-2">PSU Computer Science Collaborators</p>
-        <p class="text-sm text-gray-500">
-          Designing, coding, and testing features that drive PSU’s innovation.
-        </p>
+    <!-- Cade Cowdrey -->
+    <div class="card text-center shadow-lg-gorilla">
+      <img src="{{ url_for('static', filename='images/team/cade_cowdrey.jpg') }}" 
+           alt="Cade Cowdrey" 
+           class="w-32 h-32 mx-auto rounded-full object-cover mb-4 border-4 border-psu-gold">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Cade Cowdrey</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Founder & Lead Developer</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Visionary creator of PittState-Connect, blending technology and community to connect Gorillas worldwide.
+      </p>
+      <div class="mt-3 flex justify-center space-x-4 text-psu-gold">
+        <a href="https://github.com/Cade-Cowdrey" target="_blank"><i class="fab fa-github text-lg"></i></a>
+        <a href="https://www.linkedin.com/in/cade-cowdrey" target="_blank"><i class="fab fa-linkedin text-lg"></i></a>
       </div>
+    </div>
 
-      <!-- Faculty Advisors -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/faculty_advisor.png') }}"
-          alt="Faculty Advisors"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">Faculty & Advisors</h3>
-        <p class="text-gray-700 mb-2">Mentors & Academic Support</p>
-        <p class="text-sm text-gray-500">
-          Guiding students with real-world insight and professional mentorship.
-        </p>
-      </div>
+    <!-- Faculty Advisor -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/team/faculty_advisor.jpg') }}" 
+           alt="Faculty Advisor" 
+           class="w-32 h-32 mx-auto rounded-full object-cover mb-4 border-4 border-psu-gold">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Dr. Jennifer Adams</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Faculty Advisor</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Guiding PittState-Connect’s mission to align with PSU’s core academic values and student success goals.
+      </p>
+    </div>
 
-      <!-- Alumni Network -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/alumni_team.png') }}"
-          alt="Alumni Network"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">PSU Alumni Partners</h3>
-        <p class="text-gray-700 mb-2">Industry Mentors</p>
-        <p class="text-sm text-gray-500">
-          Offering internships, career advice, and global networking support.
-        </p>
-      </div>
+    <!-- Backend Developer -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/team/backend_dev.jpg') }}" 
+           alt="Backend Developer" 
+           class="w-32 h-32 mx-auto rounded-full object-cover mb-4 border-4 border-psu-gold">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Jordan Lee</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Backend Developer</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Responsible for building PittState-Connect’s secure Flask architecture and scalable database integrations.
+      </p>
+    </div>
 
-      <!-- Marketing & Media -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/marketing_team.png') }}"
-          alt="Marketing Team"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">Marketing & Outreach</h3>
-        <p class="text-gray-700 mb-2">Design & Communications</p>
-        <p class="text-sm text-gray-500">
-          Sharing PittState-Connect’s vision through campaigns, media, and design.
-        </p>
-      </div>
+    <!-- Marketing Lead -->
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='images/team/marketing_lead.jpg') }}" 
+           alt="Marketing Lead" 
+           class="w-32 h-32 mx-auto rounded-full object-cover mb-4 border-4 border-psu-gold">
+      <h3 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">Samantha Green</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Marketing & Communications Lead</p>
+      <p class="mt-3 text-gray-700 dark:text-gray-300 text-sm">
+        Overseeing outreach, branding, and social campaigns to help connect thousands of PSU students and alumni.
+      </p>
+    </div>
 
-      <!-- Render/Deployment Ops -->
-      <div class="team-card">
-        <img
-          src="{{ url_for('static', filename='img/devops_team.png') }}"
-          alt="DevOps"
-          class="w-36 h-36 mx-auto rounded-full object-cover shadow-lg mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000]">Deployment & Systems</h3>
-        <p class="text-gray-700 mb-2">Render & Database Ops</p>
-        <p class="text-sm text-gray-500">
-          Maintaining uptime, security, and performance for the PSU platform.
-        </p>
-      </div>
+  </div>
+</section>
+
+<!-- 🧑‍🎓 STUDENT CONTRIBUTORS -->
+<section class="section bg-white dark:bg-[#0f0f0f] fade-in text-center">
+  <h2 class="section-title">Student Contributors</h2>
+  <div class="gold-divider"></div>
+  <p class="max-w-3xl mx-auto text-gray-700 dark:text-gray-300 mt-4 text-lg">
+    A huge thanks to the students, interns, and creative thinkers who contributed to the PittState-Connect platform —
+    representing the best of PSU’s innovation and community-driven spirit.
+  </p>
+
+  <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12 container mx-auto px-6">
+    <div class="card text-center">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Alex Johnson</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">UI/UX Designer</p>
+    </div>
+    <div class="card text-center">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Taylor Smith</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Front-End Developer</p>
+    </div>
+    <div class="card text-center">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">Michael Rivera</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-300">Database & QA</p>
     </div>
   </div>
 </section>
 
-<!-- 🌟 CTA -->
-<section class="bg-[#660000] text-white py-20 text-center fade-in">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">
-      Join the Next Generation of PSU Innovators
-    </h2>
-    <p class="text-gray-100 mb-8">
-      We’re always looking for passionate students and alumni who want to
-      contribute to PittState-Connect’s growth.
-    </p>
-    <a href="{{ url_for('auth.register') }}" class="psu-btn">Become a Collaborator</a>
-  </div>
+<!-- 💛 CALL TO ACTION -->
+<section class="section bg-psu-crimson text-center text-white fade-in">
+  <h2 class="text-3xl md:text-4xl font-bold mb-4 text-psu-gold">Join the Mission</h2>
+  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
+    Want to contribute to PittState-Connect or help mentor the next generation of Gorillas?  
+    We’re always looking for passionate PSU students and alumni to join the team.
+  </p>
+  <a href="{{ url_for('core.contact') if 'core.contact' in current_app.view_functions else url_for('core.status') }}" 
+     class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg shadow hover:bg-yellow-500 transition-all">
+     Get Involved
+  </a>
 </section>
 
-<!-- ✨ Scroll Reveal -->
-<script>
-  const fadeEls = document.querySelectorAll(".fade-in");
-  const reveal = () => {
-    const trigger = window.innerHeight * 0.9;
-    fadeEls.forEach((el) => {
-      const top = el.getBoundingClientRect().top;
-      if (top < trigger) el.classList.add("visible");
-    });
-  };
-  window.addEventListener("scroll", reveal);
-  window.addEventListener("load", reveal);
-</script>
-
-<style>
-  .fade-in {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: all 0.7s ease-out;
-  }
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .team-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.75rem;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .team-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-  }
-</style>
 {% endblock %}
