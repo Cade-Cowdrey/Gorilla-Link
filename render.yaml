@@ -1,127 +1,44 @@
-# ==============================================================
-# 🦍 PittState-Connect — Render Deployment Specification
-# ==============================================================
-# This file defines all Render services used by PittState-Connect:
-# - Web Service (Flask + Gunicorn)
-# - Redis Cache
-# - Environment Variables, Build, and Health Checks
-# ==============================================================
-
 services:
-  # ------------------------------------------------------------
-  # 🌐 MAIN WEB SERVICE
-  # ------------------------------------------------------------
   - type: web
     name: pittstate-connect
     env: python
-    region: oregon                  # (change to closest region if desired)
-    branch: main
-    autoDeploy: true
-    runtime: python3
-    startCommand: gunicorn app_pro:app
-
-    # ----------------------------------------------------------
-    # 📦 BUILD SETTINGS
-    # ----------------------------------------------------------
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-
-    # ----------------------------------------------------------
-    # ⚙️ ENVIRONMENT VARIABLES
-    # ----------------------------------------------------------
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_pro:app --timeout 120 --workers 3 --threads 2
     envVars:
-      # 🔑 Core Configuration
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
         value: 3.10.13
-      - key: SECRET_KEY
-        sync: false                  # Keep in .env.production for security
-
-      # 🗃️ Database (PostgreSQL on Render)
       - key: DATABASE_URL
         sync: false
-
-      # 🧠 Redis (linked service below)
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-
-      # 📧 Mail Configuration
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
       - key: MAIL_SERVER
         value: smtp.gmail.com
       - key: MAIL_PORT
-        value: "587"
+        value: 587
       - key: MAIL_USE_TLS
-        value: "True"
+        value: "true"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
         sync: false
-      - key: MAIL_DEFAULT_SENDER
-        value: no-reply@pittstate-connect.com
+      - key: SERVER_NAME
+        value: pittstate-connect.onrender.com
+      - key: FLASK_APP
+        value: app_pro.py
 
-      # 🧰 Admin + Security Tokens
-      - key: ADMIN_TOKEN
-        sync: false
-
-      # 🕒 Scheduler + Caching
-      - key: FLASK_CACHE_TYPE
-        value: RedisCache
-      - key: FLASK_CACHE_REDIS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-
-    # ----------------------------------------------------------
-    # 🩺 HEALTH CHECK
-    # ----------------------------------------------------------
-    healthCheckPath: /health
-    healthCheckTimeout: 60
-    healthCheckIntervalSeconds: 15
-    autoDeployOnGitCommit: true
-
-    # ----------------------------------------------------------
-    # 🔥 INSTANCE SPECS
-    # ----------------------------------------------------------
-    plan: starter                   # Options: free | starter | standard | pro
-    numInstances: 1
-    envVarsFromFiles:
-      - path: .env.production       # Securely load environment variables
-
-    # ----------------------------------------------------------
-    # 🔧 SERVICE HOOKS
-    # ----------------------------------------------------------
-    preDeployCommand: |
-      echo "🔍 Running database migrations..."
-      flask db upgrade || echo "⚠️ Database migration skipped."
-      echo "✅ Build complete, preparing to serve app..."
-
+    # Run after every successful deploy — ensures demo data is ready
     postDeployCommand: |
-      echo "🎉 PittState-Connect successfully deployed and live!"
+      echo "🔍 Running PittState-Connect verification..."
+      python verify_seed_data.py --fix
 
-  # ------------------------------------------------------------
-  # 🧠 REDIS SERVICE
-  # ------------------------------------------------------------
-  - type: redis
-    name: pittstate-connect-redis
-    plan: free                      # You can upgrade to starter | standard later
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList: []                 # Default (public Render VPC)
-    # Redis automatically links to web service through env vars above.
+    # Optional health check endpoint (optional but recommended)
+    healthCheckPath: /status
 
-# ==============================================================
-# 🛠️ NOTES
-# ==============================================================
-# 1. Gunicorn starts app_pro:app (matches your Flask app factory export)
-# 2. All sensitive values like SECRET_KEY and DATABASE_URL
-#    should be stored in Render’s Environment tab or .env.production
-# 3. Flask-Moment and Redis caching auto-initialize via app_pro.py
-# 4. Logs: Check the Render dashboard → "Logs" for each deploy
-# 5. To redeploy manually: click “Manual Deploy → Clear build cache → Deploy”
-# ==============================================================
-
+    plan: free
+    region: ohio
