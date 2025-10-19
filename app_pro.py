@@ -1,70 +1,54 @@
 # ---------------------------------------------------------
 # 🦍 PittState-Connect / Gorilla-Link
-# Application Factory (Production Entrypoint)
+# Application Factory — Production Entry Point
 # ---------------------------------------------------------
 import os
 from flask import Flask
+from config import get_config
 from extensions import db, mail, migrate, login_manager, cache
-from utils.mail_util import send_email
+from flask_cors import CORS
+from flask_apscheduler import APScheduler
 
 # ---------------------------------------------------------
-# Factory Function
+# Application Factory
 # ---------------------------------------------------------
 def create_app():
-    app = Flask(__name__)
+    """Factory pattern to create and configure the Flask app."""
+    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app.config.from_object(get_config())
+
+    # Enable CORS
+    CORS(app)
 
     # -----------------------------------------------------
-    # Configuration
-    # -----------------------------------------------------
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
-
-    # Mail Configuration
-    app.config["MAIL_SERVER"] = "smtp.gmail.com"
-    app.config["MAIL_PORT"] = 587
-    app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-    app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
-        "MAIL_DEFAULT_SENDER", "no-reply@pittstateconnect.edu"
-    )
-
-    # -----------------------------------------------------
-    # Initialize Extensions
+    # Initialize Core Extensions
     # -----------------------------------------------------
     db.init_app(app)
-    migrate.init_app(app, db)
     mail.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     cache.init_app(app)
 
     # -----------------------------------------------------
-    # Import Models (register for migrations)
+    # APScheduler (for digests, cleanup, etc.)
     # -----------------------------------------------------
-    from models import (
-        User,
-        Department,
-        Post,
-        Comment,
-        Event,
-        Notification,
-        Badge,
-        AuditLog,
-    )
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
 
     # -----------------------------------------------------
-    # Register Blueprints
+    # Blueprint Registration
     # -----------------------------------------------------
     from blueprints import (
         admin,
         alumni,
         analytics,
+        api,
         auth,
         badges,
         campus,
         career,
-        careers,
+        connections,
         core,
         departments,
         digests,
@@ -81,18 +65,18 @@ def create_app():
         profile,
         stories,
         students,
-        connections,
     )
 
-    blueprints = [
+    blueprint_packages = [
         admin,
         alumni,
         analytics,
+        api,
         auth,
         badges,
         campus,
         career,
-        careers,
+        connections,
         core,
         departments,
         digests,
@@ -109,27 +93,52 @@ def create_app():
         profile,
         stories,
         students,
-        connections,
     ]
 
-    for bp in blueprints:
+    for package in blueprint_packages:
         try:
-            app.register_blueprint(bp.routes.__getattribute__(f"{bp.__name__}_bp"))
-            print(f"✅ Loaded blueprint package: {bp.__name__}")
+            # Each blueprint file defines a *_bp variable (e.g., admin_bp)
+            for attr_name in dir(package):
+                if attr_name.endswith("_bp"):
+                    bp = getattr(package, attr_name)
+                    app.register_blueprint(bp)
+                    print(f"✅ Loaded blueprint package: {package.__name__}")
+                    break
         except Exception as e:
-            print(f"⚠️  Skipped blueprint {bp.__name__}: {e}")
+            print(f"⚠️  Skipped blueprint {package.__name__}: {e}")
 
     # -----------------------------------------------------
-    # Root Route
+    # CLI + Shell Context
+    # -----------------------------------------------------
+    @app.shell_context_processor
+    def make_shell_context():
+        from models import User, Department, Post, Event, AuditLog
+        return {
+            "db": db,
+            "User": User,
+            "Department": Department,
+            "Post": Post,
+            "Event": Event,
+            "AuditLog": AuditLog,
+        }
+
+    # -----------------------------------------------------
+    # Index Route (Fallback)
     # -----------------------------------------------------
     @app.route("/")
     def index():
-        return "<h2>🦍 PittState-Connect is running successfully on Render!</h2>"
+        return "<h1>🦍 PittState-Connect is live!</h1><p>Blueprints loaded successfully.</p>"
 
     return app
 
 
 # ---------------------------------------------------------
-# Gunicorn Entrypoint
+# Entry Point for Render / Gunicorn
 # ---------------------------------------------------------
 app = create_app()
+
+# ---------------------------------------------------------
+# Run Locally (optional)
+# ---------------------------------------------------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
