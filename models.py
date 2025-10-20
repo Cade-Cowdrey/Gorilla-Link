@@ -1,13 +1,14 @@
 # ================================================================
-# 🦍 PittState-Connect — Full Database Models
+# 🦍 PittState-Connect — Unified Models File
 # ================================================================
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 
+
 # ================================================================
-# 🔐 USER MODEL (Authentication)
+# 👥 Users
 # ================================================================
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -15,46 +16,30 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
-
+    password_hash = db.Column(db.String(255))
     role = db.Column(db.String(50), default="student")  # student, alumni, admin
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    avatar_url = db.Column(db.String(255))
-    headline = db.Column(db.String(200))
     bio = db.Column(db.Text)
-
-    total_posts = db.Column(db.Integer, default=0)
-    total_connections = db.Column(db.Integer, default=0)
-    total_badges = db.Column(db.Integer, default=0)
-
+    profile_pic = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
     posts = db.relationship("Post", backref="author", lazy=True)
-    messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="sender", lazy=True)
-    messages_received = db.relationship("Message", foreign_keys="Message.receiver_id", backref="receiver", lazy=True)
+    notifications = db.relationship("Notification", backref="user", lazy=True)
     events = db.relationship("Event", backref="creator", lazy=True)
-    notifications = db.relationship("Notification", backref="recipient", lazy=True)
     badges = db.relationship("UserBadge", backref="user", lazy=True)
-    connections = db.relationship("Connection", foreign_keys="Connection.user_id", backref="user", lazy=True)
 
-    # 🔐 Security helpers
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
-        return check_password_hash(self.password_hash, password)
-
-    def get_id(self):
-        return str(self.id)
+        return check_password_hash(self.password_hash or "", password)
 
     def __repr__(self):
-        return f"<User {self.id}: {self.name} ({self.role})>"
+        return f"<User {self.name} ({self.role})>"
 
 
 # ================================================================
-# 🎓 DEPARTMENTS
+# 🏫 Departments
 # ================================================================
 class Department(db.Model):
     __tablename__ = "departments"
@@ -62,9 +47,7 @@ class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.Text)
-    faculty_count = db.Column(db.Integer, default=0)
-    student_count = db.Column(db.Integer, default=0)
-    alumni_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     users = db.relationship("User", backref="department", lazy=True)
 
@@ -73,204 +56,205 @@ class Department(db.Model):
 
 
 # ================================================================
-# 💬 POSTS (Feed / Discussions)
+# 💬 Posts / Feed
 # ================================================================
 class Post(db.Model):
     __tablename__ = "posts"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(100))
-    image_url = db.Column(db.String(255))
-    likes = db.Column(db.Integer, default=0)
-    comments_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    likes = db.relationship("Like", backref="post", lazy=True)
     replies = db.relationship("Reply", backref="post", lazy=True)
 
     def __repr__(self):
-        return f"<Post {self.id} by {self.user_id}>"
+        return f"<Post {self.id} by {self.author_id}>"
 
 
 # ================================================================
-# 💬 REPLIES (Nested under Posts)
+# ❤️ Likes / Engagement
+# ================================================================
+class Like(db.Model):
+    __tablename__ = "likes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ================================================================
+# 💬 Replies
 # ================================================================
 class Reply(db.Model):
     __tablename__ = "replies"
 
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<Reply {self.id} on Post {self.post_id}>"
-
 
 # ================================================================
-# ✉️ MESSAGES (Direct Messages)
-# ================================================================
-class Message(db.Model):
-    __tablename__ = "messages"
-
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return f"<Message {self.id} from {self.sender_id} to {self.receiver_id}>"
-
-
-# ================================================================
-# 📅 EVENTS (Campus & Alumni)
+# 📅 Events
 # ================================================================
 class Event(db.Model):
     __tablename__ = "events"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text)
-    location = db.Column(db.String(200))
-    start_time = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(255))
+    start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
-    creator_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<Event {self.title}>"
 
 
 # ================================================================
-# 🔔 NOTIFICATIONS
+# 🔔 Notifications
 # ================================================================
 class Notification(db.Model):
     __tablename__ = "notifications"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    message = db.Column(db.String(255), nullable=False)
-    category = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    message = db.Column(db.String(255))
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<Notification {self.id} for User {self.user_id}>"
-
 
 # ================================================================
-# 💼 JOBS & INTERNSHIPS
+# 💼 Job / Internship Opportunities
 # ================================================================
-class Job(db.Model):
-    __tablename__ = "jobs"
+class JobOpportunity(db.Model):
+    __tablename__ = "job_opportunities"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
     company = db.Column(db.String(150))
     description = db.Column(db.Text)
     link = db.Column(db.String(255))
-    location = db.Column(db.String(150))
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
-        return f"<Job {self.title} at {self.company}>"
+        return f"<JobOpportunity {self.title}>"
 
 
 # ================================================================
-# 🪙 BADGES (Gamified Achievements)
+# 🧑‍🤝‍🧑 Mentorship
+# ================================================================
+class Mentorship(db.Model):
+    __tablename__ = "mentorships"
+
+    id = db.Column(db.Integer, primary_key=True)
+    mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    mentee_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    status = db.Column(db.String(50), default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notes = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Mentorship {self.mentor_id}->{self.mentee_id} ({self.status})>"
+
+
+# ================================================================
+# 🧩 Groups (Campus Clubs / Organizations)
+# ================================================================
+class Group(db.Model):
+    __tablename__ = "groups"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Group {self.name}>"
+
+
+# ================================================================
+# 📰 Stories (Alumni / Student Highlights)
+# ================================================================
+class Story(db.Model):
+    __tablename__ = "stories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text)
+    image_url = db.Column(db.String(255))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    published_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Story {self.title}>"
+
+
+# ================================================================
+# 🏅 Badges
 # ================================================================
 class Badge(db.Model):
     __tablename__ = "badges"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(255))
-    icon = db.Column(db.String(150))
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    icon = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<Badge {self.name}>"
 
 
 class UserBadge(db.Model):
     __tablename__ = "user_badges"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"), nullable=False)
-    earned_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    badge = db.relationship("Badge", backref="user_badges", lazy=True)
-
-    def __repr__(self):
-        return f"<UserBadge {self.user_id}-{self.badge_id}>"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"))
+    awarded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # ================================================================
-# 🔗 CONNECTIONS (Networking / Mentorship)
+# 📨 Digest Archives
+# ================================================================
+class DigestArchive(db.Model):
+    __tablename__ = "digest_archives"
+
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(200), nullable=False)
+    content_html = db.Column(db.Text)
+    audience = db.Column(db.String(50), default="all")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ================================================================
+# 🤝 Connections
 # ================================================================
 class Connection(db.Model):
     __tablename__ = "connections"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    connected_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    status = db.Column(db.String(50), default="pending")  # pending, accepted, declined
+    connection_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<Connection {self.user_id} ↔ {self.connected_user_id} ({self.status})>"
-
 
 # ================================================================
-# 📰 WEEKLY DIGESTS (Email Campaigns)
+# 📈 Analytics
 # ================================================================
-class DigestArchive(db.Model):
-    __tablename__ = "digest_archives"
+class SiteStat(db.Model):
+    __tablename__ = "site_stats"
 
     id = db.Column(db.Integer, primary_key=True)
-    subject = db.Column(db.String(255))
-    content_html = db.Column(db.Text)
-    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
-    audience = db.Column(db.String(50), default="students")  # students, alumni, all
+    metric = db.Column(db.String(100), nullable=False)
+    value = db.Column(db.Integer, default=0)
+    recorded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<DigestArchive {self.subject}>"
-
-
-class EmailDigestLog(db.Model):
-    __tablename__ = "email_digest_logs"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    digest_id = db.Column(db.Integer, db.ForeignKey("digest_archives.id"))
-    status = db.Column(db.String(50), default="sent")  # sent, opened, bounced
-    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    user = db.relationship("User", backref="email_logs", lazy=True)
-    digest = db.relationship("DigestArchive", backref="email_logs", lazy=True)
-
-    def __repr__(self):
-        return f"<EmailDigestLog user={self.user_id} digest={self.digest_id}>"
-
-
-# ================================================================
-# 📊 PLATFORM STATISTICS (Insights)
-# ================================================================
-class PlatformStat(db.Model):
-    __tablename__ = "platform_stats"
-
-    id = db.Column(db.Integer, primary_key=True)
-    active_users = db.Column(db.Integer, default=0)
-    posts_shared = db.Column(db.Integer, default=0)
-    connections_made = db.Column(db.Integer, default=0)
-    jobs_posted = db.Column(db.Integer, default=0)
-    events_created = db.Column(db.Integer, default=0)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<PlatformStat {self.id}>"
+        return f"<SiteStat {self.metric}: {self.value}>"
