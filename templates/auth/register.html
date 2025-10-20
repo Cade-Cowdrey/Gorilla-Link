@@ -1,55 +1,48 @@
 {% extends "base.html" %}
 {% block title %}Register | PittState-Connect{% endblock %}
 {% block content %}
-<section class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f0f0f]">
-  <div class="max-w-lg w-full bg-white dark:bg-[#1b1b1b] rounded-2xl shadow-lg p-8 fade-in">
-    <h1 class="text-3xl font-bold text-center text-[#73000a] dark:text-[#FFD700] mb-6">Create Your Account</h1>
-    <p class="text-center text-gray-600 dark:text-gray-300 mb-8">
-      Join the official PSU network to connect, learn, and grow.
-    </p>
 
-    <form method="POST" action="{{ url_for('auth.register') }}" class="space-y-5">
-      <div class="grid md:grid-cols-2 gap-4">
-        <div>
-          <label class="block font-semibold mb-1">First Name</label>
-          <input type="text" name="first_name" placeholder="Cade" required>
-        </div>
-        <div>
-          <label class="block font-semibold mb-1">Last Name</label>
-          <input type="text" name="last_name" placeholder="Cowdrey" required>
-        </div>
-      </div>
-
-      <div>
-        <label class="block font-semibold mb-1">Email (PSU or personal)</label>
-        <input type="email" name="email" placeholder="you@pittstate.edu" required>
-      </div>
-
-      <div>
-        <label class="block font-semibold mb-1">Password</label>
-        <input type="password" name="password" placeholder="Create a strong password" required>
-      </div>
-
-      <div>
-        <label class="block font-semibold mb-1">Confirm Password</label>
-        <input type="password" name="confirm_password" placeholder="Re-enter password" required>
-      </div>
-
-      <div class="flex items-start space-x-2 mt-4">
-        <input type="checkbox" required class="mt-1 accent-[#73000a]">
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          I agree to the <a href="{{ url_for('core.terms') }}" class="text-psu-red hover:text-psu-gold font-semibold">Terms of Service</a>
-          and <a href="{{ url_for('core.privacy') }}" class="text-psu-red hover:text-psu-gold font-semibold">Privacy Policy</a>.
-        </p>
-      </div>
-
-      <button type="submit" class="btn btn-secondary w-full mt-4">Create Account</button>
-    </form>
-
-    <p class="text-center text-gray-600 dark:text-gray-300 mt-6">
-      Already have an account?
-      <a href="{{ url_for('auth.login') }}" class="text-psu-red hover:text-psu-gold font-semibold">Sign In</a>
-    </p>
-  </div>
+<!-- 🦍 PSU Hero -->
+<section class="hero" style="text-align:center;">
+  <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+       alt="Pitt State Logo"
+       width="100"
+       style="margin-bottom:20px;">
+  <h1>Create Your Gorilla Account</h1>
+  <p>Join the PittState-Connect network to unlock career tools, mentorship, and alumni opportunities.</p>
 </section>
+
+<!-- 📋 Registration Form -->
+<section class="section" style="max-width:550px;margin:auto;">
+  <form method="POST" action="{{ url_for('auth.register') }}"
+        style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
+    <div style="margin-bottom:18px;">
+      <label for="name" style="display:block;font-weight:bold;margin-bottom:6px;">Full Name</label>
+      <input type="text" id="name" name="name" required
+             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <label for="email" style="display:block;font-weight:bold;margin-bottom:6px;">Email Address</label>
+      <input type="email" id="email" name="email" required
+             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <label for="password" style="display:block;font-weight:bold;margin-bottom:6px;">Password</label>
+      <input type="password" id="password" name="password" required
+             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+    </div>
+
+    <button type="submit" class="psu-btn" style="width:100%;font-size:1rem;">
+      Create Account
+    </button>
+
+    <p style="margin-top:16px;text-align:center;">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}" style="color:var(--psu-crimson);font-weight:600;">Log in here</a>.
+    </p>
+  </form>
+</section>
+
 {% endblock %}
