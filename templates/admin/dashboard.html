@@ -2,24 +2,80 @@
 {% block title %}Admin Dashboard — PittState-Connect{% endblock %}
 {% block content %}
 <div class="container mx-auto py-10">
-<h1 class="text-3xl font-bold mb-6 text-crimson">Admin Dashboard</h1>
-<div class="grid md:grid-cols-4 gap-6">
-<div class="bg-white p-6 rounded-2xl shadow">
-<div class="text-sm opacity-70">Users</div>
-<div class="text-3xl font-bold">{{ stats.total_users }}</div>
+  <h1 class="text-3xl font-bold mb-8 text-crimson animate-fadeInUp">Admin Dashboard</h1>
+
+  <!-- Statistic Cards -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition animate-fadeInUp animation-delay-0">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Total Users</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.total_users }}</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition animate-fadeInUp animation-delay-200">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Departments</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.active_departments }}</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition animate-fadeInUp animation-delay-400">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Active Events</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.active_events }}</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition animate-fadeInUp animation-delay-600">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Pending Notifications</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.pending_notifications }}</div>
+    </div>
+  </div>
+
+  <!-- Overview Panel -->
+  <div class="mt-12 p-8 bg-gradient-to-r from-crimson to-gold rounded-2xl shadow text-white animate-fadeInUp animation-delay-800">
+    <h2 class="text-2xl font-semibold mb-3">Administrative Overview</h2>
+    <p class="opacity-95 leading-relaxed">
+      This PSU-branded administrative dashboard provides real-time insights across departments, student engagement,
+      and university event management. It centralizes all major operations for PittState-Connect, allowing streamlined
+      control over users, communications, and campus-wide analytics.
+    </p>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="mt-10 flex flex-wrap gap-4 animate-fadeInUp animation-delay-1000">
+    <a href="{{ url_for('admin.users') }}" class="px-5 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+      Manage Users
+    </a>
+    <a href="{{ url_for('admin.departments') }}" class="px-5 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+      Manage Departments
+    </a>
+    <a href="{{ url_for('admin.events') }}" class="px-5 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+      Manage Events
+    </a>
+    <a href="{{ url_for('admin.notifications') }}" class="px-5 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+      Manage Notifications
+    </a>
+  </div>
 </div>
-<div class="bg-white p-6 rounded-2xl shadow">
-<div class="text-sm opacity-70">Departments</div>
-<div class="text-3xl font-bold">{{ stats.active_departments }}</div>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow">
-<div class="text-sm opacity-70">Events</div>
-<div class="text-3xl font-bold">{{ stats.active_events }}</div>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow">
-<div class="text-sm opacity-70">Pending Notifications</div>
-<div class="text-3xl font-bold">{{ stats.pending_notifications }}</div>
-</div>
-</div>
-</div>
+
+<!-- Tailwind Keyframes -->
+<style>
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease forwards;
+}
+.animation-delay-0 { animation-delay: 0s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-600 { animation-delay: 0.6s; }
+.animation-delay-800 { animation-delay: 0.8s; }
+.animation-delay-1000 { animation-delay: 1s; }
+.text-gold { color: #FFC72C; } /* PSU Gold */
+.text-crimson { color: #990000; } /* PSU Crimson */
+</style>
 {% endblock %}
