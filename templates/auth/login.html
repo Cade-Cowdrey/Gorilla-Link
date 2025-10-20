@@ -2,60 +2,41 @@
 {% block title %}Login | PittState-Connect{% endblock %}
 {% block content %}
 
-<!-- 🔑 LOGIN SECTION -->
-<section class="min-h-[85vh] flex items-center justify-center bg-gray-50 dark:bg-[#121212] px-6 py-16 fade-in">
-  <div class="bg-white dark:bg-[#1a1a1a] shadow-2xl rounded-2xl max-w-md w-full p-10 border border-psu-gold/30">
-    
-    <div class="text-center mb-10">
-      <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}" 
-           alt="PSU Logo" class="mx-auto mb-4 w-20 md:w-24">
-      <h1 class="text-3xl md:text-4xl font-bold text-psu-crimson dark:text-psu-gold mb-2">
-        Welcome Back, Gorilla!
-      </h1>
-      <p class="text-gray-600 dark:text-gray-300">
-        Sign in to continue your journey with the PittState-Connect community.
-      </p>
+<!-- 🦍 PSU Hero -->
+<section class="hero" style="text-align:center;">
+  <img src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+       alt="Pitt State Logo"
+       width="100"
+       style="margin-bottom:20px;">
+  <h1>Welcome Back, Gorilla!</h1>
+  <p>Sign in to access your PittState-Connect dashboard and opportunities.</p>
+</section>
+
+<!-- 🔑 Login Form -->
+<section class="section" style="max-width:500px;margin:auto;">
+  <form method="POST" action="{{ url_for('auth.login') }}"
+        style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">
+    <div style="margin-bottom:18px;">
+      <label for="email" style="display:block;font-weight:bold;margin-bottom:6px;">Email Address</label>
+      <input type="email" id="email" name="email" required
+             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
     </div>
 
-    <!-- 🧾 Login Form -->
-    <form method="POST" action="{{ url_for('auth.login') }}">
-      {{ form.hidden_tag() if form else '' }}
+    <div style="margin-bottom:18px;">
+      <label for="password" style="display:block;font-weight:bold;margin-bottom:6px;">Password</label>
+      <input type="password" id="password" name="password" required
+             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+    </div>
 
-      <div class="mb-6">
-        <label for="email" class="block text-sm font-medium mb-1">Email</label>
-        <input type="email" id="email" name="email" required
-               class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
-      </div>
+    <button type="submit" class="psu-btn" style="width:100%;font-size:1rem;">
+      Sign In
+    </button>
 
-      <div class="mb-6">
-        <label for="password" class="block text-sm font-medium mb-1">Password</label>
-        <input type="password" id="password" name="password" required
-               class="w-full bg-gray-50 dark:bg-[#1f1f1f] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-psu-gold">
-      </div>
-
-      <div class="flex items-center justify-between mb-8">
-        <label class="flex items-center text-sm gap-2">
-          <input type="checkbox" name="remember" class="accent-psu-gold">
-          Remember me
-        </label>
-        <a href="{{ url_for('auth.forgot_password') if 'auth.forgot_password' in current_app.view_functions else '#' }}" 
-           class="text-sm text-psu-gold hover:underline">Forgot password?</a>
-      </div>
-
-      <div class="text-center">
-        <button type="submit"
-                class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all w-full">
-          Sign In
-        </button>
-      </div>
-
-      <p class="text-sm text-center text-gray-600 dark:text-gray-400 mt-6">
-        Don’t have an account?
-        <a href="{{ url_for('core.register') if 'core.register' in current_app.view_functions else url_for('core.contact') }}"
-           class="text-psu-gold hover:underline">Create one here</a>.
-      </p>
-    </form>
-  </div>
+    <p style="margin-top:16px;text-align:center;">
+      Don’t have an account?
+      <a href="{{ url_for('auth.register') }}" style="color:var(--psu-crimson);font-weight:600;">Register here</a>.
+    </p>
+  </form>
 </section>
 
 {% endblock %}
