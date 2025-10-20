@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Edit Job — Careers{% endblock %}
+{% block content %}
+<div class="container mx-auto py-8">
+<h1 class="text-3xl font-bold mb-6">Edit: {{ slug }}</h1>
+<form method="post" class="grid gap-4 max-w-xl">
+<input name="title" placeholder="Job Title" class="border p-3 rounded" />
+<input name="company" placeholder="Company" class="border p-3 rounded" />
+<input name="location" placeholder="Location" class="border p-3 rounded" />
+<textarea name="description" placeholder="Description" class="border p-3 rounded"></textarea>
+<button class="px-4 py-2 rounded bg-black text-white">Save</button>
+</form>
+</div>
+{% endblock %}
