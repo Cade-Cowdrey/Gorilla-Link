@@ -2,24 +2,36 @@
 {% block title %}Manage Departments — Admin{% endblock %}
 {% block content %}
 <div class="container mx-auto py-10">
-<h1 class="text-3xl font-bold mb-6 text-crimson">Manage Departments</h1>
-<table class="min-w-full bg-white shadow rounded-2xl overflow-hidden">
-<thead class="bg-gray-100">
-<tr>
-<th class="text-left p-3">ID</th>
-<th class="text-left p-3">Department</th>
-<th class="text-left p-3">Faculty Count</th>
-</tr>
-</thead>
-<tbody>
-{% for d in departments %}
-<tr class="border-b hover:bg-gray-50">
-<td class="p-3">{{ d.id }}</td>
-<td class="p-3">{{ d.title }}</td>
-<td class="p-3">{{ d.faculty_count }}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+  <h1 class="text-3xl font-bold mb-8 text-crimson animate-fadeInUp">Manage Departments</h1>
+
+  <div class="overflow-x-auto bg-white shadow rounded-2xl animate-fadeInUp animation-delay-200">
+    <table class="min-w-full">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="text-left p-3">ID</th>
+          <th class="text-left p-3">Department</th>
+          <th class="text-left p-3">Faculty Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in departments %}
+        <tr class="border-b hover:bg-gray-50 animate-fadeInUp" style="animation-delay: {{ loop.index * 0.1 }}s;">
+          <td class="p-3">{{ d.id }}</td>
+          <td class="p-3">{{ d.title }}</td>
+          <td class="p-3">{{ d.faculty_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<style>
+@keyframes fadeInUp {
+  0% {opacity:0;transform:translateY(25px)}
+  100% {opacity:1;transform:translateY(0)}
+}
+.animate-fadeInUp {animation: fadeInUp 0.8s ease forwards;}
+.text-crimson {color:#990000;}
+</style>
 {% endblock %}
