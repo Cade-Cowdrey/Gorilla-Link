@@ -1,137 +1,40 @@
-{% extends "base.html" %}
-{% block title %}Career Dashboard | Pitt State{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Careers — PittState-Connect{% endblock %}
 {% block content %}
+<div class="container mx-auto py-8">
+  <h1 class="text-3xl font-bold mb-6 text-crimson">Careers Dashboard</h1>
+  
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Open Roles</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.open_roles }}</div>
+    </div>
+    
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Active Employers</div>
+      <div class="text-4xl font-bold text-gold mt-1">{{ stats.active_employers }}</div>
+    </div>
+    
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+      <div class="text-sm opacity-70 uppercase tracking-wide">Average Salary</div>
+      <div class="text-4xl font-bold text-gold mt-1">${{ stats.avg_salary }}</div>
+    </div>
+  </div>
 
-<section class="container mx-auto px-6 py-12">
-  <div class="text-center mb-10">
-    <h1 class="text-4xl font-bold text-red-700 mb-2">Pitt State Career Dashboard</h1>
-    <p class="text-gray-600 dark:text-gray-400">
-      Explore Pitt State’s job and internship board with real-time filters and insights.
+  <div class="mt-10 p-6 bg-gradient-to-r from-crimson to-gold rounded-2xl shadow text-white">
+    <h2 class="text-2xl font-semibold mb-2">Overview</h2>
+    <p class="opacity-90 leading-relaxed">
+      PittState-Connect bridges students, alumni, and employers through real-time job and internship opportunities.
+      This dashboard gives administrators and employers instant insights into hiring activity and engagement levels
+      across all departments.
     </p>
   </div>
 
-  <div class="grid gap-6 md:grid-cols-4 mb-10">
-    <div class="psu-gradient text-white rounded-2xl p-6 shadow-md">
-      <p class="text-sm uppercase opacity-80">Total Jobs</p>
-      <h2 id="metric_total" class="text-3xl font-bold mt-2">—</h2>
-    </div>
-    <div class="psu-gradient-gold text-white rounded-2xl p-6 shadow-md">
-      <p class="text-sm uppercase opacity-80">Internships</p>
-      <h2 id="metric_internships" class="text-3xl font-bold mt-2">—</h2>
-    </div>
-    <div class="psu-gradient-dark text-white rounded-2xl p-6 shadow-md">
-      <p class="text-sm uppercase opacity-80">Full-Time</p>
-      <h2 id="metric_fulltime" class="text-3xl font-bold mt-2">—</h2>
-    </div>
-    <div class="psu-gradient-gold text-white rounded-2xl p-6 shadow-md">
-      <p class="text-sm uppercase opacity-80">Last Updated</p>
-      <h2 id="metric_updated" class="text-lg mt-2 font-semibold">—</h2>
-    </div>
+  <div class="mt-10">
+    <a href="{{ url_for('careers.by_department') }}"
+       class="inline-block px-6 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+       View Careers by Department
+    </a>
   </div>
-
-  <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-    <div class="flex gap-2">
-      <button data-filter="all"
-        class="tab-button bg-red-700 text-white font-semibold px-5 py-2 rounded-xl transition hover:bg-red-800">
-        All
-      </button>
-      <button data-filter="internship"
-        class="tab-button bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-xl transition hover:bg-red-600 hover:text-white">
-        Internships
-      </button>
-      <button data-filter="fulltime"
-        class="tab-button bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-xl transition hover:bg-red-600 hover:text-white">
-        Full-Time
-      </button>
-    </div>
-
-    <div class="relative w-full md:w-1/3">
-      <input id="jobSearch" type="text" placeholder="Search by title, company, or location"
-        class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-600 dark:bg-gray-900 dark:text-gray-200">
-      <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500"></i>
-    </div>
-  </div>
-
-  {% if jobs %}
-  <div id="jobGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-    {% for job in jobs %}
-    {% set job_text = (job.title ~ ' ' ~ job.description)|lower %}
-    {% set is_intern = 'intern' in job_text %}
-    <div class="job-card bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6 transition hover:shadow-lg"
-      data-title="{{ job.title|lower }}"
-      data-company="{{ job.company|lower }}"
-      data-location="{{ job.location|lower }}"
-      data-type="{{ 'internship' if is_intern else 'fulltime' }}">
-      <h3 class="text-lg font-semibold text-red-700 mb-2">{{ job.title }}</h3>
-      <p class="text-gray-600 mb-1"><i class="fa-solid fa-building mr-1"></i>{{ job.company }}</p>
-      <p class="text-gray-600 mb-3"><i class="fa-solid fa-map-marker-alt mr-1"></i>{{ job.location }}</p>
-      <p class="text-gray-500 text-sm mb-4 line-clamp-3">{{ job.description }}</p>
-      <div class="flex justify-between text-sm text-gray-500 mt-3">
-        {% if job.posted_at %}
-        <span>Posted: {{ job.posted_at|datetimeformat }}</span>
-        {% endif %}
-        {% if job.deadline %}
-        <span>Deadline: {{ job.deadline|datetimeformat }}</span>
-        {% endif %}
-      </div>
-      <span class="inline-block mt-3 text-xs uppercase tracking-wide px-3 py-1 rounded-full {% if is_intern %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
-        {{ 'Internship' if is_intern else 'Full-Time' }}
-      </span>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p class="text-center text-gray-500 mt-10">No job postings found.</p>
-  {% endif %}
-</section>
-
-<section class="bg-gray-100 dark:bg-gray-900 py-12 mt-16 text-center">
-  <h2 class="text-3xl font-bold text-red-700 mb-3">Want to See Career Analytics?</h2>
-  <a href="/career/analytics_insights"
-     class="inline-block bg-red-700 hover:bg-red-800 text-white font-semibold py-3 px-6 rounded-xl transition">
-     View Analytics →
-  </a>
-</section>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const jobCards = document.querySelectorAll(".job-card");
-  const searchInput = document.getElementById("jobSearch");
-  const tabButtons = document.querySelectorAll(".tab-button");
-
-  tabButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      tabButtons.forEach(b => b.classList.remove("bg-red-700", "text-white"));
-      btn.classList.add("bg-red-700", "text-white");
-      const filter = btn.dataset.filter;
-      jobCards.forEach(card => {
-        card.style.display = (filter === "all" || card.dataset.type === filter) ? "block" : "none";
-      });
-      updateMetrics();
-    });
-  });
-
-  searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-    jobCards.forEach(card => {
-      const text = `${card.dataset.title} ${card.dataset.company} ${card.dataset.location}`;
-      card.style.display = text.includes(query) ? "block" : "none";
-    });
-    updateMetrics();
-  });
-
-  function updateMetrics() {
-    const visible = Array.from(jobCards).filter(c => c.style.display !== "none");
-    const total = visible.length;
-    const internships = visible.filter(c => c.dataset.type === "internship").length;
-    const fulltime = total - internships;
-    document.getElementById("metric_total").textContent = total;
-    document.getElementById("metric_internships").textContent = internships;
-    document.getElementById("metric_fulltime").textContent = fulltime;
-    document.getElementById("metric_updated").textContent = new Date().toLocaleDateString();
-  }
-  updateMetrics();
-});
-</script>
-
+</div>
 {% endblock %}
