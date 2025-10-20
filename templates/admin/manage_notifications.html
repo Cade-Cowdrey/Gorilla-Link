@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Manage Notifications — Admin{% endblock %}
+{% block content %}
+<div class="container mx-auto py-10">
+<h1 class="text-3xl font-bold mb-6 text-crimson">Manage Notifications</h1>
+
+
+<form method="post" action="{{ url_for('admin.send_notification') }}" class="grid gap-4 max-w-lg mb-8">
+<input name="subject" placeholder="Subject" class="border p-3 rounded" required />
+<textarea name="message" placeholder="Message" class="border p-3 rounded" required></textarea>
+<button class="px-4 py-2 rounded bg-crimson text-white">Send</button>
+</form>
+
+
+<h2 class="text-2xl font-semibold mb-4">Recent Notifications</h2>
+<table class="min-w-full bg-white shadow rounded-2xl overflow-hidden">
+<thead class="bg-gray-100">
+<tr>
+<th class="text-left p-3">ID</th>
+<th class="text-left p-3">Subject</th>
+<th class="text-left p-3">Status</th>
+</tr>
+</thead>
+<tbody>
+{% for n in notifications %}
+<tr class="border-b hover:bg-gray-50">
+<td class="p-3">{{ n.id }}</td>
+<td class="p-3">{{ n.subject }}</td>
+<td class="p-3">{{ n.status }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}
