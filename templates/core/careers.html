@@ -1,194 +1,68 @@
 {% extends "base.html" %}
-{% block title %}Careers · PittState-Connect{% endblock %}
-
+{% block title %}Careers | PittState-Connect{% endblock %}
 {% block content %}
-<!-- 🦍 Hero -->
-<section class="bg-[#660000] text-white py-20 px-6 text-center fade-in">
-  <div class="max-w-5xl mx-auto">
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container text-center">
     <img
-      src="{{ url_for('static', filename='img/psu_logo.png') }}"
-      alt="PSU Logo"
-      class="mx-auto mb-6 w-28 h-auto"
+      src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
+      alt="Pitt State Logo"
+      width="120"
+      style="margin-bottom: 20px;"
     />
-    <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
-      Career & Internship Opportunities
-    </h1>
-    <p class="text-lg max-w-3xl mx-auto text-gray-100 leading-relaxed">
-      Empowering Gorillas to connect, grow, and succeed — discover PSU-connected
-      internships, jobs, and alumni-hosted career opportunities.
+    <h1 style="font-size: 2.4rem; margin-bottom: 10px;">Launch Your Future</h1>
+    <p style="font-size: 1.1rem; opacity: 0.95;">
+      Connect with employers, alumni, and opportunities designed for every Gorilla.
+    </p>
+    <a href="{{ url_for('auth.register') }}" class="psu-btn" style="margin-top: 25px;">
+      Get Started Today
+    </a>
+  </div>
+</section>
+
+<!-- Intro Section -->
+<section class="section">
+  <div class="container" style="max-width: 900px; margin: auto;">
+    <h2>Career Development at PittState-Connect</h2>
+    <p style="line-height: 1.7;">
+      PittState-Connect bridges the gap between <strong>students, alumni, and employers</strong> by creating a
+      centralized ecosystem for professional growth. Whether you’re exploring internships, full-time
+      positions, or mentorships — the PittState-Connect platform helps you connect directly with verified
+      partners who value the Gorilla spirit.
     </p>
   </div>
 </section>
 
-<!-- 💼 Career Highlights -->
-<section class="py-20 bg-gray-50 text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto text-center">
-    <h2 class="text-4xl font-bold mb-10 text-[#660000]">Why Choose PittState-Connect?</h2>
-    <div class="grid md:grid-cols-3 gap-10 px-6">
-      <div class="career-feature-card">
-        <img
-          src="{{ url_for('static', filename='img/internship_icon.png') }}"
-          alt="Internship"
-          class="w-16 h-16 mx-auto mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">Internships</h3>
-        <p>Access verified PSU-partnered internships that boost your experience and résumé.</p>
+<!-- Features Section -->
+<section class="section" style="background-color: #fafafa;">
+  <div class="container" style="max-width: 1000px; margin: auto;">
+    <h2 style="text-align: center;">What You Can Do</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px;">
+      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--psu-crimson);">🎓 Student Opportunities</h3>
+        <p>Discover internships, on-campus roles, and employer programs built for PSU students.</p>
       </div>
-      <div class="career-feature-card">
-        <img
-          src="{{ url_for('static', filename='img/job_icon.png') }}"
-          alt="Job Openings"
-          class="w-16 h-16 mx-auto mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">Job Listings</h3>
-        <p>Find openings from employers seeking talented PSU students and alumni.</p>
+      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--psu-crimson);">🦍 Alumni Network</h3>
+        <p>Connect with alumni mentors ready to offer career guidance and open doors across industries.</p>
       </div>
-      <div class="career-feature-card">
-        <img
-          src="{{ url_for('static', filename='img/alumni_hire.png') }}"
-          alt="Alumni Hiring"
-          class="w-16 h-16 mx-auto mb-4"
-        />
-        <h3 class="text-xl font-semibold text-[#660000] mb-2">Alumni Hiring</h3>
-        <p>Network directly with alumni offering full-time, part-time, and mentoring roles.</p>
+      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <h3 style="color: var(--psu-crimson);">💼 Employer Partnerships</h3>
+        <p>Hire skilled PSU talent or post internships, events, and scholarships directly to our community.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 🔍 Featured Opportunities -->
-<section class="py-20 bg-white text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto px-6">
-    <h2 class="text-3xl font-bold text-center text-[#660000] mb-12">Featured Opportunities</h2>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div class="job-card">
-        <h3 class="text-xl font-semibold text-[#660000]">Marketing Intern – PSU Athletics</h3>
-        <p class="text-sm text-gray-500 mb-2">Location: Pittsburg, KS</p>
-        <p class="mb-4">
-          Assist PSU Athletics in managing digital campaigns, event promotions,
-          and student engagement outreach.
-        </p>
-        <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">View Details</a>
-      </div>
-
-      <div class="job-card">
-        <h3 class="text-xl font-semibold text-[#660000]">Software Developer Intern – GorillaTech</h3>
-        <p class="text-sm text-gray-500 mb-2">Location: Remote / On-Campus Hybrid</p>
-        <p class="mb-4">
-          Collaborate on real PSU projects using Python, Flask, and SQLAlchemy.
-          Mentorship by PSU alumni engineers.
-        </p>
-        <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">View Details</a>
-      </div>
-
-      <div class="job-card">
-        <h3 class="text-xl font-semibold text-[#660000]">HR Assistant – PSU Career Services</h3>
-        <p class="text-sm text-gray-500 mb-2">Location: Student Success Center</p>
-        <p class="mb-4">
-          Gain hands-on experience supporting PSU’s career and talent programs.
-        </p>
-        <a href="#" class="psu-btn text-sm py-2 px-4 inline-block">View Details</a>
-      </div>
-    </div>
-  </div>
+<!-- Call to Action -->
+<section class="section text-center">
+  <h2>Join PittState-Connect</h2>
+  <p style="max-width: 700px; margin: 0 auto 20px auto;">
+    Be part of the Gorilla legacy — where connections create careers, and success begins with community.
+  </p>
+  <a href="{{ url_for('auth.register') }}" class="psu-btn">Create Your Account</a>
 </section>
 
-<!-- 📈 Career Growth Stats -->
-<section class="py-20 bg-gray-50 text-gray-800 fade-in">
-  <div class="max-w-6xl mx-auto text-center">
-    <h2 class="text-4xl font-bold mb-10 text-[#660000]">Career Impact at a Glance</h2>
-    <div class="grid md:grid-cols-4 gap-8">
-      <div class="stats-card">
-        <h3 class="text-3xl font-bold text-[#FFD700]">92%</h3>
-        <p>PSU Graduates Employed or in Grad School</p>
-      </div>
-      <div class="stats-card">
-        <h3 class="text-3xl font-bold text-[#FFD700]">600+</h3>
-        <p>Active Alumni Mentors</p>
-      </div>
-      <div class="stats-card">
-        <h3 class="text-3xl font-bold text-[#FFD700]">1,200+</h3>
-        <p>Student Career Matches</p>
-      </div>
-      <div class="stats-card">
-        <h3 class="text-3xl font-bold text-[#FFD700]">85%</h3>
-        <p>Job Offers Through PittState-Connect</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 🦍 CTA -->
-<section class="bg-[#660000] text-white py-20 text-center fade-in">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-4xl font-bold mb-4 text-[#FFD700]">
-      Ready to Launch Your Career?
-    </h2>
-    <p class="text-gray-100 mb-8">
-      Create your profile, showcase your skills, and connect directly with PSU
-      alumni recruiters and mentors.
-    </p>
-    <a href="{{ url_for('auth.register') }}" class="psu-btn">Get Started Today</a>
-  </div>
-</section>
-
-<!-- ✨ Scroll Reveal -->
-<script>
-  const fadeEls = document.querySelectorAll(".fade-in");
-  const reveal = () => {
-    const trigger = window.innerHeight * 0.9;
-    fadeEls.forEach((el) => {
-      const top = el.getBoundingClientRect().top;
-      if (top < trigger) el.classList.add("visible");
-    });
-  };
-  window.addEventListener("scroll", reveal);
-  window.addEventListener("load", reveal);
-</script>
-
-<style>
-  .fade-in {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: all 0.7s ease-out;
-  }
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .career-feature-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.75rem;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .career-feature-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-  }
-  .job-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .job-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.12);
-  }
-  .psu-btn {
-    background: #FFD700;
-    color: #660000;
-    font-weight: 600;
-    border-radius: 9999px;
-    padding: 0.75rem 1.5rem;
-    transition: background 0.3s ease;
-  }
-  .psu-btn:hover {
-    background: #facc15;
-  }
-</style>
 {% endblock %}
