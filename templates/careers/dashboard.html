@@ -1,40 +1,66 @@
 {% extends 'base.html' %}
 {% block title %}Careers — PittState-Connect{% endblock %}
 {% block content %}
-<div class="container mx-auto py-8">
-  <h1 class="text-3xl font-bold mb-6 text-crimson">Careers Dashboard</h1>
-  
+<div class="container mx-auto py-10">
+  <h1 class="text-3xl font-bold mb-8 text-crimson animate-fadeInUp">Careers Dashboard</h1>
+
+  <!-- Statistic Cards -->
   <div class="grid md:grid-cols-3 gap-6">
-    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition animate-fadeInUp animation-delay-0">
       <div class="text-sm opacity-70 uppercase tracking-wide">Open Roles</div>
       <div class="text-4xl font-bold text-gold mt-1">{{ stats.open_roles }}</div>
     </div>
-    
-    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition animate-fadeInUp animation-delay-200">
       <div class="text-sm opacity-70 uppercase tracking-wide">Active Employers</div>
       <div class="text-4xl font-bold text-gold mt-1">{{ stats.active_employers }}</div>
     </div>
-    
-    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition">
+
+    <div class="p-6 rounded-2xl shadow bg-white hover:shadow-lg transition animate-fadeInUp animation-delay-400">
       <div class="text-sm opacity-70 uppercase tracking-wide">Average Salary</div>
       <div class="text-4xl font-bold text-gold mt-1">${{ stats.avg_salary }}</div>
     </div>
   </div>
 
-  <div class="mt-10 p-6 bg-gradient-to-r from-crimson to-gold rounded-2xl shadow text-white">
-    <h2 class="text-2xl font-semibold mb-2">Overview</h2>
-    <p class="opacity-90 leading-relaxed">
+  <!-- Overview Panel -->
+  <div class="mt-12 p-8 bg-gradient-to-r from-crimson to-gold rounded-2xl shadow text-white animate-fadeInUp animation-delay-600">
+    <h2 class="text-2xl font-semibold mb-3">Overview</h2>
+    <p class="opacity-95 leading-relaxed">
       PittState-Connect bridges students, alumni, and employers through real-time job and internship opportunities.
-      This dashboard gives administrators and employers instant insights into hiring activity and engagement levels
-      across all departments.
+      This dashboard provides instant insights into campus hiring trends, employer engagement, and student career outcomes.
     </p>
   </div>
 
-  <div class="mt-10">
+  <!-- Action Button -->
+  <div class="mt-10 animate-fadeInUp animation-delay-800">
     <a href="{{ url_for('careers.by_department') }}"
        class="inline-block px-6 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
        View Careers by Department
     </a>
   </div>
 </div>
+
+<!-- Tailwind Keyframes & Utilities -->
+<style>
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease forwards;
+}
+.animation-delay-0 { animation-delay: 0s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-600 { animation-delay: 0.6s; }
+.animation-delay-800 { animation-delay: 0.8s; }
+.text-gold { color: #FFC72C; } /* PSU gold accent */
+.text-crimson { color: #990000; } /* PSU crimson */
+</style>
 {% endblock %}
