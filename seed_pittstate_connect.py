@@ -1,137 +1,253 @@
-from app_pro import app
-from extensions import db
-from models import (
-    Scholarship, ScholarshipApplication, Essay, Reminder, FinancialLiteracyResource,
-    CostToCompletion, FundingJourney, FacultyRecommendation, LeaderboardEntry,
-    PeerMentor, Donor, Donation, ImpactStory
-)
-from datetime import date, datetime, timedelta
+# seed_pittstate_connect.py
+# -------------------------------------------------------------
+# Populates the PittState-Connect database with PSU-themed demo data.
+# Safe for testing and UI previews.
+# -------------------------------------------------------------
+
+from datetime import datetime, timedelta, date
+from faker import Faker
 import random
+from extensions import db
+from models import *
 
-def seed_data():
-    with app.app_context():
-        print("🌱 Starting PittState-Connect seed...")
+fake = Faker()
 
-        db.create_all()
+def seed_all():
+    print("🌱 Starting PSU demo data seed...")
 
-        # Skip if data already exists
-        if Scholarship.query.first():
-            print("⚠️  Tables already contain data — skipping seeds to avoid duplicates.")
-            return
+    # ---------------------------------------------
+    # Roles
+    # ---------------------------------------------
+    roles = ["Admin", "Student", "Alumni", "Faculty", "Employer", "Donor"]
+    for r in roles:
+        if not Role.query.filter_by(name=r).first():
+            db.session.add(Role(name=r, description=f"{r} role"))
+    db.session.commit()
 
-        scholarships = [
-            Scholarship(title="Gorilla Scholars Excellence Award",
-                        description="Awarded to high-achieving PSU students.",
-                        amount=2000, deadline=date(2025,12,1), department="Arts & Sciences"),
-            Scholarship(title="College of Technology Leadership Grant",
-                        description="Recognizes leadership in applied sciences.",
-                        amount=1500, deadline=date(2025,11,15), department="Technology"),
-            Scholarship(title="Crimson & Gold Academic Achievement Fund",
-                        description="Supports academic excellence across majors.",
-                        amount=1000, deadline=date(2025,10,30), department="General Studies"),
-            Scholarship(title="Kelce College of Business Emerging Leaders",
-                        description="Entrepreneurial excellence scholarship.",
-                        amount=2500, deadline=date(2025,12,10), department="Business"),
-            Scholarship(title="Nursing Advancement Scholarship",
-                        description="Encourages excellence in health and nursing fields.",
-                        amount=1800, deadline=date(2025,11,1), department="Nursing")
-        ]
-        db.session.add_all(scholarships)
-        db.session.flush()
+    # ---------------------------------------------
+    # Users
+    # ---------------------------------------------
+    demo_users = []
+    for i in range(1, 6):
+        student = User(
+            email=f"student{i}@pittstate.edu",
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            role=Role.query.filter_by(name="Student").first(),
+            verified=True,
+        )
+        student.set_password("password123")
+        demo_users.append(student)
 
-        apps = [ScholarshipApplication(user_id=i+1, scholarship_id=s.id,
-                                       status=random.choice(["draft","submitted","awarded","rejected"]),
-                                       progress=random.randint(0,100),
-                                       submitted_at=datetime.utcnow())
-                for i, s in enumerate(scholarships)]
-        db.session.add_all(apps)
+    for i in range(1, 4):
+        alumni = User(
+            email=f"alumni{i}@pittstate.edu",
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            role=Role.query.filter_by(name="Alumni").first(),
+            verified=True,
+        )
+        alumni.set_password("password123")
+        demo_users.append(alumni)
 
-        essays = [Essay(user_id=i+1, title=f"Scholarship Essay {i+1}",
-                        content="My journey as a Gorilla at PSU...", last_updated=datetime.utcnow())
-                  for i in range(5)]
-        db.session.add_all(essays)
+    admin_user = User(
+        email="admin@pittstate.edu",
+        first_name="Gus",
+        last_name="Gorilla",
+        role=Role.query.filter_by(name="Admin").first(),
+        verified=True,
+    )
+    admin_user.set_password("adminpass")
 
-        reminders = [Reminder(user_id=i+1, scholarship_id=scholarships[i].id,
-                              due_at=datetime.utcnow()+timedelta(days=7*(i+1)),
-                              note="Submit documents before deadline")
-                     for i in range(5)]
-        db.session.add_all(reminders)
+    db.session.add_all(demo_users + [admin_user])
+    db.session.commit()
 
-        resources = [
-            FinancialLiteracyResource(title="Budget Like a Gorilla", url="https://psu.edu/budgeting", category="Budgeting"),
-            FinancialLiteracyResource(title="Understanding Student Loans", url="https://psu.edu/loans", category="Loans"),
-            FinancialLiteracyResource(title="Scholarship Search Tips", url="https://psu.edu/scholarships", category="Aid"),
-            FinancialLiteracyResource(title="Smart Credit Habits", url="https://psu.edu/credit", category="Credit"),
-            FinancialLiteracyResource(title="Investing 101 for Students", url="https://psu.edu/investing", category="Investing")
-        ]
-        db.session.add_all(resources)
+    # ---------------------------------------------
+    # Departments & Faculty
+    # ---------------------------------------------
+    dept_names = [
+        "College of Technology",
+        "Kelce College of Business",
+        "College of Education",
+        "College of Arts & Sciences",
+        "School of Construction"
+    ]
+    departments = []
+    for name in dept_names:
+        d = Department(name=name, building=fake.street_name(), phone=fake.phone_number(), website=f"https://www.pittstate.edu/{name.split()[0].lower()}")
+        departments.append(d)
+    db.session.add_all(departments)
+    db.session.commit()
 
-        ctc = [CostToCompletion(user_id=i+1, estimated_tuition_remaining=5000*(i+1),
-                                est_graduation_date=date(2026,5,15)) for i in range(5)]
-        db.session.add_all(ctc)
+    faculty_members = []
+    for d in departments:
+        for i in range(2):
+            f = Faculty(name=fake.name(), department=d, email=f"{fake.first_name().lower()}@pittstate.edu", title=random.choice(["Professor", "Advisor", "Coordinator"]))
+            faculty_members.append(f)
+    db.session.add_all(faculty_members)
+    db.session.commit()
 
-        journeys = [FundingJourney(user_id=i+1, step=step, timestamp=datetime.utcnow())
-                    for i, step in enumerate(["FAFSA Submitted","Dept Scholarship","Donor Award","Grant Received","Tuition Cleared"])]
-        db.session.add_all(journeys)
+    # ---------------------------------------------
+    # Scholarships
+    # ---------------------------------------------
+    scholarships = []
+    for i in range(5):
+        s = Scholarship(
+            title=f"Pitt State Gorilla Scholarship {i+1}",
+            description=fake.paragraph(nb_sentences=3),
+            amount=random.randint(1000, 5000),
+            deadline=date.today() + timedelta(days=random.randint(30, 120)),
+            department=random.choice(dept_names),
+            is_active=True,
+        )
+        scholarships.append(s)
+    db.session.add_all(scholarships)
+    db.session.commit()
 
-        recs = [FacultyRecommendation(applicant_user_id=i+1,
-                                      faculty_name=f"Prof. {name}",
-                                      file_url=f"https://s3.psu.edu/recs/{name.lower()}.pdf")
-                for i, name in enumerate(["Stein","Johnson","Martinez","Nguyen","Patel"])]
-        db.session.add_all(recs)
+    # Scholarship Applications
+    for u in demo_users[:3]:
+        for s in random.sample(scholarships, 2):
+            app = ScholarshipApplication(user=u, scholarship=s, status=random.choice(["draft", "submitted", "awarded"]), progress=random.randint(20, 100))
+            db.session.add(app)
+    db.session.commit()
 
-        leaders = [LeaderboardEntry(user_id=i+1, points=100*(i+1)) for i in range(5)]
-        db.session.add_all(leaders)
+    # Essays
+    for u in demo_users[:2]:
+        e = Essay(user=u, title="My PSU Journey", content=fake.paragraph(nb_sentences=5))
+        db.session.add(e)
+    db.session.commit()
 
-        peers = [PeerMentor(mentor_user_id=i+1, mentee_user_id=(i+2)) for i in range(5)]
-        db.session.add_all(peers)
+    # ---------------------------------------------
+    # Groups & Messages
+    # ---------------------------------------------
+    group = Group(name="Gorilla Scholars", description="A community for top-performing PSU students.")
+    db.session.add(group)
+    db.session.commit()
 
-        donors = [
-            Donor(name="Crimson & Gold Alumni Fund", organization="PSU Alumni Association", contact_email="alumni@pittstate.edu"),
-            Donor(name="Gorilla Gear Industries", organization="Local Sponsor", contact_email="info@gorillagear.com"),
-            Donor(name="Kelce Business Partners", organization="Kelce College Network", contact_email="kelce@pittstate.edu"),
-            Donor(name="College of Technology Advisory Board", organization="Industry Advisory", contact_email="techboard@pittstate.edu"),
-            Donor(name="Community Health Foundation", organization="Health & Nursing", contact_email="health@pittstate.edu")
-        ]
-        db.session.add_all(donors)
-        db.session.flush()
+    members = [GroupMember(group=group, user=u, role="member") for u in demo_users[:4]]
+    db.session.add_all(members)
+    db.session.commit()
 
-        donations = [Donation(donor_id=d.id, amount=1000*(i+1), note="Annual support for student success")
-                     for i, d in enumerate(donors)]
-        db.session.add_all(donations)
+    for m in members:
+        msg = GroupMessage(group=group, sender=m.user, content=fake.sentence())
+        db.session.add(msg)
+    db.session.commit()
 
-        stories = [
-            ImpactStory(title="From Gorilla to Graduate",
-                        body="Scholarships from PSU made my dream possible.",
-                        photo_url="https://psu.edu/images/impact1.jpg",
-                        published_at=datetime.utcnow()),
-            ImpactStory(title="Engineering Success Story",
-                        body="College of Technology alumni fund changed my path.",
-                        photo_url="https://psu.edu/images/impact2.jpg",
-                        published_at=datetime.utcnow()),
-            ImpactStory(title="Healthcare Heroes at PSU",
-                        body="Nursing scholarships empowered me to serve others.",
-                        photo_url="https://psu.edu/images/impact3.jpg",
-                        published_at=datetime.utcnow()),
-            ImpactStory(title="Business Leaders of Tomorrow",
-                        body="Kelce College donors shaped my entrepreneurial journey.",
-                        photo_url="https://psu.edu/images/impact4.jpg",
-                        published_at=datetime.utcnow()),
-            ImpactStory(title="Crimson & Gold Community Impact",
-                        body="PSU students give back through donor-funded projects.",
-                        photo_url="https://psu.edu/images/impact5.jpg",
-                        published_at=datetime.utcnow())
-        ]
-        db.session.add_all(stories)
+    # ---------------------------------------------
+    # Mentorships
+    # ---------------------------------------------
+    for i in range(2):
+        mentor = random.choice(demo_users)
+        mentee = random.choice(demo_users)
+        if mentor.id != mentee.id:
+            mship = Mentorship(mentor=mentor, mentee=mentee, notes="Helping with career readiness and scholarships.")
+            db.session.add(mship)
+    db.session.commit()
 
-        db.session.commit()
+    # ---------------------------------------------
+    # Events
+    # ---------------------------------------------
+    events = []
+    for i in range(5):
+        ev = Event(
+            title=f"Gorilla Networking Night {i+1}",
+            date=date.today() + timedelta(days=i*7),
+            location=random.choice(["Overman Student Center", "Kelce Atrium", "Bicknell Center"]),
+            description="Meet with employers and alumni for professional development."
+        )
+        events.append(ev)
+    db.session.add_all(events)
+    db.session.commit()
 
-        print("✅ Seeding complete!")
-        print("---------------------------------")
-        print("5 Scholarships\n5 Scholarship Applications\n5 Essays\n5 Reminders\n5 Financial Literacy Resources\n"
-              "5 Cost-to-Completion Records\n5 Funding Journey Steps\n5 Faculty Recommendations\n5 Leaderboard Entries\n"
-              "5 Peer Mentors\n5 Donors\n5 Donations\n5 Impact Stories")
-        print("---------------------------------")
+    for ev in events:
+        rsvp = EventRSVP(event=ev, user=random.choice(demo_users))
+        db.session.add(rsvp)
+    db.session.commit()
+
+    # ---------------------------------------------
+    # Badges
+    # ---------------------------------------------
+    badges = [
+        Badge(slug="gorilla-scholar", name="Gorilla Scholar", description="Awarded for academic excellence."),
+        Badge(slug="community-champion", name="Community Champion", description="Active in PSU community initiatives."),
+        Badge(slug="career-leader", name="Career Leader", description="Demonstrated career engagement.")
+    ]
+    db.session.add_all(badges)
+    db.session.commit()
+
+    for u in demo_users[:3]:
+        ub = UserBadge(user=u, badge=random.choice(badges), reason="For outstanding participation in PSU programs.")
+        db.session.add(ub)
+    db.session.commit()
+
+    # ---------------------------------------------
+    # Donors & Impact Stories
+    # ---------------------------------------------
+    donors = []
+    for i in range(3):
+        d = Donor(name=fake.name(), organization=random.choice(["PSU Foundation", "Gorilla Pride Alumni", "Commerce Bank"]), contact_email=fake.email())
+        donors.append(d)
+    db.session.add_all(donors)
+    db.session.commit()
+
+    for d in donors:
+        donation = Donation(donor=d, amount=random.randint(1000, 10000), note="Supporting PSU scholarships.")
+        db.session.add(donation)
+    db.session.commit()
+
+    stories = []
+    for i in range(3):
+        story = ImpactStory(title=f"Gorilla Success Story {i+1}", body=fake.paragraph(nb_sentences=5), photo_url="https://www.pittstate.edu/_resources/images/psu-logo.png")
+        stories.append(story)
+    db.session.add_all(stories)
+    db.session.commit()
+
+    # ---------------------------------------------
+    # Opportunities
+    # ---------------------------------------------
+    for i in range(5):
+        opp = Opportunity(
+            title=f"Internship Opportunity {i+1}",
+            category=random.choice(["Internship", "Research", "Volunteer"]),
+            description=fake.paragraph(nb_sentences=3),
+            location="Pittsburg, KS",
+            deadline=date.today() + timedelta(days=random.randint(30, 90)),
+        )
+        db.session.add(opp)
+    db.session.commit()
+
+    # ---------------------------------------------
+    # Feed / Announcements
+    # ---------------------------------------------
+    for u in demo_users[:3]:
+        fitem = FeedItem(user=u, content="Excited to announce I’ve been accepted into the Gorilla Scholars program!")
+        db.session.add(fitem)
+    db.session.commit()
+
+    ann = Announcement(title="Welcome to PittState-Connect!", body="Explore scholarships, mentors, and alumni networks all in one place.", is_public=True)
+    db.session.add(ann)
+    db.session.commit()
+
+    # ---------------------------------------------
+    # Campus / Marketing / Emails
+    # ---------------------------------------------
+    locs = [
+        CampusLocation(name="Overman Student Center", latitude=37.3912, longitude=-94.7025, category="building"),
+        CampusLocation(name="Bicknell Family Center for the Arts", latitude=37.3921, longitude=-94.7041, category="building")
+    ]
+    db.session.add_all(locs)
+    db.session.commit()
+
+    for i in range(3):
+        lead = MarketingLead(email=fake.email(), name=fake.name(), source="landing_page")
+        db.session.add(lead)
+    db.session.commit()
+
+    print("✅ PSU demo seed complete.")
+
 
 if __name__ == "__main__":
-    seed_data()
+    from app_pro import create_app
+    app = create_app()
+    with app.app_context():
+        seed_all()
