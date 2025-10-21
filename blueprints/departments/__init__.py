@@ -1,2 +1,1 @@
-from flask import Blueprint
-bp = Blueprint('departments', __name__)
+# departments package

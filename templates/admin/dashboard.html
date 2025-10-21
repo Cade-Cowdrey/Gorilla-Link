@@ -1,12 +1,10 @@
-{% extends 'base.html' %}
-{% block title %}Admin Dashboard — PittState-Connect{% endblock %}
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
-<div class="grid md:grid-cols-4 gap-6">
-  {% import '_components.html' as ui %}
-  {{ ui.stat('Users', stats.users) }}
-  {{ ui.stat('Jobs', stats.jobs) }}
-  {{ ui.stat('Departments', stats.departments) }}
-  {{ ui.stat('Events', stats.events) }}
-</div>
+<h2>Admin Dashboard</h2>
+<ul>
+  <li>Content approvals</li>
+  <li>Scholarship management</li>
+  <li>Analytics</li>
+</ul>
 {% endblock %}

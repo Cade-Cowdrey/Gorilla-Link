@@ -1,50 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Analytics Dashboard — Pitt State Connect{% endblock %}
+{% block title %}Analytics Insights{% endblock %}
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-12 transition-all duration-300">
-  <header class="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
-    <div>
-      <h1 class="text-4xl font-extrabold text-[#660000] dark:text-[#C7A008]">Analytics Insights</h1>
-      <p class="text-gray-600 dark:text-gray-300 mt-2">
-        Real-time engagement metrics across departments, alumni, and mentorship programs.
-      </p>
-    </div>
-    <a href="{{ url_for('analytics.export') if 'analytics.export' in app.view_functions else '#' }}"
-       class="bg-[#C7A008] text-black font-semibold px-5 py-2 rounded-lg hover:bg-yellow-400 transition dark:bg-[#C7A008] dark:text-[#000] dark:hover:bg-yellow-500">
-       Export Report
-    </a>
-  </header>
-
-  <!-- Metric Cards -->
-  <div class="grid gap-6 md:grid-cols-3">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 hover:shadow-md transition">
-      <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Active Alumni</h2>
-      <p class="text-4xl font-bold text-[#660000] dark:text-[#C7A008] mt-3">{{ active_alumni|default('1280') }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Currently engaged this semester</p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 hover:shadow-md transition">
-      <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Mentorship Matches</h2>
-      <p class="text-4xl font-bold text-[#660000] dark:text-[#C7A008] mt-3">{{ total_mentorships|default('460') }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Active mentor-mentee pairs</p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 hover:shadow-md transition">
-      <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Weekly Growth</h2>
-      <p class="text-4xl font-bold text-[#660000] dark:text-[#C7A008] mt-3">{{ growth_percent|default('+8.3%') }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Compared to last week</p>
-    </div>
-  </div>
-
-  <!-- Graph / Insights Section -->
-  <div class="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow p-8 transition">
-    <h3 class="text-2xl font-bold text-[#660000] dark:text-[#C7A008] mb-4">Engagement Trends</h3>
-    <p class="text-gray-600 dark:text-gray-300 mb-6">
-      Explore how student and alumni participation evolves over time.
-    </p>
-    <div class="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
-      [ Chart Placeholder — plug in Recharts.js or Chart.js later ]
-    </div>
-  </div>
-</section>
+<h2>Analytics Insights</h2>
+<p>Engagement, scholarships awarded, alumni outcomes.</p>
 {% endblock %}

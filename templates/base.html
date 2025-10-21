@@ -1,72 +1,37 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}PittState-Connect{% endblock %}</title>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='css/psu-theme.css') }}" rel="stylesheet">
+  <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body class="psu-body">
+  <header class="psu-header" role="banner">
+    <div class="psu-brand">
+      <img src="{{ url_for('static', filename='images/gorilla-icon.svg') }}" alt="Pitt State Gorilla" class="psu-logo">
+      <span class="psu-title">PittState-Connect</span>
+    </div>
+    <nav class="psu-nav" aria-label="Primary">
+      <a href="{{ url_for('core_bp.home') }}">Home</a>
+      <a href="{{ url_for('careers_bp.dashboard') }}">Careers</a>
+      <a href="{{ url_for('scholarships_bp.hub') }}">Scholarships</a>
+      <a href="{{ url_for('analytics_bp.insights') }}">Analytics</a>
+      <a href="{{ url_for('alumni_bp.profile') }}">Alumni</a>
+      <a href="{{ url_for('departments_bp.detail') }}">Departments</a>
+      <a href="{{ url_for('donor_bp.portal') }}">Donor Portal</a>
+      <a href="{{ url_for('admin_bp.dashboard') }}">Admin</a>
+      <a href="{{ url_for('auth_bp.login') }}">Login</a>
+    </nav>
+  </header>
 
-    <link rel="icon" href="{{ url_for('static', filename='images/psu_logo_small.png') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
+  <main class="psu-main" role="main">
+    {% block content %}{% endblock %}
+  </main>
 
-    <!-- Tailwind CDN for fallback -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/7c8b5f4a5b.js" crossorigin="anonymous"></script>
-
-    <!-- Include Flask-Moment for dynamic year/time -->
-    {{ moment.include_moment() }}
-  </head>
-
-  <body class="bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans flex flex-col min-h-screen">
-    <!-- NAVBAR -->
-    <header class="bg-psu-crimson text-white shadow-lg">
-      <nav class="container mx-auto flex justify-between items-center py-4 px-6">
-        <div class="flex items-center gap-3">
-          <img src="{{ url_for('static', filename='images/psu_logo_small.png') }}" alt="PSU Logo" class="w-8 h-8" />
-          <a href="{{ url_for('core.home') }}" class="font-bold text-lg tracking-wide">PittState-Connect</a>
-        </div>
-        <ul class="hidden md:flex gap-6 text-sm font-medium">
-          <li><a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a></li>
-          <li><a href="{{ url_for('core.careers') }}" class="hover:text-psu-gold">Careers</a></li>
-          <li><a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a></li>
-          <li><a href="{{ url_for('core.events') }}" class="hover:text-psu-gold">Events</a></li>
-          <li><a href="{{ url_for('core.contact') }}" class="hover:text-psu-gold">Contact</a></li>
-        </ul>
-      </nav>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="flex-grow">
-      {% block content %}{% endblock %}
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-gray-900 text-gray-300 text-center py-8 mt-12">
-      <div class="container mx-auto px-6">
-        <p class="text-lg font-semibold text-psu-gold mb-2">Pittsburg State University</p>
-        <p class="text-sm text-gray-400 mb-4">Connecting Gorillas for a lifetime of success.</p>
-        <p class="text-sm text-gray-300">
-          © {{ moment().format("YYYY") }} Pittsburg State University — PittState-Connect. All rights reserved.
-        </p>
-      </div>
-    </footer>
-
-    <!-- Dark Mode Toggle -->
-    <script>
-      const toggle = document.createElement("button");
-      toggle.innerText = "🌞/🌙";
-      toggle.className =
-        "fixed bottom-5 right-5 bg-psu-gold text-black rounded-full px-4 py-2 shadow-lg hover:bg-yellow-400 transition";
-      toggle.onclick = () => {
-        document.documentElement.classList.toggle("dark");
-        localStorage.setItem(
-          "theme",
-          document.documentElement.classList.contains("dark") ? "dark" : "light"
-        );
-      };
-      document.body.appendChild(toggle);
-      if (localStorage.getItem("theme") === "dark") {
-        document.documentElement.classList.add("dark");
-      }
-    </script>
-  </body>
+  <footer class="psu-footer" role="contentinfo">
+    <span>© 2025 Pittsburg State University · Crimson & Gold</span>
+  </footer>
+</body>
 </html>

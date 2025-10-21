@@ -1,1 +1,1 @@
-from .routes import analytics_bp
+# analytics package

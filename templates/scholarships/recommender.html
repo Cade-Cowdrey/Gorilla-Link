@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Smart Match Recommender{% endblock %}
+{% block content %}
+<h2>Smart Match Recommender</h2>
+<p>Personalized scholarship matches will appear here.</p>
+<form method="get" action="">
+  <input type="text" name="q" placeholder="Filter by keyword" value="{{ query or '' }}"/>
+  <button>Search</button>
+</form>
+{% endblock %}

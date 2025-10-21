@@ -1,24 +1,10 @@
 from flask import Blueprint, render_template
-from flask_login import current_user
+bp = Blueprint("core_bp", __name__, url_prefix="")
 
-bp = Blueprint("core", __name__)
-
-
-@bp.route("/")
+@bp.get("/")
 def home():
-    return render_template("core/home.html", user=current_user)
+    return render_template("core/home.html")
 
-
-@bp.route("/about")
-def about():
-    return render_template("core/about.html")
-
-
-@bp.route("/privacy")
-def privacy():
-    return render_template("core/privacy.html")
-
-
-@bp.route("/terms")
-def terms():
-    return render_template("core/terms.html")
+@bp.get("/events")
+def events():
+    return render_template("core/events.html")

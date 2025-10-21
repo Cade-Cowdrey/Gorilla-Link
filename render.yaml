@@ -1,49 +1,28 @@
-# ============================================================
-# 🦍 PittState-Connect — Render Deployment Configuration
-# ============================================================
-
 services:
   - type: web
     name: pittstate-connect
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app --timeout 120 --workers 3 --threads 2
-    autoDeploy: true
-
+    startCommand: gunicorn app_pro:app
     envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: PYTHON_VERSION
-        value: 3.10.13
-      - key: DATABASE_URL
-        sync: false            # (Render auto injects Postgres URL)
-      - key: REDIS_URL
-        sync: false
       - key: SECRET_KEY
         sync: false
-      - key: ADMIN_TOKEN
-        value: gorillalink2025
-      - key: MAIL_SERVER
-        value: smtp.gmail.com
-      - key: MAIL_PORT
-        value: 587
-      - key: MAIL_USE_TLS
-        value: true
-      - key: MAIL_USERNAME
+      - key: DATABASE_URL
         sync: false
-      - key: MAIL_PASSWORD
+      - key: REDIS_URL
         sync: false
-
-    postDeployCommand: |
-      echo "-----------------------------------------"
-      echo "🏗️  Running database migrations..."
-      flask db upgrade || echo "⚠️  Migration step skipped."
-      echo "🌱  Running initial seed scripts..."
-      python seed_addons.py || echo "⚠️  Seed step skipped."
-      echo "✅  Deployment complete. PSU Network Ready!"
-      echo "-----------------------------------------"
-
-databases:
-  - name: pittstate_connect_db
-    plan: free
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

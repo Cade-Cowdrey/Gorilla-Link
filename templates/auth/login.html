@@ -1,17 +1,6 @@
-{% extends 'base.html' %}
-{% block title %}Login — PittState-Connect{% endblock %}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-soft">
-  <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
-  <form method="post">
-    <div class="space-y-4">
-      <input type="email" name="email" placeholder="Email" required class="w-full border rounded-xl px-3 py-2">
-      <input type="password" name="password" placeholder="Password" required class="w-full border rounded-xl px-3 py-2">
-      <button type="submit" class="w-full bg-crimson text-white rounded-xl py-2">Sign In</button>
-    </div>
-  </form>
-  <p class="mt-4 text-sm text-center opacity-70">
-    Don’t have an account? <a class="text-crimson font-medium" href="{{ url_for('auth.register') }}">Register</a>
-  </p>
-</div>
+<h2>Login</h2>
+<p>Auth UI coming soon.</p>
 {% endblock %}
