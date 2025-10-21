@@ -1,8 +1,8 @@
 # models.py
-# -----------------------------------------------------------
-# Full PittState-Connect ORM definitions
-# Updated to fix reserved keywords and align with all blueprints
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Full PittState-Connect ORM model definitions (finalized)
+# Includes all blueprint dependencies + analytics models
+# -------------------------------------------------------------------
 
 from datetime import datetime, date
 from flask_login import UserMixin
@@ -10,9 +10,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, login_manager
 
 
-# -----------------------------------------------------------
-# Base User + Roles
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Roles / Users
+# -------------------------------------------------------------------
 
 class Role(db.Model):
     __tablename__ = "roles"
@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     verified = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Profile
     bio = db.Column(db.Text)
@@ -60,7 +61,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def full_name(self):
-        return f"{self.first_name} {self.last_name}".strip()
+        return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -71,9 +72,9 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# -----------------------------------------------------------
-# Logging & Analytics
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Analytics & Logging
+# -------------------------------------------------------------------
 
 class ActivityLog(db.Model):
     __tablename__ = "activity_log"
@@ -81,18 +82,30 @@ class ActivityLog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     action = db.Column(db.String(255), nullable=False)
     ip_address = db.Column(db.String(100))
-    extra_data = db.Column(db.JSON)  # renamed from “metadata”
+    extra_data = db.Column(db.JSON)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-
     user = db.relationship("User", back_populates="activity_logs")
 
     def __repr__(self):
-        return f"<ActivityLog action={self.action} user={self.user_id}>"
+        return f"<ActivityLog {self.action}>"
 
 
-# -----------------------------------------------------------
-# Departments / Faculty / Campus
-# -----------------------------------------------------------
+class DailyStats(db.Model):
+    __tablename__ = "daily_stats"
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=date.today, unique=True)
+    active_users = db.Column(db.Integer, default=0)
+    new_users = db.Column(db.Integer, default=0)
+    scholarships_applied = db.Column(db.Integer, default=0)
+    jobs_posted = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return f"<DailyStats {self.date}>"
+
+
+# -------------------------------------------------------------------
+# Department / Faculty / Alumni
+# -------------------------------------------------------------------
 
 class Department(db.Model):
     __tablename__ = "department"
@@ -116,28 +129,32 @@ class Faculty(db.Model):
     email = db.Column(db.String(120))
     title = db.Column(db.String(100))
     department_id = db.Column(db.Integer, db.ForeignKey("department.id"))
-
     department = db.relationship("Department", back_populates="faculty")
 
     def __repr__(self):
         return f"<Faculty {self.name}>"
 
 
-class CampusLocation(db.Model):
-    __tablename__ = "campus_location"
+class Alumni(db.Model):
+    __tablename__ = "alumni"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
-    category = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    graduation_year = db.Column(db.String(10))
+    employer = db.Column(db.String(120))
+    position = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    achievements = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User")
 
     def __repr__(self):
-        return f"<CampusLocation {self.name}>"
+        return f"<Alumni {self.user_id} - {self.employer}>"
 
 
-# -----------------------------------------------------------
-# Scholarships
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Scholarships / Essays
+# -------------------------------------------------------------------
 
 class Scholarship(db.Model):
     __tablename__ = "scholarship"
@@ -170,7 +187,7 @@ class ScholarshipApplication(db.Model):
     scholarship = db.relationship("Scholarship", back_populates="applications")
 
     def __repr__(self):
-        return f"<ScholarshipApplication {self.id} - {self.status}>"
+        return f"<ScholarshipApplication {self.id}:{self.status}>"
 
 
 class Essay(db.Model):
@@ -179,16 +196,15 @@ class Essay(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     title = db.Column(db.String(150))
     content = db.Column(db.Text)
-
     user = db.relationship("User", back_populates="essays")
 
     def __repr__(self):
         return f"<Essay {self.title}>"
 
 
-# -----------------------------------------------------------
-# Mentorship / Groups / Connections
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Mentorship / Groups
+# -------------------------------------------------------------------
 
 class Mentorship(db.Model):
     __tablename__ = "mentorship"
@@ -197,12 +213,11 @@ class Mentorship(db.Model):
     mentee_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     mentor = db.relationship("User", foreign_keys=[mentor_id], back_populates="mentorships_as_mentor")
     mentee = db.relationship("User", foreign_keys=[mentee_id], back_populates="mentorships_as_mentee")
 
     def __repr__(self):
-        return f"<Mentorship mentor={self.mentor_id} mentee={self.mentee_id}>"
+        return f"<Mentorship {self.mentor_id}->{self.mentee_id}>"
 
 
 class Group(db.Model):
@@ -210,7 +225,6 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.Text)
-
     members = db.relationship("GroupMember", back_populates="group", cascade="all,delete")
     messages = db.relationship("GroupMessage", back_populates="group", cascade="all,delete")
 
@@ -224,12 +238,11 @@ class GroupMember(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     role = db.Column(db.String(50), default="member")
-
     group = db.relationship("Group", back_populates="members")
     user = db.relationship("User", back_populates="groups")
 
     def __repr__(self):
-        return f"<GroupMember {self.user_id} in {self.group_id}>"
+        return f"<GroupMember {self.user_id}:{self.group_id}>"
 
 
 class GroupMessage(db.Model):
@@ -239,7 +252,6 @@ class GroupMessage(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     content = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     group = db.relationship("Group", back_populates="messages")
     sender = db.relationship("User")
 
@@ -247,9 +259,42 @@ class GroupMessage(db.Model):
         return f"<GroupMessage {self.id}>"
 
 
-# -----------------------------------------------------------
-# Events & RSVPs
-# -----------------------------------------------------------
+# -------------------------------------------------------------------
+# Careers / Jobs / Posts
+# -------------------------------------------------------------------
+
+class Job(db.Model):
+    __tablename__ = "job"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150))
+    company = db.Column(db.String(120))
+    description = db.Column(db.Text)
+    location = db.Column(db.String(120))
+    salary = db.Column(db.Float)
+    posted_date = db.Column(db.DateTime, default=datetime.utcnow)
+    deadline = db.Column(db.Date)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f"<Job {self.title}>"
+
+
+class Post(db.Model):
+    __tablename__ = "post"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    content = db.Column(db.Text)
+    category = db.Column(db.String(80))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship("User")
+
+    def __repr__(self):
+        return f"<Post {self.id}:{self.category}>"
+
+
+# -------------------------------------------------------------------
+# Events / RSVPs / Badges / Feed / Donors
+# -------------------------------------------------------------------
 
 class Event(db.Model):
     __tablename__ = "event"
@@ -259,7 +304,6 @@ class Event(db.Model):
     date = db.Column(db.Date)
     location = db.Column(db.String(120))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     rsvps = db.relationship("EventRSVP", back_populates="event", cascade="all,delete")
 
     def __repr__(self):
@@ -272,17 +316,12 @@ class EventRSVP(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey("event.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
     event = db.relationship("Event", back_populates="rsvps")
     user = db.relationship("User")
 
     def __repr__(self):
-        return f"<RSVP user={self.user_id} event={self.event_id}>"
+        return f"<RSVP {self.user_id}:{self.event_id}>"
 
-
-# -----------------------------------------------------------
-# Badges / Achievements
-# -----------------------------------------------------------
 
 class Badge(db.Model):
     __tablename__ = "badge"
@@ -290,7 +329,6 @@ class Badge(db.Model):
     slug = db.Column(db.String(100), unique=True)
     name = db.Column(db.String(120))
     description = db.Column(db.String(255))
-
     user_badges = db.relationship("UserBadge", back_populates="badge", cascade="all,delete")
 
     def __repr__(self):
@@ -303,7 +341,6 @@ class UserBadge(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     badge_id = db.Column(db.Integer, db.ForeignKey("badge.id"))
     reason = db.Column(db.String(255))
-
     user = db.relationship("User", back_populates="badges")
     badge = db.relationship("Badge", back_populates="user_badges")
 
@@ -311,17 +348,12 @@ class UserBadge(db.Model):
         return f"<UserBadge {self.user_id}:{self.badge_id}>"
 
 
-# -----------------------------------------------------------
-# Donors, Donations & Impact Stories
-# -----------------------------------------------------------
-
 class Donor(db.Model):
     __tablename__ = "donor"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     organization = db.Column(db.String(120))
     contact_email = db.Column(db.String(120))
-
     donations = db.relationship("Donation", back_populates="donor", cascade="all,delete")
 
     def __repr__(self):
@@ -335,7 +367,6 @@ class Donation(db.Model):
     amount = db.Column(db.Float)
     note = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
-
     donor = db.relationship("Donor", back_populates="donations")
 
     def __repr__(self):
@@ -352,57 +383,3 @@ class ImpactStory(db.Model):
 
     def __repr__(self):
         return f"<ImpactStory {self.title}>"
-
-
-# -----------------------------------------------------------
-# Opportunities / Feed / Marketing / Misc.
-# -----------------------------------------------------------
-
-class Opportunity(db.Model):
-    __tablename__ = "opportunity"
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150))
-    category = db.Column(db.String(80))
-    description = db.Column(db.Text)
-    location = db.Column(db.String(120))
-    deadline = db.Column(db.Date)
-
-    def __repr__(self):
-        return f"<Opportunity {self.title}>"
-
-
-class FeedItem(db.Model):
-    __tablename__ = "feed_item"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    content = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-    user = db.relationship("User", back_populates="feed_items")
-
-    def __repr__(self):
-        return f"<FeedItem {self.id}>"
-
-
-class Announcement(db.Model):
-    __tablename__ = "announcement"
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150))
-    body = db.Column(db.Text)
-    is_public = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<Announcement {self.title}>"
-
-
-class MarketingLead(db.Model):
-    __tablename__ = "marketing_lead"
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120))
-    name = db.Column(db.String(120))
-    source = db.Column(db.String(120))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<MarketingLead {self.email}>"
