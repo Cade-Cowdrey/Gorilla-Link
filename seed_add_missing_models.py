@@ -1,6 +1,7 @@
 # seed_add_missing_models.py
 # --------------------------------------------------------------------
 # PSU-branded demo seed script for Alumni, Job, Post, and DailyStats
+# Automatically links to existing User records for realism
 # --------------------------------------------------------------------
 
 from datetime import datetime, timedelta, date
@@ -12,12 +13,17 @@ from models import Alumni, Job, Post, DailyStats, User
 def seed_add_missing_models():
     print("🌟 Seeding Alumni, Job, Post, and DailyStats with PSU demo data...")
 
-    # -----------------------------
+    users = User.query.all()
+    if not users:
+        print("⚠️ No users found in the database. Run your user seed first.")
+        return
+
+    # ----------------------------------------------------------------
     # Alumni (PittState graduates)
-    # -----------------------------
+    # ----------------------------------------------------------------
     alumni_examples = [
         Alumni(
-            user_id=None,
+            user_id=choice(users).id,
             graduation_year="2021",
             employer="Cerner Corporation",
             position="Software Engineer",
@@ -25,7 +31,7 @@ def seed_add_missing_models():
             achievements="Developed patient record integration tools adopted by 20+ hospitals.",
         ),
         Alumni(
-            user_id=None,
+            user_id=choice(users).id,
             graduation_year="2020",
             employer="Koch Industries",
             position="Business Analyst",
@@ -33,7 +39,7 @@ def seed_add_missing_models():
             achievements="Led a data optimization project saving $200K annually.",
         ),
         Alumni(
-            user_id=None,
+            user_id=choice(users).id,
             graduation_year="2022",
             employer="Garmin",
             position="UX Designer",
@@ -41,7 +47,7 @@ def seed_add_missing_models():
             achievements="Redesigned product UI for aviation line; improved satisfaction by 30%.",
         ),
         Alumni(
-            user_id=None,
+            user_id=choice(users).id,
             graduation_year="2019",
             employer="Pittsburg State University",
             position="Assistant Professor",
@@ -49,7 +55,7 @@ def seed_add_missing_models():
             achievements="Published 3 research papers on educational technology.",
         ),
         Alumni(
-            user_id=None,
+            user_id=choice(users).id,
             graduation_year="2023",
             employer="Honeywell",
             position="Mechanical Engineer",
@@ -59,9 +65,9 @@ def seed_add_missing_models():
     ]
     db.session.bulk_save_objects(alumni_examples)
 
-    # -----------------------------
+    # ----------------------------------------------------------------
     # Jobs (Career listings)
-    # -----------------------------
+    # ----------------------------------------------------------------
     jobs = [
         Job(
             title="Marketing Coordinator",
@@ -111,21 +117,34 @@ def seed_add_missing_models():
     ]
     db.session.bulk_save_objects(jobs)
 
-    # -----------------------------
-    # Posts (Campus feed / insights)
-    # -----------------------------
+    # ----------------------------------------------------------------
+    # Posts (Campus feed / announcements)
+    # ----------------------------------------------------------------
+    post_templates = [
+        "Excited to mentor PSU seniors in software engineering this semester!",
+        "Join us for the Career Expo next week at the Bicknell Center!",
+        "Scholarship deadlines are approaching—check the Scholarship Hub!",
+        "New Gorilla Scholars leaderboard now live on PittState-Connect!",
+        "Congrats to our Tech & Engineering alumni featured in PSU Magazine!",
+        "The Financial Literacy Hub just dropped new budgeting tutorials!",
+        "GorillaLink now syncs with LinkedIn—update your profile today!",
+    ]
+    categories = ["alumni", "event", "announcement", "update", "news"]
+
     posts = [
-        Post(user_id=None, content="Excited to mentor PSU seniors in software engineering this semester!", category="alumni"),
-        Post(user_id=None, content="Join us for the Career Expo next week at the Bicknell Center!", category="event"),
-        Post(user_id=None, content="Scholarship deadlines are approaching—check the Scholarship Hub!", category="announcement"),
-        Post(user_id=None, content="New Gorilla Scholars leaderboard now live on PittState-Connect!", category="update"),
-        Post(user_id=None, content="Congrats to our Tech & Engineering alumni featured in PSU Magazine!", category="news"),
+        Post(
+            user_id=choice(users).id,
+            content=content,
+            category=choice(categories),
+            timestamp=datetime.utcnow() - timedelta(hours=randint(1, 72)),
+        )
+        for content in post_templates
     ]
     db.session.bulk_save_objects(posts)
 
-    # -----------------------------
-    # DailyStats (Analytics)
-    # -----------------------------
+    # ----------------------------------------------------------------
+    # DailyStats (Analytics tracking)
+    # ----------------------------------------------------------------
     today = date.today()
     stats = [
         DailyStats(
@@ -135,12 +154,14 @@ def seed_add_missing_models():
             scholarships_applied=randint(2, 15),
             jobs_posted=randint(1, 4),
         )
-        for i in range(5)
+        for i in range(7)
     ]
     db.session.bulk_save_objects(stats)
 
+    # Commit everything
     db.session.commit()
     print("✅ Demo data seeded successfully for Alumni, Jobs, Posts, and Analytics!")
+    print(f"👥 Linked with {len(users)} existing users.")
 
 
 if __name__ == "__main__":
