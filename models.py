@@ -253,7 +253,7 @@ class DailyStats(db.Model):
 
 
 # ------------------------------
-# Connections / Feed / Events
+# Connections / Feed / Groups / Events
 # ------------------------------
 
 class Connection(db.Model):
@@ -297,6 +297,21 @@ class Group(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class GroupMessage(db.Model):
+    __tablename__ = "group_message"
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    group = db.relationship("Group", backref="messages", lazy=True)
+    sender = db.relationship("User", backref="group_messages", lazy=True)
+
+    def __repr__(self):
+        return f"<GroupMessage group={self.group_id} sender={self.sender_id}>"
+
+
 class Event(db.Model):
     __tablename__ = "event"
     id = db.Column(db.Integer, primary_key=True)
@@ -325,5 +340,5 @@ __all__ = [
     "FacultyRecommendation", "LeaderboardEntry", "PeerMentor",
     "Donor", "Donation", "ImpactStory",
     "Alumni", "Faculty", "Department", "Job", "Post", "DailyStats",
-    "Connection", "Message", "Notification", "Group", "Event", "FeedItem"
+    "Connection", "Message", "Notification", "Group", "GroupMessage", "Event", "FeedItem"
 ]
