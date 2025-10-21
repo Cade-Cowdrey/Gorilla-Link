@@ -5,8 +5,9 @@ from extensions import db, mail, login_manager
 from blueprints import register_all_blueprints
 from models import User
 
+
 # ------------------------------
-# Factory setup
+# Flask Factory Setup
 # ------------------------------
 
 def create_app():
@@ -16,25 +17,29 @@ def create_app():
     # Configuration
     # ------------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "gorillalink-devkey-23890")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///pittstate_connect.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+        "DATABASE_URL", "sqlite:///pittstate_connect.db"
+    )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # Mail (SendGrid or SMTP)
+    # SendGrid / Mail
     app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
     app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
     app.config["MAIL_USE_TLS"] = True
     app.config["MAIL_USERNAME"] = os.getenv("SENDGRID_USERNAME", "apikey")
     app.config["MAIL_PASSWORD"] = os.getenv("SENDGRID_API_KEY", "")
-    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstate.edu")
+    app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
+        "MAIL_DEFAULT_SENDER", "no-reply@pittstate.edu"
+    )
 
-    # AWS / Cloud bucket (optional)
+    # AWS / Cloud storage
     app.config["S3_BUCKET"] = os.getenv("S3_BUCKET")
     app.config["S3_REGION"] = os.getenv("S3_REGION")
     app.config["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID")
     app.config["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     # ------------------------------
-    # Initialize extensions
+    # Init extensions
     # ------------------------------
     db.init_app(app)
     mail.init_app(app)
@@ -42,26 +47,26 @@ def create_app():
     Migrate(app, db)
 
     # ------------------------------
-    # Login manager configuration
+    # Flask-Login configuration
     # ------------------------------
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
 
     @login_manager.user_loader
     def load_user(user_id):
-        """Flask-Login: load user from user_id stored in session"""
+        """Required by Flask-Login: loads a user from the database by ID."""
         try:
             return User.query.get(int(user_id))
         except Exception:
             return None
 
     # ------------------------------
-    # Blueprint registration
+    # Blueprint auto-registration
     # ------------------------------
     register_all_blueprints(app)
 
     # ------------------------------
-    # Context processor
+    # Global context variables
     # ------------------------------
     @app.context_processor
     def inject_globals():
@@ -71,14 +76,14 @@ def create_app():
     # Health check route
     # ------------------------------
     @app.route("/health")
-    def health_check():
+    def health():
         return {"status": "ok"}
 
     return app
 
 
 # ------------------------------
-# WSGI entrypoint
+# WSGI entry point
 # ------------------------------
 app = create_app()
 
