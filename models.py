@@ -14,9 +14,6 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(200))
 
-    def __repr__(self):
-        return f"<Role {self.name}>"
-
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -40,9 +37,6 @@ class User(UserMixin, db.Model):
 
     def full_name(self):
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
-
-    def __repr__(self):
-        return f"<User {self.email}>"
 
 
 # ------------------------------
@@ -176,6 +170,70 @@ class ImpactStory(db.Model):
 
 
 # ------------------------------
+# Academic & Analytics Support Models
+# ------------------------------
+
+class Alumni(db.Model):
+    __tablename__ = "alumni"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150))
+    graduation_year = db.Column(db.Integer)
+    current_employer = db.Column(db.String(200))
+    job_title = db.Column(db.String(150))
+    email = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+
+
+class Faculty(db.Model):
+    __tablename__ = "faculty"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150))
+    department_id = db.Column(db.Integer, db.ForeignKey("department.id"))
+    email = db.Column(db.String(120))
+    title = db.Column(db.String(120))
+    department = db.relationship("Department", backref="faculty_members")
+
+
+class Department(db.Model):
+    __tablename__ = "department"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150))
+    building = db.Column(db.String(150))
+    phone = db.Column(db.String(100))
+    website = db.Column(db.String(200))
+
+
+class Job(db.Model):
+    __tablename__ = "job"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200))
+    company = db.Column(db.String(200))
+    location = db.Column(db.String(200))
+    posted_date = db.Column(db.DateTime, default=datetime.utcnow)
+    description = db.Column(db.Text)
+
+
+class Post(db.Model):
+    __tablename__ = "post"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    title = db.Column(db.String(200))
+    content = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship("User", backref="posts")
+
+
+class DailyStats(db.Model):
+    __tablename__ = "daily_stats"
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=date.today)
+    total_logins = db.Column(db.Integer, default=0)
+    new_users = db.Column(db.Integer, default=0)
+    scholarships_submitted = db.Column(db.Integer, default=0)
+    donations_made = db.Column(db.Integer, default=0)
+
+
+# ------------------------------
 # Admin Activity Log
 # ------------------------------
 
@@ -186,15 +244,11 @@ class ActivityLog(db.Model):
     action = db.Column(db.String(255), nullable=False)
     ip_address = db.Column(db.String(100))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship("User", backref="activity_logs")
-
-    def __repr__(self):
-        return f"<ActivityLog {self.action} by {self.user_id}>"
 
 
 # ------------------------------
-# Exports
+# Export list
 # ------------------------------
 
 __all__ = [
@@ -202,5 +256,6 @@ __all__ = [
     "Scholarship", "ScholarshipApplication", "Essay", "Reminder",
     "FinancialLiteracyResource", "CostToCompletion", "FundingJourney",
     "FacultyRecommendation", "LeaderboardEntry", "PeerMentor",
-    "Donor", "Donation", "ImpactStory", "ActivityLog"
+    "Donor", "Donation", "ImpactStory", "ActivityLog",
+    "Alumni", "Faculty", "Department", "Job", "Post", "DailyStats"
 ]
