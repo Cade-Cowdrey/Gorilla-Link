@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Admin Activity Logs | PittState-Connect{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-danger fw-bold">🦍 Admin Activity Log</h2>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>IP Address</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.user.full_name() if log.user else 'System' }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.ip_address or 'N/A' }}</td>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
