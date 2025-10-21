@@ -1,80 +1,104 @@
-# app_pro.py
-SKIP_BLUEPRINTS = {
-'profile', 'notifications', 'groups', 'feed', 'events', 'departments' # paused modules
-}
-REGISTER_SUFFIX = '_bp'
+import importlib
+import pkgutil
+from pathlib import Path
+
+from flask import Flask, jsonify
+from flask_cors import CORS
+
+from config import load_config, validate_config
+from extensions import db, migrate, login_manager, cache, csrf, limiter
+from app_extensions import init_all as init_app_extras
 
 
+def create_app() -> Flask:
+    app = Flask(
+        __name__,
+        template_folder="templates",
+        static_folder="static",
+        instance_relative_config=False,
+    )
+
+    # -------------------------
+    # Config
+    # -------------------------
+    cfg = load_config()
+    app.config.from_object(cfg)
+    validate_config(cfg)
+
+    # -------------------------
+    # Core extensions
+    # -------------------------
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    cache.init_app(app)
+    csrf.init_app(app)
+    limiter.init_app(app)
+
+    # CORS (if you have external clients/mobile app); adjust origins in prod
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+    # App-wide extras: filters, errors, security headers, logging, request IDs
+    init_app_extras(app)
+
+    # -------------------------
+    # Blueprints
+    # -------------------------
+    register_core_blueprints(app)
+
+    # -------------------------
+    # Health & diagnostics
+    # -------------------------
+    @app.get("/healthz")
+    def healthz():
+        return jsonify({"status": "ok"})
+
+    @app.get("/readyz")
+    def readyz():
+        # simple DB ping
+        try:
+            db.session.execute(db.text("SELECT 1"))
+            return jsonify({"status": "ready"})
+        except Exception as e:
+            app.logger.exception("readiness probe failed")
+            return jsonify({"status": "error", "detail": str(e)}), 500
+
+    return app
 
 
-def create_app():
-app = Flask(__name__)
+def register_core_blueprints(app: Flask):
+    """
+    Auto-discovers blueprints in ./blueprints/*/__init__.py that expose a `bp` object,
+    e.g. blueprints/admin/__init__.py -> bp = Blueprint('admin', __name__, url_prefix='/admin')
+    """
+    if not app.config.get("ENABLE_BLUEPRINT_AUTODISCOVERY", True):
+        return
 
+    root = Path(__file__).parent / "blueprints"
+    if not root.exists():
+        app.logger.info("No blueprints/ directory found; skipping autodiscovery.")
+        return
 
-# Load config from environment or defaults (replace with your config.py if present)
-app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = app.config.get('SECRET_KEY', 'dev')
+    for finder, name, ispkg in pkgutil.iter_modules([str(root)]):
+        pkg_name = f"blueprints.{name}"
+        try:
+            mod = importlib.import_module(pkg_name)
+        except Exception as e:
+            app.logger.exception(f"Failed importing {pkg_name}: {e}")
+            continue
 
-
-db.init_app(app)
-
-
-login_manager = LoginManager(app)
-login_manager.login_view = 'auth.login'
-
-
-@login_manager.user_loader
-def load_user(user_id):
-return User.query.get(int(user_id))
-
-
-_register_blueprints(app)
-
-
-with app.app_context():
-db.create_all()
-
-
-return app
-
-
-
-
-def _register_blueprints(app):
-import blueprints
-from flask import Blueprint
-
-
-for _, name, _ in pkgutil.iter_modules(blueprints.__path__):
-if name in SKIP_BLUEPRINTS:
-app.logger.info(f"[BP] Skipping '{name}' (explicit)")
-continue
-pkg_name = f"blueprints.{name}"
-try:
-module = importlib.import_module(f"{pkg_name}.routes")
-except Exception as e:
-app.logger.warning(f"[BP] Import failed for {pkg_name}.routes: {e}")
-continue
-
-
-registered = False
-for attr in dir(module):
-if not attr.endswith(REGISTER_SUFFIX):
-continue
-obj = getattr(module, attr)
-if isinstance(obj, Blueprint):
-app.register_blueprint(obj)
-app.logger.info(f"[BP] Registered {pkg_name}:{attr} at {obj.url_prefix}")
-registered = True
-if not registered:
-app.logger.warning(f"[BP] No '*{REGISTER_SUFFIX}' blueprint object in {pkg_name}.routes")
-
-
-
-
-app = create_app()
-
-
-if __name__ == '__main__':
-app.run(host='0.0.0.0', port=5000)
+        # If package: load its __init__.py expecting a 'bp' attribute
+        bp = getattr(mod, "bp", None)
+        if bp is not None:
+            app.register_blueprint(bp)
+            app.logger.info(f"Registered blueprint: {bp.name} (/{bp.url_prefix or ''})")
+        else:
+            # If module didn't expose bp at package level, try routes submodule
+            try:
+                routes = importlib.import_module(f"{pkg_name}.routes")
+                bp = getattr(routes, "bp", None)
+                if bp is not None:
+                    app.register_blueprint(bp)
+                    app.logger.info(f"Registered blueprint: {bp.name} (/{bp.url_prefix or ''})")
+            except Exception as e:
+                app.logger.debug(f"No routes module for {pkg_name} or no bp found: {e}")
