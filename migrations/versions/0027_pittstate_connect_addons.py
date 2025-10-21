@@ -1,7 +1,7 @@
 """Add PittState-Connect full add-on tables
 
-Revision ID: 0012_psc_full_addons
-Revises: 0011_add_doctor_time_composite
+Revision ID: 0027_pittstate_connect_addons
+Revises: 0026_split_user_name_into_first_last
 Create Date: 2025-10-21
 
 Note: This migration creates only new tables so it won't affect your existing ones.
@@ -11,8 +11,8 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = '0012_psc_full_addons'
-down_revision = '0011_add_doctor_time_composite'
+revision = '0027_pittstate_connect_addons'
+down_revision = '0026_split_user_name_into_first_last'
 branch_labels = None
 depends_on = None
 
