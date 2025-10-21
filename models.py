@@ -4,13 +4,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 
 
-# ==============================
-# Core User + Role Models
-# ==============================
+# ------------------------------
+# Core Models
+# ------------------------------
 
 class Role(db.Model):
     __tablename__ = "role"
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(200))
@@ -21,7 +20,6 @@ class Role(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
-
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -47,13 +45,12 @@ class User(UserMixin, db.Model):
         return f"<User {self.email}>"
 
 
-# ==============================
-# Scholarship Hub Models
-# ==============================
+# ------------------------------
+# Scholarship Hub
+# ------------------------------
 
 class Scholarship(db.Model):
     __tablename__ = "scholarship"
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
@@ -61,191 +58,149 @@ class Scholarship(db.Model):
     deadline = db.Column(db.Date)
     department = db.Column(db.String(120))
     is_active = db.Column(db.Boolean, default=True)
-
     applications = db.relationship("ScholarshipApplication", backref="scholarship", lazy=True)
-
-    def __repr__(self):
-        return f"<Scholarship {self.title}>"
 
 
 class ScholarshipApplication(db.Model):
     __tablename__ = "scholarship_application"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     scholarship_id = db.Column(db.Integer, db.ForeignKey("scholarship.id"))
     status = db.Column(db.String(32), default="draft")
     progress = db.Column(db.Integer, default=0)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship("User", backref="scholarship_applications")
-
-    def __repr__(self):
-        return f"<ScholarshipApplication user={self.user_id} scholarship={self.scholarship_id}>"
 
 
 class Essay(db.Model):
     __tablename__ = "essay"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     title = db.Column(db.String(200))
     content = db.Column(db.Text)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship("User", backref="essays")
-
-    def __repr__(self):
-        return f"<Essay {self.title}>"
 
 
 class Reminder(db.Model):
     __tablename__ = "reminder"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     scholarship_id = db.Column(db.Integer, nullable=True)
     due_at = db.Column(db.DateTime)
     note = db.Column(db.String(255))
-
     user = db.relationship("User", backref="reminders")
-
-    def __repr__(self):
-        return f"<Reminder {self.note}>"
 
 
 class FinancialLiteracyResource(db.Model):
     __tablename__ = "financial_literacy_resource"
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     url = db.Column(db.String(300))
     category = db.Column(db.String(100))
 
-    def __repr__(self):
-        return f"<FinancialLiteracyResource {self.title}>"
-
 
 class CostToCompletion(db.Model):
     __tablename__ = "cost_to_completion"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     estimated_tuition_remaining = db.Column(db.Integer, default=0)
     est_graduation_date = db.Column(db.Date)
-
     user = db.relationship("User", backref="cost_to_completion")
-
-    def __repr__(self):
-        return f"<CostToCompletion user={self.user_id}>"
 
 
 class FundingJourney(db.Model):
     __tablename__ = "funding_journey"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     step = db.Column(db.String(120))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship("User", backref="funding_journey")
-
-    def __repr__(self):
-        return f"<FundingJourney {self.step}>"
 
 
 class FacultyRecommendation(db.Model):
     __tablename__ = "faculty_recommendation"
-
     id = db.Column(db.Integer, primary_key=True)
     applicant_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     faculty_name = db.Column(db.String(200))
     file_url = db.Column(db.String(400))
-
     applicant = db.relationship("User", backref="faculty_recommendations")
-
-    def __repr__(self):
-        return f"<FacultyRecommendation {self.faculty_name}>"
 
 
 class LeaderboardEntry(db.Model):
     __tablename__ = "leaderboard_entry"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     points = db.Column(db.Integer, default=0)
-
     user = db.relationship("User", backref="leaderboard_entries")
-
-    def __repr__(self):
-        return f"<LeaderboardEntry user={self.user_id} points={self.points}>"
 
 
 class PeerMentor(db.Model):
     __tablename__ = "peer_mentor"
-
     id = db.Column(db.Integer, primary_key=True)
     mentor_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     mentee_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-
     mentor = db.relationship("User", foreign_keys=[mentor_user_id], backref="mentees")
     mentee = db.relationship("User", foreign_keys=[mentee_user_id], backref="mentors")
 
-    def __repr__(self):
-        return f"<PeerMentor mentor={self.mentor_user_id} mentee={self.mentee_user_id}>"
 
-
-# ==============================
-# Donor & Impact Models
-# ==============================
+# ------------------------------
+# Donors & Impact
+# ------------------------------
 
 class Donor(db.Model):
     __tablename__ = "donor"
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
     organization = db.Column(db.String(200))
     contact_email = db.Column(db.String(200))
-
     donations = db.relationship("Donation", backref="donor", lazy=True)
-
-    def __repr__(self):
-        return f"<Donor {self.name}>"
 
 
 class Donation(db.Model):
     __tablename__ = "donation"
-
     id = db.Column(db.Integer, primary_key=True)
     donor_id = db.Column(db.Integer, db.ForeignKey("donor.id"))
     amount = db.Column(db.Integer)
     note = db.Column(db.String(255))
     donated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<Donation donor={self.donor_id} amount={self.amount}>"
-
 
 class ImpactStory(db.Model):
     __tablename__ = "impact_story"
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     body = db.Column(db.Text)
     photo_url = db.Column(db.String(400))
     published_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"<ImpactStory {self.title}>"
 
-# ==============================
-# Export
-# ==============================
+# ------------------------------
+# Admin Activity Log
+# ------------------------------
+
+class ActivityLog(db.Model):
+    __tablename__ = "activity_log"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    action = db.Column(db.String(255), nullable=False)
+    ip_address = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref="activity_logs")
+
+    def __repr__(self):
+        return f"<ActivityLog {self.action} by {self.user_id}>"
+
+
+# ------------------------------
+# Exports
+# ------------------------------
 
 __all__ = [
     "db", "User", "Role",
     "Scholarship", "ScholarshipApplication", "Essay", "Reminder",
     "FinancialLiteracyResource", "CostToCompletion", "FundingJourney",
     "FacultyRecommendation", "LeaderboardEntry", "PeerMentor",
-    "Donor", "Donation", "ImpactStory"
+    "Donor", "Donation", "ImpactStory", "ActivityLog"
 ]
