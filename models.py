@@ -45,6 +45,19 @@ class User(UserMixin, db.Model):
         return f"<User {self.email}>"
 
 
+class ActivityLog(db.Model):
+    __tablename__ = "activity_log"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    action = db.Column(db.String(255), nullable=False)
+    ip_address = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship("User", backref="activity_logs")
+
+    def __repr__(self):
+        return f"<ActivityLog {self.action} by {self.user_id}>"
+
+
 # ------------------------------
 # Scholarship Hub
 # ------------------------------
@@ -176,7 +189,7 @@ class ImpactStory(db.Model):
 
 
 # ------------------------------
-# Academic / Analytics Models
+# Analytics / Academic Data
 # ------------------------------
 
 class Alumni(db.Model):
@@ -240,7 +253,7 @@ class DailyStats(db.Model):
 
 
 # ------------------------------
-# User Connections / Networking
+# Connections / Feed / Events
 # ------------------------------
 
 class Connection(db.Model):
@@ -248,9 +261,8 @@ class Connection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     connected_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    status = db.Column(db.String(50), default="pending")  # pending, accepted, blocked
+    status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship("User", foreign_keys=[user_id], backref="sent_connections")
     connected_user = db.relationship("User", foreign_keys=[connected_user_id], backref="received_connections")
 
@@ -258,21 +270,48 @@ class Connection(db.Model):
         return f"<Connection {self.user_id} ↔ {self.connected_user_id} ({self.status})>"
 
 
-# ------------------------------
-# Admin Activity Log
-# ------------------------------
-
-class ActivityLog(db.Model):
-    __tablename__ = "activity_log"
+class Message(db.Model):
+    __tablename__ = "message"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    action = db.Column(db.String(255), nullable=False)
-    ip_address = db.Column(db.String(100))
+    sender_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    receiver_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    content = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship("User", backref="activity_logs")
 
-    def __repr__(self):
-        return f"<ActivityLog {self.action} by {self.user_id}>"
+
+class Notification(db.Model):
+    __tablename__ = "notification"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    message = db.Column(db.String(255))
+    link = db.Column(db.String(255))
+    read = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Group(db.Model):
+    __tablename__ = "group"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150))
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Event(db.Model):
+    __tablename__ = "event"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200))
+    date = db.Column(db.Date)
+    location = db.Column(db.String(200))
+    description = db.Column(db.Text)
+
+
+class FeedItem(db.Model):
+    __tablename__ = "feed_item"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    content = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # ------------------------------
@@ -280,11 +319,11 @@ class ActivityLog(db.Model):
 # ------------------------------
 
 __all__ = [
-    "db", "User", "Role",
+    "db", "User", "Role", "ActivityLog",
     "Scholarship", "ScholarshipApplication", "Essay", "Reminder",
     "FinancialLiteracyResource", "CostToCompletion", "FundingJourney",
     "FacultyRecommendation", "LeaderboardEntry", "PeerMentor",
-    "Donor", "Donation", "ImpactStory", "ActivityLog",
+    "Donor", "Donation", "ImpactStory",
     "Alumni", "Faculty", "Department", "Job", "Post", "DailyStats",
-    "Connection"
+    "Connection", "Message", "Notification", "Group", "Event", "FeedItem"
 ]
