@@ -1,122 +1,83 @@
-"""Add missing auxiliary models: badges, digests, audit logs, and meta info."""
+"""Add Alumni, Job, Post, and DailyStats models
+
+Revision ID: 0014_add_missing_models
+Revises: 0026_split_user_name_into_first_last
+Create Date: 2025-10-21 22:45:00.000000
+"""
+
 from alembic import op
 import sqlalchemy as sa
 from datetime import datetime
 
-# Revision identifiers
+
+# Revision identifiers, used by Alembic.
 revision = "0014_add_missing_models"
-down_revision = "0013_init_core_models"
+down_revision = "0026_split_user_name_into_first_last"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    # --- BADGES TABLE ---
+    # ---------------------------
+    # Alumni table
+    # ---------------------------
     op.create_table(
-        "badges",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("name", sa.String(100), nullable=False),
-        sa.Column("description", sa.Text),
-        sa.Column("icon", sa.String(255)),
-        sa.Column("category", sa.String(100), default="achievement"),
-        sa.Column("created_at", sa.DateTime, default=datetime.utcnow),
+        "alumni",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("user.id")),
+        sa.Column("graduation_year", sa.String(length=10)),
+        sa.Column("employer", sa.String(length=120)),
+        sa.Column("position", sa.String(length=120)),
+        sa.Column("location", sa.String(length=120)),
+        sa.Column("achievements", sa.Text()),
+        sa.Column("created_at", sa.DateTime(), default=datetime.utcnow),
     )
 
-    # --- USER BADGES TABLE ---
+    # ---------------------------
+    # Job table
+    # ---------------------------
     op.create_table(
-        "user_badges",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
-        sa.Column("badge_id", sa.Integer, sa.ForeignKey("badges.id", ondelete="CASCADE")),
-        sa.Column("awarded_at", sa.DateTime, default=datetime.utcnow),
-        sa.UniqueConstraint("user_id", "badge_id", name="uq_user_badge"),
+        "job",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("title", sa.String(length=150)),
+        sa.Column("company", sa.String(length=120)),
+        sa.Column("description", sa.Text()),
+        sa.Column("location", sa.String(length=120)),
+        sa.Column("salary", sa.Float()),
+        sa.Column("posted_date", sa.DateTime(), default=datetime.utcnow),
+        sa.Column("deadline", sa.Date()),
+        sa.Column("is_active", sa.Boolean(), default=True),
     )
 
-    # --- DIGESTS TABLE ---
+    # ---------------------------
+    # Post table
+    # ---------------------------
     op.create_table(
-        "digests",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("title", sa.String(255), nullable=False),
-        sa.Column("content", sa.Text, nullable=False),
-        sa.Column("category", sa.String(100), default="general"),
-        sa.Column("published_at", sa.DateTime, default=datetime.utcnow),
-        sa.Column("author_id", sa.Integer, sa.ForeignKey("users.id", ondelete="SET NULL")),
+        "post",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("user.id")),
+        sa.Column("content", sa.Text()),
+        sa.Column("category", sa.String(length=80)),
+        sa.Column("timestamp", sa.DateTime(), default=datetime.utcnow),
     )
 
-    # --- DIGEST LOGS (email sending logs) ---
+    # ---------------------------
+    # DailyStats table
+    # ---------------------------
     op.create_table(
-        "digest_logs",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("digest_id", sa.Integer, sa.ForeignKey("digests.id", ondelete="CASCADE")),
-        sa.Column("recipient_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
-        sa.Column("status", sa.String(50), default="sent"),
-        sa.Column("sent_at", sa.DateTime, default=datetime.utcnow),
+        "daily_stats",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("date", sa.Date(), unique=True),
+        sa.Column("active_users", sa.Integer(), default=0),
+        sa.Column("new_users", sa.Integer(), default=0),
+        sa.Column("scholarships_applied", sa.Integer(), default=0),
+        sa.Column("jobs_posted", sa.Integer(), default=0),
     )
-
-    # --- AUDIT LOGS TABLE ---
-    op.create_table(
-        "audit_logs",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="SET NULL")),
-        sa.Column("action", sa.String(255), nullable=False),
-        sa.Column("target_table", sa.String(100)),
-        sa.Column("target_id", sa.Integer),
-        sa.Column("timestamp", sa.DateTime, default=datetime.utcnow),
-        sa.Column("details", sa.Text),
-    )
-
-    # --- META INFO (branding/system constants) ---
-    op.create_table(
-        "meta_info",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("key", sa.String(100), nullable=False, unique=True),
-        sa.Column("value", sa.String(500)),
-        sa.Column("last_updated", sa.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow),
-    )
-
-    # --- Seed Default PSU Badges ---
-    bind = op.get_bind()
-    existing_badges = bind.execute(sa.text("SELECT COUNT(*) FROM badges")).scalar() if bind else 0
-    if existing_badges == 0:
-        badges = [
-            ("Founder", "Original Gorilla-Link creator", "fa-crown"),
-            ("Mentor", "Guided another student", "fa-handshake"),
-            ("Leader", "Hosted a PSU campus event", "fa-users"),
-            ("Career Climber", "Applied for 3+ internships", "fa-briefcase"),
-            ("Connector", "Formed 5+ new PSU connections", "fa-network-wired"),
-        ]
-        for name, desc, icon in badges:
-            bind.execute(sa.text("""
-                INSERT INTO badges (name, description, icon, category, created_at)
-                VALUES (:name, :desc, :icon, 'achievement', :created)
-            """), {"name": name, "desc": desc, "icon": icon, "created": datetime.utcnow()})
-        print("🏅 Seeded default PSU badge set.")
-
-    # --- Seed PSU Meta Info ---
-    existing_meta = bind.execute(sa.text("SELECT COUNT(*) FROM meta_info")).scalar() if bind else 0
-    if existing_meta == 0:
-        meta_defaults = {
-            "platform_name": "PittState-Connect",
-            "theme_color": "#DAA520",
-            "institution": "Pittsburg State University",
-            "tagline": "Connecting Gorillas for Life",
-            "email_support": "support@pittstate-connect.edu",
-        }
-        for k, v in meta_defaults.items():
-            bind.execute(sa.text("""
-                INSERT INTO meta_info (key, value, last_updated)
-                VALUES (:k, :v, :now)
-            """), {"k": k, "v": v, "now": datetime.utcnow()})
-        print("🎓 Seeded PSU meta branding defaults.")
-
-    print("✅ Added all auxiliary PSU models (badges, digests, logs, meta info).")
 
 
 def downgrade():
-    op.drop_table("meta_info")
-    op.drop_table("audit_logs")
-    op.drop_table("digest_logs")
-    op.drop_table("digests")
-    op.drop_table("user_badges")
-    op.drop_table("badges")
-    print("🧹 Removed auxiliary PSU models.")
+    # Drop in reverse order
+    op.drop_table("daily_stats")
+    op.drop_table("post")
+    op.drop_table("job")
+    op.drop_table("alumni")
