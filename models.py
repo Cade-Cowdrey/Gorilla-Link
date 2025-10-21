@@ -14,6 +14,9 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(200))
 
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -37,6 +40,9 @@ class User(UserMixin, db.Model):
 
     def full_name(self):
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
+
+    def __repr__(self):
+        return f"<User {self.email}>"
 
 
 # ------------------------------
@@ -170,7 +176,7 @@ class ImpactStory(db.Model):
 
 
 # ------------------------------
-# Academic & Analytics Support Models
+# Academic / Analytics Models
 # ------------------------------
 
 class Alumni(db.Model):
@@ -234,6 +240,25 @@ class DailyStats(db.Model):
 
 
 # ------------------------------
+# User Connections / Networking
+# ------------------------------
+
+class Connection(db.Model):
+    __tablename__ = "connection"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    connected_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    status = db.Column(db.String(50), default="pending")  # pending, accepted, blocked
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", foreign_keys=[user_id], backref="sent_connections")
+    connected_user = db.relationship("User", foreign_keys=[connected_user_id], backref="received_connections")
+
+    def __repr__(self):
+        return f"<Connection {self.user_id} ↔ {self.connected_user_id} ({self.status})>"
+
+
+# ------------------------------
 # Admin Activity Log
 # ------------------------------
 
@@ -246,9 +271,12 @@ class ActivityLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship("User", backref="activity_logs")
 
+    def __repr__(self):
+        return f"<ActivityLog {self.action} by {self.user_id}>"
+
 
 # ------------------------------
-# Export list
+# Exports
 # ------------------------------
 
 __all__ = [
@@ -257,5 +285,6 @@ __all__ = [
     "FinancialLiteracyResource", "CostToCompletion", "FundingJourney",
     "FacultyRecommendation", "LeaderboardEntry", "PeerMentor",
     "Donor", "Donation", "ImpactStory", "ActivityLog",
-    "Alumni", "Faculty", "Department", "Job", "Post", "DailyStats"
+    "Alumni", "Faculty", "Department", "Job", "Post", "DailyStats",
+    "Connection"
 ]
