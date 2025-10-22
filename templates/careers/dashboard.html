@@ -1,10 +1,45 @@
+<!-- =========================================================
+FILE: src/templates/careers/dashboard.html
+========================================================= -->
 {% extends "base.html" %}
-{% block title %}Careers Dashboard{% endblock %}
+{% block title %}Careers Dashboard · PittState-Connect{% endblock %}
 {% block content %}
-<h2>Careers Dashboard</h2>
-<ul>
-  <li>Job Board (department-scoped)</li>
-  <li>Internship Listings</li>
-  <li>Employer Sponsorships</li>
-</ul>
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+    <h1 class="text-4xl font-bold">Careers Dashboard</h1>
+    <div class="flex gap-3 mt-4 md:mt-0">
+      <a href="{{ url_for('alumni_bp.directory') }}" class="btn btn-gold">Alumni Network</a>
+      <a href="{{ url_for('departments_bp.index') }}" class="btn btn-crimson">Department Stats</a>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Recommended Roles</h3>
+      <p class="text-gray mb-3">AI-ready stub — tailored to your major and skills.</p>
+      <a href="#" class="text-crimson hover:text-gold">View recommendations →</a>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Resume Feedback</h3>
+      <p class="text-gray mb-3">Upload your resume for instant ATS scoring (stub).</p>
+      <a href="#" class="text-crimson hover:text-gold">Upload now →</a>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Events & Fairs</h3>
+      <p class="text-gray mb-3">Career fairs and company sessions curated for PSU students.</p>
+      <a href="{{ url_for('core_bp.events') }}" class="text-crimson hover:text-gold">View events →</a>
+    </div>
+  </div>
+
+  <!-- Analytics Preview -->
+  <div class="mt-10 card p-6 fade-in bg-gray-50 dark:bg-gray-800">
+    <h2 class="text-2xl font-semibold mb-4">Career Insights (Preview)</h2>
+    <ul class="space-y-2 text-gray text-sm">
+      <li>📈 87% of Engineering students secured internships</li>
+      <li>💼 Top Employers: Garmin, Cerner, Honeywell</li>
+      <li>🎓 Average starting salary: $62,400/year</li>
+    </ul>
+  </div>
+</section>
 {% endblock %}
