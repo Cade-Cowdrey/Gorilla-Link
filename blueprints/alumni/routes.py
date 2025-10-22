@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template
+# ============================================================
+# FILE: blueprints/alumni/routes.py
+# ============================================================
+from flask import render_template, request
+from . import alumni_bp
 
-alumni_bp = Blueprint("alumni_bp", __name__, template_folder="../../templates")
-
-@alumni_bp.route("/")
+@alumni_bp.route("/directory", methods=["GET"])
 def directory():
-    return render_template("alumni/directory.html")
+    q = request.args.get("q", "")
+    alumni = [
+        {"name": "Taylor R.", "class_year": 2018, "title": "Data Analyst"},
+        {"name": "Sam K.", "class_year": 2016, "title": "Project Engineer"},
+    ]
+    return render_template("alumni/directory.html", q=q, alumni=alumni)
