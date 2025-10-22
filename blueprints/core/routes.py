@@ -1,7 +1,7 @@
 # =============================================================
 # FILE: blueprints/core/routes.py
 # PittState-Connect — Core Pages & Contact System
-# Includes home, about, contact form (with email automation).
+# Includes home, about, and contact with auto email + admin alert.
 # =============================================================
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
@@ -11,9 +11,6 @@ from utils.mail_util import send_email
 
 core_bp = Blueprint("core_bp", __name__, url_prefix="/")
 
-# -------------------------------------------------------------
-# HOME PAGE
-# -------------------------------------------------------------
 @core_bp.route("/")
 def home():
     hero = {
@@ -28,17 +25,11 @@ def home():
     return render_template("core/home.html", hero=hero, panels=panels)
 
 
-# -------------------------------------------------------------
-# ABOUT PAGE
-# -------------------------------------------------------------
 @core_bp.route("/about")
 def about():
     return render_template("core/about.html")
 
 
-# -------------------------------------------------------------
-# CONTACT PAGE
-# -------------------------------------------------------------
 @core_bp.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -64,11 +55,12 @@ def contact():
             context={"name": name, "subject": subject, "message": message},
         )
 
-        # Admin notification
+        # Admin alert email (new advanced HTML)
         send_email(
-            subject=f"📩 New Contact Message: {subject}",
+            subject=f"📥 New Message from {name} — {subject}",
             recipients=["admin@pittstate.edu"],
-            text_body=f"From: {name} <{email}>\n\n{message}",
+            template_name="emails/admin_contact_alert.html",
+            context={"name": name, "email": email, "subject": subject, "message": message},
         )
 
         flash("✅ Your message has been sent successfully!", "success")
