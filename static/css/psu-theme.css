@@ -1,122 +1,209 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ============================================================
+   PITTSTATE-CONNECT THEME  —  PSU Crimson & Gold Edition
+   Compatible with all templates, Tailwind or vanilla builds.
+   ============================================================ */
 
-/* ────────────────────────────────────────────────
-   🎓 PSU BRAND THEME  (Light + Dark Mode)
-   ──────────────────────────────────────────────── */
+/* ------------------------
+   PSU Brand Colors
+------------------------ */
 :root {
-  --psu-crimson: #991B1E;
-  --psu-gold: #FFC82E;
-  --psu-charcoal: #2C2A29;
-  --psu-gray: #E5E5E5;
-  --psu-light: #F9F9F9;
+  --psu-crimson: #a6192e;
+  --psu-gold: #ffb81c;
+  --psu-dark: #1a1a1a;
+  --psu-light: #f9f9f9;
+  --psu-gray: #6b7280;
+  --psu-white: #ffffff;
 }
 
-html {
+/* ------------------------
+   Base Elements
+------------------------ */
+body {
+  font-family: 'Inter', 'Montserrat', 'Segoe UI', sans-serif;
+  background-color: var(--psu-light);
+  color: var(--psu-dark);
+  line-height: 1.6;
   scroll-behavior: smooth;
 }
 
-body {
-  @apply bg-[var(--psu-light)] text-[var(--psu-charcoal)] font-sans transition-colors duration-300;
-}
-
-.dark body {
-  @apply bg-gray-900 text-gray-100;
-}
-
-/* ─────────────── HEADINGS ─────────────── */
-h1, h2, h3, h4, h5 {
-  @apply font-heading text-[var(--psu-charcoal)] dark:text-gray-100;
-}
-h1 { @apply text-3xl font-bold mb-3; }
-h2 { @apply text-2xl font-semibold mb-2; }
-h3 { @apply text-xl font-medium mb-1; }
-
-/* ─────────────── LINKS ─────────────── */
 a {
-  @apply text-psu-crimson hover:text-psu-gold transition-colors duration-200;
-}
-.dark a {
-  @apply text-psu-gold hover:text-white;
-}
-
-/* ─────────────── NAVBAR / HEADER ─────────────── */
-header {
-  @apply bg-psu-crimson text-white dark:bg-gray-800 dark:text-gray-100 shadow-md transition-colors duration-300;
+  color: var(--psu-crimson);
+  text-decoration: none;
+  transition: color 0.25s ease, background-color 0.25s ease;
 }
 
-/* ─────────────── CARDS ─────────────── */
-.card {
-  @apply bg-white dark:bg-gray-800 shadow-smooth rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-gold;
+a:hover {
+  color: var(--psu-gold);
 }
 
-/* ─────────────── TABLES ─────────────── */
-table {
-  @apply w-full border-collapse text-sm rounded-lg overflow-hidden;
-}
-thead {
-  @apply bg-psu-crimson text-white dark:bg-gray-700;
-}
-tbody tr:nth-child(even) {
-  @apply bg-gray-50 dark:bg-gray-800;
-}
-tbody tr:hover {
-  @apply bg-psu-gold/20 dark:bg-psu-gold/10 transition-colors;
-}
+/* ------------------------
+   PSU Utility Classes
+------------------------ */
+.bg-crimson { background-color: var(--psu-crimson) !important; }
+.text-crimson { color: var(--psu-crimson) !important; }
 
-/* ─────────────── BUTTONS ─────────────── */
+.bg-gold { background-color: var(--psu-gold) !important; }
+.text-gold { color: var(--psu-gold) !important; }
+
+.bg-light { background-color: var(--psu-light) !important; }
+.text-gray { color: var(--psu-gray) !important; }
+
+.font-heading { font-family: 'Montserrat', 'Inter', sans-serif; font-weight: 700; }
+.font-body { font-family: 'Inter', sans-serif; }
+
+/* ------------------------
+   Buttons
+------------------------ */
 .btn {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all focus:outline-none;
+  display: inline-block;
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.25s ease;
 }
-.btn-crimson {
-  @apply bg-psu-crimson text-white hover:bg-psu-gold hover:text-psu-charcoal;
-}
+
 .btn-gold {
-  @apply bg-psu-gold text-psu-charcoal hover:bg-psu-crimson hover:text-white;
-}
-.dark .btn-crimson {
-  @apply bg-gray-700 text-white hover:bg-psu-gold hover:text-gray-900;
-}
-.dark .btn-gold {
-  @apply bg-psu-gold text-gray-900 hover:bg-gray-700 hover:text-white;
+  background-color: var(--psu-gold);
+  color: var(--psu-dark);
 }
 
-/* ─────────────── ALERTS / FLASHES ─────────────── */
-.alert-success {
-  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-md p-3;
-}
-.alert-error {
-  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-md p-3;
-}
-.alert-warning {
-  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-md p-3;
+.btn-gold:hover {
+  background-color: #ffd54f;
+  transform: translateY(-1px);
 }
 
-/* ─────────────── BANNERS / HEROES ─────────────── */
-.banner-psu {
-  @apply bg-gradient-to-r from-psu-crimson to-psu-gold text-white dark:from-gray-800 dark:to-psu-gold text-center py-8 rounded-lg shadow-md;
+.btn-crimson {
+  background-color: var(--psu-crimson);
+  color: var(--psu-white);
 }
 
-/* ─────────────── BADGES ─────────────── */
-.badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-psu-crimson text-white dark:bg-psu-gold dark:text-gray-900;
+.btn-crimson:hover {
+  background-color: #8c1628;
+  transform: translateY(-1px);
 }
 
-/* ─────────────── INPUTS & FORMS ─────────────── */
-input, select, textarea {
-  @apply border border-gray-300 rounded-lg p-2 w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 focus:ring-2 focus:ring-psu-gold focus:outline-none;
+/* ------------------------
+   Navbar
+------------------------ */
+nav {
+  backdrop-filter: blur(6px);
+  transition: background-color 0.3s ease;
 }
 
-/* ─────────────── FOOTER ─────────────── */
+nav a {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+nav a:hover {
+  color: var(--psu-gold);
+}
+
+/* ------------------------
+   Footer
+------------------------ */
 footer {
-  @apply bg-psu-charcoal text-gray-200 dark:bg-gray-800 text-center py-6 text-sm transition-colors duration-300;
+  background-color: var(--psu-crimson);
+  color: var(--psu-white);
+  font-size: 0.9rem;
 }
 
-/* ─────────────── PSU UTILITIES ─────────────── */
-.shadow-smooth {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+footer p {
+  margin: 0.25rem 0;
 }
-.shadow-gold {
-  box-shadow: 0 0 12px rgba(255, 200, 46, 0.4);
+
+/* ------------------------
+   Cards & Panels
+------------------------ */
+.card {
+  background-color: var(--psu-white);
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ------------------------
+   Headings
+------------------------ */
+h1, h2, h3, h4, h5 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--psu-crimson);
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+
+/* ------------------------
+   Section Layout Helpers
+------------------------ */
+.section {
+  padding: 4rem 1.5rem;
+}
+
+.section-light {
+  background-color: var(--psu-light);
+}
+
+.section-dark {
+  background-color: var(--psu-crimson);
+  color: var(--psu-white);
+}
+
+/* ------------------------
+   Animations & Transitions
+------------------------ */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------
+   Scrollbar (optional polish)
+------------------------ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--psu-crimson);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #8c1628;
+}
+
+/* ------------------------
+   Dark Mode Support (optional)
+------------------------ */
+body.dark {
+  background-color: #111;
+  color: #f1f1f1;
+}
+
+body.dark nav {
+  background-color: #222;
+}
+
+body.dark .bg-crimson {
+  background-color: #800016 !important;
+}
+
+body.dark .btn-gold {
+  background-color: #d4a017;
+  color: #111;
 }
