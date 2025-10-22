@@ -1,29 +1,65 @@
+<!-- =========================================================
+FILE: src/templates/core/home.html
+========================================================= -->
 {% extends "base.html" %}
+{% block title %}Home · PittState-Connect{% endblock %}
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-12 text-center">
-  <h1 class="text-4xl md:text-5xl font-bold text-crimson mb-6">Welcome to PittState-Connect</h1>
-  <p class="text-gray-700 text-lg max-w-2xl mx-auto">
-    The official networking and career hub for Pittsburg State University students, alumni, and employers.
-  </p>
-  <div class="mt-8 flex justify-center space-x-4">
-    <a href="{{ url_for('auth_bp.register') }}" class="bg-gold text-black px-5 py-3 rounded-lg font-semibold hover:bg-yellow-400">Join Now</a>
-    <a href="{{ url_for('careers_bp.dashboard') }}" class="bg-crimson text-white px-5 py-3 rounded-lg font-semibold hover:bg-red-700">Explore Careers</a>
+
+<!-- HERO -->
+<section class="hero-banner relative">
+  <div class="hero-overlay"></div>
+  <div class="max-w-7xl mx-auto px-6 py-20 text-center relative fade-in">
+    <img src="{{ url_for('static', filename='img/gorilla-gradient.svg') }}" alt="Gorilla" class="mx-auto w-20 h-20 mb-4" loading="lazy">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to PittState-Connect</h1>
+    <p class="text-lg max-w-2xl mx-auto text-gray">
+      PSU’s all-in-one hub for <strong>scholarships</strong>, <strong>mentorship</strong>, <strong>careers</strong>, <strong>analytics</strong>, and <strong>alumni</strong>.
+    </p>
+    <div class="mt-8 flex justify-center gap-4">
+      <a href="{{ url_for('auth_bp.register') }}" class="btn btn-gold">Join Now</a>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="btn btn-crimson">Explore Careers</a>
+    </div>
   </div>
 </section>
 
-<section class="bg-white py-16">
-  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 text-center">
-    <div class="p-6 shadow-lg rounded-2xl">
-      <h3 class="text-2xl font-bold text-crimson mb-2">Scholarships</h3>
-      <p class="text-gray-600">Find and apply for scholarships that fit your goals using Smart-Match technology.</p>
+<!-- FEATURE CARDS -->
+<section class="section section-light">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
+    <a class="card p-6 fade-in block" href="{{ url_for('scholarships_bp.index') }}">
+      <img src="{{ url_for('static', filename='img/icon_scholarship_gold.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
+      <h3 class="text-xl font-semibold mb-2">Scholarship Smart-Match</h3>
+      <p class="text-gray">Funding aligned to your profile, deadlines, and department.</p>
+      <span class="text-crimson hover:text-gold mt-3 inline-block">Open Hub →</span>
+    </a>
+    <a class="card p-6 fade-in block" href="{{ url_for('mentors_bp.hub') }}">
+      <img src="{{ url_for('static', filename='img/icon_mentor.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
+      <h3 class="text-xl font-semibold mb-2">Mentorship & Alumni</h3>
+      <p class="text-gray">Connect with verified alumni mentors by major and goals.</p>
+      <span class="text-crimson hover:text-gold mt-3 inline-block">Find a Mentor →</span>
+    </a>
+    <a class="card p-6 fade-in block" href="{{ url_for('analytics_bp.dashboard') }}">
+      <img src="{{ url_for('static', filename='img/icon_analytics.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
+      <h3 class="text-xl font-semibold mb-2">Outcomes & Analytics</h3>
+      <p class="text-gray">Career placement, engagement, and scholarship impact trends.</p>
+      <span class="text-crimson hover:text-gold mt-3 inline-block">View Dashboard →</span>
+    </a>
+  </div>
+</section>
+
+<!-- BRAND / VALUE -->
+<section class="section">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+    <div class="fade-in">
+      <img src="{{ url_for('static', filename='img/psu_gold_gradient.jpg') }}" class="rounded-2xl shadow w-full" alt="PSU Pride" loading="lazy">
     </div>
-    <div class="p-6 shadow-lg rounded-2xl">
-      <h3 class="text-2xl font-bold text-crimson mb-2">Mentorship</h3>
-      <p class="text-gray-600">Connect with alumni mentors and build your professional network.</p>
-    </div>
-    <div class="p-6 shadow-lg rounded-2xl">
-      <h3 class="text-2xl font-bold text-crimson mb-2">Analytics</h3>
-      <p class="text-gray-600">Track your academic, career, and financial progress across every semester.</p>
+    <div class="fade-in">
+      <h2 class="text-3xl font-bold mb-3">Built for Gorillas, by Gorillas</h2>
+      <p class="text-gray mb-4">
+        PSU branding, secure data handling, and scalable architecture—ready for official adoption.
+      </p>
+      <div class="flex gap-3">
+        <a href="{{ url_for('core_bp.about') }}" class="btn btn-crimson">How it works</a>
+        <a href="{{ url_for('emails_bp.digest_preview') }}" class="btn btn-gold">Preview Digest</a>
+      </div>
     </div>
   </div>
 </section>
