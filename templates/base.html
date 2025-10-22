@@ -1,89 +1,83 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
-      x-bind:class="{ 'dark': darkMode }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
+<html lang="en" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' }"
+      x-bind:class="{ 'dark': darkMode }"
+      x-init="$watch('darkMode', val => localStorage.setItem('theme', val ? 'dark' : 'light'))">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}PittState-Connect{% endblock %}</title>
-  <link rel="icon" href="{{ url_for('static', filename='img/psu-logo.png') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PittState-Connect{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/psu_logo.png') }}" type="image/png">
+    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 
-<body class="bg-light text-psu-charcoal dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-psu-light dark:bg-gray-900 text-psu-charcoal dark:text-gray-100 flex flex-col min-h-screen">
 
-  <!-- 🌟 HEADER / NAVBAR -->
-  <header class="bg-psu-crimson text-white dark:bg-gray-800 shadow-md transition-colors duration-300">
-    <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
-      <a href="{{ url_for('core.home') }}" class="flex items-center space-x-2">
-        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="h-10 w-10">
-        <span class="font-heading text-xl font-semibold">PittState-Connect</span>
-      </a>
+    <!-- 🔺 NAVBAR -->
+    <header class="bg-gradient-to-r from-psu-crimson to-psu-gold text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-3 px-4">
+            <div class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='images/psu_logo.png') }}" alt="PSU Logo" class="h-10 w-auto">
+                <a href="{{ url_for('core.home') }}" class="font-heading text-xl font-bold">PittState-Connect</a>
+            </div>
 
-      <nav class="hidden md:flex space-x-6 font-medium">
-        <a href="{{ url_for('careers.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Careers</a>
-        <a href="{{ url_for('scholarships.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Scholarships</a>
-        <a href="{{ url_for('events.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Events</a>
-        <a href="{{ url_for('alumni.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Alumni</a>
-        <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Team</a>
-      </nav>
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-6 font-medium">
+                <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
+                <a href="{{ url_for('careers.dashboard') }}" class="hover:text-psu-gold">Careers</a>
+                <a href="{{ url_for('scholarships.dashboard') }}" class="hover:text-psu-gold">Scholarships</a>
+                <a href="{{ url_for('departments.list_departments') }}" class="hover:text-psu-gold">Departments</a>
+                <a href="{{ url_for('alumni.dashboard') }}" class="hover:text-psu-gold">Alumni</a>
+                <a href="{{ url_for('auth.login') }}" class="hover:text-psu-gold">Login</a>
+            </nav>
 
-      <div class="flex items-center space-x-3">
-        <!-- 🌙 Dark Mode Toggle -->
-        <button @click="darkMode = !darkMode"
-                class="p-2 rounded-lg bg-psu-gold text-psu-charcoal hover:bg-psu-crimson hover:text-white dark:bg-gray-700 dark:hover:bg-psu-gold dark:hover:text-gray-900 transition-all">
-          <template x-if="darkMode">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                    d="M21.752 15.002A9.718 9.718 0 0112 21c-5.523 0-10-4.477-10-10 0-4.97 3.637-9.09 8.444-9.878a.75.75 0 01.898.94 7.5 7.5 0 009.98 9.94.75.75 0 01.43.94z"/>
-            </svg>
-          </template>
-          <template x-if="!darkMode">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                    d="M12 3v1m0 16v1m8.485-9.485h1M3.515 12.515h1M16.95 7.05l.707.707M6.343 17.657l.707.707M16.95 16.95l.707-.707M6.343 6.343l.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/>
-            </svg>
-          </template>
-        </button>
+            <!-- Dark Mode Toggle -->
+            <button @click="darkMode = !darkMode"
+                    class="ml-4 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition">
+                <span x-show="!darkMode">🌙</span>
+                <span x-show="darkMode">☀️</span>
+            </button>
+        </div>
 
-        {% if current_user.is_authenticated %}
-          <a href="{{ url_for('auth.logout') }}"
-             class="btn btn-gold dark:btn-crimson">Logout</a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}"
-             class="btn btn-crimson dark:btn-gold">Login</a>
-        {% endif %}
-      </div>
+        <!-- Mobile Nav -->
+        <div class="md:hidden bg-psu-charcoal text-gray-100">
+            <nav class="flex flex-col px-4 pb-3 space-y-2">
+                <a href="{{ url_for('core.home') }}" class="hover:text-psu-gold">Home</a>
+                <a href="{{ url_for('careers.dashboard') }}" class="hover:text-psu-gold">Careers</a>
+                <a href="{{ url_for('scholarships.dashboard') }}" class="hover:text-psu-gold">Scholarships</a>
+                <a href="{{ url_for('departments.list_departments') }}" class="hover:text-psu-gold">Departments</a>
+                <a href="{{ url_for('alumni.dashboard') }}" class="hover:text-psu-gold">Alumni</a>
+                <a href="{{ url_for('auth.login') }}" class="hover:text-psu-gold">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 🟨 FLASH MESSAGES -->
+    <div class="container mx-auto mt-4 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert-{{ category }} mb-3 animate-fadeIn">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
-  </header>
 
-  <!-- 🧱 MAIN CONTENT -->
-  <main class="max-w-7xl mx-auto px-4 py-6">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, msg in messages %}
-          <div class="my-3 p-3 rounded-md text-center transition-colors duration-300
-            {% if category == 'success' %}
-              bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-            {% elif category == 'error' %}
-              bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-            {% else %}
-              bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-            {% endif %}">
-            {{ msg }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <!-- 🧱 MAIN CONTENT -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        {% block content %}
+        <!-- Page-specific content -->
+        {% endblock %}
+    </main>
 
-    {% block content %}{% endblock %}
-  </main>
+    <!-- 🦍 FOOTER -->
+    <footer class="bg-psu-charcoal text-gray-200 dark:bg-gray-800 mt-10 py-6 text-center text-sm">
+        <p class="font-medium">© {{ current_year or 2025 }} Pittsburg State University • 
+        <span class="text-psu-gold font-semibold">Gorilla Pride</span></p>
+        <p class="mt-1 text-xs text-gray-400">Built with ❤️ using Flask + Tailwind</p>
+    </footer>
 
-  <!-- ⚓ FOOTER -->
-  <footer class="bg-psu-charcoal text-gray-200 dark:bg-gray-800 mt-12 py-6 text-center transition-colors duration-300">
-    <p class="text-sm">© {{ now().year }} Pittsburg State University · Built for Gorillas 🦍</p>
-  </footer>
 </body>
 </html>
