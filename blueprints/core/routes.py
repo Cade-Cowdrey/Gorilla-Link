@@ -1,8 +1,17 @@
-from flask import Blueprint, render_template, current_app
+# =============================================================
+# FILE: blueprints/core/routes.py
+# PittState-Connect — Core Blueprint
+# Handles main site pages: Home, About, Mission, and fallback routes.
+# =============================================================
 
-core_bp = Blueprint('core_bp', __name__, template_folder='templates')
+from flask import Blueprint, render_template, current_app, redirect, url_for
 
-@core_bp.route('/')
+core_bp = Blueprint("core_bp", __name__, url_prefix="")
+
+# -------------------------------------------------------------
+# HOME PAGE
+# -------------------------------------------------------------
+@core_bp.route("/")
 def home():
     hero = {
         "title": "Welcome to PittState-Connect",
@@ -14,11 +23,15 @@ def home():
         {"icon": "fa-users", "title": "Connect", "desc": "Network with students, alumni, and employers."},
         {"icon": "fa-graduation-cap", "title": "Scholarships", "desc": "Discover and apply with SmartMatch AI."},
         {"icon": "fa-chart-line", "title": "Analytics", "desc": "Track career and funding progress in real time."},
-        {"icon": "fa-handshake", "title": "Mentorships", "desc": "Pair with successful alumni mentors."},
+        {"icon": "fa-handshake", "title": "Mentorships", "desc": "Pair with successful alumni mentors and recruiters."},
     ]
     return render_template("core/home.html", hero=hero, panels=panels)
 
-@core_bp.route('/about')
+
+# -------------------------------------------------------------
+# ABOUT PAGE
+# -------------------------------------------------------------
+@core_bp.route("/about")
 def about():
     """Overview of how PittState-Connect works."""
     overview = {
@@ -28,32 +41,54 @@ def about():
             {
                 "title": "For Students",
                 "points": [
-                    "Smart scholarship matching using AI recommendations.",
-                    "Auto-reminders for deadlines and essay guidance.",
-                    "Career dashboards that visualize your growth."
-                ]
+                    "AI-powered scholarship SmartMatch recommender.",
+                    "Auto reminders and deadline tracking dashboard.",
+                    "Career analytics and funding progress visualization.",
+                ],
             },
             {
                 "title": "For Alumni",
                 "points": [
                     "Reconnect with your department and mentor students.",
-                    "Showcase your achievements on the Gorilla Scholars leaderboard.",
-                    "Give back through targeted donor campaigns."
-                ]
+                    "Feature on the Gorilla Scholars leaderboard.",
+                    "Contribute to scholarship and donor campaigns.",
+                ],
             },
             {
                 "title": "For Employers",
                 "points": [
-                    "Post jobs, internships, and sponsorships directly.",
-                    "View verified PSU talent pipelines.",
-                    "Partner in the Gorilla Network for visibility."
-                ]
-            }
-        ]
+                    "Post verified jobs, internships, and sponsorships.",
+                    "Gain access to PSU student and alumni pipelines.",
+                    "Partner through the Gorilla Network to recruit top talent.",
+                ],
+            },
+        ],
     }
     return render_template("core/about.html", overview=overview)
 
-# Optional: lightweight diagnostics route
-@core_bp.route('/ping')
+
+# -------------------------------------------------------------
+# CONTACT / MISC
+# -------------------------------------------------------------
+@core_bp.route("/contact")
+def contact():
+    """Optional Contact page placeholder."""
+    return render_template("core/contact.html")
+
+
+# -------------------------------------------------------------
+# HEALTH CHECK / DIAGNOSTIC
+# -------------------------------------------------------------
+@core_bp.route("/ping")
 def ping():
     return {"status": "ok", "service": "PittState-Connect Core"}
+
+
+# -------------------------------------------------------------
+# FALLBACK REDIRECT
+# -------------------------------------------------------------
+@core_bp.app_errorhandler(404)
+def not_found(e):
+    """Redirects any invalid route to home for smoother UX."""
+    current_app.logger.warning(f"404 on path redirected to home: {e}")
+    return redirect(url_for("core_bp.home"))
