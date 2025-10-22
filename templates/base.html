@@ -1,60 +1,69 @@
-{% extends "layout.html" %}
-{% block head %}
-<title>PittState-Connect</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}">
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PittState-Connect</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+  {% block head %}{% endblock %}
+</head>
 
-{% block body %}
-<nav class="bg-crimson text-white shadow-md fixed w-full z-50 top-0">
-  <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-    <a href="{{ url_for('core_bp.home') }}" class="font-heading text-xl font-bold tracking-wide flex items-center">
-      <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="h-8 w-8 mr-2">
-      PittState-Connect
-    </a>
-    <ul class="hidden md:flex space-x-6 font-semibold">
-      <li><a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a></li>
-      <li><a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a></li>
-      <li><a href="{{ url_for('departments_bp.index') }}" class="hover:text-gold transition">Departments</a></li>
-      <li><a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-gold transition">Scholarships</a></li>
-      <li><a href="{{ url_for('analytics_bp.dashboard') }}" class="hover:text-gold transition">Analytics</a></li>
-      <li><a href="{{ url_for('alumni_bp.directory') }}" class="hover:text-gold transition">Alumni</a></li>
-      <li><a href="{{ url_for('core_bp.team') }}" class="hover:text-gold transition">Team</a></li>
-    </ul>
-    <div class="md:hidden">
-      <button id="menu-toggle" class="focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round"
-             stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-crimson text-white shadow-md fixed w-full z-50 top-0">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+      <a href="{{ url_for('core_bp.home') }}" class="font-heading text-xl font-bold tracking-wide flex items-center">
+        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="h-8 w-8 mr-2">
+        PittState-Connect
+      </a>
+      <ul class="hidden md:flex space-x-6 font-semibold">
+        <li><a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a></li>
+        <li><a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a></li>
+        <li><a href="{{ url_for('departments_bp.index') }}" class="hover:text-gold transition">Departments</a></li>
+        <li><a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-gold transition">Scholarships</a></li>
+        <li><a href="{{ url_for('analytics_bp.dashboard') }}" class="hover:text-gold transition">Analytics</a></li>
+        <li><a href="{{ url_for('alumni_bp.directory') }}" class="hover:text-gold transition">Alumni</a></li>
+        <li><a href="{{ url_for('core_bp.team') }}" class="hover:text-gold transition">Team</a></li>
+      </ul>
+      <div class="md:hidden">
+        <button id="menu-toggle" class="focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
     </div>
-  </div>
-  <div id="mobile-menu" class="md:hidden hidden bg-crimson px-6 py-3 space-y-2">
-    <a href="{{ url_for('core_bp.home') }}" class="block hover:text-gold">Home</a>
-    <a href="{{ url_for('careers_bp.dashboard') }}" class="block hover:text-gold">Careers</a>
-    <a href="{{ url_for('departments_bp.index') }}" class="block hover:text-gold">Departments</a>
-    <a href="{{ url_for('scholarships_bp.index') }}" class="block hover:text-gold">Scholarships</a>
-    <a href="{{ url_for('analytics_bp.dashboard') }}" class="block hover:text-gold">Analytics</a>
-    <a href="{{ url_for('alumni_bp.directory') }}" class="block hover:text-gold">Alumni</a>
-    <a href="{{ url_for('core_bp.team') }}" class="block hover:text-gold">Team</a>
-  </div>
-</nav>
+    <div id="mobile-menu" class="md:hidden hidden bg-crimson px-6 py-3 space-y-2">
+      <a href="{{ url_for('core_bp.home') }}" class="block hover:text-gold">Home</a>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="block hover:text-gold">Careers</a>
+      <a href="{{ url_for('departments_bp.index') }}" class="block hover:text-gold">Departments</a>
+      <a href="{{ url_for('scholarships_bp.index') }}" class="block hover:text-gold">Scholarships</a>
+      <a href="{{ url_for('analytics_bp.dashboard') }}" class="block hover:text-gold">Analytics</a>
+      <a href="{{ url_for('alumni_bp.directory') }}" class="block hover:text-gold">Alumni</a>
+      <a href="{{ url_for('core_bp.team') }}" class="block hover:text-gold">Team</a>
+    </div>
+  </nav>
 
-<main class="pt-20 bg-gray-50 min-h-screen">
-  {% block content %}
-  {% endblock %}
-</main>
+  <!-- Main Page Content -->
+  <main class="pt-20 min-h-screen">
+    {% block content %}{% endblock %}
+  </main>
 
-<footer class="bg-crimson text-white text-center py-6 mt-10">
-  <p class="text-sm">&copy; {{ current_year }} Pittsburg State University — PittState-Connect</p>
-  <p class="text-xs opacity-75">Built for Gorillas • Powered by PSU Innovation Lab</p>
-</footer>
+  <!-- Footer -->
+  <footer class="bg-crimson text-white text-center py-6 mt-10">
+    <p class="text-sm">&copy; {{ current_year }} Pittsburg State University — PittState-Connect</p>
+    <p class="text-xs opacity-75">Built for Gorillas • Powered by PSU Innovation Lab</p>
+  </footer>
 
-<script>
-  document.getElementById("menu-toggle").addEventListener("click", function () {
-    const menu = document.getElementById("mobile-menu");
-    menu.classList.toggle("hidden");
-  });
-</script>
-{% endblock %}
+  <script>
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+      const menu = document.getElementById("mobile-menu");
+      menu.classList.toggle("hidden");
+    });
+  </script>
+</body>
+</html>
