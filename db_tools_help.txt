@@ -1,0 +1,138 @@
+===============================================================
+🏛️  PittState-Connect | Database Management Developer Guide
+===============================================================
+
+📦 PURPOSE
+---------------------------------------------------------------
+This document explains how to manage your PostgreSQL database
+and Alembic migrations for PittState-Connect using the unified
+tooling system (`db_tools.sh` + seed scripts).
+
+Everything below works both locally and in Render’s shell.
+
+
+🚀 QUICK COMMANDS
+---------------------------------------------------------------
+# Run from your project root:
+
+  ./db_tools.sh migrate "add_new_model"
+      → Auto-generates and applies a new migration file.
+
+  ./db_tools.sh check
+      → Verifies your DB and models.py are in perfect sync.
+
+  flask db upgrade
+      → Manually apply all unapplied migrations.
+
+  flask db downgrade
+      → Roll back the last migration (use with caution).
+
+  flask db current
+      → Show current migration revision applied to DB.
+
+
+🧩 MIGRATION FILE NAMING CONVENTION
+---------------------------------------------------------------
+All migrations live in:
+    migrations/versions/
+
+Each follows this format:
+    0001_initial_full.py
+    0002_seed_admin.py
+    0028_add_scholarship_impact_stories.py
+    0029_sync_fixes.py
+
+✅ 4-digit sequential number prefix  
+✅ short, lowercase, descriptive slug  
+✅ always include underscores between words
+
+
+🧠 HOW MIGRATIONS WORK
+---------------------------------------------------------------
+- models.py defines your full database schema.
+- Alembic tracks changes between the live DB and that file.
+- Each time you change or add a model, generate a migration:
+
+    ./db_tools.sh migrate "add_new_table"
+
+  → Creates 0031_add_new_table.py automatically.
+  → Applies it immediately to keep your DB current.
+
+
+🔍 CHECKING FOR SYNC ISSUES
+---------------------------------------------------------------
+If you suspect the DB and models.py differ (e.g., after manual edits):
+
+    ./db_tools.sh check
+
+  → Performs a dry-run autogenerate diff
+  → Lists discrepancies (missing columns, renamed tables, etc.)
+  → Shows your current DB tables and Alembic version
+
+
+🌱 SEEDING DATABASE
+---------------------------------------------------------------
+Seed scripts populate demo data for testing or PSU showcase.
+
+Main seed scripts:
+    seed_pittstate_connect.py              → Real PSU demo data
+    seed_pittstate_connect_full.py         → Full combined dataset
+    seed_add_missing_models.py             → Adds missing entities if needed
+
+Run them manually inside Render or local shell:
+
+    python seed_pittstate_connect.py
+
+
+💾 BACKUPS & RESTORES
+---------------------------------------------------------------
+Before applying migrations or seeding large data, back up DB:
+
+    pg_dump $DATABASE_URL > backup_$(date +%F).sql
+
+Restore (if needed):
+    psql $DATABASE_URL < backup_2025-10-21.sql
+
+
+🧰 FILES THAT CONTROL THE DATABASE SYSTEM
+---------------------------------------------------------------
+- app_pro.py                → Flask app entry with db init
+- models.py                 → Centralized model definitions
+- migrations/               → Alembic migration history
+- db_tools.sh               → Unified migration/sync CLI
+- db_tools_help.txt         → This developer guide
+- seed_*.py                 → PSU data population scripts
+- render.yaml               → Render build & deploy configuration
+
+
+🦍 PITTSBURG STATE CUSTOMIZATION
+---------------------------------------------------------------
+The current models and seeds reflect real PSU context:
+- Colleges and departments mapped to official PSU data
+- Alumni, faculty, and student demo users seeded
+- Scholarship Hub (Phase 2) and Donor Portal integrated
+- Mutual LinkedIn-style connections supported
+- Tailwind UI branding for all templates
+
+
+✅ BEST PRACTICES
+---------------------------------------------------------------
+1️⃣ Always run `./db_tools.sh check` before pushing to GitHub.
+2️⃣ Always commit new migrations alongside your model changes.
+3️⃣ Never manually edit migrations after applying them.
+4️⃣ Run seed scripts on dev/staging, NOT on production DB.
+5️⃣ Keep `models.py` as the single source of truth.
+
+
+👨‍💻 MAINTAINERS
+---------------------------------------------------------------
+Created and maintained for:
+Pittsburg State University (PSU) | Gorilla-Link / PittState-Connect
+
+Lead Developer: Connor Vandenberg
+Assistive AI Architect: GPT-5
+
+===============================================================
+📁 Place this file in your project root:
+     → db_tools_help.txt
+===============================================================
