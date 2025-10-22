@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Donor Portal | PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     ❤️ DONOR DASHBOARD
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Donor & Sponsor Dashboard</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-8">
+    Track your impact, view student success stories, and explore new opportunities to empower PSU students.
+  </p>
+</section>
+
+<!-- ============================================================
+     💰 DONATION METRICS
+============================================================ -->
+<section class="section-light py-16 fade-in">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+    <div class="card p-6 text-center">
+      <h3 class="text-sm uppercase text-gray mb-2">Total Donations</h3>
+      <p class="text-4xl font-heading text-crimson">${{ donor_stats.total_donations or "245,000" }}</p>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-sm uppercase text-gray mb-2">Students Funded</h3>
+      <p class="text-4xl font-heading text-crimson">{{ donor_stats.students_funded or 138 }}</p>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-sm uppercase text-gray mb-2">Active Scholarships</h3>
+      <p class="text-4xl font-heading text-crimson">{{ donor_stats.active_scholarships or 22 }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     📖 IMPACT STORIES
+============================================================ -->
+<section class="section py-16 fade-in">
+  <h2 class="text-3xl font-heading text-crimson text-center mb-8">Scholarship Impact Stories</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+    {% for story in impact_stories %}
+    <div class="card p-6">
+      <h3 class="text-xl font-heading text-crimson mb-2">{{ story.student_name }}</h3>
+      <p class="text-gray mb-2"><em>{{ story.major }}</em></p>
+      <p class="text-gray mb-4">{{ story.story[:200] }}...</p>
+      <a href="{{ url_for('donor_bp.story', id=story.id) }}" class="btn btn-gold">Read More</a>
+    </div>
+    {% else %}
+    <div class="col-span-2 text-center text-gray">No impact stories available yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============================================================
+     🌟 CALL TO ACTION
+============================================================ -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Continue Your Impact</h2>
+  <p class="text-white mb-6 max-w-2xl mx-auto">
+    Support more students by creating new scholarships or renewing your contributions.
+  </p>
+  <a href="{{ url_for('donor_bp.create_scholarship') }}" class="btn btn-gold mr-3">Create Scholarship</a>
+  <a href="{{ url_for('donor_bp.donate') }}" class="btn btn-crimson">Donate Now</a>
+</section>
+{% endblock %}
