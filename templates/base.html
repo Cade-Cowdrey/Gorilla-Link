@@ -1,43 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ============================================================
+       PittState-Connect | PSU Crimson & Gold Edition
+       Author: PittState-Connect Dev Team
+       Version: Final Build (v2)
+       ============================================================ -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#a6192e">
   <title>{% block title %}PittState-Connect{% endblock %}</title>
+
+  <!-- PSU Favicon & Styles -->
   <link rel="icon" href="{{ url_for('static', filename='images/psu-logo.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-</head>
-<body class="bg-gray-50 text-gray-900">
 
-  <!-- 🔝 Navbar -->
-  <nav class="bg-white shadow-md">
+  <!-- Optional: Tailwind (if you have Tailwind support enabled) -->
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+
+  <!-- Font Preload -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light text-gray font-body fade-in">
+
+  <!-- ============================================================
+       🦍 PSU NAVBAR
+  ============================================================ -->
+  <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50">
     <div class="container mx-auto flex items-center justify-between py-4 px-6">
-      <a href="{{ url_for('core_bp.home') }}" class="flex items-center space-x-2">
-        <img src="{{ url_for('static', filename='images/psu-logo.png') }}" alt="PSU Logo" class="h-8 w-8">
-        <span class="font-bold text-crimson text-xl">PittState-Connect</span>
+      <!-- Logo & Brand -->
+      <a href="{{ url_for('core_bp.home') }}" class="flex items-center space-x-3">
+        <img src="{{ url_for('static', filename='images/psu-logo.png') }}" alt="PSU Logo" class="h-9 w-9 rounded-full">
+        <span class="text-crimson font-heading text-xl md:text-2xl">PittState-Connect</span>
       </a>
-      <div class="space-x-6">
-        <a href="{{ url_for('core_bp.home') }}" class="hover:text-crimson">Home</a>
-        <a href="{{ url_for('core_bp.team') }}" class="hover:text-crimson">Team</a>
-        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-crimson">Careers</a>
-        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-crimson">Scholarships</a>
-        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-crimson">Analytics</a>
+
+      <!-- Nav Links -->
+      <div class="hidden md:flex space-x-6 font-semibold text-gray-700">
+        <a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a>
+        <a href="{{ url_for('core_bp.team') }}" class="hover:text-gold transition">Team</a>
+        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-gold transition">Scholarships</a>
+        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a>
+        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-gold transition">Analytics</a>
+        <a href="{{ url_for('community_bp.feed') }}" class="hover:text-gold transition">Community</a>
       </div>
+
+      <!-- Mobile Menu Placeholder -->
+      <button id="mobile-menu-toggle" class="md:hidden bg-crimson text-white px-3 py-2 rounded-md">
+        ☰
+      </button>
+    </div>
+
+    <!-- Mobile Dropdown -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 px-6 py-4 space-y-3">
+      <a href="{{ url_for('core_bp.home') }}" class="block hover:text-gold">Home</a>
+      <a href="{{ url_for('core_bp.team') }}" class="block hover:text-gold">Team</a>
+      <a href="{{ url_for('scholarships_bp.dashboard') }}" class="block hover:text-gold">Scholarships</a>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="block hover:text-gold">Careers</a>
+      <a href="{{ url_for('analytics_bp.insights') }}" class="block hover:text-gold">Analytics</a>
+      <a href="{{ url_for('community_bp.feed') }}" class="block hover:text-gold">Community</a>
     </div>
   </nav>
 
-  <!-- 🧩 Page Content -->
-  <main class="container mx-auto px-6 py-10">
+  <!-- ============================================================
+       🧩 PAGE CONTENT
+  ============================================================ -->
+  <main class="container mx-auto px-6 py-28 md:py-32">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ⚡ Footer -->
-  <footer class="bg-crimson text-white mt-20 py-6">
-    <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
-      <p>&copy; {{ current_year or 2025 }} Pittsburg State University — All Rights Reserved.</p>
-      <p class="text-sm">Developed by Gorilla Link / PittState-Connect Team</p>
+  <!-- ============================================================
+       ⚡ FOOTER
+  ============================================================ -->
+  <footer class="section-dark text-center md:text-left py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="font-heading text-gold text-lg mb-3">PittState-Connect</h3>
+        <p>Your all-in-one portal for PSU scholarships, careers, and community connections.</p>
+      </div>
+
+      <div>
+        <h3 class="font-heading text-gold text-lg mb-3">Quick Links</h3>
+        <ul class="space-y-2">
+          <li><a href="{{ url_for('core_bp.home') }}" class="hover:text-gold">Home</a></li>
+          <li><a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-gold">Scholarships</a></li>
+          <li><a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold">Careers</a></li>
+          <li><a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-gold">Analytics</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-heading text-gold text-lg mb-3">Contact</h3>
+        <p>Pittsburg State University</p>
+        <p>1701 S Broadway St, Pittsburg, KS 66762</p>
+        <p>Email: support@pittstateconnect.com</p>
+      </div>
+    </div>
+
+    <hr class="border-gray-700 my-6">
+    <div class="flex flex-col md:flex-row justify-between items-center text-sm">
+      <p>&copy; {{ current_year or 2025 }} PittState-Connect. All Rights Reserved.</p>
+      <p>Built with ❤️ by the Gorilla Link Dev Team</p>
     </div>
   </footer>
+
+  <!-- ============================================================
+       🌗 DARK MODE TOGGLE
+  ============================================================ -->
+  <button id="theme-toggle" title="Toggle Light/Dark Mode">☀️</button>
+
+  <!-- ============================================================
+       🔧 SCRIPTS
+  ============================================================ -->
+  <script>
+    // Mobile menu
+    const menuBtn = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    // Dark mode toggle
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark');
+
+      toggle.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+
+      toggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        toggle.textContent = isDark ? '🌙' : '☀️';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    }
+
+    // Optional: Smooth scroll for anchors
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(anchor.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
 
 </body>
 </html>
