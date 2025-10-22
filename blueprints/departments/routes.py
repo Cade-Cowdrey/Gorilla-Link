@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template
-bp = Blueprint("departments_bp", __name__, url_prefix="/departments")
 
-@bp.get("/detail")
-def detail():
-    return render_template("departments/detail.html")
+departments_bp = Blueprint("departments_bp", __name__, template_folder="../../templates")
+
+@departments_bp.route("/")
+def index():
+    return render_template("departments/index.html")
