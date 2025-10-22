@@ -1,6 +1,26 @@
+<!-- =========================================================
+FILE: src/templates/auth/login.html
+========================================================= -->
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% block title %}Login · PittState-Connect{% endblock %}
 {% block content %}
-<h2>Login</h2>
-<p>Auth UI coming soon.</p>
+<section class="section max-w-md mx-auto px-6 fade-in">
+  <h1 class="text-3xl font-bold mb-6 text-center">Sign In</h1>
+  <form method="post" class="card p-6 space-y-5">
+    <input type="email" name="email" placeholder="PSU Email" required
+           class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
+    <input type="password" name="password" placeholder="Password" required
+           class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
+    <button type="submit" class="btn btn-crimson w-full">Login</button>
+
+    <div class="flex justify-between text-sm pt-2">
+      <a href="{{ url_for('auth_bp.forgot') }}" class="text-crimson hover:text-gold">Forgot password?</a>
+      <a href="{{ url_for('auth_bp.register') }}" class="text-crimson hover:text-gold">Create account</a>
+    </div>
+  </form>
+
+  <div class="text-center mt-6 text-gray text-sm">
+    <p>By logging in, you agree to PSU’s <a href="#" class="text-crimson hover:text-gold underline">terms of use</a>.</p>
+  </div>
+</section>
 {% endblock %}
