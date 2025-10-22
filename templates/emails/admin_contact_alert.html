@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 700px; background: #ffffff; margin: 30px auto; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background-color: #a6192e; color: #fff; padding: 24px; text-align: center; border-radius: 12px 12px 0 0; }
+    .header h2 { margin: 0; font-size: 1.8em; }
+    .content { padding: 24px; color: #333; }
+    .content h3 { color: #a6192e; margin-top: 0; }
+    .info-box { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
+    .footer { background-color: #f0f0f0; padding: 16px; text-align: center; font-size: 0.9em; color: #666; border-radius: 0 0 12px 12px; }
+    a.button {
+      background-color: #a6192e;
+      color: #fff;
+      padding: 10px 16px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 15px;
+    }
+    a.button:hover { background-color: #861425; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>PittState-Connect</h2>
+      <p>📩 New Contact Form Submission</p>
+    </div>
+    <div class="content">
+      <h3>New message received:</h3>
+
+      <div class="info-box">
+        <p><strong>From:</strong> {{ name }} &lt;{{ email }}&gt;</p>
+        <p><strong>Subject:</strong> {{ subject }}</p>
+      </div>
+
+      <p><strong>Message:</strong></p>
+      <blockquote style="border-left: 4px solid #a6192e; padding-left: 12px; color: #444; margin: 10px 0;">
+        {{ message }}
+      </blockquote>
+
+      <a href="https://pittstate-connect.onrender.com/admin/inbox" class="button">
+        View in Admin Inbox
+      </a>
+    </div>
+    <div class="footer">
+      <p>📍 PittState-Connect • Pittsburg State University</p>
+      <p>This email was automatically generated. Please do not reply.</p>
+    </div>
+  </div>
+</body>
+</html>
