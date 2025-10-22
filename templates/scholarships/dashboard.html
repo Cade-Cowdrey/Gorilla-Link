@@ -1,134 +1,50 @@
 {% extends "base.html" %}
-{% block title %}Scholarship Hub | PittState-Connect{% endblock %}
+{% block title %}Scholarships | PittState-Connect{% endblock %}
+
 {% block content %}
-
-<!-- 🦍 HEADER -->
-<section class="text-center mb-10">
-  <h1 class="text-3xl font-heading font-bold text-psu-crimson dark:text-psu-gold">Scholarship Hub</h1>
-  <p class="text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">
-    Find, apply, and track scholarships tailored to your academic journey at Pittsburg State.
+<!-- ============================================================
+     🎓 SCHOLARSHIP HUB
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Scholarship Hub</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-8">
+    Explore curated scholarships, receive smart matches, and track your progress toward funding your PSU journey.
   </p>
+
+  <form method="GET" action="{{ url_for('scholarships_bp.search') }}" class="max-w-xl mx-auto flex mb-10">
+    <input type="text" name="q" placeholder="Search scholarships..." 
+           class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-crimson">
+    <button type="submit" class="btn btn-crimson rounded-l-none">Search</button>
+  </form>
 </section>
 
-<!-- 🎯 SMART MATCH RECOMMENDER -->
-<section class="mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold text-psu-crimson dark:text-psu-gold">🎯 Smart Match Recommendations</h2>
-    <a href="{{ url_for('scholarships.refresh_matches') }}" class="btn btn-gold text-sm">Refresh Matches</a>
-  </div>
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for s in matched_scholarships or [] %}
-    <div class="card hover:shadow-gold animate-fadeIn">
-      <h3 class="font-semibold text-lg text-psu-crimson dark:text-psu-gold">{{ s.name }}</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">Deadline: {{ s.deadline.strftime("%b %d, %Y") }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Award Amount: ${{ s.amount }}</p>
-      <a href="{{ url_for('scholarships.view', id=s.id) }}" class="btn btn-crimson w-full">View Details</a>
+<!-- ============================================================
+     🧭 SMART MATCH RESULTS
+============================================================ -->
+<section class="section-light py-16 fade-in">
+  <h2 class="text-3xl font-heading text-crimson text-center mb-8">Recommended For You</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    {% for s in scholarships %}
+    <div class="card p-6">
+      <h3 class="text-2xl font-heading text-crimson mb-2">{{ s.title }}</h3>
+      <p class="text-gray mb-2">Deadline: <strong>{{ s.deadline.strftime('%b %d, %Y') }}</strong></p>
+      <p class="text-gray mb-4">{{ s.summary[:150] }}...</p>
+      <a href="{{ url_for('scholarships_bp.details', id=s.id) }}" class="btn btn-gold">View Details</a>
     </div>
     {% else %}
-    <p class="col-span-full text-center text-gray-500 dark:text-gray-400">
-      No new scholarship matches right now — check back soon!
-    </p>
+    <div class="col-span-3 text-center text-gray">No matching scholarships found. Try refining your search.</div>
     {% endfor %}
   </div>
 </section>
 
-<!-- 🧭 DEADLINE TRACKER & PROGRESS -->
-<section class="grid md:grid-cols-2 gap-8 mb-12">
-  <!-- Progress Meter -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
-    <h2 class="text-lg font-semibold mb-3 text-psu-crimson dark:text-psu-gold">📊 Scholarship Progress Meter</h2>
-    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-      <div class="bg-gradient-to-r from-psu-crimson to-psu-gold h-full transition-all duration-700"
-           style="width: {{ progress_percent or 0 }}%;"></div>
-    </div>
-    <p class="text-sm mt-2 text-gray-600 dark:text-gray-300">
-      You’ve completed <strong>{{ progress_percent or 0 }}%</strong> of your scholarship goals this semester.
-    </p>
+<!-- ============================================================
+     📊 PROGRESS METER SECTION
+============================================================ -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Your Scholarship Progress</h2>
+  <div class="max-w-lg mx-auto bg-light rounded-full overflow-hidden shadow-md mt-6">
+    <div class="bg-gold h-6 rounded-full" style="width: {{ progress or 45 }}%;"></div>
   </div>
-
-  <!-- Deadline Tracker -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
-    <h2 class="text-lg font-semibold mb-3 text-psu-crimson dark:text-psu-gold">⏰ Upcoming Deadlines</h2>
-    <ul class="space-y-2">
-      {% for d in upcoming_deadlines or [] %}
-      <li class="flex justify-between text-sm border-b border-gray-200 dark:border-gray-700 pb-2">
-        <span>{{ d.name }}</span>
-        <span class="text-psu-crimson dark:text-psu-gold">{{ d.deadline.strftime("%b %d") }}</span>
-      </li>
-      {% else %}
-      <li class="text-gray-500 dark:text-gray-400 text-sm">No deadlines within the next 30 days.</li>
-      {% endfor %}
-    </ul>
-  </div>
+  <p class="text-white mt-4">{{ progress or 45 }}% Complete</p>
 </section>
-
-<!-- 📝 ESSAY LIBRARY & AI HELPER -->
-<section class="mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">📝 Essay Library & AI Helper</h2>
-    <a href="{{ url_for('scholarships.new_essay') }}" class="btn btn-gold text-sm">Add New Essay</a>
-  </div>
-  <div class="grid md:grid-cols-2 gap-6">
-    {% for essay in user_essays or [] %}
-    <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg hover:shadow-gold">
-      <h3 class="font-semibold text-psu-crimson dark:text-psu-gold">{{ essay.title }}</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mt-1">{{ essay.content[:250] }}...</p>
-      <a href="{{ url_for('scholarships.view_essay', essay_id=essay.id) }}" class="btn btn-crimson mt-3 w-full">
-        Edit / AI Review
-      </a>
-    </div>
-    {% else %}
-    <p class="col-span-full text-center text-gray-500 dark:text-gray-400">No saved essays yet.</p>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- 💡 FINANCIAL LITERACY & COST DASHBOARD -->
-<section class="grid md:grid-cols-2 gap-8 mb-12">
-  <div class="card">
-    <h2 class="text-lg font-semibold mb-3 text-psu-crimson dark:text-psu-gold">💡 Financial Literacy Hub</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-      Learn to budget, manage debt, and make smart financial decisions with curated PSU resources.
-    </p>
-    <a href="{{ url_for('students.financial_literacy') }}" class="btn btn-gold w-full">Start Learning</a>
-  </div>
-
-  <div class="card">
-    <h2 class="text-lg font-semibold mb-3 text-psu-crimson dark:text-psu-gold">🎓 Cost-to-Completion Dashboard</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-      Track your tuition, fees, and scholarships to visualize your remaining cost to graduate.
-    </p>
-    <a href="{{ url_for('analytics.cost_dashboard') }}" class="btn btn-crimson w-full">View Dashboard</a>
-  </div>
-</section>
-
-<!-- 🏆 GORILLA SCHOLARS LEADERBOARD -->
-<section class="bg-gradient-to-r from-psu-crimson to-psu-gold text-white rounded-xl p-8 shadow-gold mb-12">
-  <h2 class="text-2xl font-bold mb-4">🏆 Gorilla Scholars Leaderboard</h2>
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for scholar in top_scholars or [] %}
-    <div class="bg-white text-psu-charcoal p-5 rounded-lg shadow-md hover:shadow-gold">
-      <h3 class="font-semibold">{{ scholar.name }}</h3>
-      <p class="text-sm text-gray-600">Awards Won: {{ scholar.awards_count }}</p>
-      <p class="text-xs text-gray-500">Major: {{ scholar.major }}</p>
-    </div>
-    {% else %}
-    <p class="col-span-full text-gray-800">No leaderboard data yet.</p>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- 🤝 DONOR PORTAL PREVIEW -->
-<section class="text-center py-10 border-t border-gray-200 dark:border-gray-700">
-  <h2 class="text-2xl font-heading font-bold mb-2 text-psu-crimson dark:text-psu-gold">
-    Make a Difference — Support Future Gorillas 🦍
-  </h2>
-  <p class="text-sm text-gray-500 dark:text-gray-300 mb-6">
-    Alumni and employers can fund scholarships and view impact stories through the Donor Portal.
-  </p>
-  <a href="{{ url_for('donor.portal') }}" class="btn btn-gold text-base font-semibold animate-pulseGold">
-    Visit Donor Portal
-  </a>
-</section>
-
 {% endblock %}
