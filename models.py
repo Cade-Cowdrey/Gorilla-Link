@@ -1,65 +1,38 @@
-# ============================================================
+# =============================================================
 # FILE: models.py
-# SQLAlchemy models for PittState-Connect
-# ============================================================
+# PittState-Connect — Unified Data Models
+# Includes: Users, Posts, Departments, Events, Scholarships,
+# Mentorship, Analytics, Badges, Notifications, Digests,
+# and ContactMessage (Admin Inbox)
+# =============================================================
 
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app_pro import db, login_manager
 
-
-# ============================================================
-# LOGIN MANAGER USER LOADER
-# ============================================================
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-
-# ============================================================
+# -------------------------------------------------------------
 # USER MODEL
-# ============================================================
-class User(db.Model, UserMixin):
-    """Main user table: students, alumni, faculty, and employers."""
-
+# -------------------------------------------------------------
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(
-        db.String(30),
-        default="student",
-        nullable=False,
-        doc="student, alumni, faculty, employer, admin",
-    )
+    role = db.Column(db.String(50), default="student")
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    major = db.Column(db.String(120))
-    graduation_year = db.Column(db.Integer)
     bio = db.Column(db.Text)
-    profile_image = db.Column(db.String(255), default="default.png")
+    avatar_url = db.Column(db.String(250))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=True)
 
     # Relationships
     posts = db.relationship("Post", backref="author", lazy=True)
-    messages_sent = db.relationship(
-        "Message", foreign_keys="Message.sender_id", backref="sender", lazy=True
-    )
-    messages_received = db.relationship(
-        "Message", foreign_keys="Message.receiver_id", backref="receiver", lazy=True
-    )
-    applications = db.relationship("ScholarshipApplication", backref="applicant", lazy=True)
-    mentor_sessions = db.relationship("MentorshipSession", backref="mentor", lazy=True)
-
-    # Optional Enhancements
-    points = db.Column(db.Integer, default=0, doc="Leaderboard points")
+    notifications = db.relationship("Notification", backref="recipient", lazy=True)
     badges = db.relationship("UserBadge", backref="user", lazy=True)
 
-    # Authentication
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -70,259 +43,177 @@ class User(db.Model, UserMixin):
         return f"{self.first_name} {self.last_name}"
 
     def __repr__(self):
-        return f"<User {self.email} ({self.role})>"
+        return f"<User {self.email}>"
 
 
-# ============================================================
-# DEPARTMENT MODEL
-# ============================================================
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+# -------------------------------------------------------------
+# DEPARTMENTS MODEL
+# -------------------------------------------------------------
 class Department(db.Model):
-    """Academic departments for PSU (used for filtering, scholarships, etc.)."""
-
     __tablename__ = "departments"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.Text)
-    chair = db.Column(db.String(100))
-    contact_email = db.Column(db.String(120))
+    faculty_contact = db.Column(db.String(120))
+    email = db.Column(db.String(120))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Relationships
-    users = db.relationship("User", backref="department", lazy=True)
-    scholarships = db.relationship("Scholarship", backref="department", lazy=True)
 
     def __repr__(self):
         return f"<Department {self.name}>"
 
 
-# ============================================================
-# POST MODEL (Feed / News / Announcements)
-# ============================================================
+# -------------------------------------------------------------
+# POSTS / FEED MODEL
+# -------------------------------------------------------------
 class Post(db.Model):
-    """Core feed posts (news, updates, or events)."""
-
     __tablename__ = "posts"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    image_url = db.Column(db.String(255))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    category = db.Column(db.String(50), default="general")
-    likes = db.Column(db.Integer, default=0)
-    comments_count = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(250))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    likes = db.relationship("Like", backref="post", lazy=True)
+    replies = db.relationship("Reply", backref="post", lazy=True)
 
     def __repr__(self):
-        return f"<Post {self.title[:25]}>"
+        return f"<Post {self.id}>"
 
 
-# ============================================================
-# MESSAGE MODEL
-# ============================================================
-class Message(db.Model):
-    """Private messages between users (stub for chat system)."""
-
-    __tablename__ = "messages"
+# -------------------------------------------------------------
+# LIKES / REPLIES MODELS
+# -------------------------------------------------------------
+class Like(db.Model):
+    __tablename__ = "likes"
 
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    body = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return f"<Message {self.id} from {self.sender_id} to {self.receiver_id}>"
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ============================================================
-# EVENT MODEL
-# ============================================================
+class Reply(db.Model):
+    __tablename__ = "replies"
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# -------------------------------------------------------------
+# EVENTS MODEL
+# -------------------------------------------------------------
 class Event(db.Model):
-    """Campus or alumni events."""
-
     __tablename__ = "events"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    location = db.Column(db.String(255))
-    start_time = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(200))
+    start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
-    organizer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    is_public = db.Column(db.Boolean, default=True)
-
-    def __repr__(self):
-        return f"<Event {self.title}>"
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ============================================================
-# SCHOLARSHIP MODEL
-# ============================================================
+# -------------------------------------------------------------
+# JOBS / INTERNSHIPS MODEL
+# -------------------------------------------------------------
+class Job(db.Model):
+    __tablename__ = "jobs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    company = db.Column(db.String(150))
+    description = db.Column(db.Text)
+    link = db.Column(db.String(300))
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
+
+
+# -------------------------------------------------------------
+# SCHOLARSHIPS MODEL
+# -------------------------------------------------------------
 class Scholarship(db.Model):
-    """Scholarship database with Smart-Match compatibility."""
-
     __tablename__ = "scholarships"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    amount = db.Column(db.Float, default=0.0)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    amount = db.Column(db.Numeric(10, 2))
     deadline = db.Column(db.DateTime)
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    donor_id = db.Column(db.Integer, db.ForeignKey("donors.id"))
-    tags = db.Column(db.String(255), doc="Comma-separated keywords for AI Smart Match")
-    is_active = db.Column(db.Boolean, default=True)
-
-    # Relationships
-    applications = db.relationship("ScholarshipApplication", backref="scholarship", lazy=True)
-
-    def __repr__(self):
-        return f"<Scholarship {self.title}>"
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ============================================================
-# SCHOLARSHIP APPLICATION MODEL
-# ============================================================
-class ScholarshipApplication(db.Model):
-    """Student scholarship submissions."""
-
-    __tablename__ = "scholarship_applications"
-
-    id = db.Column(db.Integer, primary_key=True)
-    scholarship_id = db.Column(db.Integer, db.ForeignKey("scholarships.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    essay_text = db.Column(db.Text)
-    status = db.Column(db.String(50), default="pending")  # pending, accepted, rejected
-    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
-    ai_score = db.Column(db.Float, default=0.0, doc="Smart-Match AI confidence score (0-100)")
-
-    def __repr__(self):
-        return f"<Application {self.id} - {self.status}>"
-
-
-# ============================================================
-# DONOR MODEL
-# ============================================================
-class Donor(db.Model):
-    """Donor profiles for scholarships and impact stories."""
-
-    __tablename__ = "donors"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    organization = db.Column(db.String(255))
-    email = db.Column(db.String(120))
-    message = db.Column(db.Text)
-    total_contributed = db.Column(db.Float, default=0.0)
-    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
-    featured = db.Column(db.Boolean, default=False)
-
-    scholarships = db.relationship("Scholarship", backref="donor", lazy=True)
-
-    def __repr__(self):
-        return f"<Donor {self.name}>"
-
-
-# ============================================================
-# MENTORSHIP SESSION MODEL
-# ============================================================
-class MentorshipSession(db.Model):
-    """Peer or alumni mentorship sessions."""
-
-    __tablename__ = "mentorship_sessions"
-
-    id = db.Column(db.Integer, primary_key=True)
-    mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    mentee_id = db.Column(db.Integer)
-    topic = db.Column(db.String(255))
-    notes = db.Column(db.Text)
-    session_date = db.Column(db.DateTime, default=datetime.utcnow)
-    completed = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return f"<MentorshipSession mentor={self.mentor_id} mentee={self.mentee_id}>"
-
-
-# ============================================================
-# USER BADGES MODEL
-# ============================================================
-class UserBadge(db.Model):
-    """Tracks earned achievements and leaderboards."""
-
-    __tablename__ = "user_badges"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    name = db.Column(db.String(120))
-    description = db.Column(db.Text)
-    icon = db.Column(db.String(255))
-    earned_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<Badge {self.name} for User {self.user_id}>"
-
-
-# ============================================================
-# ANALYTICS MODEL (STUB)
-# ============================================================
-class UserAnalytics(db.Model):
-    """Optional model for tracking user engagement metrics."""
-
-    __tablename__ = "user_analytics"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    last_login = db.Column(db.DateTime)
-    total_logins = db.Column(db.Integer, default=0)
-    scholarships_applied = db.Column(db.Integer, default=0)
-    messages_sent = db.Column(db.Integer, default=0)
-    mentorship_sessions = db.Column(db.Integer, default=0)
-    leaderboard_score = db.Column(db.Integer, default=0)
-
-    def __repr__(self):
-        return f"<UserAnalytics {self.user_id}>"
-
-
-# ============================================================
-# SYSTEM NOTIFICATION MODEL
-# ============================================================
+# -------------------------------------------------------------
+# NOTIFICATIONS MODEL
+# -------------------------------------------------------------
 class Notification(db.Model):
-    """System and email notification queue."""
-
     __tablename__ = "notifications"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    title = db.Column(db.String(255))
-    message = db.Column(db.Text)
-    category = db.Column(db.String(50), default="general")
+    message = db.Column(db.String(250))
+    link = db.Column(db.String(250))
+    is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    read = db.Column(db.Boolean, default=False)
-    delivery_status = db.Column(db.String(50), default="queued")
-
-    def __repr__(self):
-        return f"<Notification {self.title[:30]}>"
 
 
-# ============================================================
-# OPTIONAL AI LOGGING MODEL
-# ============================================================
-class AIInteraction(db.Model):
-    """Logs AI helper prompts/responses (for essay helper or analytics)."""
+# -------------------------------------------------------------
+# BADGES SYSTEM
+# -------------------------------------------------------------
+class Badge(db.Model):
+    __tablename__ = "badges"
 
-    __tablename__ = "ai_interactions"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    icon = db.Column(db.String(150))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class UserBadge(db.Model):
+    __tablename__ = "user_badges"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    feature = db.Column(db.String(50))  # essay_helper, smart_match, etc.
-    prompt = db.Column(db.Text)
-    response = db.Column(db.Text)
+    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"))
+    earned_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# -------------------------------------------------------------
+# DIGESTS / EMAIL LOGS
+# -------------------------------------------------------------
+class EmailDigestLog(db.Model):
+    __tablename__ = "email_digest_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    digest_type = db.Column(db.String(50))
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# -------------------------------------------------------------
+# CONTACT MESSAGE MODEL (NEW)
+# -------------------------------------------------------------
+class ContactMessage(db.Model):
+    __tablename__ = "contact_messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    success = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
-        return f"<AIInteraction {self.feature} by {self.user_id}>"
+        return f"<ContactMessage from {self.email}>"
