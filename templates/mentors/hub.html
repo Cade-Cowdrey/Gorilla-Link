@@ -1,0 +1,50 @@
+<!-- =========================================================
+FILE: src/templates/mentors/hub.html
+========================================================= -->
+{% extends "base.html" %}
+{% block title %}Mentorship Hub · PittState-Connect{% endblock %}
+{% block content %}
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+    <div>
+      <h1 class="text-4xl font-bold">Mentorship Hub</h1>
+      <p class="text-gray mt-1">Connect students with verified alumni mentors by major and career path.</p>
+    </div>
+    <a href="{{ url_for('alumni_bp.directory') }}" class="btn btn-gold mt-4 md:mt-0">Browse Alumni</a>
+  </div>
+
+  <!-- Mentorship Panels -->
+  <div class="grid md:grid-cols-3 gap-6 mb-10">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Find a Mentor</h3>
+      <p class="text-gray mb-3">Filter by department, interests, and graduation year.</p>
+      <a href="#" class="text-crimson hover:text-gold text-sm">Start Search →</a>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Message Center</h3>
+      <p class="text-gray mb-3">Built-in chat system (coming soon) with read receipts and notifications.</p>
+      <a href="#" class="text-crimson hover:text-gold text-sm">View Messages →</a>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Alumni Spotlights</h3>
+      <p class="text-gray mb-3">Featured success stories from Gorilla graduates.</p>
+      <a href="{{ url_for('alumni_bp.directory') }}" class="text-crimson hover:text-gold text-sm">View Stories →</a>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card p-6 bg-gray-50 dark:bg-gray-800 fade-in">
+    <h2 class="text-2xl font-semibold mb-4">Gorilla Scholars Leaderboard (Opt-in)</h2>
+    <table class="w-full text-left text-sm">
+      <thead class="text-gray uppercase border-b border-gray-200 dark:border-gray-700">
+        <tr><th class="py-2">Rank</th><th>Name</th><th>Mentor Sessions</th><th>Points</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="py-2">1</td><td>Jordan A.</td><td>12</td><td class="text-gold font-bold">890</td></tr>
+        <tr><td class="py-2">2</td><td>Maria L.</td><td>9</td><td>760</td></tr>
+        <tr><td class="py-2">3</td><td>Chris M.</td><td>8</td><td>700</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
