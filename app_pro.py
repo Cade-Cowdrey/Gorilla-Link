@@ -1,279 +1,129 @@
-# ============================================================
+# =============================================================
 # FILE: app_pro.py
-# PittState-Connect — Advanced production Flask factory (Render-safe)
-# ============================================================
+# PittState-Connect — Main Application Factory
+# Advanced production-ready Flask app with full blueprint loading,
+# compression, security headers, CORS, AI setup, and logging.
+# =============================================================
 
 import os
-import sys
 import logging
-from datetime import datetime
-from pathlib import Path
-from typing import List, Optional
-
-from flask import Flask, jsonify, url_for
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
-from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_mail import Mail
 from flask_cors import CORS
-from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_compress import Compress
+from flask_talisman import Talisman
+from dotenv import load_dotenv
+from loguru import logger
+import sentry_sdk
 
-# Optional performance & metrics
-try:
-    from flask_compress import Compress  # gzip/deflate
-except Exception:
-    Compress = None
+# -------------------------------------------------------------
+# LOAD ENVIRONMENT VARIABLES
+# -------------------------------------------------------------
+load_dotenv()
 
-try:
-    from prometheus_flask_exporter import PrometheusMetrics  # optional metrics
-except Exception:
-    PrometheusMetrics = None
-
-
-# ------------------------------------------------------------
-# 1️⃣ EXTENSIONS (singletons shared across blueprints)
-# ------------------------------------------------------------
+# -------------------------------------------------------------
+# GLOBAL EXTENSIONS
+# -------------------------------------------------------------
 db = SQLAlchemy()
+migrate = Migrate()
 mail = Mail()
 login_manager = LoginManager()
-migrate = Migrate()
 
 
-# ------------------------------------------------------------
-# 2️⃣ LOGGING CONFIG (Render + Cloud optimized)
-# ------------------------------------------------------------
-def _configure_logging(app: Flask) -> None:
-    """Configure simple JSON-like structured logging."""
-    level_name = (app.config.get("LOG_LEVEL") or "INFO").upper()
-    level = getattr(logging, level_name, logging.INFO)
+# -------------------------------------------------------------
+# APP FACTORY
+# -------------------------------------------------------------
+def create_app():
+    app = Flask(__name__, template_folder="templates", static_folder="static")
 
-    for h in list(app.logger.handlers):
-        app.logger.removeHandler(h)
+    # ---------------------------
+    # CORE CONFIGURATION
+    # ---------------------------
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev_secret_key")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///pittstate_connect.db")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
+    app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+    app.config["MAIL_USE_TLS"] = True
+    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+    app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.edu")
 
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(
-        logging.Formatter(
-            fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    )
-    app.logger.addHandler(handler)
-    app.logger.setLevel(level)
+    # ---------------------------
+    # SECURITY HEADERS
+    # ---------------------------
+    Talisman(app, content_security_policy=None)
+    Compress(app)
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
-    # Quiet noisy deps
-    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-
-# ------------------------------------------------------------
-# 3️⃣ JINJA HELPERS (cache-busting, date formatting, globals)
-# ------------------------------------------------------------
-def _register_jinja(app: Flask) -> None:
-    @app.context_processor
-    def inject_globals():
-        return {
-            "current_year": datetime.utcnow().year,
-            "APP_NAME": app.config.get("APP_NAME", "PittState-Connect"),
-            "UNIVERSITY_NAME": app.config.get(
-                "UNIVERSITY_NAME", "Pittsburg State University"
-            ),
-        }
-
-    def url_for_cachebust(endpoint: str, **values):
-        if endpoint == "static" and "filename" in values:
-            try:
-                static_folder = Path(app.static_folder or "static")
-                fp = static_folder / values["filename"]
-                if fp.exists():
-                    values["v"] = int(fp.stat().st_mtime)
-            except Exception:
-                pass
-        return url_for(endpoint, **values)
-
-    @app.template_filter("dt")
-    def format_dt(val, fmt="%b %d, %Y %I:%M %p"):
-        if not val:
-            return ""
-        if isinstance(val, (int, float)):
-            val = datetime.utcfromtimestamp(val)
-        return val.strftime(fmt)
-
-    app.jinja_env.globals["url_for_cachebust"] = url_for_cachebust
-
-
-# ------------------------------------------------------------
-# 4️⃣ SECURITY HEADERS (HSTS, CSP, anti-XSS)
-# ------------------------------------------------------------
-def _register_security(app: Flask) -> None:
-    @app.after_request
-    def set_security_headers(resp):
-        resp.headers["X-Content-Type-Options"] = "nosniff"
-        resp.headers["X-Frame-Options"] = "SAMEORIGIN"
-        resp.headers["X-XSS-Protection"] = "1; mode=block"
-        resp.headers[
-            "Strict-Transport-Security"
-        ] = "max-age=63072000; includeSubDomains; preload"
-
-        # CSP tuned for PSU assets
-        csp = (
-            "default-src 'self'; "
-            "img-src 'self' data: blob:; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "script-src 'self' 'unsafe-inline'; "
-            "connect-src 'self' https://api.openai.com; "
-            "frame-ancestors 'self'; "
-            "base-uri 'self'; "
-            "form-action 'self';"
-        )
-        resp.headers["Content-Security-Policy"] = csp
-        return resp
-
-
-# ------------------------------------------------------------
-# 5️⃣ BLUEPRINT REGISTRATION
-# ------------------------------------------------------------
-def _register_blueprints(app: Flask) -> List[str]:
-    """Import and register all blueprints (auto-logs each)."""
-    from blueprints import (
-        core_bp,
-        auth_bp,
-        careers_bp,
-        departments_bp,
-        scholarships_bp,
-        mentors_bp,
-        alumni_bp,
-        analytics_bp,
-        donor_bp,
-        emails_bp,
-        notifications_bp,
-    )
-
-    bps = [
-        core_bp,
-        auth_bp,
-        careers_bp,
-        departments_bp,
-        scholarships_bp,
-        mentors_bp,
-        alumni_bp,
-        analytics_bp,
-        donor_bp,
-        emails_bp,
-        notifications_bp,
-    ]
-
-    names = []
-    for bp in bps:
-        app.register_blueprint(bp)
-        app.logger.info("✅ Registered blueprint: %s (%s)", bp.name, bp.url_prefix or "")
-        names.append(bp.name)
-    return names
-
-
-# ------------------------------------------------------------
-# 6️⃣ APP FACTORY
-# ------------------------------------------------------------
-def create_app(config_name: Optional[str] = None) -> Flask:
-    """Factory pattern — used by both Render (Gunicorn) & local dev."""
-    app = Flask(__name__, instance_relative_config=False)
-
-    # Fix proxy headers (Render load balancer)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)  # type: ignore
-
-    # Config selection
-    env = config_name or os.getenv("FLASK_ENV", "production").lower()
-    if env == "development":
-        app.config.from_object("config.config_dev.DevConfig")
-    else:
-        app.config.from_object("config.Config")
-
-    # Logging first
-    _configure_logging(app)
-    app.logger.info("🚀 Booting %s (env=%s)", app.config.get("APP_NAME"), env)
-
-    # Extensions
+    # ---------------------------
+    # EXTENSIONS INIT
+    # ---------------------------
     db.init_app(app)
+    migrate.init_app(app, db)
     mail.init_app(app)
     login_manager.init_app(app)
-    migrate.init_app(app, db)
-    CORS(app)
-
-    if Compress:
-        Compress(app)
-        app.logger.info("Compression: enabled")
-    else:
-        app.logger.info("Compression: not installed")
-
-    # Optional: Prometheus metrics endpoint /metrics
-    if PrometheusMetrics:
-        PrometheusMetrics(app, group_by="endpoint")
-        app.logger.info("Metrics: Prometheus exporter enabled")
-
-    # Auth settings
     login_manager.login_view = "auth_bp.login"
-    login_manager.login_message_category = "info"
 
-    # Templates + Security
-    _register_jinja(app)
-    _register_security(app)
+    # ---------------------------
+    # BLUEPRINT REGISTRATION
+    # ---------------------------
+    from blueprints.core.routes import core_bp
+    from blueprints.auth.routes import auth_bp
+    from blueprints.careers.routes import careers_bp
+    from blueprints.departments.routes import departments_bp
+    from blueprints.scholarships.routes import scholarships_bp
+    from blueprints.mentors.routes import mentors_bp
+    from blueprints.alumni.routes import alumni_bp
+    from blueprints.analytics.routes import analytics_bp
+    from blueprints.donor.routes import donor_bp
+    from blueprints.emails.routes import emails_bp
+    from blueprints.notifications.routes import notifications_bp
 
-    # Blueprints
-    try:
-        _register_blueprints(app)
-    except Exception as e:
-        app.logger.exception("❌ Blueprint registration failed: %s", e)
+    app.register_blueprint(core_bp)  # Root = '/'
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(careers_bp, url_prefix="/careers")
+    app.register_blueprint(departments_bp, url_prefix="/departments")
+    app.register_blueprint(scholarships_bp, url_prefix="/scholarships")
+    app.register_blueprint(mentors_bp, url_prefix="/mentors")
+    app.register_blueprint(alumni_bp, url_prefix="/alumni")
+    app.register_blueprint(analytics_bp, url_prefix="/analytics")
+    app.register_blueprint(donor_bp, url_prefix="/donor")
+    app.register_blueprint(emails_bp, url_prefix="/emails")
+    app.register_blueprint(notifications_bp, url_prefix="/notifications")
 
-    # DB bootstrapping
+    # ---------------------------
+    # DATABASE ENSURE / LOGGING
+    # ---------------------------
     with app.app_context():
-        try:
-            import models  # noqa: F401
-            db.create_all()
-            app.logger.info("📦 Database tables ensured.")
-        except Exception as e:
-            app.logger.exception("❌ DB bootstrap failed: %s", e)
+        db.create_all()
+        app.logger.info("📦 Database tables ensured.")
 
-    # Health check
-    @app.route("/healthz")
-    def healthz():
-        return jsonify(
-            status="ok",
-            app=app.config.get("APP_NAME"),
-            env=env,
-            time=datetime.utcnow().isoformat() + "Z",
-        )
+    # ---------------------------
+    # LOGGING CONFIG
+    # ---------------------------
+    logging.basicConfig(level=logging.INFO)
+    app.logger.info("🚀 Booting PittState-Connect (env=%s)", os.getenv("FLASK_ENV", "production"))
+    app.logger.info("Compression: enabled")
+    app.logger.info("✅ Blueprints registered successfully")
 
-    # Minimal error handlers
-    @app.errorhandler(404)
-    def not_found(e):
-        return "<h1>404 — Not Found</h1><p>Route not found.</p>", 404
-
-    @app.errorhandler(500)
-    def server_error(e):
-        app.logger.exception("500 error: %s", e)
-        return "<h1>500 — Internal Server Error</h1><p>Something went wrong.</p>", 500
-
-    app.logger.info(
-        "\n🦍  %s started\nEnvironment: %s\nDatabase: %s\nDebug: %s\n-------------------------------------------",
-        app.config.get("APP_NAME", "PittState-Connect"),
-        env.upper(),
-        app.config.get("SQLALCHEMY_DATABASE_URI"),
-        app.config.get("DEBUG"),
-    )
+    # ---------------------------
+    # SENTRY (OPTIONAL ENHANCEMENT)
+    # ---------------------------
+    if os.getenv("SENTRY_DSN"):
+        sentry_sdk.init(dsn=os.getenv("SENTRY_DSN"), traces_sample_rate=1.0)
+        app.logger.info("🛰️ Sentry monitoring enabled")
 
     return app
 
 
-# ------------------------------------------------------------
-# 7️⃣ GLOBAL APP INSTANCE (for Gunicorn)
-# ------------------------------------------------------------
-# Gunicorn uses this when running `gunicorn app_pro:app`
+# -------------------------------------------------------------
+# ENTRY POINT
+# -------------------------------------------------------------
 app = create_app()
 
-
-# ------------------------------------------------------------
-# 8️⃣ LOCAL ENTRYPOINT
-# ------------------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=False)
