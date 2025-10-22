@@ -1,0 +1,57 @@
+<!-- =========================================================
+FILE: src/templates/scholarships/index.html
+========================================================= -->
+{% extends "base.html" %}
+{% block title %}Scholarship Hub · PittState-Connect{% endblock %}
+{% block content %}
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div>
+      <h1 class="text-4xl font-bold">Scholarship Hub</h1>
+      <p class="text-gray mt-1">Track, apply, and manage your awards in one place.</p>
+    </div>
+    <a href="{{ url_for('notifications_bp.settings') }}" class="btn btn-gold mt-4 md:mt-0">Reminders</a>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid md:grid-cols-3 gap-6 mb-10">
+    <div class="card p-6 text-center">
+      <h3 class="text-lg font-semibold">Eligible Scholarships</h3>
+      <p class="text-3xl font-bold text-crimson mt-2">14</p>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-lg font-semibold">Applications Sent</h3>
+      <p class="text-3xl font-bold text-gold mt-2">5</p>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-lg font-semibold">Deadline Tracker</h3>
+      <p class="text-3xl font-bold text-gray mt-2">3 this week</p>
+    </div>
+  </div>
+
+  <!-- Feature Cards -->
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <a href="{{ url_for('scholarships_bp.smart_match') }}" class="card p-6 block hover:shadow-lg transition">
+      <h3 class="text-xl font-semibold mb-2">Smart-Match Recommender</h3>
+      <p class="text-gray mb-3">Automatically suggests scholarships that best match your profile and major.</p>
+      <span class="text-crimson hover:text-gold text-sm">View Matches →</span>
+    </a>
+
+    <a href="{{ url_for('scholarships_bp.essay_helper') }}" class="card p-6 block hover:shadow-lg transition">
+      <h3 class="text-xl font-semibold mb-2">Essay Helper</h3>
+      <p class="text-gray mb-3">AI-ready assistant to polish your essays and personal statements.</p>
+      <span class="text-crimson hover:text-gold text-sm">Open Editor →</span>
+    </a>
+  </div>
+
+  <!-- Impact Stories -->
+  <div class="card p-6 bg-gray-50 dark:bg-gray-800 fade-in">
+    <h3 class="text-2xl font-semibold mb-2">Scholarship Impact Stories</h3>
+    <p class="text-gray mb-4">Real Gorillas who turned awards into success stories (stub feed).</p>
+    <ul class="list-disc ml-5 text-gray text-sm space-y-1">
+      <li>🏆 Engineering Leaders Award — supported Maria L. ’26</li>
+      <li>💡 First-Gen Scholars Fund — opened doors for James T. ’25</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
