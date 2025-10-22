@@ -1,105 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block head %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PittState-Connect{% endblock %}</title>
-
-    <!-- PSU Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='img/psu_logo_square.png') }}" type="image/png">
-
-    <!-- Tailwind / PSU Theme CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-
-    <!-- Animate.css for fade-in effects -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
-    <!-- PSU Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <!-- Meta -->
-    <meta name="description" content="PittState-Connect — PSU’s all-in-one hub for scholarships, mentorship, analytics, and careers.">
-    <meta name="theme-color" content="#A6192E">
-    {% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/psu-logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-inter">
+<body class="bg-gray-50 text-gray-900">
 
-<!-- ================= NAVBAR ================= -->
-<nav class="bg-white dark:bg-gray-950 shadow-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="{{ url_for('core_bp.home') }}" class="flex items-center space-x-2">
-      <img src="{{ url_for('static', filename='img/psu_logo_square.png') }}" alt="PSU Logo" class="w-8 h-8">
-      <span class="text-xl font-bold text-crimson">PittState-Connect</span>
-    </a>
-
-    <div class="hidden md:flex space-x-6 font-medium">
-      <a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a>
-      <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a>
-      <a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-gold transition">Scholarships</a>
-      <a href="{{ url_for('mentors_bp.hub') }}" class="hover:text-gold transition">Mentorship</a>
-      <a href="{{ url_for('analytics_bp.dashboard') }}" class="hover:text-gold transition">Analytics</a>
-      <a href="{{ url_for('donor_bp.portal') }}" class="hover:text-gold transition">Donors</a>
+  <!-- 🔝 Navbar -->
+  <nav class="bg-white shadow-md">
+    <div class="container mx-auto flex items-center justify-between py-4 px-6">
+      <a href="{{ url_for('core_bp.home') }}" class="flex items-center space-x-2">
+        <img src="{{ url_for('static', filename='images/psu-logo.png') }}" alt="PSU Logo" class="h-8 w-8">
+        <span class="font-bold text-crimson text-xl">PittState-Connect</span>
+      </a>
+      <div class="space-x-6">
+        <a href="{{ url_for('core_bp.home') }}" class="hover:text-crimson">Home</a>
+        <a href="{{ url_for('core_bp.team') }}" class="hover:text-crimson">Team</a>
+        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-crimson">Careers</a>
+        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-crimson">Scholarships</a>
+        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-crimson">Analytics</a>
+      </div>
     </div>
+  </nav>
 
-    <div class="flex items-center space-x-3">
-      <button id="darkModeToggle" class="text-sm px-3 py-2 rounded-md bg-gray-100 dark:bg-gray-800">
-        🌞 / 🌙
-      </button>
-      <a href="{{ url_for('auth_bp.login') }}" class="btn btn-crimson hidden md:inline">Login</a>
+  <!-- 🧩 Page Content -->
+  <main class="container mx-auto px-6 py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ⚡ Footer -->
+  <footer class="bg-crimson text-white mt-20 py-6">
+    <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+      <p>&copy; {{ current_year or 2025 }} Pittsburg State University — All Rights Reserved.</p>
+      <p class="text-sm">Developed by Gorilla Link / PittState-Connect Team</p>
     </div>
-  </div>
-</nav>
-
-<!-- ================= MAIN CONTENT ================= -->
-<main id="main-content">
-  {% block content %}{% endblock %}
-</main>
-
-<!-- ================= FOOTER ================= -->
-<footer class="bg-gray-100 dark:bg-gray-950 border-t mt-12">
-  <div class="max-w-7xl mx-auto px-6 py-10 text-center text-sm text-gray-600 dark:text-gray-400">
-    <p class="mb-2">© {{ current_year }} Pittsburg State University</p>
-    <p class="mb-4">PittState-Connect • “Built for Gorillas, by Gorillas.”</p>
-    <div class="flex justify-center space-x-4 text-lg">
-      <a href="https://www.pittstate.edu" target="_blank" class="hover:text-crimson">PSU Website</a>
-      <a href="{{ url_for('core_bp.about') }}" class="hover:text-crimson">About</a>
-      <a href="{{ url_for('core_bp.team') }}" class="hover:text-crimson">Team</a>
-      <a href="{{ url_for('emails_bp.digest_preview') }}" class="hover:text-crimson">Digest Preview</a>
-    </div>
-  </div>
-</footer>
-
-<!-- ================= SCROLL-TO-TOP & DARK-MODE SCRIPTS ================= -->
-<button id="scrollTopBtn"
-  class="fixed bottom-5 right-5 hidden bg-crimson text-white px-3 py-2 rounded-full shadow-lg hover:bg-gold hover:text-black transition">
-  ↑
-</button>
-
-<script>
-// Dark Mode Toggle
-const toggle = document.getElementById('darkModeToggle');
-toggle?.addEventListener('click', () => {
-  document.documentElement.classList.toggle('dark');
-  localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-});
-if (localStorage.theme === 'dark') document.documentElement.classList.add('dark');
-
-// Scroll-to-top button
-const scrollBtn = document.getElementById('scrollTopBtn');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 200) scrollBtn.classList.remove('hidden');
-  else scrollBtn.classList.add('hidden');
-});
-scrollBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
-
-// Fade-in animation trigger
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.fade-in').forEach(el => {
-    el.classList.add('animate__animated', 'animate__fadeInUp');
-  });
-});
-</script>
+  </footer>
 
 </body>
 </html>
