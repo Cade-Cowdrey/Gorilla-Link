@@ -1,6 +1,6 @@
 /* ============================================================
-   PITTSTATE-CONNECT THEME  —  PSU Crimson & Gold Edition
-   Compatible with all templates, Tailwind or vanilla builds.
+   PITTSTATE-CONNECT THEME — PSU Crimson & Gold Edition (v2)
+   Includes full brand palette, utilities, transitions, dark mode.
    ============================================================ */
 
 /* ------------------------
@@ -24,6 +24,7 @@ body {
   color: var(--psu-dark);
   line-height: 1.6;
   scroll-behavior: smooth;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 a {
@@ -37,7 +38,7 @@ a:hover {
 }
 
 /* ------------------------
-   PSU Utility Classes
+   Utility Classes
 ------------------------ */
 .bg-crimson { background-color: var(--psu-crimson) !important; }
 .text-crimson { color: var(--psu-crimson) !important; }
@@ -61,6 +62,7 @@ a:hover {
   font-weight: 600;
   text-align: center;
   transition: all 0.25s ease;
+  cursor: pointer;
 }
 
 .btn-gold {
@@ -109,12 +111,10 @@ footer {
   font-size: 0.9rem;
 }
 
-footer p {
-  margin: 0.25rem 0;
-}
+footer p { margin: 0.25rem 0; }
 
 /* ------------------------
-   Cards & Panels
+   Cards
 ------------------------ */
 .card {
   background-color: var(--psu-white);
@@ -142,23 +142,14 @@ h2 { font-size: 1.75rem; }
 h3 { font-size: 1.5rem; }
 
 /* ------------------------
-   Section Layout Helpers
+   Section Helpers
 ------------------------ */
-.section {
-  padding: 4rem 1.5rem;
-}
-
-.section-light {
-  background-color: var(--psu-light);
-}
-
-.section-dark {
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-}
+.section { padding: 4rem 1.5rem; }
+.section-light { background-color: var(--psu-light); }
+.section-dark { background-color: var(--psu-crimson); color: var(--psu-white); }
 
 /* ------------------------
-   Animations & Transitions
+   Animations
 ------------------------ */
 .fade-in {
   opacity: 0;
@@ -172,38 +163,65 @@ h3 { font-size: 1.5rem; }
 }
 
 /* ------------------------
-   Scrollbar (optional polish)
+   Scrollbar
 ------------------------ */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb {
   background-color: var(--psu-crimson);
   border-radius: 8px;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #8c1628;
-}
+::-webkit-scrollbar-thumb:hover { background-color: #8c1628; }
 
 /* ------------------------
-   Dark Mode Support (optional)
+   Dark Mode Styles
 ------------------------ */
 body.dark {
   background-color: #111;
   color: #f1f1f1;
 }
 
-body.dark nav {
-  background-color: #222;
-}
+body.dark nav { background-color: #222; }
 
-body.dark .bg-crimson {
-  background-color: #800016 !important;
-}
+body.dark .bg-crimson { background-color: #800016 !important; }
+body.dark .text-crimson { color: #ff7a7a !important; }
 
 body.dark .btn-gold {
   background-color: #d4a017;
   color: #111;
+}
+
+body.dark .card {
+  background-color: #1e1e1e;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+body.dark footer {
+  background-color: #000;
+  color: var(--psu-gold);
+}
+
+/* ------------------------
+   Dark Mode Toggle Button
+------------------------ */
+#theme-toggle {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: var(--psu-crimson);
+  color: var(--psu-white);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  z-index: 999;
+}
+
+#theme-toggle:hover {
+  background-color: var(--psu-gold);
+  color: var(--psu-dark);
+  transform: scale(1.05);
 }
