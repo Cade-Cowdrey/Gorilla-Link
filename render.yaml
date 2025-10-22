@@ -1,42 +1,41 @@
-# ============================================================
+# =============================================================
 # FILE: render.yaml
-# PittState-Connect — Advanced Render Deployment Config
-# ============================================================
+# PittState-Connect — Advanced Render Deployment Blueprint
+# =============================================================
 
 services:
+  # -----------------------------------------------------------
+  # 1️⃣  WEB SERVICE — main Flask app (production)
+  # -----------------------------------------------------------
   - type: web
     name: pittstate-connect
     env: python
+    plan: starter  # or upgrade to standard for AI + analytics load
+    runtime: python-3.10.13
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
-      # Optional: Install optional performance/monitoring packages
-      pip install flask-compress prometheus-flask-exporter sentry-sdk || true
+      echo "✅ Dependencies installed."
+      python diagnostics/run_check.py || echo "⚠️ Diagnostics ran with warnings."
+    startCommand: gunicorn 'app_pro:create_app()' --workers=3 --threads=2 --timeout=120 --preload --log-level=info
+    autoDeploy: true
+    healthCheckPath: /healthz
 
-    startCommand: gunicorn app_pro:app
-
-    # ------------------------------------------------------------------
-    # 🔹 Environment
-    # ------------------------------------------------------------------
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: PYTHON_VERSION
-        value: 3.10.13
       - key: APP_NAME
         value: PittState-Connect
       - key: UNIVERSITY_NAME
         value: Pittsburg State University
-      - key: LOG_LEVEL
-        value: INFO
-      # ⚙️ Database (example)
-      - key: DATABASE_URL
-        sync: false
-      # 📧 Email
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: pittstate-connect-db
+          property: connectionString
       - key: MAIL_SERVER
-        sync: false
+        value: smtp.gmail.com
       - key: MAIL_PORT
         value: 587
       - key: MAIL_USE_TLS
@@ -45,64 +44,107 @@ services:
         sync: false
       - key: MAIL_PASSWORD
         sync: false
-      # 🔑 Optional secrets
       - key: OPENAI_API_KEY
         sync: false
       - key: SENTRY_DSN
         sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: ENABLE_ANALYTICS
+        value: "true"
+      - key: ENABLE_DONOR_PORTAL
+        value: "true"
+      - key: ENABLE_SCHOLARSHIP_AI
+        value: "true"
+      - key: ENABLE_MENTOR_FEATURES
+        value: "true"
+      - key: ENABLE_DIAGNOSTICS
+        value: "true"
 
-    # ------------------------------------------------------------------
-    # ⚡ Scaling
-    # ------------------------------------------------------------------
-    plan: starter
-    numInstances: 1
-    autoDeploy: true
-    healthCheckPath: /healthz
-    runtime: python3
-    region: ohio
+    autoScaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 75
 
-    # ------------------------------------------------------------------
-    # ⚙️ Optional advanced tuning
-    # ------------------------------------------------------------------
-    buildFilter:
-      paths:
-        - "requirements.txt"
-        - "render.yaml"
-        - "Procfile"
-        - "app_pro.py"
-        - "blueprints/**"
-        - "templates/**"
-        - "static/**"
     disk:
-      name: pittstate-volume
-      mountPath: /var/pittstate
-      sizeGB: 1
+      name: persistent-storage
+      mountPath: /data
+      sizeGB: 2
 
-    # Logs retention and health behavior
-    autoHealing: true
-    logRetentionDays: 30
+  # -----------------------------------------------------------
+  # 2️⃣  WORKER SERVICE — handles background async tasks
+  # -----------------------------------------------------------
+  - type: worker
+    name: pittstate-connect-worker
+    env: python
+    runtime: python-3.10.13
+    buildCommand: pip install -r requirements.txt
+    startCommand: python worker.py
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: pittstate-connect-db
+          property: connectionString
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: ENABLE_SCHOLARSHIP_AI
+        value: "true"
+      - key: ENABLE_DONOR_SYNC
+        value: "true"
 
-# ============================================================
-# OPTIONAL BACKGROUND WORKERS
-# ============================================================
-# Uncomment if you later add background job handling
-# - type: worker
-#   name: pittstate-connect-worker
-#   env: python
-#   buildCommand: pip install -r requirements.txt
-#   startCommand: python worker.py
-#   envVars:
-#     - key: FLASK_ENV
-#       value: production
-#     - key: DATABASE_URL
-#       sync: false
-#     - key: OPENAI_API_KEY
-#       sync: false
+  # -----------------------------------------------------------
+  # 3️⃣  CRON JOB SERVICE — scheduled background maintenance
+  # -----------------------------------------------------------
+  - type: cron
+    name: pittstate-connect-cron
+    env: python
+    schedule: "0 6 * * *" # every day at 6AM UTC
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage_tasks.py
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: pittstate-connect-db
+          property: connectionString
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
 
-# ============================================================
-# OPTIONAL REDIS CACHE (example)
-# ============================================================
-# databases:
-#   - name: pittstate-cache
-#     plan: free
-#     region: ohio
+  # -----------------------------------------------------------
+  # 4️⃣  DIAGNOSTICS — optional on-demand health verification
+  # -----------------------------------------------------------
+  - type: worker
+    name: pittstate-connect-diagnostics
+    env: python
+    startCommand: python diagnostics/run_check.py
+    buildCommand: pip install -r requirements.txt
+    autoDeploy: false
+    plan: free
+    envVars:
+      - key: ENABLE_DIAGNOSTICS
+        value: "true"
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: pittstate-connect-db
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+
+databases:
+  - name: pittstate-connect-db
+    plan: free
+    databaseName: pittstate_connect
+    user: pittstate_connect_user
