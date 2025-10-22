@@ -1,15 +1,31 @@
+<!-- =========================================================
+FILE: src/templates/core/about.html
+========================================================= -->
 {% extends "base.html" %}
+{% block title %}About · PittState-Connect{% endblock %}
 {% block content %}
-<section class="max-w-5xl mx-auto px-6 py-16">
-  <h1 class="text-4xl font-bold text-crimson mb-6">About PittState-Connect</h1>
-  <p class="text-gray-700 text-lg leading-relaxed">
-    PittState-Connect is a digital ecosystem designed to unite students, alumni, faculty, and employers under one powerful PSU platform.
-    Our goal is to enhance career readiness, increase scholarship access, and strengthen the Gorilla alumni network.
+<section class="section max-w-6xl mx-auto px-6 fade-in">
+  <h1 class="text-4xl font-bold mb-4">About PittState-Connect</h1>
+  <p class="text-gray mb-6">
+    PittState-Connect unites scholarships, mentorship, careers, alumni, analytics, and donor engagement into one PSU ecosystem.
   </p>
-  <div class="mt-10 space-y-4">
-    <p>✅ Built by PSU innovators for PSU students.</p>
-    <p>🎓 Supports student success from enrollment to alumnihood.</p>
-    <p>💼 Connects Gorillas to high-impact opportunities and funding.</p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">What’s Inside</h3>
+      <ul class="list-disc ml-5 text-gray space-y-1">
+        <li>Scholarship Hub with smart-match & deadline reminders</li>
+        <li>Mentorship & Alumni networking with verified profiles</li>
+        <li>Employer partnerships, sponsorship tiers, and donor portal</li>
+        <li>Admin/department analytics & exportable reports</li>
+      </ul>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Why It Matters</h3>
+      <p class="text-gray">
+        Students win opportunities faster. Alumni give back with impact. Departments see outcomes clearly. PSU scales success.
+      </p>
+    </div>
   </div>
 </section>
 {% endblock %}
