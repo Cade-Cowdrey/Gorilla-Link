@@ -1,128 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Contact PittState-Connect{% endblock %}
-
+{% block title %}Contact Us | PittState-Connect{% endblock %}
 {% block content %}
-<!-- =========================================================
-     PSU-Branded Contact Page
-     Handles user inquiries routed to admin via Flask-Mail.
-     Optional Enhancements: Live validation, success alerts,
-     animated icons, PSU gradient banner, and reCAPTCHA-ready.
-     ========================================================= -->
-
-<!-- Hero Banner -->
-<section class="relative overflow-hidden bg-gradient-to-r from-crimson-700 via-crimson-600 to-gold-500 text-white py-5 shadow-lg">
-  <div class="container text-center py-5">
-    <h1 class="display-5 fw-bold mb-2">Get in Touch</h1>
-    <p class="lead mb-0">Have questions or feedback about PittState-Connect? We’d love to hear from you.</p>
-  </div>
-</section>
-
-<!-- Contact Info Section -->
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="row text-center mb-5">
-      <div class="col-md-4 mb-4">
-        <div class="icon-circle bg-crimson text-white mb-3 mx-auto">
-          <i class="fa-solid fa-location-dot fa-2x"></i>
-        </div>
-        <h5 class="fw-bold text-crimson mb-1">Campus Office</h5>
-        <p class="text-muted small mb-0">Pittsburg State University</p>
-        <p class="text-muted small">1701 S Broadway St, Pittsburg, KS</p>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="icon-circle bg-gold text-crimson mb-3 mx-auto">
-          <i class="fa-solid fa-envelope fa-2x"></i>
-        </div>
-        <h5 class="fw-bold text-crimson mb-1">Email</h5>
-        <p class="text-muted small">support@pittstateconnect.edu</p>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="icon-circle bg-crimson text-white mb-3 mx-auto">
-          <i class="fa-solid fa-phone fa-2x"></i>
-        </div>
-        <h5 class="fw-bold text-crimson mb-1">Call</h5>
-        <p class="text-muted small">+1 (620) 235-4000</p>
-      </div>
+<section class="container py-5">
+  <h2 class="text-crimson fw-bold mb-4">📞 Contact PittState-Connect</h2>
+  <form method="POST" class="shadow-sm p-4 bg-white rounded-4 border">
+    <div class="mb-3">
+      <label class="form-label fw-bold">Your Name</label>
+      <input type="text" class="form-control" name="name" required>
     </div>
-
-    <!-- Contact Form -->
-    <div class="card shadow-lg border-0 fade-in">
-      <div class="card-body p-4">
-        <h4 class="text-center text-crimson fw-bold mb-4">Send us a Message</h4>
-        <form id="contactForm" method="POST" action="{{ url_for('core_bp.contact') }}">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label text-muted small">Full Name</label>
-              <input type="text" class="form-control form-control-lg" name="name" placeholder="Your name" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label text-muted small">Email Address</label>
-              <input type="email" class="form-control form-control-lg" name="email" placeholder="you@pittstate.edu" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-muted small">Subject</label>
-            <input type="text" class="form-control form-control-lg" name="subject" placeholder="Subject" required>
-          </div>
-          <div class="mb-4">
-            <label class="form-label text-muted small">Message</label>
-            <textarea class="form-control form-control-lg" rows="5" name="message" placeholder="Write your message..." required></textarea>
-          </div>
-          <div class="text-center">
-            <button type="submit" class="btn btn-crimson btn-lg px-5">
-              <i class="fa-solid fa-paper-plane me-2"></i> Send Message
-            </button>
-          </div>
-        </form>
-
-        <!-- Feedback Alerts -->
-        <div id="formAlert" class="alert mt-4 text-center d-none"></div>
-      </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Your Email</label>
+      <input type="email" class="form-control" name="email" required>
     </div>
-  </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Subject</label>
+      <input type="text" class="form-control" name="subject" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Message</label>
+      <textarea class="form-control" rows="5" name="message" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-crimson w-100 fw-bold">Send Message</button>
+  </form>
 </section>
-
-<!-- Optional Enhancement: Add Animated Counters or Footer CTA -->
-<section class="py-5 bg-gradient-to-r from-gold-500 to-crimson-700 text-white text-center shadow-lg">
-  <div class="container">
-    <h2 class="fw-bold mb-2">Join the Gorilla Network</h2>
-    <p class="lead mb-4">Empowering the next generation of PSU students and alumni — one connection at a time.</p>
-    <a href="{{ url_for('auth_bp.register') }}" class="btn btn-light text-crimson fw-bold">Create Account</a>
-  </div>
-</section>
-
-<script>
-// Optional Enhancement: AJAX-style alert feedback (safe fallback for static hosting)
-document.querySelector("#contactForm").addEventListener("submit", function(e) {
-  const alertBox = document.querySelector("#formAlert");
-  alertBox.classList.remove("d-none", "alert-danger", "alert-success");
-  alertBox.classList.add("alert", "alert-info");
-  alertBox.textContent = "Sending your message...";
-});
-</script>
 
 <style>
-  .text-gold { color: #f5c518; }
-  .bg-crimson { background-color: #a6192e; }
-  .bg-gold { background-color: #f5c518; }
-  .btn-crimson {
-    background-color: #a6192e;
-    color: #fff;
-    border: none;
-    transition: 0.3s;
-  }
-  .btn-crimson:hover {
-    background-color: #861425;
-  }
-  .icon-circle {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
-  .fade-in-visible { opacity: 1; transform: translateY(0); }
+  .btn-crimson { background-color: #a6192e; color: white; }
+  .btn-crimson:hover { background-color: #861425; }
+  .text-crimson { color: #a6192e; }
 </style>
 {% endblock %}
