@@ -1,50 +1,90 @@
+# ============================================================
+# RENDER DEPLOY CONFIG | PittState-Connect
+# ============================================================
+
 services:
   - type: web
     name: pittstate-connect
     env: python
-    plan: standard
-    autoDeploy: true
-
+    plan: starter   # You can upgrade later if needed
+    branch: main
     buildCommand: |
-      echo "🔧 Installing Python dependencies..."
       pip install --upgrade pip
       pip install -r requirements.txt
-      echo "🎨 Building Tailwind PSU theme..."
-      npx tailwindcss -i ./static/css/psu-theme.css -o ./static/css/output.css --minify
-      echo "✅ Tailwind build complete!"
-
-    startCommand: |
-      echo "🚀 Starting PittState-Connect..."
-      gunicorn app_pro:app --workers=3 --timeout 120
+      flask db upgrade || echo "No migrations to apply"
+    startCommand: gunicorn app_pro:app
+    autoDeploy: true
 
     envVars:
-      # ─────────────── Python/Flask Config ───────────────
-      - key: PYTHON_VERSION
-        value: 3.10.13
+      # --------------------------------------------------------
+      # Core Flask Settings
+      # --------------------------------------------------------
       - key: FLASK_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: SECRET_KEY
         generateValue: true
 
-      # ─────────────── Database + Cache ───────────────
+      # --------------------------------------------------------
+      # Database
+      # --------------------------------------------------------
       - key: DATABASE_URL
-        sync: false   # Provided by your Render PostgreSQL add-on
-      - key: REDIS_URL
-        sync: false   # Provided by your Render Redis add-on
+        fromDatabase:
+          name: pittstate-connect-db
+          property: connectionString
 
-      # ─────────────── Email / API Integrations ───────────────
-      - key: SENDGRID_API_KEY
-        sync: false   # Use your SendGrid key for transactional emails
-      - key: CLOUD_BUCKET_URL
-        sync: false   # Cloud storage (S3, GCS, or Render Disk)
+      # --------------------------------------------------------
+      # Email / Notifications
+      # --------------------------------------------------------
+      - key: MAIL_SERVER
+        value: smtp.sendgrid.net
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        value: apikey
+      - key: MAIL_PASSWORD
+        sync: false   # Set manually in Render dashboard
+      - key: MAIL_DEFAULT_SENDER
+        value: no-reply@pittstate-connect.com
 
-      # ─────────────── Analytics / Environment ───────────────
-      - key: FLASK_APP
-        value: app_pro.py
-      - key: TZ
-        value: America/Chicago
+      # --------------------------------------------------------
+      # Optional AI / Smart Match Enhancements
+      # --------------------------------------------------------
+      - key: OPENAI_API_KEY
+        sync: false   # Set manually only if using AI helper
 
-    disk:
-      name: static-cache
-      mountPath: /opt/render/project/src/static/cache
-      sizeGB: 1
+      # --------------------------------------------------------
+      # Branding / Theme Overrides (optional)
+      # --------------------------------------------------------
+      - key: APP_NAME
+        value: PittState-Connect
+      - key: UNIVERSITY_NAME
+        value: Pittsburg State University
+
+      # --------------------------------------------------------
+      # Security / Performance
+      # --------------------------------------------------------
+      - key: LOG_LEVEL
+        value: info
+
+    healthCheckPath: /healthz
+
+    autoScaling:
+      enabled: true
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 85
+      targetCPUPercent: 75
+
+    staticPublishPath: static
+    envSpecificConfigs:
+      - type: python
+        buildCommand: pip install -r requirements.txt
+
+databases:
+  - name: pittstate-connect-db
+    plan: free
+    region: oregon
