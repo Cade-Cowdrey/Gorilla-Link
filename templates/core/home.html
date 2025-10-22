@@ -1,66 +1,25 @@
-<!-- =========================================================
-FILE: src/templates/core/home.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Home · PittState-Connect{% endblock %}
+{% block title %}PittState-Connect | Home{% endblock %}
+
 {% block content %}
-
-<!-- HERO -->
-<section class="hero-banner relative">
-  <div class="hero-overlay"></div>
-  <div class="max-w-7xl mx-auto px-6 py-20 text-center relative fade-in">
-    <img src="{{ url_for('static', filename='img/gorilla-gradient.svg') }}" alt="Gorilla" class="mx-auto w-20 h-20 mb-4" loading="lazy">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to PittState-Connect</h1>
-    <p class="text-lg max-w-2xl mx-auto text-gray">
-      PSU’s all-in-one hub for <strong>scholarships</strong>, <strong>mentorship</strong>, <strong>careers</strong>, <strong>analytics</strong>, and <strong>alumni</strong>.
-    </p>
-    <div class="mt-8 flex justify-center gap-4">
-      <a href="{{ url_for('auth_bp.register') }}" class="btn btn-gold">Join Now</a>
-      <a href="{{ url_for('careers_bp.dashboard') }}" class="btn btn-crimson">Explore Careers</a>
-    </div>
-  </div>
+<section class="text-center">
+  <h1 class="text-4xl font-bold text-crimson mb-4">{{ hero.title }}</h1>
+  <p class="text-lg text-gray-700 mb-10">{{ hero.subtitle }}</p>
 </section>
 
-<!-- FEATURE CARDS -->
-<section class="section section-light">
-  <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
-    <a class="card p-6 fade-in block" href="{{ url_for('scholarships_bp.index') }}">
-      <img src="{{ url_for('static', filename='img/icon_scholarship_gold.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
-      <h3 class="text-xl font-semibold mb-2">Scholarship Smart-Match</h3>
-      <p class="text-gray">Funding aligned to your profile, deadlines, and department.</p>
-      <span class="text-crimson hover:text-gold mt-3 inline-block">Open Hub →</span>
-    </a>
-    <a class="card p-6 fade-in block" href="{{ url_for('mentors_bp.hub') }}">
-      <img src="{{ url_for('static', filename='img/icon_mentor.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
-      <h3 class="text-xl font-semibold mb-2">Mentorship & Alumni</h3>
-      <p class="text-gray">Connect with verified alumni mentors by major and goals.</p>
-      <span class="text-crimson hover:text-gold mt-3 inline-block">Find a Mentor →</span>
-    </a>
-    <a class="card p-6 fade-in block" href="{{ url_for('analytics_bp.dashboard') }}">
-      <img src="{{ url_for('static', filename='img/icon_analytics.svg') }}" alt="" class="w-8 h-8 mb-3" loading="lazy">
-      <h3 class="text-xl font-semibold mb-2">Outcomes & Analytics</h3>
-      <p class="text-gray">Career placement, engagement, and scholarship impact trends.</p>
-      <span class="text-crimson hover:text-gold mt-3 inline-block">View Dashboard →</span>
-    </a>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  {% for panel in panels %}
+  <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition">
+    <div class="text-5xl mb-4">{{ panel.icon }}</div>
+    <h3 class="text-xl font-semibold text-crimson mb-2">{{ panel.title }}</h3>
+    <p class="text-gray-600">{{ panel.desc }}</p>
   </div>
-</section>
+  {% endfor %}
+</div>
 
-<!-- BRAND / VALUE -->
-<section class="section">
-  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
-    <div class="fade-in">
-      <img src="{{ url_for('static', filename='img/psu_gold_gradient.jpg') }}" class="rounded-2xl shadow w-full" alt="PSU Pride" loading="lazy">
-    </div>
-    <div class="fade-in">
-      <h2 class="text-3xl font-bold mb-3">Built for Gorillas, by Gorillas</h2>
-      <p class="text-gray mb-4">
-        PSU branding, secure data handling, and scalable architecture—ready for official adoption.
-      </p>
-      <div class="flex gap-3">
-        <a href="{{ url_for('core_bp.about') }}" class="btn btn-crimson">How it works</a>
-        <a href="{{ url_for('emails_bp.digest_preview') }}" class="btn btn-gold">Preview Digest</a>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="text-center mt-16">
+  <a href="{{ url_for('core_bp.team') }}" class="inline-block bg-crimson text-white px-6 py-3 rounded-lg hover:bg-gold transition">
+    Meet the Team →
+  </a>
+</div>
 {% endblock %}
