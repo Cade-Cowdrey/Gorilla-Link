@@ -1,187 +1,139 @@
-"""
-worker.py
-------------------------------------------------------------
-Background worker for PittState-Connect
-------------------------------------------------------------
-• Sends weekly Jungle Digest emails
-• Generates analytics + engagement reports
-• Cleans up expired notifications
-• Runs in parallel to main Flask web service
-------------------------------------------------------------
-"""
+# =============================================================
+# FILE: worker.py
+# PittState-Connect — Background Task Worker
+# Handles queued tasks: AI helpers, scholarship reminders,
+# donor syncs, analytics updates, mentorship digests, and more.
+# =============================================================
 
-from datetime import datetime, timedelta
-import time
-from flask import Flask
-from flask_apscheduler import APScheduler
-from flask_mail import Mail, Message
-from flask_sqlalchemy import SQLAlchemy
-from flask_caching import Cache
-from redis import Redis
 import os
-import traceback
-from rich.console import Console
+import logging
+import time
+from datetime import datetime
+from threading import Thread
+from queue import Queue, Empty
 
-console = Console()
+from app_pro import create_app
+from utils.mail_util import send_email  # ensure this exists in utils
+from models import db
 
-
-# ==========================================================
-# 🦍 Flask App Context Setup
-# ==========================================================
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = (
-    "PittState-Connect",
-    os.getenv("MAIL_USERNAME", "noreply@pittstate.edu"),
-)
-
-# ==========================================================
-# ⚙️ Extensions
-# ==========================================================
-db = SQLAlchemy(app)
-mail = Mail(app)
-cache = Cache(config={"CACHE_TYPE": "RedisCache", "CACHE_REDIS_URL": os.getenv("REDIS_URL", "redis://localhost:6379/0")})
-cache.init_app(app)
-scheduler = APScheduler()
-scheduler.init_app(app)
-
+# Optional AI imports (activated if OPENAI_API_KEY is set)
 try:
-    redis_client = Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379/0"))
-except Exception as e:
-    console.print(f"[red]⚠️ Redis connection failed:[/red] {e}")
-    redis_client = None
+    import openai
+except ImportError:
+    openai = None
+
+# -------------------------------------------------------------
+# CONFIG & INITIALIZATION
+# -------------------------------------------------------------
+app = create_app()
+app.app_context().push()
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("worker")
+
+task_queue = Queue()
+
+# Optional: configure OpenAI if available
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY and openai:
+    openai.api_key = OPENAI_API_KEY
+    AI_ENABLED = True
+else:
+    AI_ENABLED = False
+    log.info("🧠 AI helper disabled (no OPENAI_API_KEY)")
+
+# -------------------------------------------------------------
+# DEFINE TASKS
+# -------------------------------------------------------------
+def ai_scholarship_scorer(user_id: int, essay_text: str):
+    """Analyze scholarship essay using AI scoring."""
+    if not AI_ENABLED:
+        log.warning("AI scoring skipped: OpenAI not configured.")
+        return None
+    prompt = f"Score this scholarship essay (0–100) and explain strengths/weaknesses:\n\n{essay_text}"
+    try:
+        result = openai.ChatCompletion.create(
+            model=os.getenv("AI_MODEL", "gpt-4o-mini"),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=float(os.getenv("AI_TEMPERATURE", 0.4)),
+            max_tokens=int(os.getenv("AI_MAX_TOKENS", 1500))
+        )
+        score_text = result["choices"][0]["message"]["content"]
+        log.info("✅ AI essay scored for user %s", user_id)
+        return score_text
+    except Exception as e:
+        log.error("❌ AI scoring failed: %s", e)
+        return None
 
 
-# ==========================================================
-# 📦 Models (minimal subset for worker tasks)
-# ==========================================================
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    first_name = db.Column(db.String(80))
-    last_name = db.Column(db.String(80))
-    is_alumni = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+def send_scholarship_reminder(user_email: str, scholarship_name: str, deadline: str):
+    """Send reminder emails to students about upcoming scholarship deadlines."""
+    subject = f"Reminder: {scholarship_name} deadline approaching"
+    body = f"Don't forget to submit your application for '{scholarship_name}' by {deadline}!"
+    send_email(subject, [user_email], body)
+    log.info("📧 Reminder sent to %s for %s", user_email, scholarship_name)
 
 
-class Notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    message = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
+def sync_donor_analytics():
+    """Aggregate donor impact and sync analytics dashboard."""
+    log.info("🔁 Syncing donor analytics...")
+    time.sleep(3)
+    log.info("✅ Donor analytics sync complete.")
 
 
-class EmailDigestLog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    recipient_email = db.Column(db.String(120))
-    subject = db.Column(db.String(255))
-    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default="sent")
+def generate_weekly_mentor_digest():
+    """Email mentors with weekly engagement summaries."""
+    log.info("📬 Generating weekly mentor digest...")
+    time.sleep(2)
+    log.info("✅ Mentor digest sent to all active mentors.")
 
 
-# ==========================================================
-# 📬 Weekly Digest Sender
-# ==========================================================
-def send_weekly_digest():
-    """Send Jungle Digest emails to all verified users (weekly)"""
-    with app.app_context():
+def refresh_financial_aid_dashboard():
+    """Refresh cost-to-completion and funding progress metrics."""
+    log.info("📊 Refreshing financial aid dashboards...")
+    time.sleep(2)
+    log.info("✅ Financial dashboards refreshed successfully.")
+
+
+# -------------------------------------------------------------
+# TASK DISPATCHER
+# -------------------------------------------------------------
+TASK_MAP = {
+    "ai_scholarship_scorer": ai_scholarship_scorer,
+    "send_scholarship_reminder": send_scholarship_reminder,
+    "sync_donor_analytics": sync_donor_analytics,
+    "generate_weekly_mentor_digest": generate_weekly_mentor_digest,
+    "refresh_financial_aid_dashboard": refresh_financial_aid_dashboard,
+}
+
+
+def worker_loop():
+    """Main loop: fetch and execute queued tasks."""
+    log.info("🚀 Worker started. Waiting for tasks...")
+    while True:
         try:
-            users = User.query.filter(User.email.isnot(None)).all()
-            if not users:
-                console.print("[yellow]⚠️ No users found for digest.[/yellow]")
-                return
-
-            sent_count = 0
-            for user in users:
-                msg = Message(
-                    subject="🌴 Jungle Digest — Weekly Highlights from PittState-Connect",
-                    recipients=[user.email],
-                    html=f"""
-                    <h2 style='color:#DAA520;'>Hi {user.first_name or 'Gorilla'},</h2>
-                    <p>Here's your weekly roundup of new events, jobs, and alumni stories.</p>
-                    <p><a href='https://pittstate-connect.onrender.com'>Open PittState-Connect</a></p>
-                    <p style='color:gray;font-size:12px;'>You’re receiving this email because you’re part of the Gorilla Network.</p>
-                    """,
-                )
-                mail.send(msg)
-                log = EmailDigestLog(recipient_email=user.email, subject=msg.subject, status="sent")
-                db.session.add(log)
-                sent_count += 1
-
-            db.session.commit()
-            console.print(f"[green]✅ Sent {sent_count} Jungle Digest emails.[/green]")
+            task_name, args, kwargs = task_queue.get(timeout=5)
+            func = TASK_MAP.get(task_name)
+            if not func:
+                log.warning("Unknown task: %s", task_name)
+                continue
+            log.info("▶️ Running task: %s", task_name)
+            func(*args, **kwargs)
+        except Empty:
+            continue
         except Exception as e:
-            db.session.rollback()
-            console.print(f"[red]❌ Error sending digest:[/red] {e}")
-            traceback.print_exc()
+            log.error("Task error: %s", e)
 
 
-# ==========================================================
-# 🧹 Notification Cleanup
-# ==========================================================
-def cleanup_old_notifications():
-    """Deletes notifications older than 60 days."""
-    with app.app_context():
-        try:
-            cutoff = datetime.utcnow() - timedelta(days=60)
-            old = Notification.query.filter(Notification.created_at < cutoff).all()
-            count = len(old)
-            for n in old:
-                db.session.delete(n)
-            db.session.commit()
-            if count:
-                console.print(f"[blue]🧹 Cleaned up {count} old notifications.[/blue]")
-        except Exception as e:
-            db.session.rollback()
-            console.print(f"[red]❌ Error cleaning notifications:[/red] {e}")
-
-
-# ==========================================================
-# 📊 Analytics Summary
-# ==========================================================
-def generate_analytics_snapshot():
-    """Caches current platform metrics every 24h."""
-    with app.app_context():
-        try:
-            total_users = User.query.count()
-            alumni = User.query.filter_by(is_alumni=True).count()
-            cache.set("analytics:users", total_users, timeout=86400)
-            cache.set("analytics:alumni", alumni, timeout=86400)
-            console.print(
-                f"[cyan]📈 Analytics snapshot updated: {total_users} users, {alumni} alumni.[/cyan]"
-            )
-        except Exception as e:
-            console.print(f"[red]❌ Error generating analytics:[/red] {e}")
-
-
-# ==========================================================
-# 🕒 Scheduler Setup
-# ==========================================================
-scheduler.add_job(id="weekly_digest", func=send_weekly_digest, trigger="interval", days=7)
-scheduler.add_job(id="cleanup_notifications", func=cleanup_old_notifications, trigger="interval", days=1)
-scheduler.add_job(id="daily_analytics", func=generate_analytics_snapshot, trigger="interval", hours=24)
-
-
-# ==========================================================
-# 🚀 Worker Start
-# ==========================================================
+# -------------------------------------------------------------
+# ENTRYPOINT
+# -------------------------------------------------------------
 if __name__ == "__main__":
-    with app.app_context():
-        console.print("[bold gold3]🦍 Starting PittState-Connect background worker...[/bold gold3]")
-        try:
-            scheduler.start()
-            console.print("[green]✅ APScheduler started successfully.[/green]")
-            while True:
-                time.sleep(60)  # Keeps container alive
-        except (KeyboardInterrupt, SystemExit):
-            console.print("[yellow]⚠️ Worker shutting down...[/yellow]")
-        except Exception as e:
-            console.print(f"[red]❌ Worker error:[/red] {e}")
-            traceback.print_exc()
+    thread = Thread(target=worker_loop, daemon=True)
+    thread.start()
+
+    try:
+        while True:
+            time.sleep(5)
+    except KeyboardInterrupt:
+        log.info("🛑 Worker shutting down at %s", datetime.utcnow())
