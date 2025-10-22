@@ -29,7 +29,7 @@ requests>=2.32.3
 
 # --- CORS / Proxy Support ---
 Flask-Cors==4.0.1
-Werkzeug-ProxyFix>=0.1
+# ProxyFix is built into Werkzeug, no external package needed
 
 # --- Compression / Optimization ---
 Flask-Compress==1.14
