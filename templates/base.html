@@ -9,15 +9,17 @@
   {% block head %}{% endblock %}
 </head>
 
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body class="bg-light text-gray font-body">
 
   <!-- Navbar -->
-  <nav class="bg-crimson text-white shadow-md fixed w-full z-50 top-0">
+  <nav class="bg-crimson text-white shadow-md fixed w-full z-50 top-0" role="navigation">
     <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-      <a href="{{ url_for('core_bp.home') }}" class="font-heading text-xl font-bold tracking-wide flex items-center">
+      <a href="{{ url_for('core_bp.home') }}" class="font-heading text-xl font-bold tracking-wide flex items-center focus:outline-none focus:ring-2 focus:ring-gold">
         <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="h-8 w-8 mr-2">
         PittState-Connect
       </a>
+
+      <!-- Desktop Links -->
       <ul class="hidden md:flex space-x-6 font-semibold">
         <li><a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a></li>
         <li><a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a></li>
@@ -27,8 +29,10 @@
         <li><a href="{{ url_for('alumni_bp.directory') }}" class="hover:text-gold transition">Alumni</a></li>
         <li><a href="{{ url_for('core_bp.team') }}" class="hover:text-gold transition">Team</a></li>
       </ul>
+
+      <!-- Mobile Toggle -->
       <div class="md:hidden">
-        <button id="menu-toggle" class="focus:outline-none">
+        <button id="menu-toggle" class="focus:outline-none" aria-label="Toggle menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,6 +41,8 @@
         </button>
       </div>
     </div>
+
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden hidden bg-crimson px-6 py-3 space-y-2">
       <a href="{{ url_for('core_bp.home') }}" class="block hover:text-gold">Home</a>
       <a href="{{ url_for('careers_bp.dashboard') }}" class="block hover:text-gold">Careers</a>
@@ -48,22 +54,79 @@
     </div>
   </nav>
 
-  <!-- Main Page Content -->
-  <main class="pt-20 min-h-screen">
+  <!-- Main Content -->
+  <main class="pt-20 min-h-screen fade-in">
     {% block content %}{% endblock %}
   </main>
 
   <!-- Footer -->
-  <footer class="bg-crimson text-white text-center py-6 mt-10">
+  <footer class="bg-crimson text-white text-center py-8 mt-10">
     <p class="text-sm">&copy; {{ current_year }} Pittsburg State University — PittState-Connect</p>
-    <p class="text-xs opacity-75">Built for Gorillas • Powered by PSU Innovation Lab</p>
+    <p class="text-xs opacity-75">
+      Built for Gorillas • Powered by PSU Innovation Lab • 
+      <a href="{{ url_for('core_bp.about') }}" class="text-gold hover:underline">Learn More</a>
+    </p>
+    <div class="flex justify-center space-x-4 mt-3">
+      <a href="https://www.pittstate.edu" target="_blank" aria-label="Visit PSU website">
+        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="h-6 w-6">
+      </a>
+      <a href="mailto:support@pittstateconnect.edu" aria-label="Email Support" class="hover:text-gold">Support</a>
+    </div>
   </footer>
 
+  <!-- Scroll-to-Top Button -->
+  <button id="scrollTopBtn" title="Back to top" class="hidden fixed bottom-20 right-4 bg-gold text-black rounded-full w-10 h-10 font-bold shadow-md hover:bg-yellow-400 transition">
+    ↑
+  </button>
+
+  <!-- Dark Mode Toggle -->
+  <button id="theme-toggle" title="Toggle Dark Mode">☀️</button>
+
+  <!-- Scripts -->
   <script>
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-      const menu = document.getElementById("mobile-menu");
-      menu.classList.toggle("hidden");
+    // -------------------------------
+    // Mobile Menu Toggle
+    // -------------------------------
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+    menuToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // -------------------------------
+    // Scroll-to-Top Button
+    // -------------------------------
+    const scrollBtn = document.getElementById("scrollTopBtn");
+    window.addEventListener("scroll", () => {
+      if (document.documentElement.scrollTop > 200) {
+        scrollBtn.classList.remove("hidden");
+      } else {
+        scrollBtn.classList.add("hidden");
+      }
+    });
+    scrollBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // -------------------------------
+    // Dark Mode Toggle
+    // -------------------------------
+    const toggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    // Load saved theme
+    if (localStorage.getItem("theme") === "dark") {
+      body.classList.add("dark");
+      toggle.textContent = "🌙";
+    }
+
+    toggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+      const isDark = body.classList.contains("dark");
+      toggle.textContent = isDark ? "🌙" : "☀️";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
     });
   </script>
+
 </body>
 </html>
