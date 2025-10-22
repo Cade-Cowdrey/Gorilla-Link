@@ -1,0 +1,24 @@
+<!-- =========================================================
+FILE: src/templates/scholarships/essay_helper.html
+========================================================= -->
+{% extends "base.html" %}
+{% block title %}Essay Helper · PittState-Connect{% endblock %}
+{% block content %}
+<section class="section max-w-4xl mx-auto px-6 fade-in">
+  <h1 class="text-3xl font-bold mb-6">Essay Helper</h1>
+  <form method="post" class="card p-6 space-y-5">
+    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Prompt or Draft</label>
+    <textarea name="prompt" rows="8" required
+      class="w-full p-3 rounded border border-gray-300 dark:border-gray-700"
+      placeholder="Paste your essay prompt or draft here..."></textarea>
+    <button class="btn btn-crimson w-full">Get Suggestions</button>
+  </form>
+
+  {% if suggestions %}
+  <div class="card p-6 mt-6 bg-gray-50 dark:bg-gray-800">
+    <h3 class="text-xl font-semibold mb-2">Suggestions (AI Placeholder)</h3>
+    <pre class="whitespace-pre-wrap text-gray text-sm">{{ suggestions }}</pre>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
