@@ -1,12 +1,53 @@
+# ============================================================
+# PittState-Connect | Flask Web App
+# ============================================================
+
+# --- Core Framework ---
 Flask==3.0.3
+Werkzeug==3.0.3
+Jinja2==3.1.4
+itsdangerous==2.2.0
+
+# --- Database + ORM ---
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.30
+Flask-Migrate==4.0.5
+alembic==1.13.2
+
+# --- Authentication + Login ---
 Flask-Login==0.6.3
+
+# --- Email + Notifications ---
 Flask-Mail==0.9.1
-Flask-Migrate==4.0.7
-Flask-Caching==2.3.0
-SQLAlchemy==2.0.32
-psycopg2-binary==2.9.9
-redis==5.0.8
-boto3==1.35.1
+sendgrid==6.11.0
+
+# --- CORS + Security ---
+Flask-Cors==4.0.1
+
+# --- Performance Enhancements ---
+Flask-Compress==1.15
+gunicorn==22.0.0
+
+# --- Utilities ---
 python-dotenv==1.0.1
 requests==2.32.3
+
+# --- AI / Optional Enhancements (stub-ready) ---
+openai==1.47.0
+
+# --- Time, Dates, Formatting ---
+pytz==2024.1
+humanize==4.9.0
+
+# --- Optional Admin Tools ---
+Flask-Admin==1.6.1
+
+# --- Optional Data Serialization ---
+marshmallow==3.21.2
+Flask-Marshmallow==0.15.0
+
+# --- For Development / Local Testing ---
+Flask-DebugToolbar==0.14.1
+
+# --- Render / Production ---
 gunicorn==22.0.0
