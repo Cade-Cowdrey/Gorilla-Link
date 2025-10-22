@@ -1,84 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Career Hub | PittState-Connect{% endblock %}
 {% block content %}
-
-<!-- 🔺 HEADER SECTION -->
-<section class="text-center mb-10">
-  <h1 class="text-3xl font-heading font-bold text-psu-crimson dark:text-psu-gold">Career Hub</h1>
-  <p class="text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">
-    Discover internships, jobs, and employer connections designed to launch your Gorilla career.
+<section class="max-w-6xl mx-auto px-6 py-16">
+  <h1 class="text-4xl font-bold text-crimson mb-6 text-center">Career Pathways at PSU</h1>
+  <p class="text-gray-700 text-center max-w-2xl mx-auto mb-10">
+    Explore internships, jobs, and employer connections powered by the GorillaLink ecosystem.
   </p>
-</section>
 
-<!-- 🔍 FILTERS -->
-<section class="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
-  <h2 class="text-lg font-semibold mb-4 text-psu-crimson dark:text-psu-gold">Filter Opportunities</h2>
-  <form method="GET" action="{{ url_for('careers.dashboard') }}" class="grid md:grid-cols-3 gap-4">
-    <select name="department" class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-      <option value="">All Departments</option>
-      <option>Business</option>
-      <option>Engineering</option>
-      <option>Education</option>
-      <option>Technology</option>
-    </select>
-    <select name="type" class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-      <option value="">All Types</option>
-      <option>Internship</option>
-      <option>Full-Time</option>
-      <option>Part-Time</option>
-      <option>Remote</option>
-    </select>
-    <input type="text" name="location" placeholder="Search by location..."
-           class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-    <button type="submit" class="btn btn-crimson md:col-span-3 w-full md:w-auto">Search</button>
-  </form>
-</section>
-
-<!-- 💼 FEATURED JOBS -->
-<section class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-  {% for job in featured_jobs or [] %}
-  <div class="card hover:shadow-gold animate-fadeIn">
-    <div class="flex justify-between items-center mb-2">
-      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">{{ job.title }}</h3>
-      <span class="badge">{{ job.type }}</span>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="bg-white p-6 rounded-2xl shadow-md">
+      <h3 class="text-xl font-semibold text-crimson mb-2">Internships</h3>
+      <p class="text-gray-600">Gain hands-on experience with top employers across Kansas and beyond.</p>
     </div>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ job.company }}</p>
-    <p class="text-xs text-gray-500 dark:text-gray-400">{{ job.location }}</p>
-    <p class="text-sm mt-3 text-gray-700 dark:text-gray-200 line-clamp-3">{{ job.description[:120] }}...</p>
-    <a href="{{ url_for('careers.view_job', job_id=job.id) }}" class="btn btn-gold mt-4 w-full">View Details</a>
-  </div>
-  {% else %}
-  <p class="col-span-full text-center text-gray-500 dark:text-gray-400">No featured jobs found.</p>
-  {% endfor %}
-</section>
-
-<!-- 🌟 EMPLOYER SPOTLIGHT -->
-<section class="bg-gradient-to-r from-psu-crimson to-psu-gold text-white rounded-xl p-8 mb-12 shadow-gold">
-  <h2 class="text-2xl font-bold mb-3">Employer Spotlight</h2>
-  <p class="max-w-2xl mb-4">
-    Pitt State partners with leading employers to help Gorillas gain hands-on experience and competitive opportunities.
-  </p>
-  <div class="grid md:grid-cols-3 gap-6">
-    {% for employer in spotlight_employers or [] %}
-    <div class="bg-white text-psu-charcoal p-5 rounded-lg shadow-md hover:shadow-gold transition">
-      <h3 class="font-semibold text-lg">{{ employer.name }}</h3>
-      <p class="text-sm mt-1 text-gray-600">{{ employer.industry }}</p>
-      <a href="{{ employer.website }}" target="_blank" class="btn btn-crimson mt-3 w-full">Visit Site</a>
+    <div class="bg-white p-6 rounded-2xl shadow-md">
+      <h3 class="text-xl font-semibold text-crimson mb-2">Full-Time Roles</h3>
+      <p class="text-gray-600">Find your next professional step through verified PSU-friendly employers.</p>
     </div>
-    {% else %}
-    <p class="col-span-full text-gray-800">No spotlight employers available right now.</p>
-    {% endfor %}
+    <div class="bg-white p-6 rounded-2xl shadow-md">
+      <h3 class="text-xl font-semibold text-crimson mb-2">Career Resources</h3>
+      <p class="text-gray-600">Get resume, interview, and networking guidance from PSU mentors and alumni.</p>
+    </div>
   </div>
 </section>
-
-<!-- 📈 CAREER INSIGHTS CTA -->
-<section class="text-center py-10 border-t border-gray-200 dark:border-gray-700">
-  <h2 class="text-2xl font-heading font-bold mb-2 text-psu-crimson dark:text-psu-gold">Track Your Career Growth</h2>
-  <p class="text-gray-500 dark:text-gray-300 mb-6">
-    Use your analytics dashboard to view job applications, saved positions, and upcoming interviews.
-  </p>
-  <a href="{{ url_for('analytics.dashboard') }}" 
-     class="btn btn-gold font-semibold animate-pulseGold">Go to Analytics Dashboard</a>
-</section>
-
 {% endblock %}
