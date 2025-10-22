@@ -1,10 +1,20 @@
 # =============================================================
 # FILE: blueprints/core/routes.py
-# PittState-Connect — Core Blueprint
-# Handles main site pages: Home, About, Mission, and fallback routes.
+# Core pages: home, about, contact, ping, and 404 fallback.
+# Handles PSU branding, SmartMatch overview, and contact form.
 # =============================================================
 
-from flask import Blueprint, render_template, current_app, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    current_app,
+    redirect,
+    url_for,
+    request,
+    flash,
+)
+from utils.mail_util import send_email
+from models import db, ContactMessage
 
 core_bp = Blueprint("core_bp", __name__, url_prefix="")
 
@@ -33,51 +43,57 @@ def home():
 # -------------------------------------------------------------
 @core_bp.route("/about")
 def about():
-    """Overview of how PittState-Connect works."""
     overview = {
         "title": "How PittState-Connect Works",
         "intro": "A unified digital ecosystem for PSU students, alumni, and employers.",
-        "sections": [
-            {
-                "title": "For Students",
-                "points": [
-                    "AI-powered scholarship SmartMatch recommender.",
-                    "Auto reminders and deadline tracking dashboard.",
-                    "Career analytics and funding progress visualization.",
-                ],
-            },
-            {
-                "title": "For Alumni",
-                "points": [
-                    "Reconnect with your department and mentor students.",
-                    "Feature on the Gorilla Scholars leaderboard.",
-                    "Contribute to scholarship and donor campaigns.",
-                ],
-            },
-            {
-                "title": "For Employers",
-                "points": [
-                    "Post verified jobs, internships, and sponsorships.",
-                    "Gain access to PSU student and alumni pipelines.",
-                    "Partner through the Gorilla Network to recruit top talent.",
-                ],
-            },
-        ],
     }
     return render_template("core/about.html", overview=overview)
 
 
 # -------------------------------------------------------------
-# CONTACT / MISC
+# CONTACT PAGE (GET + POST)
 # -------------------------------------------------------------
-@core_bp.route("/contact")
+@core_bp.route("/contact", methods=["GET", "POST"])
 def contact():
-    """Optional Contact page placeholder."""
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        subject = request.form.get("subject", "No subject").strip()
+        message = request.form.get("message", "").strip()
+
+        if not all([name, email, message]):
+            flash("❌ Please fill out all fields before submitting.", "danger")
+            return redirect(url_for("core_bp.contact"))
+
+        # Save message to DB
+        new_msg = ContactMessage(
+            name=name,
+            email=email,
+            subject=subject,
+            message=message,
+        )
+        db.session.add(new_msg)
+        db.session.commit()
+
+        # Send notification email to admin
+        try:
+            send_email(
+                subject=f"[PittState-Connect] {subject}",
+                recipients=["admin@pittstateconnect.edu"],
+                body=f"New message from {name} <{email}>:\n\n{message}",
+            )
+            flash("✅ Your message has been sent successfully!", "success")
+        except Exception as e:
+            current_app.logger.error(f"Mail send failed: {e}")
+            flash("⚠️ Message saved but email failed to send.", "warning")
+
+        return redirect(url_for("core_bp.contact"))
+
     return render_template("core/contact.html")
 
 
 # -------------------------------------------------------------
-# HEALTH CHECK / DIAGNOSTIC
+# HEALTH CHECK
 # -------------------------------------------------------------
 @core_bp.route("/ping")
 def ping():
@@ -85,10 +101,9 @@ def ping():
 
 
 # -------------------------------------------------------------
-# FALLBACK REDIRECT
+# GLOBAL 404 FALLBACK
 # -------------------------------------------------------------
 @core_bp.app_errorhandler(404)
 def not_found(e):
-    """Redirects any invalid route to home for smoother UX."""
-    current_app.logger.warning(f"404 on path redirected to home: {e}")
+    current_app.logger.warning(f"404 redirected: {e}")
     return redirect(url_for("core_bp.home"))
