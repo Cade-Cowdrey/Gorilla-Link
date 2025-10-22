@@ -2,22 +2,49 @@ services:
   - type: web
     name: pittstate-connect
     env: python
+    plan: standard
+    autoDeploy: true
+
     buildCommand: |
+      echo "🔧 Installing Python dependencies..."
+      pip install --upgrade pip
       pip install -r requirements.txt
+      echo "🎨 Building Tailwind PSU theme..."
       npx tailwindcss -i ./static/css/psu-theme.css -o ./static/css/output.css --minify
-    startCommand: gunicorn app_pro:app
+      echo "✅ Tailwind build complete!"
+
+    startCommand: |
+      echo "🚀 Starting PittState-Connect..."
+      gunicorn app_pro:app --workers=3 --timeout 120
+
     envVars:
+      # ─────────────── Python/Flask Config ───────────────
       - key: PYTHON_VERSION
         value: 3.10.13
       - key: FLASK_ENV
         value: production
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: CLOUD_BUCKET_URL
-        sync: false
       - key: SECRET_KEY
         generateValue: true
+
+      # ─────────────── Database + Cache ───────────────
+      - key: DATABASE_URL
+        sync: false   # Provided by your Render PostgreSQL add-on
+      - key: REDIS_URL
+        sync: false   # Provided by your Render Redis add-on
+
+      # ─────────────── Email / API Integrations ───────────────
+      - key: SENDGRID_API_KEY
+        sync: false   # Use your SendGrid key for transactional emails
+      - key: CLOUD_BUCKET_URL
+        sync: false   # Cloud storage (S3, GCS, or Render Disk)
+
+      # ─────────────── Analytics / Environment ───────────────
+      - key: FLASK_APP
+        value: app_pro.py
+      - key: TZ
+        value: America/Chicago
+
+    disk:
+      name: static-cache
+      mountPath: /opt/render/project/src/static/cache
+      sizeGB: 1
