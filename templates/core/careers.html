@@ -1,68 +1,84 @@
 {% extends "base.html" %}
-{% block title %}Careers | PittState-Connect{% endblock %}
+{% block title %}Career Hub | PittState-Connect{% endblock %}
 {% block content %}
 
-<!-- Hero Section -->
-<section class="hero">
-  <div class="container text-center">
-    <img
-      src="{{ url_for('static', filename='images/psu_logo_large.png') }}"
-      alt="Pitt State Logo"
-      width="120"
-      style="margin-bottom: 20px;"
-    />
-    <h1 style="font-size: 2.4rem; margin-bottom: 10px;">Launch Your Future</h1>
-    <p style="font-size: 1.1rem; opacity: 0.95;">
-      Connect with employers, alumni, and opportunities designed for every Gorilla.
-    </p>
-    <a href="{{ url_for('auth.register') }}" class="psu-btn" style="margin-top: 25px;">
-      Get Started Today
-    </a>
-  </div>
-</section>
-
-<!-- Intro Section -->
-<section class="section">
-  <div class="container" style="max-width: 900px; margin: auto;">
-    <h2>Career Development at PittState-Connect</h2>
-    <p style="line-height: 1.7;">
-      PittState-Connect bridges the gap between <strong>students, alumni, and employers</strong> by creating a
-      centralized ecosystem for professional growth. Whether you’re exploring internships, full-time
-      positions, or mentorships — the PittState-Connect platform helps you connect directly with verified
-      partners who value the Gorilla spirit.
-    </p>
-  </div>
-</section>
-
-<!-- Features Section -->
-<section class="section" style="background-color: #fafafa;">
-  <div class="container" style="max-width: 1000px; margin: auto;">
-    <h2 style="text-align: center;">What You Can Do</h2>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px;">
-      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h3 style="color: var(--psu-crimson);">🎓 Student Opportunities</h3>
-        <p>Discover internships, on-campus roles, and employer programs built for PSU students.</p>
-      </div>
-      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h3 style="color: var(--psu-crimson);">🦍 Alumni Network</h3>
-        <p>Connect with alumni mentors ready to offer career guidance and open doors across industries.</p>
-      </div>
-      <div class="feature-card" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h3 style="color: var(--psu-crimson);">💼 Employer Partnerships</h3>
-        <p>Hire skilled PSU talent or post internships, events, and scholarships directly to our community.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Call to Action -->
-<section class="section text-center">
-  <h2>Join PittState-Connect</h2>
-  <p style="max-width: 700px; margin: 0 auto 20px auto;">
-    Be part of the Gorilla legacy — where connections create careers, and success begins with community.
+<!-- 🔺 HEADER SECTION -->
+<section class="text-center mb-10">
+  <h1 class="text-3xl font-heading font-bold text-psu-crimson dark:text-psu-gold">Career Hub</h1>
+  <p class="text-gray-600 dark:text-gray-300 mt-2 max-w-2xl mx-auto">
+    Discover internships, jobs, and employer connections designed to launch your Gorilla career.
   </p>
-  <a href="{{ url_for('auth.register') }}" class="psu-btn">Create Your Account</a>
+</section>
+
+<!-- 🔍 FILTERS -->
+<section class="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-smooth p-6">
+  <h2 class="text-lg font-semibold mb-4 text-psu-crimson dark:text-psu-gold">Filter Opportunities</h2>
+  <form method="GET" action="{{ url_for('careers.dashboard') }}" class="grid md:grid-cols-3 gap-4">
+    <select name="department" class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+      <option value="">All Departments</option>
+      <option>Business</option>
+      <option>Engineering</option>
+      <option>Education</option>
+      <option>Technology</option>
+    </select>
+    <select name="type" class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+      <option value="">All Types</option>
+      <option>Internship</option>
+      <option>Full-Time</option>
+      <option>Part-Time</option>
+      <option>Remote</option>
+    </select>
+    <input type="text" name="location" placeholder="Search by location..."
+           class="p-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+    <button type="submit" class="btn btn-crimson md:col-span-3 w-full md:w-auto">Search</button>
+  </form>
+</section>
+
+<!-- 💼 FEATURED JOBS -->
+<section class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+  {% for job in featured_jobs or [] %}
+  <div class="card hover:shadow-gold animate-fadeIn">
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="text-lg font-semibold text-psu-crimson dark:text-psu-gold">{{ job.title }}</h3>
+      <span class="badge">{{ job.type }}</span>
+    </div>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ job.company }}</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400">{{ job.location }}</p>
+    <p class="text-sm mt-3 text-gray-700 dark:text-gray-200 line-clamp-3">{{ job.description[:120] }}...</p>
+    <a href="{{ url_for('careers.view_job', job_id=job.id) }}" class="btn btn-gold mt-4 w-full">View Details</a>
+  </div>
+  {% else %}
+  <p class="col-span-full text-center text-gray-500 dark:text-gray-400">No featured jobs found.</p>
+  {% endfor %}
+</section>
+
+<!-- 🌟 EMPLOYER SPOTLIGHT -->
+<section class="bg-gradient-to-r from-psu-crimson to-psu-gold text-white rounded-xl p-8 mb-12 shadow-gold">
+  <h2 class="text-2xl font-bold mb-3">Employer Spotlight</h2>
+  <p class="max-w-2xl mb-4">
+    Pitt State partners with leading employers to help Gorillas gain hands-on experience and competitive opportunities.
+  </p>
+  <div class="grid md:grid-cols-3 gap-6">
+    {% for employer in spotlight_employers or [] %}
+    <div class="bg-white text-psu-charcoal p-5 rounded-lg shadow-md hover:shadow-gold transition">
+      <h3 class="font-semibold text-lg">{{ employer.name }}</h3>
+      <p class="text-sm mt-1 text-gray-600">{{ employer.industry }}</p>
+      <a href="{{ employer.website }}" target="_blank" class="btn btn-crimson mt-3 w-full">Visit Site</a>
+    </div>
+    {% else %}
+    <p class="col-span-full text-gray-800">No spotlight employers available right now.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 📈 CAREER INSIGHTS CTA -->
+<section class="text-center py-10 border-t border-gray-200 dark:border-gray-700">
+  <h2 class="text-2xl font-heading font-bold mb-2 text-psu-crimson dark:text-psu-gold">Track Your Career Growth</h2>
+  <p class="text-gray-500 dark:text-gray-300 mb-6">
+    Use your analytics dashboard to view job applications, saved positions, and upcoming interviews.
+  </p>
+  <a href="{{ url_for('analytics.dashboard') }}" 
+     class="btn btn-gold font-semibold animate-pulseGold">Go to Analytics Dashboard</a>
 </section>
 
 {% endblock %}
