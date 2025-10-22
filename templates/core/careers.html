@@ -1,23 +1,29 @@
+<!-- =========================================================
+FILE: src/templates/core/careers.html
+(Note: Optional marketing page. Main dashboard lives at /careers/)
+========================================================= -->
 {% extends "base.html" %}
+{% block title %}Career Pathways · PittState-Connect{% endblock %}
 {% block content %}
-<section class="max-w-6xl mx-auto px-6 py-16">
-  <h1 class="text-4xl font-bold text-crimson mb-6 text-center">Career Pathways at PSU</h1>
-  <p class="text-gray-700 text-center max-w-2xl mx-auto mb-10">
-    Explore internships, jobs, and employer connections powered by the GorillaLink ecosystem.
-  </p>
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <h1 class="text-4xl font-bold mb-4">Career Pathways</h1>
+  <p class="text-gray mb-8">Explore internships, full-time roles, and PSU employer partners.</p>
 
-  <div class="grid md:grid-cols-3 gap-8">
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h3 class="text-xl font-semibold text-crimson mb-2">Internships</h3>
-      <p class="text-gray-600">Gain hands-on experience with top employers across Kansas and beyond.</p>
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Internships</h3>
+      <p class="text-gray mb-3">Gain hands-on experience with PSU-friendly employers.</p>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="text-crimson hover:text-gold">Open dashboard →</a>
     </div>
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h3 class="text-xl font-semibold text-crimson mb-2">Full-Time Roles</h3>
-      <p class="text-gray-600">Find your next professional step through verified PSU-friendly employers.</p>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Full-Time</h3>
+      <p class="text-gray mb-3">Discover roles aligned to your major and interests.</p>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="text-crimson hover:text-gold">Find roles →</a>
     </div>
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h3 class="text-xl font-semibold text-crimson mb-2">Career Resources</h3>
-      <p class="text-gray-600">Get resume, interview, and networking guidance from PSU mentors and alumni.</p>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Resources</h3>
+      <p class="text-gray mb-3">Resume feedback, mock interviews, and alumni tips.</p>
+      <a href="{{ url_for('careers_bp.dashboard') }}" class="text-crimson hover:text-gold">Open resources →</a>
     </div>
   </div>
 </section>
