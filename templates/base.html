@@ -1,53 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
+      x-bind:class="{ 'dark': darkMode }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}PittState-Connect{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static', filename='img/psu-logo.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-light text-psu-charcoal">
-  <header class="bg-psu-crimson text-white shadow-md">
+
+<body class="bg-light text-psu-charcoal dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- 🌟 HEADER / NAVBAR -->
+  <header class="bg-psu-crimson text-white dark:bg-gray-800 shadow-md transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
       <a href="{{ url_for('core.home') }}" class="flex items-center space-x-2">
         <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="h-10 w-10">
         <span class="font-heading text-xl font-semibold">PittState-Connect</span>
       </a>
-      <nav class="space-x-4 hidden md:block">
-        <a href="{{ url_for('careers.dashboard') }}" class="hover:text-psu-gold">Careers</a>
-        <a href="{{ url_for('scholarships.dashboard') }}" class="hover:text-psu-gold">Scholarships</a>
-        <a href="{{ url_for('events.dashboard') }}" class="hover:text-psu-gold">Events</a>
-        <a href="{{ url_for('alumni.dashboard') }}" class="hover:text-psu-gold">Alumni</a>
-        <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold">Team</a>
+
+      <nav class="hidden md:flex space-x-6 font-medium">
+        <a href="{{ url_for('careers.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Careers</a>
+        <a href="{{ url_for('scholarships.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Scholarships</a>
+        <a href="{{ url_for('events.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Events</a>
+        <a href="{{ url_for('alumni.dashboard') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Alumni</a>
+        <a href="{{ url_for('core.team') }}" class="hover:text-psu-gold dark:hover:text-psu-gold">Team</a>
       </nav>
-      <div class="flex items-center space-x-2">
+
+      <div class="flex items-center space-x-3">
+        <!-- 🌙 Dark Mode Toggle -->
+        <button @click="darkMode = !darkMode"
+                class="p-2 rounded-lg bg-psu-gold text-psu-charcoal hover:bg-psu-crimson hover:text-white dark:bg-gray-700 dark:hover:bg-psu-gold dark:hover:text-gray-900 transition-all">
+          <template x-if="darkMode">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M21.752 15.002A9.718 9.718 0 0112 21c-5.523 0-10-4.477-10-10 0-4.97 3.637-9.09 8.444-9.878a.75.75 0 01.898.94 7.5 7.5 0 009.98 9.94.75.75 0 01.43.94z"/>
+            </svg>
+          </template>
+          <template x-if="!darkMode">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M12 3v1m0 16v1m8.485-9.485h1M3.515 12.515h1M16.95 7.05l.707.707M6.343 17.657l.707.707M16.95 16.95l.707-.707M6.343 6.343l.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/>
+            </svg>
+          </template>
+        </button>
+
         {% if current_user.is_authenticated %}
-          <a href="{{ url_for('auth.logout') }}" class="btn btn-gold">Logout</a>
+          <a href="{{ url_for('auth.logout') }}"
+             class="btn btn-gold dark:btn-crimson">Logout</a>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-crimson">Login</a>
+          <a href="{{ url_for('auth.login') }}"
+             class="btn btn-crimson dark:btn-gold">Login</a>
         {% endif %}
       </div>
     </div>
   </header>
 
+  <!-- 🧱 MAIN CONTENT -->
   <main class="max-w-7xl mx-auto px-4 py-6">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, msg in messages %}
-          <div class="my-3 p-3 rounded-md text-center
-            {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'error' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+          <div class="my-3 p-3 rounded-md text-center transition-colors duration-300
+            {% if category == 'success' %}
+              bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+            {% elif category == 'error' %}
+              bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+            {% else %}
+              bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+            {% endif %}">
             {{ msg }}
           </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="bg-psu-charcoal text-gray-200 mt-12 py-6 text-center">
-    <p class="text-sm">© {{ now().year }} Pittsburg State University. All Rights Reserved.</p>
+  <!-- ⚓ FOOTER -->
+  <footer class="bg-psu-charcoal text-gray-200 dark:bg-gray-800 mt-12 py-6 text-center transition-colors duration-300">
+    <p class="text-sm">© {{ now().year }} Pittsburg State University · Built for Gorillas 🦍</p>
   </footer>
 </body>
 </html>
