@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Notifications | PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     🔔 NOTIFICATION CENTER
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Notification Center</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-8">
+    Stay updated on scholarships, job postings, messages, and event alerts.
+  </p>
+  <a href="{{ url_for('notifications_bp.mark_all_read') }}" class="btn btn-gold">Mark All as Read</a>
+</section>
+
+<!-- ============================================================
+     📢 NOTIFICATION FEED
+============================================================ -->
+<section class="section-light py-16 fade-in">
+  <div class="max-w-4xl mx-auto space-y-6">
+    {% for note in notifications %}
+    <div class="card p-6 flex items-start space-x-4 {% if not note.read %}border-l-4 border-gold{% endif %}">
+      <div class="text-3xl">{{ note.icon or "🔔" }}</div>
+      <div class="flex-1">
+        <h3 class="font-heading text-crimson text-lg mb-1">{{ note.title }}</h3>
+        <p class="text-gray mb-1">{{ note.message }}</p>
+        <p class="text-sm text-gray">Received: {{ note.timestamp.strftime('%b %d, %Y %I:%M %p') }}</p>
+      </div>
+      {% if not note.read %}
+      <a href="{{ url_for('notifications_bp.mark_read', id=note.id) }}" class="btn btn-crimson text-xs px-3 py-1">Mark Read</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center text-gray">No notifications at this time.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============================================================
+     📈 INSIGHT SUMMARY
+============================================================ -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Highlights</h2>
+  <p class="text-white max-w-2xl mx-auto mb-6">
+    Here’s what’s new across your PittState-Connect account.
+  </p>
+  <ul class="list-disc text-left max-w-md mx-auto text-gray space-y-2">
+    <li><strong>{{ insights.unread_messages or 0 }}</strong> unread messages</li>
+    <li><strong>{{ insights.upcoming_events or 0 }}</strong> upcoming events</li>
+    <li><strong>{{ insights.new_jobs or 0 }}</strong> new job opportunities</li>
+  </ul>
+</section>
+{% endblock %}
