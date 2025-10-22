@@ -1,253 +1,191 @@
 # seed_pittstate_connect.py
-# -------------------------------------------------------------
-# Populates the PittState-Connect database with PSU-themed demo data.
-# Safe for testing and UI previews.
-# -------------------------------------------------------------
+"""
+Seeds PittState-Connect with realistic PSU data.
+Creates departments, roles, users, alumni, faculty, students,
+companies, jobs, scholarships, donors, and connections.
+"""
 
 from datetime import datetime, timedelta, date
 from faker import Faker
 import random
-from extensions import db
-from models import *
+from models import (
+    db, Role, Department, User, Student, Alumni, Faculty,
+    Company, AlumniEmployment, Scholarship, ScholarshipApplication,
+    Donor, Donation, Job, Event, Group, Connection,
+    Mentorship, Badge, Opportunity, Story, UserAnalytics, DailyStats
+)
+from app_pro import create_app
 
 fake = Faker()
+app = create_app()
 
-def seed_all():
-    print("🌱 Starting PSU demo data seed...")
+with app.app_context():
+    db.drop_all()
+    db.create_all()
 
-    # ---------------------------------------------
-    # Roles
-    # ---------------------------------------------
-    roles = ["Admin", "Student", "Alumni", "Faculty", "Employer", "Donor"]
-    for r in roles:
-        if not Role.query.filter_by(name=r).first():
-            db.session.add(Role(name=r, description=f"{r} role"))
-    db.session.commit()
+    print("🌾 Seeding roles...")
+    roles = {
+        "student": Role(slug="student", name="Student"),
+        "alumni": Role(slug="alumni", name="Alumni"),
+        "faculty": Role(slug="faculty", name="Faculty"),
+        "admin": Role(slug="admin", name="Administrator")
+    }
+    db.session.add_all(roles.values())
 
-    # ---------------------------------------------
-    # Users
-    # ---------------------------------------------
-    demo_users = []
-    for i in range(1, 6):
-        student = User(
-            email=f"student{i}@pittstate.edu",
-            first_name=fake.first_name(),
-            last_name=fake.last_name(),
-            role=Role.query.filter_by(name="Student").first(),
-            verified=True,
-        )
-        student.set_password("password123")
-        demo_users.append(student)
-
-    for i in range(1, 4):
-        alumni = User(
-            email=f"alumni{i}@pittstate.edu",
-            first_name=fake.first_name(),
-            last_name=fake.last_name(),
-            role=Role.query.filter_by(name="Alumni").first(),
-            verified=True,
-        )
-        alumni.set_password("password123")
-        demo_users.append(alumni)
-
-    admin_user = User(
-        email="admin@pittstate.edu",
-        first_name="Gus",
-        last_name="Gorilla",
-        role=Role.query.filter_by(name="Admin").first(),
-        verified=True,
-    )
-    admin_user.set_password("adminpass")
-
-    db.session.add_all(demo_users + [admin_user])
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Departments & Faculty
-    # ---------------------------------------------
-    dept_names = [
-        "College of Technology",
-        "Kelce College of Business",
-        "College of Education",
-        "College of Arts & Sciences",
-        "School of Construction"
+    print("🏛️ Seeding departments...")
+    departments = [
+        Department(code="KELCE", name="Kelce College of Business", college="College of Business"),
+        Department(code="TECH", name="College of Technology", college="Technology & Workforce Learning"),
+        Department(code="EDUC", name="College of Education", college="Education"),
+        Department(code="ARTS", name="College of Arts & Sciences", college="Arts & Sciences"),
+        Department(code="NURS", name="School of Nursing", college="Health Sciences")
     ]
-    departments = []
-    for name in dept_names:
-        d = Department(name=name, building=fake.street_name(), phone=fake.phone_number(), website=f"https://www.pittstate.edu/{name.split()[0].lower()}")
-        departments.append(d)
     db.session.add_all(departments)
-    db.session.commit()
+    db.session.flush()
 
-    faculty_members = []
-    for d in departments:
-        for i in range(2):
-            f = Faculty(name=fake.name(), department=d, email=f"{fake.first_name().lower()}@pittstate.edu", title=random.choice(["Professor", "Advisor", "Coordinator"]))
-            faculty_members.append(f)
-    db.session.add_all(faculty_members)
-    db.session.commit()
+    print("👩‍🎓 Seeding users...")
+    users = []
+    for i in range(10):
+        dept = random.choice(departments)
+        role = random.choice(list(roles.values()))
+        u = User(
+            email=f"user{i}@pittstate.edu",
+            password_hash=fake.sha256(),
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            headline=f"Passionate {role.name.lower()} at PSU",
+            role=role,
+            department=dept,
+            bio=fake.paragraph(nb_sentences=3),
+            is_verified=True
+        )
+        users.append(u)
+    db.session.add_all(users)
+    db.session.flush()
 
-    # ---------------------------------------------
-    # Scholarships
-    # ---------------------------------------------
+    print("🎓 Students, Alumni, Faculty...")
+    for u in users:
+        if u.role.slug == "student":
+            db.session.add(Student(user=u, grad_year=2026, major="Business Administration", department=u.department))
+        elif u.role.slug == "alumni":
+            alumni = Alumni(
+                user=u, grad_year=2019, degree="B.S. in Marketing", current_title="Account Executive",
+                current_company="Watco", department=u.department
+            )
+            db.session.add(alumni)
+            db.session.flush()
+            db.session.add(AlumniEmployment(alumni=alumni, company_id=None, title="Sales Associate", is_current=True))
+        elif u.role.slug == "faculty":
+            db.session.add(Faculty(user=u, title="Assistant Professor", office="Room 214", department=u.department))
+
+    print("🏢 Seeding companies...")
+    companies = [
+        Company(name="Watco", website="https://www.watco.com", hq_city="Pittsburg", hq_state="KS"),
+        Company(name="Garmin", website="https://www.garmin.com", hq_city="Olathe", hq_state="KS"),
+        Company(name="Spirit AeroSystems", website="https://www.spiritaero.com", hq_city="Wichita", hq_state="KS"),
+        Company(name="H&R Block", website="https://www.hrblock.com", hq_city="Kansas City", hq_state="MO")
+    ]
+    db.session.add_all(companies)
+
+    print("💼 Seeding jobs...")
+    for i in range(5):
+        db.session.add(Job(
+            title=f"Internship {i + 1}",
+            description=fake.paragraph(nb_sentences=5),
+            company=random.choice(companies),
+            poster=random.choice(users),
+            location="Pittsburg, KS",
+            is_remote=random.choice([True, False])
+        ))
+
+    print("🎓 Seeding scholarships...")
     scholarships = []
     for i in range(5):
         s = Scholarship(
-            title=f"Pitt State Gorilla Scholarship {i+1}",
-            description=fake.paragraph(nb_sentences=3),
+            title=f"PSU Excellence Award {i + 1}",
+            description=fake.paragraph(nb_sentences=4),
             amount=random.randint(1000, 5000),
-            deadline=date.today() + timedelta(days=random.randint(30, 120)),
-            department=random.choice(dept_names),
-            is_active=True,
+            opens_on=date.today() - timedelta(days=15),
+            closes_on=date.today() + timedelta(days=45)
         )
         scholarships.append(s)
     db.session.add_all(scholarships)
-    db.session.commit()
+    db.session.flush()
 
-    # Scholarship Applications
-    for u in demo_users[:3]:
-        for s in random.sample(scholarships, 2):
-            app = ScholarshipApplication(user=u, scholarship=s, status=random.choice(["draft", "submitted", "awarded"]), progress=random.randint(20, 100))
-            db.session.add(app)
-    db.session.commit()
+    print("📝 Scholarship applications...")
+    for s in scholarships:
+        db.session.add(ScholarshipApplication(
+            scholarship=s,
+            applicant=random.choice(users),
+            essay_text=fake.paragraph(nb_sentences=6)
+        ))
 
-    # Essays
-    for u in demo_users[:2]:
-        e = Essay(user=u, title="My PSU Journey", content=fake.paragraph(nb_sentences=5))
-        db.session.add(e)
-    db.session.commit()
+    print("❤️ Seeding donors & donations...")
+    donors = [
+        Donor(name="Gorilla Alumni Foundation", organization="PSU Alumni", email="donor@psu.edu"),
+        Donor(name="Crawford County Bank", organization="Local Partner", email="ccbank@pittsburg.com")
+    ]
+    db.session.add_all(donors)
+    db.session.flush()
 
-    # ---------------------------------------------
-    # Groups & Messages
-    # ---------------------------------------------
-    group = Group(name="Gorilla Scholars", description="A community for top-performing PSU students.")
-    db.session.add(group)
-    db.session.commit()
+    for donor in donors:
+        db.session.add(Donation(donor=donor, amount=random.randint(2000, 10000), designated_scholarship=random.choice(scholarships)))
 
-    members = [GroupMember(group=group, user=u, role="member") for u in demo_users[:4]]
-    db.session.add_all(members)
-    db.session.commit()
-
-    for m in members:
-        msg = GroupMessage(group=group, sender=m.user, content=fake.sentence())
-        db.session.add(msg)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Mentorships
-    # ---------------------------------------------
-    for i in range(2):
-        mentor = random.choice(demo_users)
-        mentee = random.choice(demo_users)
-        if mentor.id != mentee.id:
-            mship = Mentorship(mentor=mentor, mentee=mentee, notes="Helping with career readiness and scholarships.")
-            db.session.add(mship)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Events
-    # ---------------------------------------------
-    events = []
-    for i in range(5):
-        ev = Event(
-            title=f"Gorilla Networking Night {i+1}",
-            date=date.today() + timedelta(days=i*7),
-            location=random.choice(["Overman Student Center", "Kelce Atrium", "Bicknell Center"]),
-            description="Meet with employers and alumni for professional development."
-        )
-        events.append(ev)
-    db.session.add_all(events)
-    db.session.commit()
-
-    for ev in events:
-        rsvp = EventRSVP(event=ev, user=random.choice(demo_users))
-        db.session.add(rsvp)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Badges
-    # ---------------------------------------------
+    print("🪙 Badges...")
     badges = [
-        Badge(slug="gorilla-scholar", name="Gorilla Scholar", description="Awarded for academic excellence."),
-        Badge(slug="community-champion", name="Community Champion", description="Active in PSU community initiatives."),
-        Badge(slug="career-leader", name="Career Leader", description="Demonstrated career engagement.")
+        Badge(slug="mentor", name="Peer Mentor", description="Helps guide students."),
+        Badge(slug="donor", name="Scholarship Donor", description="Contributed to student funding."),
+        Badge(slug="leader", name="Campus Leader", description="Active student leader."),
     ]
     db.session.add_all(badges)
-    db.session.commit()
 
-    for u in demo_users[:3]:
-        ub = UserBadge(user=u, badge=random.choice(badges), reason="For outstanding participation in PSU programs.")
-        db.session.add(ub)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Donors & Impact Stories
-    # ---------------------------------------------
-    donors = []
+    print("📅 Events...")
     for i in range(3):
-        d = Donor(name=fake.name(), organization=random.choice(["PSU Foundation", "Gorilla Pride Alumni", "Commerce Bank"]), contact_email=fake.email())
-        donors.append(d)
-    db.session.add_all(donors)
-    db.session.commit()
+        db.session.add(Event(
+            title=f"Career Fair {2025 + i}",
+            description="Connect with employers and PSU alumni.",
+            starts_at=datetime.utcnow() + timedelta(days=30 * (i + 1)),
+            ends_at=datetime.utcnow() + timedelta(days=30 * (i + 1), hours=2),
+            location="Student Center Ballroom",
+            organizer=random.choice(users)
+        ))
 
-    for d in donors:
-        donation = Donation(donor=d, amount=random.randint(1000, 10000), note="Supporting PSU scholarships.")
-        db.session.add(donation)
-    db.session.commit()
-
-    stories = []
-    for i in range(3):
-        story = ImpactStory(title=f"Gorilla Success Story {i+1}", body=fake.paragraph(nb_sentences=5), photo_url="https://www.pittstate.edu/_resources/images/psu-logo.png")
-        stories.append(story)
-    db.session.add_all(stories)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Opportunities
-    # ---------------------------------------------
-    for i in range(5):
-        opp = Opportunity(
-            title=f"Internship Opportunity {i+1}",
-            category=random.choice(["Internship", "Research", "Volunteer"]),
-            description=fake.paragraph(nb_sentences=3),
-            location="Pittsburg, KS",
-            deadline=date.today() + timedelta(days=random.randint(30, 90)),
-        )
-        db.session.add(opp)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Feed / Announcements
-    # ---------------------------------------------
-    for u in demo_users[:3]:
-        fitem = FeedItem(user=u, content="Excited to announce I’ve been accepted into the Gorilla Scholars program!")
-        db.session.add(fitem)
-    db.session.commit()
-
-    ann = Announcement(title="Welcome to PittState-Connect!", body="Explore scholarships, mentors, and alumni networks all in one place.", is_public=True)
-    db.session.add(ann)
-    db.session.commit()
-
-    # ---------------------------------------------
-    # Campus / Marketing / Emails
-    # ---------------------------------------------
-    locs = [
-        CampusLocation(name="Overman Student Center", latitude=37.3912, longitude=-94.7025, category="building"),
-        CampusLocation(name="Bicknell Family Center for the Arts", latitude=37.3921, longitude=-94.7041, category="building")
+    print("💬 Groups...")
+    groups = [
+        Group(name="Kelce Business Leaders", description="Network of Kelce business students.", owner=random.choice(users)),
+        Group(name="Tech Innovators", description="College of Technology student makerspace.", owner=random.choice(users))
     ]
-    db.session.add_all(locs)
+    db.session.add_all(groups)
+
+    print("🤝 Connections...")
+    for _ in range(10):
+        requester, addressee = random.sample(users, 2)
+        db.session.add(Connection(requester=requester, addressee=addressee, status="accepted"))
+
+    print("🎯 Mentorships...")
+    for _ in range(5):
+        mentor, mentee = random.sample(users, 2)
+        db.session.add(Mentorship(mentor=mentor, mentee=mentee, goals="Career advice and skill development."))
+
+    print("📖 Stories...")
+    for _ in range(3):
+        db.session.add(Story(
+            title=fake.sentence(nb_words=5),
+            body=fake.paragraph(nb_sentences=6),
+            author=random.choice(users)
+        ))
+
+    print("📈 User Analytics & Daily Stats...")
+    for u in users:
+        db.session.add(UserAnalytics(user=u, connections_count=random.randint(3, 10), posts_count=random.randint(1, 5)))
+
+    db.session.add(DailyStats(
+        stats_date=date.today(),
+        new_users=len(users),
+        new_connections=5,
+        new_posts=4,
+        new_events=2
+    ))
+
     db.session.commit()
-
-    for i in range(3):
-        lead = MarketingLead(email=fake.email(), name=fake.name(), source="landing_page")
-        db.session.add(lead)
-    db.session.commit()
-
-    print("✅ PSU demo seed complete.")
-
-
-if __name__ == "__main__":
-    from app_pro import create_app
-    app = create_app()
-    with app.app_context():
-        seed_all()
+    print("✅ PSU demo data seeded successfully!")
