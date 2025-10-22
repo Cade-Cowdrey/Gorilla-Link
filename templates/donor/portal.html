@@ -1,6 +1,65 @@
+<!-- =========================================================
+FILE: src/templates/donor/portal.html
+========================================================= -->
 {% extends "base.html" %}
-{% block title %}Donor Portal{% endblock %}
+{% block title %}Donor & Sponsorship Portal · PittState-Connect{% endblock %}
 {% block content %}
-<h2>Donor Portal</h2>
-<p>Alumni/employers can offer scholarships, sponsorships, and view impact stories.</p>
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+    <div>
+      <h1 class="text-4xl font-bold">Donor & Sponsorship Portal</h1>
+      <p class="text-gray mt-1">Fund scholarships, view impact, and manage visibility tiers.</p>
+    </div>
+    <div class="flex gap-3 mt-4 md:mt-0">
+      <a href="{{ url_for('scholarships_bp.index') }}" class="btn btn-gold">Fund Scholarships</a>
+      <a href="{{ url_for('analytics_bp.dashboard') }}" class="btn btn-crimson">View Impact</a>
+    </div>
+  </div>
+
+  <!-- Tiers -->
+  <div class="grid md:grid-cols-4 gap-6">
+    <div class="card p-6 text-center">
+      <h3 class="text-xl font-semibold mb-1">Bronze</h3>
+      <p class="text-gray text-sm">Logo on site & digest</p>
+      <p class="text-2xl font-bold mt-2">$1k+</p>
+      <button class="btn btn-crimson mt-3 w-full">Choose</button>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-xl font-semibold mb-1">Silver</h3>
+      <p class="text-gray text-sm">Bronze + feature in spotlight</p>
+      <p class="text-2xl font-bold mt-2">$5k+</p>
+      <button class="btn btn-crimson mt-3 w-full">Choose</button>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-xl font-semibold mb-1">Gold</h3>
+      <p class="text-gray text-sm">Silver + event signage</p>
+      <p class="text-2xl font-bold mt-2">$10k+</p>
+      <button class="btn btn-crimson mt-3 w-full">Choose</button>
+    </div>
+    <div class="card p-6 text-center">
+      <h3 class="text-xl font-semibold mb-1">Platinum</h3>
+      <p class="text-gray text-sm">Gold + custom program naming</p>
+      <p class="text-2xl font-bold mt-2">$25k+</p>
+      <button class="btn btn-crimson mt-3 w-full">Choose</button>
+    </div>
+  </div>
+
+  <!-- Impact & Recent Awards -->
+  <div class="grid md:grid-cols-2 gap-6 mt-8">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Recent Awards</h3>
+      <ul class="text-sm text-gray space-y-1">
+        <li>🎓 Engineering Leaders Award — $2,000 — Maria L.</li>
+        <li>🎓 First-Gen Scholars Fund — $1,500 — James T.</li>
+        <li>🎓 Business Excellence — $1,750 — Taylor R.</li>
+      </ul>
+    </div>
+    <div class="card p-6 bg-gray-50 dark:bg-gray-800">
+      <h3 class="text-xl font-semibold mb-2">Visibility & Impact</h3>
+      <p class="text-gray text-sm">Sponsor logos appear across scholarships hub, digest emails, and career pages based on tier.</p>
+      <a href="{{ url_for('emails_bp.digest_preview') }}" class="text-crimson hover:text-gold text-sm mt-2 inline-block">Preview Digest Placement →</a>
+    </div>
+  </div>
+</section>
 {% endblock %}
