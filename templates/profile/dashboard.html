@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Profile Dashboard | PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     👤 PROFILE DASHBOARD
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">My Dashboard</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-10">
+    Manage your PittState-Connect profile, scholarships, and career applications all in one place.
+  </p>
+</section>
+
+<!-- ============================================================
+     🪪 PROFILE OVERVIEW
+============================================================ -->
+<section class="section-light py-16 fade-in">
+  <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+    <!-- Profile Card -->
+    <div class="card p-6 text-center">
+      <img src="{{ user.profile_pic or url_for('static', filename='images/default-avatar.png') }}" 
+           alt="Profile Picture" class="w-28 h-28 mx-auto rounded-full mb-4 object-cover shadow-md">
+      <h2 class="text-2xl font-heading text-crimson">{{ user.full_name }}</h2>
+      <p class="text-gray text-sm mb-2">{{ user.major or 'Undeclared Major' }}</p>
+      <p class="text-gray text-sm mb-4">{{ user.role|capitalize }}</p>
+      <a href="{{ url_for('profile_bp.edit') }}" class="btn btn-gold">Edit Profile</a>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="card p-6 text-center">
+      <h3 class="text-xl font-heading text-crimson mb-3">My Stats</h3>
+      <ul class="text-gray space-y-2">
+        <li>Scholarships Applied: <strong>{{ stats.scholarships_applied or 5 }}</strong></li>
+        <li>Jobs Saved: <strong>{{ stats.jobs_saved or 3 }}</strong></li>
+        <li>Connections: <strong>{{ stats.connections or 42 }}</strong></li>
+      </ul>
+    </div>
+
+    <!-- Activity Summary -->
+    <div class="card p-6">
+      <h3 class="text-xl font-heading text-crimson mb-3">Recent Activity</h3>
+      <ul class="space-y-3 text-gray text-sm">
+        {% for log in activity %}
+        <li>🕓 {{ log.timestamp.strftime('%b %d') }} — {{ log.action }}</li>
+        {% else %}
+        <li>No recent activity.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     🎯 ACTION HUB
+============================================================ -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Action Hub</h2>
+  <p class="text-white mb-6 max-w-2xl mx-auto">
+    Continue your journey — explore scholarships, discover jobs, or check your analytics.
+  </p>
+  <div class="flex flex-wrap justify-center gap-4">
+    <a href="{{ url_for('scholarships_bp.dashboard') }}" class="btn btn-gold">Scholarships</a>
+    <a href="{{ url_for('careers_bp.dashboard') }}" class="btn btn-crimson">Careers</a>
+    <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-gold">Analytics</a>
+    <a href="{{ url_for('community_bp.feed') }}" class="btn btn-crimson">Community</a>
+  </div>
+</section>
+{% endblock %}
