@@ -3,6 +3,7 @@
 {% block content %}
 <section class="container py-5">
   <h2 class="fw-bold text-crimson mb-4">📬 Admin Inbox</h2>
+
   {% if messages %}
   <div class="table-responsive shadow-sm border rounded-3 bg-white">
     <table class="table table-hover align-middle mb-0">
@@ -10,17 +11,30 @@
         <tr>
           <th>Sender</th>
           <th>Subject</th>
-          <th>Message</th>
+          <th>Message Preview</th>
           <th>Received</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for msg in messages %}
         <tr>
-          <td><strong>{{ msg.name }}</strong><br><small>{{ msg.email }}</small></td>
-          <td>{{ msg.subject }}</td>
-          <td>{{ msg.message|truncate(100) }}</td>
+          <td>
+            <strong>{{ msg.name }}</strong><br>
+            <small>{{ msg.email }}</small>
+          </td>
+          <td>
+            <a href="{{ url_for('admin_bp.message_detail', message_id=msg.id) }}" class="text-decoration-none text-crimson fw-bold">
+              {{ msg.subject }}
+            </a>
+          </td>
+          <td>{{ msg.message|truncate(80) }}</td>
           <td><small>{{ msg.created_at.strftime('%b %d, %Y %I:%M %p') }}</small></td>
+          <td>
+            <form method="POST" action="{{ url_for('admin_bp.delete_message', message_id=msg.id) }}" onsubmit="return confirm('Delete this message?');">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -33,5 +47,6 @@
 
 <style>
   .table-crimson { background-color: #a6192e; }
+  .text-crimson { color: #a6192e; }
 </style>
 {% endblock %}
