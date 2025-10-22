@@ -1,8 +1,99 @@
 {% extends "base.html" %}
-{% block title %}Home · PittState-Connect{% endblock %}
+{% block title %}PittState-Connect | Home{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>Welcome to PittState-Connect</h1>
-  <p>Careers, Scholarships, Alumni, Analytics, Donor Portal — all in one place.</p>
+
+<!-- 🦍 HERO SECTION -->
+<section class="text-center mb-12 animate-fadeIn">
+  <div class="banner-psu">
+    <h1 class="text-3xl md:text-4xl font-heading font-bold">Welcome to PittState-Connect</h1>
+    <p class="text-base md:text-lg mt-2 text-white/90">
+      Your all-in-one gateway for <span class="font-semibold">Careers</span>, 
+      <span class="font-semibold">Scholarships</span>, 
+      <span class="font-semibold">Alumni</span>, and <span class="font-semibold">Campus Connections</span>.
+    </p>
+    <div class="mt-6">
+      <a href="{{ url_for('auth.register') }}" 
+         class="btn btn-gold font-semibold text-base">Join Now</a>
+      <a href="{{ url_for('auth.login') }}" 
+         class="btn btn-crimson font-semibold text-base ml-2">Login</a>
+    </div>
+  </div>
 </section>
+
+<!-- 🧱 FEATURE GRID -->
+<section class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-16">
+  <!-- Careers -->
+  <div class="card animate-fadeIn">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">🎯 Career Hub</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Explore internships, jobs, and employer connections built for Gorillas.
+    </p>
+    <a href="{{ url_for('careers.dashboard') }}" 
+       class="btn btn-crimson mt-4">Explore Careers</a>
+  </div>
+
+  <!-- Scholarships -->
+  <div class="card animate-fadeIn delay-75">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">💰 Scholarship Hub</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Find scholarships matched to your major, GPA, and goals — all in one place.
+    </p>
+    <a href="{{ url_for('scholarships.dashboard') }}" 
+       class="btn btn-gold mt-4">Find Scholarships</a>
+  </div>
+
+  <!-- Alumni -->
+  <div class="card animate-fadeIn delay-100">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">🤝 Alumni Network</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Connect with successful Gorillas worldwide and get real-world guidance.
+    </p>
+    <a href="{{ url_for('alumni.dashboard') }}" 
+       class="btn btn-crimson mt-4">View Alumni</a>
+  </div>
+
+  <!-- Departments -->
+  <div class="card animate-fadeIn delay-150">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">🏫 Departments</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Access departmental dashboards, faculty recommendations, and research highlights.
+    </p>
+    <a href="{{ url_for('departments.list_departments') }}" 
+       class="btn btn-gold mt-4">Browse Departments</a>
+  </div>
+
+  <!-- Analytics -->
+  <div class="card animate-fadeIn delay-200">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">📊 Analytics & Insights</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      See your scholarship progress, career metrics, and engagement analytics in real-time.
+    </p>
+    <a href="{{ url_for('analytics.dashboard') }}" 
+       class="btn btn-crimson mt-4">View Insights</a>
+  </div>
+
+  <!-- Campus Life -->
+  <div class="card animate-fadeIn delay-300">
+    <h2 class="text-xl font-semibold mb-2 text-psu-crimson dark:text-psu-gold">🎓 Campus Life</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Stay connected with PSU events, groups, and student stories — built for your journey.
+    </p>
+    <a href="{{ url_for('events.list_events') }}" 
+       class="btn btn-gold mt-4">View Events</a>
+  </div>
+</section>
+
+<!-- 🦍 CALL TO ACTION -->
+<section class="text-center py-10 border-t border-gray-200 dark:border-gray-700">
+  <h2 class="text-2xl font-heading font-bold mb-2 text-psu-crimson dark:text-psu-gold">
+    Empowering Gorillas, One Connection at a Time 🦍
+  </h2>
+  <p class="text-sm text-gray-500 dark:text-gray-300 mb-6">
+    Join thousands of PSU students and alumni who are building brighter futures together.
+  </p>
+  <a href="{{ url_for('auth.register') }}" class="btn btn-gold text-base font-semibold animate-pulseGold">
+    Get Started Today
+  </a>
+</section>
+
 {% endblock %}
