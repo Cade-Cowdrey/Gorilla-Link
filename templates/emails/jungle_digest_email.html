@@ -1,155 +1,68 @@
+<!-- =========================================================
+FILE: src/templates/emails/jungle_digest_email.html
+(Standalone email — DO NOT extend base.html)
+========================================================= -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weekly Faculty Digest | PittState-Connect</title>
-<style>
-  body {
-    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-    margin: 0;
-    padding: 0;
-  }
-  .email-container {
-    max-width: 640px;
-    margin: 0 auto;
-    background: #ffffff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  .header {
-    background: #c8102e;
-    color: #ffd700;
-    text-align: center;
-    padding: 24px;
-  }
-  .content {
-    padding: 30px;
-  }
-  h1, h2, h3 {
-    color: #c8102e;
-  }
-  a {
-    color: #c8102e;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .footer {
-    background: #f4f4f4;
-    text-align: center;
-    padding: 16px;
-    font-size: 13px;
-    color: #777;
-  }
-  .section {
-    margin-bottom: 32px;
-  }
-  .card {
-    background: #fafafa;
-    border-left: 4px solid #c8102e;
-    padding: 12px 16px;
-    margin: 10px 0;
-    border-radius: 6px;
-  }
-  /* Plain-text fallback separator */
-  pre.plaintext {
-    display: none;
-  }
-</style>
+  <meta charset="utf-8">
+  <title>Gorilla Digest</title>
+  <meta name="color-scheme" content="light only">
+  <style>
+    /* Email-safe styles only */
+    body { margin:0; padding:24px; background:#f7f7f7; font-family: Arial, sans-serif; }
+    .wrap { max-width:640px; margin:0 auto; background:#ffffff; border-radius:12px; padding:20px; }
+    .header { display:flex; align-items:center; gap:10px; }
+    .logo { width:28px; height:28px; }
+    .title { color:#a6192e; font-weight:700; font-size:20px; margin:0; }
+    .hr { border:0; border-top:1px solid #eee; margin:16px 0; }
+    .p { color:#333; line-height:1.6; font-size:14px; margin: 10px 0; }
+    .cta { display:inline-block; background:#ffb81c; color:#000; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:700; }
+    .card { background:#fafafa; border-radius:10px; padding:12px 14px; margin:10px 0; }
+    .small { color:#777; font-size:12px; }
+  </style>
 </head>
 <body>
-  <div class="email-container">
+  <div class="wrap">
     <div class="header">
-      <h1>📊 Weekly Faculty Digest</h1>
-      <p>PittState-Connect | Empowering Gorillas Everywhere</p>
+      <img class="logo" src="{{ base_url }}/static/img/psu_logo_square.png" alt="PSU">
+      <h1 class="title">Gorilla Digest</h1>
+    </div>
+    <hr class="hr">
+
+    <p class="p">Your weekly PSU opportunities: top scholarships, internships, and events.</p>
+
+    <!-- Scholarships -->
+    <div class="card">
+      <strong>🎓 Scholarships</strong>
+      <ul class="p" style="margin:8px 0 0 18px;">
+        <li>Engineering Leaders Award — due in 3 days</li>
+        <li>First-Gen Scholars Fund — due next week</li>
+      </ul>
+      <p class="p"><a class="cta" href="{{ base_url }}/scholarships">Open Scholarship Hub</a></p>
     </div>
 
-    <div class="content">
-      <p>Dear {{ user.first_name }},</p>
-      <p>Here’s your weekly PittState-Connect faculty digest featuring the latest campus updates, posts, and events.</p>
-
-      <div class="section">
-        <h2>📰 Recent Posts</h2>
-        {% for post in posts %}
-          <div class="card">
-            <strong>{{ post.user.first_name }} {{ post.user.last_name }}</strong> posted:<br>
-            <em>{{ post.content }}</em>
-          </div>
-        {% else %}
-          <p>No recent posts this week.</p>
-        {% endfor %}
-      </div>
-
-      <div class="section">
-        <h2>📅 Upcoming Events</h2>
-        {% for event in events %}
-          <div class="card">
-            <strong>{{ event.title }}</strong><br>
-            {{ event.date.strftime("%B %d, %Y") }} — {{ event.location or "TBA" }}<br>
-            <em>{{ event.description or "No description provided." }}</em>
-          </div>
-        {% else %}
-          <p>No upcoming events scheduled.</p>
-        {% endfor %}
-      </div>
-
-      <div class="section">
-        <h2>🏫 Department Highlights</h2>
-        <ul>
-          {% for dept in departments %}
-          <li><strong>{{ dept.name }}</strong>: {{ dept.description or "No updates available." }}</li>
-          {% else %}
-          <li>No department updates at this time.</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <p>Thank you for inspiring excellence across Pitt State!</p>
-      <p>🦍 <strong>The PittState-Connect Team</strong></p>
+    <!-- Careers -->
+    <div class="card">
+      <strong>💼 Careers</strong>
+      <ul class="p" style="margin:8px 0 0 18px;">
+        <li>Software Engineering Internship — Garmin</li>
+        <li>Marketing Analyst — Honeywell</li>
+      </ul>
+      <p class="p"><a class="cta" href="{{ base_url }}/careers">Visit Careers Dashboard</a></p>
     </div>
 
-    <div class="footer">
-      <p>© 2025 PittState-Connect | Powered by Gorilla-Link</p>
-      <p><a href="https://pittstateconnect.com">Visit the platform</a></p>
+    <!-- Events -->
+    <div class="card">
+      <strong>📅 Events</strong>
+      <ul class="p" style="margin:8px 0 0 18px;">
+        <li>Career Fair — Overman Center</li>
+        <li>Alumni Mixer — Block22</li>
+      </ul>
+      <p class="p"><a class="cta" href="{{ base_url }}/events">See All Events</a></p>
     </div>
+
+    <p class="small">© {{ current_year }} Pittsburg State University — PittState-Connect</p>
   </div>
-
-  <!-- Plain-text fallback version for email clients -->
-  <pre class="plaintext">
-Weekly Faculty Digest | PittState-Connect
------------------------------------------
-Dear {{ user.first_name }},
-
-Here’s your weekly PittState-Connect faculty digest.
-
-Recent Posts:
-{% for post in posts %}
-- {{ post.user.first_name }} {{ post.user.last_name }} posted: "{{ post.content }}"
-{% else %}
-- No recent posts this week.
-{% endfor %}
-
-Upcoming Events:
-{% for event in events %}
-- {{ event.title }} on {{ event.date.strftime("%B %d, %Y") }} at {{ event.location or "TBA" }} — {{ event.description or "No description." }}
-{% else %}
-- No upcoming events scheduled.
-{% endfor %}
-
-Department Highlights:
-{% for dept in departments %}
-- {{ dept.name }}: {{ dept.description or "No updates available." }}
-{% else %}
-- No department updates at this time.
-{% endfor %}
-
-Thank you for inspiring excellence across Pitt State!
-
-🦍 The PittState-Connect Team
-Visit us: https://pittstateconnect.com
-  </pre>
 </body>
 </html>
