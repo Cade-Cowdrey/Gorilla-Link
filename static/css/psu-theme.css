@@ -2,54 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom PSU Brand Styles */
+/* ────────────────────────────────────────────────
+   🎓 PSU BRAND THEME  (Light + Dark Mode)
+   ──────────────────────────────────────────────── */
 :root {
   --psu-crimson: #991B1E;
   --psu-gold: #FFC82E;
   --psu-charcoal: #2C2A29;
+  --psu-gray: #E5E5E5;
+  --psu-light: #F9F9F9;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-light text-psu-charcoal font-sans;
+  @apply bg-[var(--psu-light)] text-[var(--psu-charcoal)] font-sans transition-colors duration-300;
 }
 
-/* Cards and Dashboards */
-.card {
-  @apply bg-white shadow-smooth rounded-2xl p-6 transition-transform hover:-translate-y-1 hover:shadow-gold;
+.dark body {
+  @apply bg-gray-900 text-gray-100;
 }
 
-/* Headings */
+/* ─────────────── HEADINGS ─────────────── */
 h1, h2, h3, h4, h5 {
-  @apply font-heading text-psu-charcoal;
+  @apply font-heading text-[var(--psu-charcoal)] dark:text-gray-100;
+}
+h1 { @apply text-3xl font-bold mb-3; }
+h2 { @apply text-2xl font-semibold mb-2; }
+h3 { @apply text-xl font-medium mb-1; }
+
+/* ─────────────── LINKS ─────────────── */
+a {
+  @apply text-psu-crimson hover:text-psu-gold transition-colors duration-200;
+}
+.dark a {
+  @apply text-psu-gold hover:text-white;
 }
 
-h1 {
-  @apply text-3xl font-bold;
+/* ─────────────── NAVBAR / HEADER ─────────────── */
+header {
+  @apply bg-psu-crimson text-white dark:bg-gray-800 dark:text-gray-100 shadow-md transition-colors duration-300;
 }
 
-h2 {
-  @apply text-2xl font-semibold;
+/* ─────────────── CARDS ─────────────── */
+.card {
+  @apply bg-white dark:bg-gray-800 shadow-smooth rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-gold;
 }
 
-/* Buttons */
+/* ─────────────── TABLES ─────────────── */
+table {
+  @apply w-full border-collapse text-sm rounded-lg overflow-hidden;
+}
+thead {
+  @apply bg-psu-crimson text-white dark:bg-gray-700;
+}
+tbody tr:nth-child(even) {
+  @apply bg-gray-50 dark:bg-gray-800;
+}
+tbody tr:hover {
+  @apply bg-psu-gold/20 dark:bg-psu-gold/10 transition-colors;
+}
+
+/* ─────────────── BUTTONS ─────────────── */
 .btn {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all;
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all focus:outline-none;
 }
-
 .btn-crimson {
   @apply bg-psu-crimson text-white hover:bg-psu-gold hover:text-psu-charcoal;
 }
-
 .btn-gold {
   @apply bg-psu-gold text-psu-charcoal hover:bg-psu-crimson hover:text-white;
 }
-
-/* Gradient banners */
-.banner-psu {
-  @apply bg-psu-gold text-psu-charcoal bg-psu-gold-gradient text-center py-6 rounded-lg;
+.dark .btn-crimson {
+  @apply bg-gray-700 text-white hover:bg-psu-gold hover:text-gray-900;
+}
+.dark .btn-gold {
+  @apply bg-psu-gold text-gray-900 hover:bg-gray-700 hover:text-white;
 }
 
-/* Badges / Leaderboard Highlights */
+/* ─────────────── ALERTS / FLASHES ─────────────── */
+.alert-success {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-md p-3;
+}
+.alert-error {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-md p-3;
+}
+.alert-warning {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-md p-3;
+}
+
+/* ─────────────── BANNERS / HEROES ─────────────── */
+.banner-psu {
+  @apply bg-gradient-to-r from-psu-crimson to-psu-gold text-white dark:from-gray-800 dark:to-psu-gold text-center py-8 rounded-lg shadow-md;
+}
+
+/* ─────────────── BADGES ─────────────── */
 .badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-psu-crimson text-white;
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-psu-crimson text-white dark:bg-psu-gold dark:text-gray-900;
+}
+
+/* ─────────────── INPUTS & FORMS ─────────────── */
+input, select, textarea {
+  @apply border border-gray-300 rounded-lg p-2 w-full dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 focus:ring-2 focus:ring-psu-gold focus:outline-none;
+}
+
+/* ─────────────── FOOTER ─────────────── */
+footer {
+  @apply bg-psu-charcoal text-gray-200 dark:bg-gray-800 text-center py-6 text-sm transition-colors duration-300;
+}
+
+/* ─────────────── PSU UTILITIES ─────────────── */
+.shadow-smooth {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.shadow-gold {
+  box-shadow: 0 0 12px rgba(255, 200, 46, 0.4);
 }
