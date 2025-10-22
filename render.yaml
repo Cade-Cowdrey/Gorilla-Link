@@ -1,164 +1,108 @@
-# =============================================================
-# RENDER DEPLOY CONFIG — PittState-Connect
-# Advanced production config for Flask (factory pattern)
-# =============================================================
+# ============================================================
+# FILE: render.yaml
+# PittState-Connect — Advanced Render Deployment Config
+# ============================================================
 
 services:
   - type: web
     name: pittstate-connect
     env: python
-    region: oregon
-
-    # -------------------------------
-    # STARTUP COMMAND (factory call)
-    # -------------------------------
-    startCommand: gunicorn 'app_pro:create_app()' \
-      --workers 3 \
-      --threads 2 \
-      --timeout 120 \
-      --preload \
-      --bind 0.0.0.0:$PORT
-
-    # -------------------------------
-    # BUILD SETTINGS
-    # -------------------------------
     buildCommand: |
-      pip install --upgrade pip setuptools wheel
+      pip install --upgrade pip
       pip install -r requirements.txt
-      echo "✅ Build complete: dependencies installed"
+      # Optional: Install optional performance/monitoring packages
+      pip install flask-compress prometheus-flask-exporter sentry-sdk || true
 
-    # -------------------------------
-    # ENVIRONMENT SETTINGS
-    # -------------------------------
+    startCommand: gunicorn app_pro:app
+
+    # ------------------------------------------------------------------
+    # 🔹 Environment
+    # ------------------------------------------------------------------
     envVars:
-      # Core Flask settings
       - key: FLASK_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: PYTHON_VERSION
         value: 3.10.13
       - key: APP_NAME
         value: PittState-Connect
-      - key: SECRET_KEY
-        generateValue: true
-
-      # ---------------------------
-      # Database
-      # ---------------------------
+      - key: UNIVERSITY_NAME
+        value: Pittsburg State University
+      - key: LOG_LEVEL
+        value: INFO
+      # ⚙️ Database (example)
       - key: DATABASE_URL
-        sync: false    # Set in Render Dashboard or external DB service
-
-      # ---------------------------
-      # Mail / SendGrid
-      # ---------------------------
+        sync: false
+      # 📧 Email
       - key: MAIL_SERVER
-        value: smtp.gmail.com
+        sync: false
       - key: MAIL_PORT
         value: 587
       - key: MAIL_USE_TLS
-        value: true
+        value: "true"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
         sync: false
-      - key: MAIL_DEFAULT_SENDER
-        value: "no-reply@pittstateconnect.edu"
-
-      # ---------------------------
-      # AI / OpenAI integration
-      # ---------------------------
+      # 🔑 Optional secrets
       - key: OPENAI_API_KEY
         sync: false
-
-      # ---------------------------
-      # Feature Flags (optional enhancements)
-      # ---------------------------
-      - key: CAREERS_BOARD_ENABLED
-        value: true
-      - key: SCHOLARSHIP_HUB_ENABLED
-        value: true
-      - key: MENTORSHIP_PROGRAM_ENABLED
-        value: true
-      - key: DONOR_PORTAL_ENABLED
-        value: true
-      - key: NOTIFICATIONS_ENABLED
-        value: true
-      - key: DEPARTMENT_PAGES_ENABLED
-        value: true
-      - key: ANALYTICS_DASHBOARD
-        value: true
-      - key: ALUMNI_PORTAL_ENABLED
-        value: true
-      - key: EVENTS_ENABLED
-        value: true
-      - key: MESSAGING_ENABLED
-        value: true
-
-      # ---------------------------
-      # Security & Logging
-      # ---------------------------
-      - key: LOG_LEVEL
-        value: info
-      - key: SESSION_COOKIE_SECURE
-        value: true
-      - key: SESSION_COOKIE_SAMESITE
-        value: Lax
-      - key: PREFERRED_URL_SCHEME
-        value: https
-
-      # ---------------------------
-      # Analytics / Monitoring (optional)
-      # ---------------------------
-      - key: ENABLE_ANALYTICS
-        value: true
       - key: SENTRY_DSN
         sync: false
-      - key: ENABLE_REQUEST_LOGGING
-        value: true
 
-    # -------------------------------
-    # AUTO DEPLOY + HEALTH
-    # -------------------------------
-    autoDeploy: true
-    plan: standard
+    # ------------------------------------------------------------------
+    # ⚡ Scaling
+    # ------------------------------------------------------------------
+    plan: starter
     numInstances: 1
-    healthCheckPath: /health
-    healthCheckTimeout: 30
-    envVarsFile: .env.production
+    autoDeploy: true
+    healthCheckPath: /healthz
+    runtime: python3
+    region: ohio
 
-    # -------------------------------
-    # OPTIONAL STORAGE / LOGGING
-    # -------------------------------
+    # ------------------------------------------------------------------
+    # ⚙️ Optional advanced tuning
+    # ------------------------------------------------------------------
+    buildFilter:
+      paths:
+        - "requirements.txt"
+        - "render.yaml"
+        - "Procfile"
+        - "app_pro.py"
+        - "blueprints/**"
+        - "templates/**"
+        - "static/**"
     disk:
-      name: persistent-data
-      mountPath: /opt/render/project/persistent
+      name: pittstate-volume
+      mountPath: /var/pittstate
       sizeGB: 1
 
-    # -------------------------------
-    # SCALING (optional performance)
-    # -------------------------------
-    scaling:
-      minInstances: 1
-      maxInstances: 3
-      targetMemoryPercent: 85
-      targetCPUPercent: 75
+    # Logs retention and health behavior
+    autoHealing: true
+    logRetentionDays: 30
 
-    # -------------------------------
-    # ADVANCED NETWORKING
-    # -------------------------------
-    headers:
-      - key: X-Frame-Options
-        value: DENY
-      - key: X-Content-Type-Options
-        value: nosniff
-      - key: Referrer-Policy
-        value: no-referrer
-      - key: Permissions-Policy
-        value: geolocation=(), microphone=(), camera=()
+# ============================================================
+# OPTIONAL BACKGROUND WORKERS
+# ============================================================
+# Uncomment if you later add background job handling
+# - type: worker
+#   name: pittstate-connect-worker
+#   env: python
+#   buildCommand: pip install -r requirements.txt
+#   startCommand: python worker.py
+#   envVars:
+#     - key: FLASK_ENV
+#       value: production
+#     - key: DATABASE_URL
+#       sync: false
+#     - key: OPENAI_API_KEY
+#       sync: false
 
-    # -------------------------------
-    # POST-DEPLOY HOOKS
-    # -------------------------------
-    postDeployCommand: |
-      echo "🚀 Running DB migrations..."
-      flask db upgrade || echo "⚠️ Skipped migration (no DB)"
-      echo "✅ Deployment complete and healthy."
+# ============================================================
+# OPTIONAL REDIS CACHE (example)
+# ============================================================
+# databases:
+#   - name: pittstate-cache
+#     plan: free
+#     region: ohio
