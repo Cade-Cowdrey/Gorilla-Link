@@ -1,9 +1,8 @@
 # =============================================================
 # FILE: models.py
 # PittState-Connect — Unified Data Models
-# Includes: Users, Posts, Departments, Events, Scholarships,
-# Mentorship, Analytics, Badges, Notifications, Digests,
-# and ContactMessage (Admin Inbox)
+# Includes Users, Departments, Posts, Events, Jobs, Scholarships,
+# Notifications, Badges, Digests, and ContactMessage (with read state)
 # =============================================================
 
 from datetime import datetime
@@ -28,7 +27,6 @@ class User(UserMixin, db.Model):
     avatar_url = db.Column(db.String(250))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships
     posts = db.relationship("Post", backref="author", lazy=True)
     notifications = db.relationship("Notification", backref="recipient", lazy=True)
     badges = db.relationship("UserBadge", backref="user", lazy=True)
@@ -52,7 +50,7 @@ def load_user(user_id):
 
 
 # -------------------------------------------------------------
-# DEPARTMENTS MODEL
+# DEPARTMENT MODEL
 # -------------------------------------------------------------
 class Department(db.Model):
     __tablename__ = "departments"
@@ -69,7 +67,7 @@ class Department(db.Model):
 
 
 # -------------------------------------------------------------
-# POSTS / FEED MODEL
+# POSTS / FEED MODELS
 # -------------------------------------------------------------
 class Post(db.Model):
     __tablename__ = "posts"
@@ -82,13 +80,7 @@ class Post(db.Model):
     likes = db.relationship("Like", backref="post", lazy=True)
     replies = db.relationship("Reply", backref="post", lazy=True)
 
-    def __repr__(self):
-        return f"<Post {self.id}>"
 
-
-# -------------------------------------------------------------
-# LIKES / REPLIES MODELS
-# -------------------------------------------------------------
 class Like(db.Model):
     __tablename__ = "likes"
 
@@ -191,7 +183,7 @@ class UserBadge(db.Model):
 
 
 # -------------------------------------------------------------
-# DIGESTS / EMAIL LOGS
+# EMAIL DIGEST LOGS
 # -------------------------------------------------------------
 class EmailDigestLog(db.Model):
     __tablename__ = "email_digest_logs"
@@ -213,7 +205,8 @@ class ContactMessage(db.Model):
     email = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<ContactMessage from {self.email}>"
+        return f"<ContactMessage {self.email}>"
