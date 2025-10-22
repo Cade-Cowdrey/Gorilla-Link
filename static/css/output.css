@@ -1,0 +1,79 @@
+/* ============================================================
+   PITTSTATE-CONNECT | TAILWIND PSU THEME (Compiled Output)
+   Compiled from psu-theme.css + tailwind.config.js
+   ------------------------------------------------------------
+   Includes: 
+   - Tailwind base utilities
+   - PSU brand palette
+   - Dark mode support
+   - Button, card, alert, and badge styling
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*! purgecss start ignore */
+:root {
+  --psu-crimson:#991B1E;
+  --psu-gold:#FFC82E;
+  --psu-charcoal:#2C2A29;
+  --psu-gray:#E5E5E5;
+  --psu-light:#F9F9F9
+}
+html{scroll-behavior:smooth}
+body{background-color:var(--psu-light);color:var(--psu-charcoal);font-family:Inter,system-ui,sans-serif;transition-property:background-color,color;transition-duration:.3s}
+.dark body{background-color:#111827;color:#f3f4f6}
+h1,h2,h3,h4,h5{font-family:Poppins,Segoe UI,sans-serif;color:var(--psu-charcoal)}
+.dark h1,.dark h2,.dark h3,.dark h4,.dark h5{color:#f3f4f6}
+h1{font-size:1.875rem;font-weight:700;margin-bottom:.75rem}
+h2{font-size:1.5rem;font-weight:600;margin-bottom:.5rem}
+h3{font-size:1.25rem;font-weight:500;margin-bottom:.25rem}
+a{color:var(--psu-crimson);transition:color .2s}
+a:hover{color:var(--psu-gold)}
+.dark a{color:var(--psu-gold)}
+.dark a:hover{color:#fff}
+header{background-color:var(--psu-crimson);color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1);transition:background-color .3s,color .3s}
+.dark header{background-color:#1f2937;color:#f3f4f6}
+.card{background-color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.1);border-radius:1rem;padding:1.5rem;transition:all .3s}
+.card:hover{transform:translateY(-.25rem);box-shadow:0 0 12px rgba(255,200,46,.4)}
+.dark .card{background-color:#1f2937}
+table{width:100%;border-collapse:collapse;font-size:.875rem;border-radius:.75rem;overflow:hidden}
+thead{background-color:var(--psu-crimson);color:#fff}
+.dark thead{background-color:#374151}
+tbody tr:nth-child(even){background-color:#f9fafb}
+.dark tbody tr:nth-child(even){background-color:#1f2937}
+tbody tr:hover{background-color:rgba(255,200,46,.2);transition:background-color .2s}
+.dark tbody tr:hover{background-color:rgba(255,200,46,.1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.5rem 1rem;border-radius:.5rem;font-weight:500;transition:all .2s;cursor:pointer}
+.btn-crimson{background-color:var(--psu-crimson);color:#fff}
+.btn-crimson:hover{background-color:var(--psu-gold);color:var(--psu-charcoal)}
+.btn-gold{background-color:var(--psu-gold);color:var(--psu-charcoal)}
+.btn-gold:hover{background-color:var(--psu-crimson);color:#fff}
+.dark .btn-crimson{background-color:#374151;color:#fff}
+.dark .btn-crimson:hover{background-color:var(--psu-gold);color:#111827}
+.dark .btn-gold{background-color:var(--psu-gold);color:#111827}
+.dark .btn-gold:hover{background-color:#374151;color:#fff}
+.alert-success{background-color:#d1fae5;color:#065f46;border-radius:.5rem;padding:.75rem}
+.dark .alert-success{background-color:#064e3b;color:#a7f3d0}
+.alert-error{background-color:#fee2e2;color:#991b1b;border-radius:.5rem;padding:.75rem}
+.dark .alert-error{background-color:#7f1d1d;color:#fecaca}
+.alert-warning{background-color:#fef9c3;color:#854d0e;border-radius:.5rem;padding:.75rem}
+.dark .alert-warning{background-color:#78350f;color:#fef08a}
+.banner-psu{background-image:linear-gradient(to right,var(--psu-crimson),var(--psu-gold));color:#fff;text-align:center;padding:2rem;border-radius:.75rem;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.dark .banner-psu{background-image:linear-gradient(to right,#1f2937,var(--psu-gold));color:#111827}
+.badge{display:inline-flex;align-items:center;padding:.25rem .75rem;border-radius:9999px;font-size:.875rem;font-weight:500;background-color:var(--psu-crimson);color:#fff}
+.dark .badge{background-color:var(--psu-gold);color:#111827}
+input,select,textarea{border:1px solid #d1d5db;border-radius:.5rem;padding:.5rem;width:100%;transition:all .2s}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 2px var(--psu-gold)}
+.dark input,.dark select,.dark textarea{background-color:#1f2937;border-color:#4b5563;color:#f3f4f6}
+footer{background-color:var(--psu-charcoal);color:#e5e7eb;text-align:center;padding:1.5rem;font-size:.875rem;transition:background-color .3s}
+.dark footer{background-color:#1f2937}
+.shadow-smooth{box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.shadow-gold{box-shadow:0 0 12px rgba(255,200,46,.4)}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(255,200,46,.5)}50%{box-shadow:0 0 10px 6px rgba(255,200,46,.3)}}
+.animate-fadeIn{animation:fadeIn .5s ease-in-out}
+.animate-pulseGold{animation:pulseGold 2s infinite}
+.container{margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
+/*! purgecss end ignore */
