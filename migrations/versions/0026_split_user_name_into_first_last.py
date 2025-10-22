@@ -1,79 +1,54 @@
-"""split user name into first/last and drop legacy name
+"""Split user.name into first_name and last_name
+
+This migration updates the users table to deprecate the single `name` column
+and replace it with separate `first_name` and `last_name` columns.
+It is part of the PittState-Connect schema normalization update.
+"""
+
+from alembic import op
+import sqlalchemy as sa
 
 
-# revision identifiers, used by Alembic.
-revision = '0026_split_user_name'
-down_revision = '0025_seed_demo_jobs_events_connections'
+# Revision identifiers, used by Alembic.
+revision = "0026_split_user_name_into_first_last"
+down_revision = "0025_seed_demo_jobs_events_connections"
 branch_labels = None
 depends_on = None
 
 
-
-
-def _has_column(bind, table, column):
-insp = reflection.Inspector.from_engine(bind)
-return any(col['name'] == column for col in insp.get_columns(table))
-
-
-
-
 def upgrade():
-bind = op.get_bind()
+    """Perform schema upgrade to split user full name into first and last fields."""
+    with op.batch_alter_table("users", schema=None) as batch_op:
+        # Add new columns
+        batch_op.add_column(sa.Column("first_name", sa.String(length=80), nullable=True))
+        batch_op.add_column(sa.Column("last_name", sa.String(length=80), nullable=True))
 
+        # Optional: migrate data if the old 'name' field exists
+        connection = op.get_bind()
+        inspector = sa.inspect(connection)
+        columns = [col["name"] for col in inspector.get_columns("users")]
 
-# 1) Add first/last columns if missing
-if not _has_column(bind, 'users', 'first_name'):
-op.add_column('users', sa.Column('first_name', sa.String(length=120), nullable=False, server_default=''))
-if not _has_column(bind, 'users', 'last_name'):
-op.add_column('users', sa.Column('last_name', sa.String(length=120), nullable=False, server_default=''))
+        if "name" in columns:
+            connection.execute(sa.text("""
+                UPDATE users
+                SET first_name = SPLIT_PART(name, ' ', 1),
+                    last_name = CASE
+                        WHEN POSITION(' ' IN name) > 0 THEN SUBSTRING(name FROM POSITION(' ' IN name) + 1)
+                        ELSE ''
+                    END
+            """))
 
+            # Drop the old 'name' column
+            batch_op.drop_column("name")
 
-# 2) If a legacy `name` column exists, best-effort split → first/last, then drop it
-if _has_column(bind, 'users', 'name'):
-op.execute(sa.text(
-"""
-UPDATE users
-SET first_name = CASE
-WHEN name IS NULL OR name = '' THEN first_name
-WHEN position(' ' in name) = 0 THEN name
-ELSE split_part(name, ' ', 1)
-END,
-last_name = CASE
-WHEN name IS NULL OR name = '' THEN last_name
-WHEN position(' ' in name) = 0 THEN last_name
-ELSE trim(substring(name from position(' ' in name)+1))
-END
-"""
-))
-with op.batch_alter_table('users') as batch:
-batch.drop_column('name')
-
-
-# 3) Remove server defaults
-with op.batch_alter_table('users') as batch:
-batch.alter_column('first_name', server_default=None)
-batch.alter_column('last_name', server_default=None)
-
-
+    print("✅ Split user.name -> first_name, last_name completed successfully.")
 
 
 def downgrade():
-bind = op.get_bind()
+    """Revert schema back to single user.name column."""
+    with op.batch_alter_table("users", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("name", sa.String(length=160), nullable=True))
+        batch_op.drop_column("first_name")
+        batch_op.drop_column("last_name")
 
-
-# Recreate legacy `name` for downgrade path
-if not _has_column(bind, 'users', 'name'):
-op.add_column('users', sa.Column('name', sa.String(length=255), nullable=True))
-op.execute(sa.text(
-"""
-UPDATE users
-SET name = trim(coalesce(first_name,'') || ' ' || coalesce(last_name,''))
-"""
-))
-
-
-with op.batch_alter_table('users') as batch:
-if _has_column(bind, 'users', 'first_name'):
-batch.drop_column('first_name')
-if _has_column(bind, 'users', 'last_name'):
-batch.drop_column('last_name')
+    print("⏪ Reverted to single user.name column.")
