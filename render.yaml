@@ -2,27 +2,22 @@ services:
   - type: web
     name: pittstate-connect
     env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      npx tailwindcss -i ./static/css/psu-theme.css -o ./static/css/output.css --minify
     startCommand: gunicorn app_pro:app
     envVars:
-      - key: SECRET_KEY
-        sync: false
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: FLASK_ENV
+        value: production
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
         sync: false
       - key: SENDGRID_API_KEY
         sync: false
-      - key: MAIL_DEFAULT_SENDER
+      - key: CLOUD_BUCKET_URL
         sync: false
-      - key: S3_BUCKET
-        sync: false
-      - key: S3_REGION
-        sync: false
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
+      - key: SECRET_KEY
+        generateValue: true
