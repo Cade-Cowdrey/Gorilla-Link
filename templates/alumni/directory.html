@@ -1,25 +1,62 @@
-
+<!-- =========================================================
+FILE: src/templates/alumni/directory.html
+========================================================= -->
 {% extends "base.html" %}
+{% block title %}Alumni Directory · PittState-Connect{% endblock %}
 {% block content %}
-<section class="hero"><h1>Find Alumni Mentors</h1><p class="tag">Search by department, city, or company.</p></section>
-<section>
-  <form method="get" class="searchbar">
-    <input type="text" name="search" placeholder="Search name, company, or keyword" value="{{ request.args.get('search','') }}">
-    <input type="text" name="major" placeholder="Department" value="{{ request.args.get('major','') }}">
-    <input type="text" name="city" placeholder="City" value="{{ request.args.get('city','') }}">
-    <button class="btn" type="submit">Filter</button>
+<section class="section max-w-7xl mx-auto px-6 fade-in">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-4xl font-bold">Alumni Directory</h1>
+    <a href="{{ url_for('mentors_bp.hub') }}" class="btn btn-gold">Become a Mentor</a>
+  </div>
+
+  <!-- Alumni Search -->
+  <form class="mb-8 flex gap-3">
+    <input type="text" name="q" placeholder="Search alumni by name or major..."
+           class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
+    <button type="submit" class="btn btn-crimson">Search</button>
   </form>
-  <div class="grid3">
-    {% for p in people %}
-      <div class="card">
-        <h3>{{ p.name }}</h3>
-        <p class="tag">{{ p.major }} {% if p.grad_year %}• {{ p.grad_year }}{% endif %}</p>
-        {% if p.current_job or p.company %}<p>{{ p.current_job }} {% if p.company %}@ {{ p.company }}{% endif %}</p>{% endif %}
-        {% if p.city %}<p class="small">{{ p.city }}</p>{% endif %}
-        {% if p.help_offers %}<p><strong>Offers:</strong> {{ p.help_offers }}</p>{% endif %}
-        {% if p.linkedin %}<p><a class="btn" href="{{ p.linkedin }}" target="_blank" rel="noopener">LinkedIn</a></p>{% endif %}
+
+  <!-- Alumni Cards -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="card p-6 text-center fade-in">
+      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+           class="mx-auto h-24 w-24 rounded-full object-cover mb-3" alt="Alumnus" loading="lazy">
+      <h3 class="text-lg font-semibold">Jordan A.</h3>
+      <p class="text-gray text-sm mb-2">Software Engineer • Class of ’22</p>
+      <a href="#" class="text-crimson hover:text-gold text-sm">View Profile →</a>
+    </div>
+    <div class="card p-6 text-center fade-in">
+      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+           class="mx-auto h-24 w-24 rounded-full object-cover mb-3" alt="Alumnus" loading="lazy">
+      <h3 class="text-lg font-semibold">Taylor R.</h3>
+      <p class="text-gray text-sm mb-2">Marketing Analyst • Class of ’21</p>
+      <a href="#" class="text-crimson hover:text-gold text-sm">View Profile →</a>
+    </div>
+    <div class="card p-6 text-center fade-in">
+      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+           class="mx-auto h-24 w-24 rounded-full object-cover mb-3" alt="Alumnus" loading="lazy">
+      <h3 class="text-lg font-semibold">Chris M.</h3>
+      <p class="text-gray text-sm mb-2">Nurse Practitioner • Class of ’20</p>
+      <a href="#" class="text-crimson hover:text-gold text-sm">View Profile →</a>
+    </div>
+  </div>
+
+  <!-- Alumni Spotlight Section -->
+  <div class="mt-12 card p-6 bg-gray-50 dark:bg-gray-800 fade-in">
+    <h2 class="text-2xl font-semibold mb-4">Alumni Success Spotlight</h2>
+    <div class="grid md:grid-cols-2 gap-6 items-center">
+      <div>
+        <img src="{{ url_for('static', filename='img/spotlight_alumni.jpg') }}" alt="Alumni Success" class="rounded-xl shadow">
       </div>
-    {% else %}<p>No results yet.</p>{% endfor %}
+      <div>
+        <h3 class="text-xl font-semibold mb-2">Jordan R. – Class of ’19</h3>
+        <p class="text-gray text-sm mb-3">
+          “PittState-Connect gave me my first internship connection that led to a full-time position after graduation.”
+        </p>
+        <a href="{{ url_for('mentors_bp.hub') }}" class="btn btn-gold">Read More Stories</a>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}
