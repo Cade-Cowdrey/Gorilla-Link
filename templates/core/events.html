@@ -1,21 +1,22 @@
+<!-- =========================================================
+FILE: src/templates/core/events.html
+========================================================= -->
 {% extends "base.html" %}
+{% block title %}Events · PittState-Connect{% endblock %}
 {% block content %}
-<section class="max-w-6xl mx-auto px-6 py-16">
-  <h1 class="text-4xl font-bold text-crimson mb-6 text-center">Campus & Alumni Events</h1>
-  <p class="text-gray-700 text-center max-w-2xl mx-auto mb-10">
-    Stay connected through upcoming events, workshops, and networking opportunities.
-  </p>
-
-  <div class="grid md:grid-cols-2 gap-8">
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h3 class="text-xl font-semibold text-crimson mb-2">Career Fair 2025</h3>
-      <p class="text-gray-600">Join employers and recruiters on campus to explore full-time and internship positions.</p>
-      <p class="text-sm text-gray-500 mt-2">📅 October 28th • 🏛️ Overman Student Center</p>
+<section class="section max-w-6xl mx-auto px-6 fade-in">
+  <h1 class="text-4xl font-bold mb-4">Campus & Alumni Events</h1>
+  <p class="text-gray mb-8">Workshops, career fairs, and alumni mixers.</p>
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Career Fair</h3>
+      <p class="text-gray">Meet recruiters and explore opportunities.</p>
+      <p class="text-sm text-gray mt-2">📅 Coming Soon • 🏛️ Overman Student Center</p>
     </div>
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h3 class="text-xl font-semibold text-crimson mb-2">Gorilla Alumni Mixer</h3>
-      <p class="text-gray-600">Reconnect with fellow alumni and share your career experiences with current students.</p>
-      <p class="text-sm text-gray-500 mt-2">📅 November 15th • 🏛️ Block22 Downtown Pittsburg</p>
+    <div class="card p-6">
+      <h3 class="text-xl font-semibold mb-2">Alumni Mixer</h3>
+      <p class="text-gray">Network with Gorillas from diverse industries.</p>
+      <p class="text-sm text-gray mt-2">📅 Coming Soon • 🏛️ Block22 Downtown Pittsburg</p>
     </div>
   </div>
 </section>
