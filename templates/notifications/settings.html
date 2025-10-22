@@ -1,0 +1,48 @@
+<!-- =========================================================
+FILE: src/templates/notifications/settings.html
+========================================================= -->
+{% extends "base.html" %}
+{% block title %}Notifications · PittState-Connect{% endblock %}
+{% block content %}
+<section class="section max-w-3xl mx-auto px-6 fade-in">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Notification Preferences</h1>
+    <button class="btn btn-gold">Save Changes</button>
+  </div>
+
+  <form class="card p-6 space-y-4">
+    <label class="flex items-center gap-3">
+      <input type="checkbox" name="scholarship_deadlines" checked>
+      <span>Email reminders for scholarship deadlines</span>
+    </label>
+
+    <label class="flex items-center gap-3">
+      <input type="checkbox" name="mentor_suggestions" checked>
+      <span>Mentorship match suggestions & new connections</span>
+    </label>
+
+    <label class="flex items-center gap-3">
+      <input type="checkbox" name="career_events">
+      <span>Career event alerts & application updates</span>
+    </label>
+
+    <label class="flex items-center gap-3">
+      <input type="checkbox" name="digest_email">
+      <span>Weekly Gorilla Digest email summary</span>
+    </label>
+
+    <div class="flex justify-end pt-4">
+      <button type="submit" class="btn btn-crimson">Update Preferences</button>
+    </div>
+  </form>
+
+  <div class="mt-8 card p-6 bg-gray-50 dark:bg-gray-800">
+    <h3 class="text-xl font-semibold mb-2">Auto Reminders Enabled (Preview)</h3>
+    <ul class="text-sm text-gray space-y-1">
+      <li>🎓 “Scholarship Deadline: Engineering Leaders Award” – 3 days left</li>
+      <li>💼 “Career Fair 2025” – Tomorrow at Overman Center</li>
+      <li>🤝 “Mentor Match: Jordan R. (Alumni ’22)”</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
