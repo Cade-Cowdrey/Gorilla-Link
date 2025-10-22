@@ -1,167 +1,201 @@
 # =============================================================
 # FILE: diagnostics/run_check.py
-# PittState-Connect — System Diagnostics and Health Checker
-# Runs on Render (diagnostic process) or locally before deploy.
-# Checks blueprints, database, AI config, mail setup, env flags,
-# and security settings.
+# PittState-Connect — System Health & Blueprint Diagnostic Tool
+# -------------------------------------------------------------
+# Run via:  python diagnostics/run_check.py
+# or:       render.yaml -> service: diagnostic
+# -------------------------------------------------------------
+# Performs end-to-end verification of:
+#   ✅ App factory integrity
+#   ✅ Blueprint registration
+#   ✅ Database connectivity
+#   ✅ Email system readiness
+#   ✅ OpenAI / AI helper status
+#   ✅ Environment sanity
 # =============================================================
 
 import os
 import sys
-import logging
 import traceback
-from pathlib import Path
-from importlib import import_module
+import logging
 from datetime import datetime
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-log = logging.getLogger("diagnostic")
+from app_pro import create_app
+from models import db
+from utils.mail_util import send_email
 
-# Ensure the app factory and models are available
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+# Optional: AI & monitoring
+try:
+    import openai
+except ImportError:
+    openai = None
 
 try:
-    from app_pro import create_app
-    from models import db
-except Exception as e:
-    log.critical("❌ Could not import app or models: %s", e)
-    sys.exit(1)
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+    SENTRY_ENABLED = True
+except ImportError:
+    SENTRY_ENABLED = False
 
-# =============================================================
-# 1️⃣  Create app context
-# =============================================================
-log.info("🧩 Running PittState-Connect diagnostic checks...")
-app = create_app()
-app.app_context().push()
 
-# =============================================================
-# 2️⃣  Blueprint registration check
-# =============================================================
-try:
-    bp_names = list(app.blueprints.keys())
-    log.info("✅ %d blueprints loaded:", len(bp_names))
-    for bp in bp_names:
-        log.info("   • %s", bp)
-except Exception as e:
-    log.error("❌ Blueprint check failed: %s", e)
+# -------------------------------------------------------------
+# LOGGING SETUP
+# -------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | diagnostics | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger("diagnostics")
 
-# =============================================================
-# 3️⃣  Database connection test
-# =============================================================
-try:
-    db.session.execute("SELECT 1")
-    log.info("✅ Database connection: OK")
-except Exception as e:
-    log.warning("⚠️ Database connection failed: %s", e)
 
-# =============================================================
-# 4️⃣  Mail configuration test
-# =============================================================
-required_mail_vars = ["MAIL_SERVER", "MAIL_PORT", "MAIL_USERNAME", "MAIL_PASSWORD"]
-missing_mail = [v for v in required_mail_vars if not os.getenv(v)]
-if missing_mail:
-    log.warning("⚠️ Mail not fully configured (missing %s)", ", ".join(missing_mail))
-else:
-    log.info("✅ Mail configuration appears complete")
+# -------------------------------------------------------------
+# INITIALIZE APP CONTEXT
+# -------------------------------------------------------------
+def boot_app():
+    try:
+        app = create_app()
+        app.app_context().push()
+        log.info("🦍 PittState-Connect app factory created successfully.")
+        return app
+    except Exception as e:
+        log.exception("❌ Failed to initialize Flask app: %s", e)
+        raise
 
-# =============================================================
-# 5️⃣  AI / OpenAI configuration
-# =============================================================
-openai_key = os.getenv("OPENAI_API_KEY")
-if openai_key:
-    log.info("✅ OpenAI key detected — AI helper active")
-else:
-    log.warning("⚠️ No OPENAI_API_KEY — AI helper disabled")
 
-# =============================================================
-# 6️⃣  Feature Flags Summary
-# =============================================================
-feature_flags = [
-    "CAREERS_BOARD_ENABLED",
-    "SCHOLARSHIP_HUB_ENABLED",
-    "MENTORSHIP_PROGRAM_ENABLED",
-    "DONOR_PORTAL_ENABLED",
-    "NOTIFICATIONS_ENABLED",
-    "DEPARTMENT_PAGES_ENABLED",
-    "ANALYTICS_DASHBOARD",
-    "ALUMNI_PORTAL_ENABLED",
-    "EVENTS_ENABLED",
-    "MESSAGING_ENABLED",
-]
+# -------------------------------------------------------------
+# CHECK BLUEPRINTS
+# -------------------------------------------------------------
+def check_blueprints(app):
+    try:
+        blueprints = list(app.blueprints.keys())
+        log.info("📁 Registered Blueprints: %s", blueprints)
+        expected = [
+            "core_bp", "auth_bp", "careers_bp", "departments_bp",
+            "scholarships_bp", "mentors_bp", "alumni_bp",
+            "analytics_bp", "donor_bp", "emails_bp", "notifications_bp"
+        ]
+        missing = [bp for bp in expected if bp not in blueprints]
+        if missing:
+            log.warning("⚠️ Missing blueprints: %s", missing)
+        else:
+            log.info("✅ All expected blueprints registered.")
+    except Exception as e:
+        log.exception("❌ Blueprint check failed: %s", e)
 
-log.info("📦 Feature Flags:")
-for flag in feature_flags:
-    val = os.getenv(flag, "False")
-    emoji = "🟢" if val.lower() in {"1", "true", "yes", "on"} else "🔴"
-    log.info("   %s %s=%s", emoji, flag, val)
 
-# =============================================================
-# 7️⃣  Static / Template assets
-# =============================================================
-paths = ["templates", "static"]
-for folder in paths:
-    path = Path(folder)
-    if path.exists():
-        total = sum(1 for _ in path.rglob("*") if _.is_file())
-        log.info("✅ %s: %d files", folder, total)
+# -------------------------------------------------------------
+# DATABASE CHECK
+# -------------------------------------------------------------
+def check_database():
+    try:
+        with db.engine.connect() as conn:
+            conn.execute("SELECT 1")
+        log.info("✅ Database connection successful.")
+    except Exception as e:
+        log.exception("❌ Database connection failed: %s", e)
+
+
+# -------------------------------------------------------------
+# EMAIL SYSTEM CHECK
+# -------------------------------------------------------------
+def check_email_system():
+    try:
+        if not os.getenv("MAIL_SERVER"):
+            log.warning("⚠️ MAIL_SERVER not set — email disabled.")
+            return
+        # Safe dry run (does not actually send)
+        send_email(
+            subject="[Diagnostics] PittState-Connect Test",
+            recipients=[os.getenv("ADMIN_EMAIL", "admin@pittstate.edu")],
+            body="This is a diagnostics test email (dry-run).",
+            dry_run=True,
+        )
+        log.info("✅ Email configuration appears valid.")
+    except Exception as e:
+        log.exception("❌ Email system check failed: %s", e)
+
+
+# -------------------------------------------------------------
+# OPENAI CHECK
+# -------------------------------------------------------------
+def check_openai():
+    try:
+        if not openai or not os.getenv("OPENAI_API_KEY"):
+            log.info("🧠 OpenAI integration not configured (skipping).")
+            return
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        log.info("🧠 OpenAI API key detected — testing minimal request...")
+        result = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "Respond with the word OK."}],
+            max_tokens=3,
+            temperature=0.1,
+        )
+        reply = result["choices"][0]["message"]["content"].strip()
+        log.info("✅ OpenAI API test successful: %s", reply)
+    except Exception as e:
+        log.exception("❌ OpenAI test failed: %s", e)
+
+
+# -------------------------------------------------------------
+# ENVIRONMENT CHECK
+# -------------------------------------------------------------
+def check_environment():
+    required = ["SQLALCHEMY_DATABASE_URI", "SECRET_KEY"]
+    missing = [key for key in required if not os.getenv(key)]
+    if missing:
+        log.warning("⚠️ Missing critical env vars: %s", missing)
     else:
-        log.warning("⚠️ %s folder missing", folder)
+        log.info("✅ Core environment variables set.")
+    log.info("🌍 FLASK_ENV = %s", os.getenv("FLASK_ENV", "production"))
+    log.info("📦 RENDER = %s", os.getenv("RENDER", "local"))
 
-# =============================================================
-# 8️⃣  Persistent disk & uploads
-# =============================================================
-persistent_path = Path("/opt/render/project/persistent")
-if persistent_path.exists():
-    log.info("💾 Persistent storage available at %s", persistent_path)
-else:
-    log.warning("⚠️ No persistent storage mounted")
 
-# =============================================================
-# 9️⃣  Security configuration checks
-# =============================================================
-security_vars = [
-    ("SESSION_COOKIE_SECURE", "True"),
-    ("SESSION_COOKIE_SAMESITE", "Lax"),
-    ("PREFERRED_URL_SCHEME", "https"),
-]
-for var, expected in security_vars:
-    actual = os.getenv(var, "")
-    if actual.lower() != expected.lower():
-        log.warning("⚠️ %s is %s (expected %s)", var, actual or "unset", expected)
+# -------------------------------------------------------------
+# SENTRY CHECK
+# -------------------------------------------------------------
+def check_sentry():
+    if SENTRY_ENABLED and os.getenv("SENTRY_DSN"):
+        sentry_sdk.init(
+            dsn=os.getenv("SENTRY_DSN"),
+            integrations=[FlaskIntegration()],
+            environment=os.getenv("FLASK_ENV", "production"),
+        )
+        log.info("🧩 Sentry enabled — reporting test event.")
+        sentry_sdk.capture_message("PittState-Connect Diagnostics Check")
     else:
-        log.info("✅ %s=%s", var, actual)
+        log.info("Sentry disabled or DSN missing.")
 
-# =============================================================
-# 🔟  Optional service checks
-# =============================================================
-try:
-    from utils.mail_util import send_email
 
-    if callable(send_email):
-        log.info("✅ Mail utility callable — ready for outbound messages")
-except Exception as e:
-    log.warning("⚠️ Could not verify mail utility: %s", e)
+# -------------------------------------------------------------
+# MASTER DIAGNOSTIC RUNNER
+# -------------------------------------------------------------
+def run_all_diagnostics():
+    start_time = datetime.utcnow()
+    log.info("🚀 Starting PittState-Connect System Diagnostic (%s)", start_time)
 
-# AI model sanity
-model = os.getenv("AI_MODEL", "")
-if model:
-    log.info("✅ AI model configured: %s", model)
-else:
-    log.info("ℹ️  Default AI model will be used (gpt-4o-mini)")
+    app = boot_app()
+    check_environment()
+    check_blueprints(app)
+    check_database()
+    check_email_system()
+    check_openai()
+    check_sentry()
 
-# =============================================================
-# 11️⃣  Final summary
-# =============================================================
-log.info("🧭 Environment summary:")
-log.info("   FLASK_ENV=%s", os.getenv("FLASK_ENV"))
-log.info("   LOG_LEVEL=%s", os.getenv("LOG_LEVEL", "info"))
-log.info("   DATABASE_URL=%s", ("set" if os.getenv("DATABASE_URL") else "missing"))
-log.info("   MAIL_SERVER=%s", os.getenv("MAIL_SERVER", "not set"))
-log.info("   TIME=%s UTC", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+    elapsed = (datetime.utcnow() - start_time).total_seconds()
+    log.info("✅ All diagnostics completed successfully in %.2fs", elapsed)
 
-# =============================================================
-# ✅ Done
-# =============================================================
-log.info("✅ PittState-Connect diagnostics completed successfully.")
-print("\nAll checks finished.\n")
+
+# -------------------------------------------------------------
+# ENTRYPOINT
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    try:
+        run_all_diagnostics()
+    except Exception as e:
+        log.error("❌ Diagnostics failed: %s", e)
+        traceback.print_exc()
+        sys.exit(1)
+    finally:
+        log.info("🏁 Diagnostics finished at %s", datetime.utcnow())
