@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Message from {{ msg.name }}{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-crimson text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i> Message Detail</h4>
+      <a href="{{ url_for('admin_bp.inbox') }}" class="btn btn-light btn-sm text-crimson fw-bold">← Back to Inbox</a>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <h5 class="fw-bold text-crimson mb-1">{{ msg.subject }}</h5>
+        <p class="text-muted small mb-0">From: {{ msg.name }} &lt;{{ msg.email }}&gt;</p>
+        <p class="text-muted small">{{ msg.created_at.strftime('%B %d, %Y %I:%M %p') }}</p>
+      </div>
+      <hr>
+      <p class="fs-5">{{ msg.message | nl2br }}</p>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <form method="POST" action="{{ url_for('admin_bp.delete_message', message_id=msg.id) }}" onsubmit="return confirm('Delete this message permanently?');">
+        <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-trash-can me-2"></i> Delete Message</button>
+      </form>
+      <a href="mailto:{{ msg.email }}?subject=Re: {{ msg.subject }}" class="btn btn-crimson">
+        <i class="fa-solid fa-reply me-2"></i> Reply via Email
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bg-crimson { background-color: #a6192e; }
+  .text-crimson { color: #a6192e; }
+  .btn-crimson { background-color: #a6192e; color: #fff; }
+  .btn-crimson:hover { background-color: #861425; }
+</style>
+{% endblock %}
