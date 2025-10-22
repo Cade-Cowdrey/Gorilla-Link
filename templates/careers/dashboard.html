@@ -1,45 +1,46 @@
-<!-- =========================================================
-FILE: src/templates/careers/dashboard.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Careers Dashboard · PittState-Connect{% endblock %}
+{% block title %}Careers | PittState-Connect{% endblock %}
+
 {% block content %}
-<section class="section max-w-7xl mx-auto px-6 fade-in">
-  <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-    <h1 class="text-4xl font-bold">Careers Dashboard</h1>
-    <div class="flex gap-3 mt-4 md:mt-0">
-      <a href="{{ url_for('alumni_bp.directory') }}" class="btn btn-gold">Alumni Network</a>
-      <a href="{{ url_for('departments_bp.index') }}" class="btn btn-crimson">Department Stats</a>
-    </div>
-  </div>
+<!-- ============================================================
+     💼 CAREERS DASHBOARD
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Career & Internship Hub</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-10">
+    Discover opportunities from top employers partnering with Pittsburg State University.
+  </p>
+  <a href="{{ url_for('careers_bp.add_job') }}" class="btn btn-gold">Post a Job or Internship</a>
+</section>
 
-  <!-- Summary Cards -->
-  <div class="grid md:grid-cols-3 gap-6">
+<!-- ============================================================
+     🔍 JOB LISTINGS
+============================================================ -->
+<section class="section-light py-16 fade-in">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    {% for job in jobs %}
     <div class="card p-6">
-      <h3 class="text-xl font-semibold mb-2">Recommended Roles</h3>
-      <p class="text-gray mb-3">AI-ready stub — tailored to your major and skills.</p>
-      <a href="#" class="text-crimson hover:text-gold">View recommendations →</a>
+      <h3 class="text-2xl font-heading text-crimson mb-2">{{ job.title }}</h3>
+      <p class="font-semibold text-gray mb-2">{{ job.company }}</p>
+      <p class="text-gray mb-4">{{ job.location }}</p>
+      <p class="text-sm text-gray mb-6">{{ job.description[:160] }}...</p>
+      <a href="{{ url_for('careers_bp.details', job_id=job.id) }}" class="btn btn-crimson">View Details</a>
     </div>
-    <div class="card p-6">
-      <h3 class="text-xl font-semibold mb-2">Resume Feedback</h3>
-      <p class="text-gray mb-3">Upload your resume for instant ATS scoring (stub).</p>
-      <a href="#" class="text-crimson hover:text-gold">Upload now →</a>
-    </div>
-    <div class="card p-6">
-      <h3 class="text-xl font-semibold mb-2">Events & Fairs</h3>
-      <p class="text-gray mb-3">Career fairs and company sessions curated for PSU students.</p>
-      <a href="{{ url_for('core_bp.events') }}" class="text-crimson hover:text-gold">View events →</a>
-    </div>
+    {% else %}
+    <div class="col-span-3 text-center text-gray">No jobs posted yet. Check back soon!</div>
+    {% endfor %}
   </div>
+</section>
 
-  <!-- Analytics Preview -->
-  <div class="mt-10 card p-6 fade-in bg-gray-50 dark:bg-gray-800">
-    <h2 class="text-2xl font-semibold mb-4">Career Insights (Preview)</h2>
-    <ul class="space-y-2 text-gray text-sm">
-      <li>📈 87% of Engineering students secured internships</li>
-      <li>💼 Top Employers: Garmin, Cerner, Honeywell</li>
-      <li>🎓 Average starting salary: $62,400/year</li>
-    </ul>
-  </div>
+<!-- ============================================================
+     🚀 CTA SECTION
+============================================================ -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Employers, Join the Network</h2>
+  <p class="text-white mb-8 max-w-2xl mx-auto">
+    Recruit Gorillas, post internships, and access talent analytics with your PittState-Connect employer profile.
+  </p>
+  <a href="{{ url_for('auth_bp.register') }}" class="btn btn-gold mr-3">Create Employer Account</a>
+  <a href="{{ url_for('careers_bp.dashboard') }}" class="btn btn-crimson">View Dashboard</a>
 </section>
 {% endblock %}
