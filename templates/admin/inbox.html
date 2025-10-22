@@ -2,7 +2,12 @@
 {% block title %}Admin Inbox{% endblock %}
 {% block content %}
 <section class="container py-5">
-  <h2 class="fw-bold text-crimson mb-4">📬 Admin Inbox</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-crimson">📬 Admin Inbox</h2>
+    <span class="badge bg-crimson text-white px-3 py-2">
+      {{ unread_count }} Unread
+    </span>
+  </div>
 
   {% if messages %}
   <div class="table-responsive shadow-sm border rounded-3 bg-white">
@@ -11,18 +16,16 @@
         <tr>
           <th>Sender</th>
           <th>Subject</th>
-          <th>Message Preview</th>
+          <th>Message</th>
           <th>Received</th>
+          <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for msg in messages %}
-        <tr>
-          <td>
-            <strong>{{ msg.name }}</strong><br>
-            <small>{{ msg.email }}</small>
-          </td>
+        <tr class="{{ '' if msg.is_read else 'table-warning' }}">
+          <td><strong>{{ msg.name }}</strong><br><small>{{ msg.email }}</small></td>
           <td>
             <a href="{{ url_for('admin_bp.message_detail', message_id=msg.id) }}" class="text-decoration-none text-crimson fw-bold">
               {{ msg.subject }}
@@ -31,7 +34,19 @@
           <td>{{ msg.message|truncate(80) }}</td>
           <td><small>{{ msg.created_at.strftime('%b %d, %Y %I:%M %p') }}</small></td>
           <td>
-            <form method="POST" action="{{ url_for('admin_bp.delete_message', message_id=msg.id) }}" onsubmit="return confirm('Delete this message?');">
+            {% if msg.is_read %}
+              <span class="badge bg-success">Read</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Unread</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if not msg.is_read %}
+            <form method="POST" action="{{ url_for('admin_bp.mark_read', message_id=msg.id) }}" style="display:inline;">
+              <button class="btn btn-sm btn-outline-success">Mark as Read</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin_bp.delete_message', message_id=msg.id) }}" onsubmit="return confirm('Delete this message?');" style="display:inline;">
               <button class="btn btn-sm btn-outline-danger">Delete</button>
             </form>
           </td>
@@ -48,5 +63,6 @@
 <style>
   .table-crimson { background-color: #a6192e; }
   .text-crimson { color: #a6192e; }
+  .bg-crimson { background-color: #a6192e; }
 </style>
 {% endblock %}
