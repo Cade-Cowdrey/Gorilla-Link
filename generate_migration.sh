@@ -1,25 +1,25 @@
 #!/bin/bash
-# -------------------------------------------------------------
-# PittState-Connect | Migration Generator Helper
-# -------------------------------------------------------------
+# =====================================================================
+# PittState-Connect | One-Step Migration Generator & Sync Script
+# =====================================================================
 # Usage:
-#   ./generate_migration.sh "add_new_table"
+#   ./generate_migration.sh "add_feature_name"
 #
-# Automatically creates a new Alembic migration file in
-# migrations/versions/ using the PittState-Connect conventions:
-# - Sequential numbering
-# - Proper Alembic header
-# - Ready-to-edit upgrade/downgrade stubs
+# This automates your full Alembic workflow:
+#   1️⃣  Auto-increments the version number.
+#   2️⃣  Creates a new migration stub using PittState-Connect conventions.
+#   3️⃣  Runs Flask-Migrate's autogenerate check.
+#   4️⃣  Applies the migration immediately to keep database in sync.
 #
 # Example:
-#   ./generate_migration.sh "add_scholarship_ai_score"
-# -------------------------------------------------------------
+#   ./generate_migration.sh "add_financial_literacy_models"
+#
+# =====================================================================
 
 set -e
+export FLASK_APP=app_pro.py
 
 MIGRATIONS_DIR="migrations/versions"
-LATEST=$(ls $MIGRATIONS_DIR | grep -E '^[0-9]{4}_.+\.py$' | sort | tail -n 1 | cut -d'_' -f1)
-NEXT_NUM=$(printf "%04d" $((10#$LATEST + 1)))
 DESC=$1
 
 if [ -z "$DESC" ]; then
@@ -27,11 +27,17 @@ if [ -z "$DESC" ]; then
   exit 1
 fi
 
-FILENAME="${MIGRATIONS_DIR}/${NEXT_NUM}_${DESC}.py"
+# Determine latest version and increment
+LATEST=$(ls $MIGRATIONS_DIR | grep -E '^[0-9]{4}_.+\.py$' | sort | tail -n 1 | cut -d'_' -f1)
+NEXT_NUM=$(printf "%04d" $((10#$LATEST + 1)))
 REVISION="${NEXT_NUM}_${DESC}"
-DOWN_REVISION=$(ls $MIGRATIONS_DIR | grep -E '^[0-9]{4}_.+\.py$' | sort | tail -n 1 | cut -d'_' -f1)_$(ls $MIGRATIONS_DIR | sort | tail -n 1 | cut -d'_' -f2- | sed 's/\.py//')
+FILE="${MIGRATIONS_DIR}/${REVISION}.py"
 
-cat <<EOF > $FILENAME
+# Identify previous migration for down_revision
+DOWN_REVISION=$(ls $MIGRATIONS_DIR | grep -E '^[0-9]{4}_.+\.py$' | sort | tail -n 1 | sed 's/\.py//')
+
+# Create the migration stub
+cat <<EOF > "$FILE"
 """${REVISION} | Auto-generated migration for PittState-Connect"""
 
 from alembic import op
@@ -61,9 +67,22 @@ def downgrade():
     pass
 EOF
 
-echo "✅ Created new migration stub:"
-echo "   → $FILENAME"
 echo ""
-echo "Next steps:"
-echo "  1️⃣ Edit the file to define your schema changes."
-echo "  2️⃣ Run: flask db upgrade"
+echo "---------------------------------------------------------------"
+echo "✅ Created new migration file:"
+echo "   → $FILE"
+echo "---------------------------------------------------------------"
+echo ""
+
+# Step 1: Run autogenerate to check model diffs
+echo "🔍 Running Alembic autogenerate check..."
+flask db migrate -m "${DESC}" || true
+
+# Step 2: Apply the new migration to database
+echo "⚙️  Applying migration..."
+flask db upgrade
+
+echo ""
+echo "🎉 Migration '${REVISION}' generated and applied successfully!"
+echo "📁 File saved at: ${FILE}"
+echo "---------------------------------------------------------------"
