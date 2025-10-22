@@ -1,52 +1,27 @@
 from flask import Blueprint, render_template, request
-bp = Blueprint("scholarships_bp", __name__, url_prefix="/scholarships")
+from utils.openai_util import ai_scholarship_smart_match, ai_essay_suggestions
 
-@bp.get("/hub")
-def hub():
-    return render_template("scholarships/hub.html")
+scholarships_bp = Blueprint("scholarships_bp", __name__, template_folder="../../templates")
 
-@bp.get("/recommender")
-def recommender():
-    # Placeholder Smart Match view
-    q = request.args.get("q", "")
-    return render_template("scholarships/recommender.html", query=q)
+@scholarships_bp.route("/")
+def index():
+    return render_template("scholarships/index.html")
 
-@bp.get("/deadlines")
-def deadlines():
-    return render_template("scholarships/deadlines.html")
+@scholarships_bp.route("/smart-match")
+def smart_match():
+    # Demo data
+    profile = {"tags": ["engineering", "first-gen", "leadership"]}
+    scholarships = [
+        {"title": "Engineering Excellence", "tags": ["engineering", "gpa"]},
+        {"title": "First-Gen Scholar", "tags": ["first-gen"]},
+        {"title": "Leadership Award", "tags": ["leadership", "community"]},
+    ]
+    matches = ai_scholarship_smart_match(profile, scholarships)
+    return render_template("scholarships/smart_match.html", matches=matches)
 
-@bp.get("/progress")
-def progress():
-    return render_template("scholarships/progress.html")
-
-@bp.get("/essay-library")
-def essay_library():
-    return render_template("scholarships/essay_library.html")
-
-@bp.get("/financial-literacy")
-def financial_literacy():
-    return render_template("scholarships/financial_literacy.html")
-
-@bp.get("/cost-to-completion")
-def cost_to_completion():
-    return render_template("scholarships/cost_to_completion.html")
-
-@bp.get("/funding-journey")
-def funding_journey():
-    return render_template("scholarships/funding_journey.html")
-
-@bp.get("/faculty-recommendations")
-def faculty_recommendations():
-    return render_template("scholarships/faculty_recommendations.html")
-
-@bp.get("/leaderboard")
-def leaderboard():
-    return render_template("scholarships/leaderboard.html")
-
-@bp.get("/peer-mentors")
-def peer_mentors():
-    return render_template("scholarships/peer_mentors.html")
-
-@bp.get("/impact-stories")
-def impact_stories():
-    return render_template("scholarships/impact_stories.html")
+@scholarships_bp.route("/essay-helper", methods=["GET", "POST"])
+def essay_helper():
+    suggestions = None
+    if request.method == "POST":
+        suggestions = ai_essay_suggestions(request.form.get("prompt", ""))
+    return render_template("scholarships/essay_helper.html", suggestions=suggestions)
