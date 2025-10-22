@@ -1,0 +1,26 @@
+<!-- =========================================================
+FILE: src/templates/scholarships/smart_match.html
+========================================================= -->
+{% extends "base.html" %}
+{% block title %}Smart-Match · PittState-Connect{% endblock %}
+{% block content %}
+<section class="section max-w-5xl mx-auto px-6 fade-in">
+  <h1 class="text-3xl font-bold mb-4">Smart-Match Scholarships</h1>
+  <p class="text-gray mb-6">
+    These results are generated using a placeholder scoring algorithm. Once your AI API key is linked, this page will use live Smart Match data.
+  </p>
+
+  <div class="space-y-4">
+    {% for m in matches %}
+    <div class="card p-5 hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">{{ m.title }}</h3>
+        <span class="text-sm font-semibold text-gold">Score: {{ m.match_score }}%</span>
+      </div>
+      <p class="text-gray text-sm mt-1">Tags: {{ m.tags|join(', ') }}</p>
+      <button class="btn btn-crimson mt-3">Apply Now</button>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
