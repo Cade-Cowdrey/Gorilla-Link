@@ -1,90 +1,164 @@
-# ============================================================
-# RENDER DEPLOY CONFIG | PittState-Connect
-# ============================================================
+# =============================================================
+# RENDER DEPLOY CONFIG — PittState-Connect
+# Advanced production config for Flask (factory pattern)
+# =============================================================
 
 services:
   - type: web
     name: pittstate-connect
     env: python
-    plan: starter   # You can upgrade later if needed
-    branch: main
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-      flask db upgrade || echo "No migrations to apply"
-    startCommand: gunicorn app_pro:app
-    autoDeploy: true
+    region: oregon
 
+    # -------------------------------
+    # STARTUP COMMAND (factory call)
+    # -------------------------------
+    startCommand: gunicorn 'app_pro:create_app()' \
+      --workers 3 \
+      --threads 2 \
+      --timeout 120 \
+      --preload \
+      --bind 0.0.0.0:$PORT
+
+    # -------------------------------
+    # BUILD SETTINGS
+    # -------------------------------
+    buildCommand: |
+      pip install --upgrade pip setuptools wheel
+      pip install -r requirements.txt
+      echo "✅ Build complete: dependencies installed"
+
+    # -------------------------------
+    # ENVIRONMENT SETTINGS
+    # -------------------------------
     envVars:
-      # --------------------------------------------------------
-      # Core Flask Settings
-      # --------------------------------------------------------
+      # Core Flask settings
       - key: FLASK_ENV
         value: production
-      - key: PORT
-        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: APP_NAME
+        value: PittState-Connect
       - key: SECRET_KEY
         generateValue: true
 
-      # --------------------------------------------------------
+      # ---------------------------
       # Database
-      # --------------------------------------------------------
+      # ---------------------------
       - key: DATABASE_URL
-        fromDatabase:
-          name: pittstate-connect-db
-          property: connectionString
+        sync: false    # Set in Render Dashboard or external DB service
 
-      # --------------------------------------------------------
-      # Email / Notifications
-      # --------------------------------------------------------
+      # ---------------------------
+      # Mail / SendGrid
+      # ---------------------------
       - key: MAIL_SERVER
-        value: smtp.sendgrid.net
+        value: smtp.gmail.com
       - key: MAIL_PORT
         value: 587
       - key: MAIL_USE_TLS
         value: true
       - key: MAIL_USERNAME
-        value: apikey
+        sync: false
       - key: MAIL_PASSWORD
-        sync: false   # Set manually in Render dashboard
+        sync: false
       - key: MAIL_DEFAULT_SENDER
-        value: no-reply@pittstate-connect.com
+        value: "no-reply@pittstateconnect.edu"
 
-      # --------------------------------------------------------
-      # Optional AI / Smart Match Enhancements
-      # --------------------------------------------------------
+      # ---------------------------
+      # AI / OpenAI integration
+      # ---------------------------
       - key: OPENAI_API_KEY
-        sync: false   # Set manually only if using AI helper
+        sync: false
 
-      # --------------------------------------------------------
-      # Branding / Theme Overrides (optional)
-      # --------------------------------------------------------
-      - key: APP_NAME
-        value: PittState-Connect
-      - key: UNIVERSITY_NAME
-        value: Pittsburg State University
+      # ---------------------------
+      # Feature Flags (optional enhancements)
+      # ---------------------------
+      - key: CAREERS_BOARD_ENABLED
+        value: true
+      - key: SCHOLARSHIP_HUB_ENABLED
+        value: true
+      - key: MENTORSHIP_PROGRAM_ENABLED
+        value: true
+      - key: DONOR_PORTAL_ENABLED
+        value: true
+      - key: NOTIFICATIONS_ENABLED
+        value: true
+      - key: DEPARTMENT_PAGES_ENABLED
+        value: true
+      - key: ANALYTICS_DASHBOARD
+        value: true
+      - key: ALUMNI_PORTAL_ENABLED
+        value: true
+      - key: EVENTS_ENABLED
+        value: true
+      - key: MESSAGING_ENABLED
+        value: true
 
-      # --------------------------------------------------------
-      # Security / Performance
-      # --------------------------------------------------------
+      # ---------------------------
+      # Security & Logging
+      # ---------------------------
       - key: LOG_LEVEL
         value: info
+      - key: SESSION_COOKIE_SECURE
+        value: true
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      - key: PREFERRED_URL_SCHEME
+        value: https
 
-    healthCheckPath: /healthz
+      # ---------------------------
+      # Analytics / Monitoring (optional)
+      # ---------------------------
+      - key: ENABLE_ANALYTICS
+        value: true
+      - key: SENTRY_DSN
+        sync: false
+      - key: ENABLE_REQUEST_LOGGING
+        value: true
 
-    autoScaling:
-      enabled: true
+    # -------------------------------
+    # AUTO DEPLOY + HEALTH
+    # -------------------------------
+    autoDeploy: true
+    plan: standard
+    numInstances: 1
+    healthCheckPath: /health
+    healthCheckTimeout: 30
+    envVarsFile: .env.production
+
+    # -------------------------------
+    # OPTIONAL STORAGE / LOGGING
+    # -------------------------------
+    disk:
+      name: persistent-data
+      mountPath: /opt/render/project/persistent
+      sizeGB: 1
+
+    # -------------------------------
+    # SCALING (optional performance)
+    # -------------------------------
+    scaling:
       minInstances: 1
       maxInstances: 3
       targetMemoryPercent: 85
       targetCPUPercent: 75
 
-    staticPublishPath: static
-    envSpecificConfigs:
-      - type: python
-        buildCommand: pip install -r requirements.txt
+    # -------------------------------
+    # ADVANCED NETWORKING
+    # -------------------------------
+    headers:
+      - key: X-Frame-Options
+        value: DENY
+      - key: X-Content-Type-Options
+        value: nosniff
+      - key: Referrer-Policy
+        value: no-referrer
+      - key: Permissions-Policy
+        value: geolocation=(), microphone=(), camera=()
 
-databases:
-  - name: pittstate-connect-db
-    plan: free
-    region: oregon
+    # -------------------------------
+    # POST-DEPLOY HOOKS
+    # -------------------------------
+    postDeployCommand: |
+      echo "🚀 Running DB migrations..."
+      flask db upgrade || echo "⚠️ Skipped migration (no DB)"
+      echo "✅ Deployment complete and healthy."
