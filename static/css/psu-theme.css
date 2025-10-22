@@ -1,18 +1,55 @@
-:root{
-  --psu-crimson:#991B1E;
-  --psu-gold:#FDB913;
-  --psu-dark:#121212;
-  --psu-light:#ffffff;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom PSU Brand Styles */
+:root {
+  --psu-crimson: #991B1E;
+  --psu-gold: #FFC82E;
+  --psu-charcoal: #2C2A29;
 }
 
-.psu-body{margin:0;background:#fafafa;color:#111;font-family:Inter,system-ui,Arial,Segoe UI,Roboto;}
-.psu-header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:linear-gradient(90deg,var(--psu-crimson),var(--psu-gold));color:#fff}
-.psu-brand{display:flex;align-items:center;gap:10px;font-weight:700}
-.psu-logo{width:28px;height:28px}
-.psu-title{font-size:18px}
-.psu-nav a{color:#fff;text-decoration:none;margin:0 10px;font-weight:600;opacity:.95}
-.psu-nav a:hover{opacity:1;text-decoration:underline}
-.psu-main{max-width:1100px;margin:30px auto;padding:0 16px}
-.psu-footer{padding:20px;text-align:center;color:#555;border-top:1px solid #eee;background:#fff}
-.hero{padding:36px;border:1px solid #eee;border-radius:12px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.04)}
-.subnav a{margin-right:8px}
+body {
+  @apply bg-light text-psu-charcoal font-sans;
+}
+
+/* Cards and Dashboards */
+.card {
+  @apply bg-white shadow-smooth rounded-2xl p-6 transition-transform hover:-translate-y-1 hover:shadow-gold;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+  @apply font-heading text-psu-charcoal;
+}
+
+h1 {
+  @apply text-3xl font-bold;
+}
+
+h2 {
+  @apply text-2xl font-semibold;
+}
+
+/* Buttons */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all;
+}
+
+.btn-crimson {
+  @apply bg-psu-crimson text-white hover:bg-psu-gold hover:text-psu-charcoal;
+}
+
+.btn-gold {
+  @apply bg-psu-gold text-psu-charcoal hover:bg-psu-crimson hover:text-white;
+}
+
+/* Gradient banners */
+.banner-psu {
+  @apply bg-psu-gold text-psu-charcoal bg-psu-gold-gradient text-center py-6 rounded-lg;
+}
+
+/* Badges / Leaderboard Highlights */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-psu-crimson text-white;
+}
