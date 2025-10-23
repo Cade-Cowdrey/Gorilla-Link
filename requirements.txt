@@ -1,96 +1,81 @@
-# =============================================================
-# FILE: requirements.txt
-# PittState-Connect — Production + Development Dependencies
-# Advanced, Render-safe, and Feature-Enhanced
-# =============================================================
+# ================================
+#  PittState-Connect Requirements
+#  Production Build (Final)
+#  ===============================
 
-# --- Core Framework ---
+# --- Core Flask stack ---
 Flask==3.0.3
 Werkzeug==3.0.3
-itsdangerous>=2.2.0
-Jinja2>=3.1.4
+Jinja2==3.1.6
+itsdangerous==2.2.0
+blinker==1.9.0
 
-# --- Database / ORM ---
+# --- Flask extensions ---
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.32
 Flask-Migrate==4.0.7
-psycopg2-binary>=2.9.9     # ✅ Render-safe PostgreSQL adapter
-alembic>=1.13.2
-
-# --- Authentication / Login ---
 Flask-Login==0.6.3
-bcrypt==4.1.3
-email-validator==2.2.0
-
-# --- Mail / Notifications ---
 Flask-Mail==0.9.1
-blinker>=1.7.0
-requests>=2.32.3
-
-# --- CORS / Proxy Support ---
 Flask-Cors==4.0.1
-# ProxyFix is built into Werkzeug, no external package needed
-
-# --- Compression / Optimization ---
 Flask-Compress==1.14
+Flask-Session==0.5.0        # ✅ required for app_pro.py
+Flask-DebugToolbar==0.16.0
+Flask-Talisman==1.1.0       # HTTPS & security headers
+
+# --- Database & migrations ---
+alembic==1.17.0
+psycopg2-binary==2.9.11
+
+# --- Background jobs & scheduling ---
+APScheduler==3.11.0
+schedule==1.2.2
+
+# --- Cloud integrations ---
+boto3==1.40.57
+botocore==1.40.57
+s3transfer==0.14.0
+redis==7.0.0
+
+# --- Security & cryptography ---
+bcrypt==4.1.3
+cryptography==46.0.3
+PyJWT==2.10.1
+
+# --- AI / OpenAI features ---
+openai==2.6.0
+tiktoken==0.12.0
+tenacity==9.1.2
+
+# --- Analytics & visualization ---
+pandas==2.3.3
+numpy==2.2.6
+matplotlib==3.10.7
+plotly==6.3.1
+scikit-learn==1.7.2
+textstat==0.7.10
+
+# --- Utilities & performance ---
+cachetools==6.2.1
+python-dotenv==1.1.1
+loguru==0.7.3
+requests==2.32.5
+beautifulsoup4==4.14.2
+markdown2==2.5.4
+rich==14.2.0
+
+# --- Dev / testing / debugging ---
+pytest==8.4.2
+pytest-flask==1.3.0
+ipython==8.37.0
+
+# --- Web server ---
 gunicorn==22.0.0
-cachetools>=5.5.0
+eventlet==0.40.3
+gevent==25.9.1
 
-# --- AI / OpenAI Integration ---
-openai>=1.37.0
-tiktoken>=0.7.0
-tenacity>=9.0.0  # retry helper for API resilience
-
-# --- Analytics / Visualization Enhancements ---
-pandas>=2.2.3
-numpy>=2.1.3
-matplotlib>=3.9.2
-plotly>=5.24.0
-
-# --- Logging / Monitoring ---
-sentry-sdk>=2.12.0
-rich>=13.9.1
-loguru>=0.7.2
-
-# --- Utilities / Background Tasks ---
-python-dotenv>=1.0.1
-schedule>=1.2.2
-APScheduler>=3.10.4
-aiofiles>=24.1.0
-redis>=5.0.1   # optional if you add async task queues later
-
-# --- Security / CSRF / Headers ---
-Flask-Talisman>=1.1.0
-cryptography>=43.0.1
-PyJWT>=2.9.0
-
-# --- Developer / Debugging Tools (optional for local dev) ---
-Flask-DebugToolbar>=0.14.1
-ipython>=8.27.0
-pytest>=8.3.3
-pytest-flask>=1.3.0
-
-# --- File Uploads / Cloud Integration ---
-boto3>=1.35.25
-botocore>=1.35.25
-
-# --- Email Templates / HTML Rendering ---
-markdown2>=2.5.0
-beautifulsoup4>=4.12.3
-
-# --- Diagnostics / Maintenance ---
-click>=8.1.7
-psutil>=6.0.0
-
-# --- Performance / Worker Utilities ---
-gevent>=24.2.1
-greenlet>=3.1.0
-eventlet>=0.36.1
-
-# --- Optional Machine Learning / Scoring Addons ---
-scikit-learn>=1.5.2
-textstat>=0.7.4
-
-# =============================================================
-# END OF REQUIREMENTS
-# =============================================================
+# --- Compatibility ---
+typing-extensions==4.15.0
+python-dateutil==2.9.0.post0
+pytz==2025.2
+tzdata==2025.2
+certifi==2025.10.5
