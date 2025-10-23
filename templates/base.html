@@ -1,150 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ============================================================
-       PittState-Connect | PSU Crimson & Gold Edition
-       Author: PittState-Connect Dev Team
-       Version: Final Build (v2)
-       ============================================================ -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#a6192e">
   <title>{% block title %}PittState-Connect{% endblock %}</title>
 
-  <!-- PSU Favicon & Styles -->
-  <link rel="icon" href="{{ url_for('static', filename='images/psu-logo.png') }}">
+  <!-- PSU Colors & Branding -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/psu-logo.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='pwa/manifest.webmanifest') }}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Optional: Tailwind (if you have Tailwind support enabled) -->
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-
-  <!-- Font Preload -->
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+
+  {% block head %}{% endblock %}
 </head>
-<body class="bg-light text-gray font-body fade-in">
-
+<body>
   <!-- ============================================================
-       🦍 PSU NAVBAR
+       🟥 NAVBAR
   ============================================================ -->
-  <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-50">
-    <div class="container mx-auto flex items-center justify-between py-4 px-6">
-      <!-- Logo & Brand -->
-      <a href="{{ url_for('core_bp.home') }}" class="flex items-center space-x-3">
-        <img src="{{ url_for('static', filename='images/psu-logo.png') }}" alt="PSU Logo" class="h-9 w-9 rounded-full">
-        <span class="text-crimson font-heading text-xl md:text-2xl">PittState-Connect</span>
-      </a>
-
-      <!-- Nav Links -->
-      <div class="hidden md:flex space-x-6 font-semibold text-gray-700">
-        <a href="{{ url_for('core_bp.home') }}" class="hover:text-gold transition">Home</a>
-        <a href="{{ url_for('core_bp.team') }}" class="hover:text-gold transition">Team</a>
-        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-gold transition">Scholarships</a>
-        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold transition">Careers</a>
-        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-gold transition">Analytics</a>
-        <a href="{{ url_for('community_bp.feed') }}" class="hover:text-gold transition">Community</a>
+  <nav class="bg-white/90 backdrop-blur-lg shadow-md py-4 sticky top-0 z-50 transition-colors">
+    <div class="container mx-auto px-6 flex justify-between items-center">
+      <a href="{{ url_for('core_bp.home') }}" class="text-2xl font-heading text-crimson">PittState-Connect</a>
+      <div class="flex gap-6 text-gray text-sm font-semibold">
+        <a href="{{ url_for('core_bp.home') }}" class="hover:text-crimson">Home</a>
+        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-crimson">Careers</a>
+        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-crimson">Scholarships</a>
+        <a href="{{ url_for('community_bp.feed') }}" class="hover:text-crimson">Community</a>
+        <a href="{{ url_for('events_bp.list') }}" class="hover:text-crimson">Events</a>
+        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-crimson">Analytics</a>
+        <a href="{{ url_for('profile_bp.dashboard') }}" class="hover:text-crimson">Profile</a>
+        <a href="{{ url_for('messages_bp.inbox') }}" class="hover:text-crimson">Messages</a>
+        <a href="{{ url_for('notifications_bp.center') }}" class="hover:text-crimson">Notifications</a>
+        <a href="{{ url_for('admin_bp.portal') }}" class="hover:text-crimson">Admin</a>
+        <a href="{{ url_for('system_bp.multicampus') }}" class="hover:text-crimson">Campuses</a>
+        <a href="{{ url_for('pwa_bp.onboarding') }}" class="hover:text-crimson">Install App</a>
       </div>
-
-      <!-- Mobile Menu Placeholder -->
-      <button id="mobile-menu-toggle" class="md:hidden bg-crimson text-white px-3 py-2 rounded-md">
-        ☰
-      </button>
-    </div>
-
-    <!-- Mobile Dropdown -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 px-6 py-4 space-y-3">
-      <a href="{{ url_for('core_bp.home') }}" class="block hover:text-gold">Home</a>
-      <a href="{{ url_for('core_bp.team') }}" class="block hover:text-gold">Team</a>
-      <a href="{{ url_for('scholarships_bp.dashboard') }}" class="block hover:text-gold">Scholarships</a>
-      <a href="{{ url_for('careers_bp.dashboard') }}" class="block hover:text-gold">Careers</a>
-      <a href="{{ url_for('analytics_bp.insights') }}" class="block hover:text-gold">Analytics</a>
-      <a href="{{ url_for('community_bp.feed') }}" class="block hover:text-gold">Community</a>
     </div>
   </nav>
 
   <!-- ============================================================
-       🧩 PAGE CONTENT
+       PAGE CONTENT
   ============================================================ -->
-  <main class="container mx-auto px-6 py-28 md:py-32">
+  <main class="min-h-screen fade-in">
     {% block content %}{% endblock %}
   </main>
 
   <!-- ============================================================
-       ⚡ FOOTER
+       FOOTER
   ============================================================ -->
-  <footer class="section-dark text-center md:text-left py-10 px-6 mt-16">
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div>
-        <h3 class="font-heading text-gold text-lg mb-3">PittState-Connect</h3>
-        <p>Your all-in-one portal for PSU scholarships, careers, and community connections.</p>
-      </div>
-
-      <div>
-        <h3 class="font-heading text-gold text-lg mb-3">Quick Links</h3>
-        <ul class="space-y-2">
-          <li><a href="{{ url_for('core_bp.home') }}" class="hover:text-gold">Home</a></li>
-          <li><a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-gold">Scholarships</a></li>
-          <li><a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-gold">Careers</a></li>
-          <li><a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-gold">Analytics</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="font-heading text-gold text-lg mb-3">Contact</h3>
-        <p>Pittsburg State University</p>
-        <p>1701 S Broadway St, Pittsburg, KS 66762</p>
-        <p>Email: support@pittstateconnect.com</p>
-      </div>
-    </div>
-
-    <hr class="border-gray-700 my-6">
-    <div class="flex flex-col md:flex-row justify-between items-center text-sm">
-      <p>&copy; {{ current_year or 2025 }} PittState-Connect. All Rights Reserved.</p>
-      <p>Built with ❤️ by the Gorilla Link Dev Team</p>
-    </div>
+  <footer class="text-center py-8">
+    <p class="text-white text-sm">&copy; {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by PSU Students</p>
   </footer>
 
   <!-- ============================================================
-       🌗 DARK MODE TOGGLE
+       GLOBAL SCRIPTS
   ============================================================ -->
-  <button id="theme-toggle" title="Toggle Light/Dark Mode">☀️</button>
-
-  <!-- ============================================================
-       🔧 SCRIPTS
-  ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Mobile menu
-    const menuBtn = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (menuBtn) {
-      menuBtn.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-      });
-    }
-
     // Dark mode toggle
-    const toggle = document.getElementById('theme-toggle');
-    if (toggle) {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') document.body.classList.add('dark');
+    const toggle = document.createElement("button");
+    toggle.id = "theme-toggle";
+    toggle.innerHTML = "☀️";
+    toggle.onclick = () => {
+      document.body.classList.toggle("dark");
+      toggle.innerHTML = document.body.classList.contains("dark") ? "🌙" : "☀️";
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    };
+    document.body.appendChild(toggle);
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-      toggle.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
-
-      toggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        const isDark = document.body.classList.contains('dark');
-        toggle.textContent = isDark ? '🌙' : '☀️';
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    // Register PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("{{ url_for('static', filename='pwa/service-worker.js') }}");
       });
     }
-
-    // Optional: Smooth scroll for anchors
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelector(anchor.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
   </script>
-
+  {% block scripts %}{% endblock %}
 </body>
 </html>
