@@ -1,0 +1,14 @@
+{
+  "name": "PittState-Connect",
+  "short_name": "PSU Connect",
+  "description": "PSU scholarships, careers, analytics, and community — all in one place.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#a6192e",
+  "icons": [
+    { "src": "/static/images/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/images/pwa/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
