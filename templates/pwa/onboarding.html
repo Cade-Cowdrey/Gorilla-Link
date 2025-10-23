@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Install App | PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     📱 PWA ONBOARDING
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Install PittState-Connect</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-8">
+    Get a fast, app-like experience — offline access, push notifications, and home screen launch.
+  </p>
+
+  <div class="card max-w-2xl mx-auto p-6 text-left">
+    <h3 class="text-xl font-heading text-crimson mb-3">How to Install</h3>
+    <ol class="list-decimal pl-6 space-y-2 text-gray">
+      <li>On desktop Chrome/Edge: Click the install icon in the address bar.</li>
+      <li>On iOS Safari: Tap <em>Share</em> → <strong>Add to Home Screen</strong>.</li>
+      <li>On Android Chrome: Tap menu (⋮) → <strong>Install app</strong>.</li>
+    </ol>
+    <button id="pwa-install" class="btn btn-gold mt-6">Install Now</button>
+  </div>
+</section>
+
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Why Install?</h2>
+  <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+    <div class="card p-6">
+      <h4 class="font-heading text-crimson mb-2">Offline Ready</h4>
+      <p class="text-gray">Access key pages and your saved content without internet.</p>
+    </div>
+    <div class="card p-6">
+      <h4 class="font-heading text-crimson mb-2">Push Notifications</h4>
+      <p class="text-gray">Get timely alerts for scholarships, jobs, and event updates.</p>
+    </div>
+    <div class="card p-6">
+      <h4 class="font-heading text-crimson mb-2">One-Tap Launch</h4>
+      <p class="text-gray">Start from your home screen with native-like speed.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+document.getElementById('pwa-install')?.addEventListener('click', async () => {
+  if (!deferredPrompt) return alert('Install prompt not available yet.');
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+</script>
+{% endblock %}
