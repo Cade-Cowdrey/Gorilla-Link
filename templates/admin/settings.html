@@ -1,220 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Platform Settings | PittState-Connect Admin</title>
+{% extends "base.html" %}
+{% block title %}System Settings | PittState-Connect{% endblock %}
 
-    <style>
-      :root {
-        --psu-red: #C8102E;
-        --psu-gold: #FFC72C;
-        --psu-bg: #f9f9f9;
-        --psu-dark: #1b1b1b;
-      }
+{% block content %}
+<!-- ============================================================
+     ⚙️ SYSTEM SETTINGS (Admin)
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">System Settings</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-10">
+    Configure global preferences, integrations, roles, and automation for PittState-Connect.
+  </p>
+</section>
 
-      body {
-        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: var(--psu-bg);
-        margin: 0;
-        padding: 0;
-        color: #333;
-      }
-
-      /* ===== Header ===== */
-      header {
-        background-color: var(--psu-red);
-        color: #fff;
-        padding: 20px 40px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-      }
-
-      header a {
-        color: #fff;
-        background-color: var(--psu-gold);
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: background 0.3s ease;
-      }
-
-      header a:hover {
-        background-color: #e6b500;
-      }
-
-      /* ===== Container ===== */
-      main {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 0 20px;
-      }
-
-      h2 {
-        color: var(--psu-red);
-        border-bottom: 2px solid var(--psu-gold);
-        padding-bottom: 5px;
-        margin-bottom: 25px;
-      }
-
-      form {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        padding: 30px 35px;
-      }
-
-      label {
-        display: block;
-        font-weight: 600;
-        color: #444;
-        margin-bottom: 8px;
-      }
-
-      input[type="text"],
-      input[type="color"],
-      input[type="email"],
-      input[type="password"] {
-        width: 100%;
-        padding: 10px 12px;
-        font-size: 15px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        transition: border 0.2s ease;
-      }
-
-      input:focus {
-        border-color: var(--psu-red);
-        outline: none;
-      }
-
-      button {
-        background-color: var(--psu-red);
-        color: #fff;
-        border: none;
-        padding: 12px 22px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 15px;
-        cursor: pointer;
-        transition: background 0.3s ease;
-      }
-
-      button:hover {
-        background-color: #A60D26;
-      }
-
-      .field-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
-      }
-
-      .note {
-        font-size: 14px;
-        color: #666;
-        margin-top: -10px;
-        margin-bottom: 20px;
-      }
-
-      footer {
-        text-align: center;
-        margin-top: 50px;
-        font-size: 13px;
-        color: #777;
-      }
-
-      @media screen and (max-width: 700px) {
-        .field-group {
-          grid-template-columns: 1fr;
-        }
-        header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        header h1 {
-          margin-bottom: 8px;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1>⚙️ Platform Settings</h1>
-      <a href="{{ url_for('admin.dashboard') }}">⬅ Back to Admin</a>
-    </header>
-
-    <main>
-      <h2>PittState-Connect Configuration</h2>
-
-      <form method="POST" action="{{ url_for('admin.settings') }}">
-        <div class="field-group">
-          <div>
-            <label for="site_name">Platform Name</label>
-            <input
-              type="text"
-              id="site_name"
-              name="site_name"
-              value="{{ settings.site_name }}"
-              required
-            />
-            <p class="note">Displayed on email headers and login pages.</p>
-          </div>
-
-          <div>
-            <label for="primary_color">Primary Theme Color</label>
-            <input
-              type="color"
-              id="primary_color"
-              name="primary_color"
-              value="{{ settings.primary_color }}"
-            />
-            <p class="note">Used for buttons, banners, and accent UI elements.</p>
-          </div>
+<section class="section-light py-12 fade-in">
+  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- General -->
+    <div class="card p-6">
+      <h3 class="text-xl font-heading text-crimson mb-3">General</h3>
+      <form method="POST" action="{{ url_for('admin_bp.update_settings') }}" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray mb-1">Site Name</label>
+          <input name="site_name" value="{{ settings.site_name or 'PittState-Connect' }}" class="w-full border border-gray-300 rounded-lg p-3">
         </div>
-
-        <div class="field-group">
-          <div>
-            <label for="mail_from">Default “From” Email</label>
-            <input
-              type="email"
-              id="mail_from"
-              name="mail_from"
-              value="{{ settings.mail_from }}"
-              required
-            />
-            <p class="note">Address used when sending official PSU emails.</p>
-          </div>
-
-          <div>
-            <label for="api_key">API Key</label>
-            <input
-              type="password"
-              id="api_key"
-              name="api_key"
-              value="{{ settings.api_key }}"
-            />
-            <p class="note">Used for secure integrations (e.g., Render, Slack, etc.).</p>
-          </div>
+        <div>
+          <label class="block text-sm text-gray mb-1">Support Email</label>
+          <input name="support_email" value="{{ settings.support_email or 'support@pittstateconnect.com' }}" class="w-full border border-gray-300 rounded-lg p-3">
         </div>
-
-        <button type="submit">💾 Save Settings</button>
+        <div class="flex items-center gap-2">
+          <input id="maintenance" name="maintenance_mode" type="checkbox" {% if settings.maintenance_mode %}checked{% endif %}>
+          <label for="maintenance" class="text-sm text-gray">Enable Maintenance Mode</label>
+        </div>
+        <button class="btn btn-gold">Save General</button>
       </form>
+    </div>
 
-      <footer>
-        &copy; {{ current_year }} PittState-Connect · Pittsburg State University
-      </footer>
-    </main>
-  </body>
-</html>
+    <!-- Integrations -->
+    <div class="card p-6">
+      <h3 class="text-xl font-heading text-crimson mb-3">Integrations</h3>
+      <form method="POST" action="{{ url_for('admin_bp.update_integrations') }}" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray mb-1">SendGrid API Key</label>
+          <input name="sendgrid_key" value="{{ integrations.sendgrid_key_masked or '' }}" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-3">
+        </div>
+        <div>
+          <label class="block text-sm text-gray mb-1">OpenAI API (Key Layer)</label>
+          <input name="openai_key" value="{{ integrations.openai_key_masked or '' }}" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg p-3">
+        </div>
+        <div>
+          <label class="block text-sm text-gray mb-1">Cloud Bucket (S3/Render Disk)</label>
+          <input name="storage_bucket" value="{{ integrations.storage_bucket or '' }}" class="w-full border border-gray-300 rounded-lg p-3">
+        </div>
+        <button class="btn btn-gold">Save Integrations</button>
+      </form>
+    </div>
+
+    <!-- Roles & Access -->
+    <div class="card p-6">
+      <h3 class="text-xl font-heading text-crimson mb-3">Roles & Access</h3>
+      <form method="POST" action="{{ url_for('admin_bp.update_roles') }}" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-gray">Allow Employer Self-Signup</span>
+          <label class="flex items-center gap-2">
+            <input type="checkbox" name="employer_signup" {% if roles.employer_signup %}checked{% endif %}>
+            <span class="text-sm">Enabled</span>
+          </label>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-gray">Require Alumni Verification</span>
+          <label class="flex items-center gap-2">
+            <input type="checkbox" name="alumni_verify" {% if roles.alumni_verify %}checked{% endif %}>
+            <span class="text-sm">Enabled</span>
+          </label>
+        </div>
+        <div>
+          <label class="block text-sm text-gray mb-1">Default User Role</label>
+          <select name="default_role" class="w-full border border-gray-300 rounded-lg p-3">
+            <option value="student" {% if roles.default_role == 'student' %}selected{% endif %}>Student</option>
+            <option value="alumni" {% if roles.default_role == 'alumni' %}selected{% endif %}>Alumni</option>
+            <option value="faculty" {% if roles.default_role == 'faculty' %}selected{% endif %}>Faculty</option>
+          </select>
+        </div>
+        <button class="btn btn-gold">Save Access</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Automation -->
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">Automation</h2>
+  <p class="text-white max-w-2xl mx-auto mb-8">Schedule digests, reminders, and data refresh tasks.</p>
+  <div class="max-w-3xl mx-auto bg-white dark:bg-[#1e1e1e] p-6 rounded-lg shadow-md text-left">
+    <form method="POST" action="{{ url_for('admin_bp.update_automation') }}" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm text-gray mb-1">Daily Digest Time (HH:MM)</label>
+        <input name="digest_time" value="{{ automation.digest_time or '08:00' }}" class="w-full border border-gray-300 rounded-lg p-3">
+      </div>
+      <div>
+        <label class="block text-sm text-gray mb-1">Reminder Frequency</label>
+        <select name="reminder_freq" class="w-full border border-gray-300 rounded-lg p-3">
+          <option value="daily" {% if automation.reminder_freq == 'daily' %}selected{% endif %}>Daily</option>
+          <option value="weekly" {% if automation.reminder_freq == 'weekly' %}selected{% endif %}>Weekly</option>
+          <option value="monthly" {% if automation.reminder_freq == 'monthly' %}selected{% endif %}>Monthly</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <button class="btn btn-gold">Save Automation</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
