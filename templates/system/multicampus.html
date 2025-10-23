@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Multi-Campus Overview | PittState-Connect{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     🏫 MULTI-CAMPUS OVERVIEW
+============================================================ -->
+<section class="section text-center fade-in">
+  <h1 class="text-5xl font-heading text-crimson mb-4">Multi-Campus Overview</h1>
+  <p class="text-gray max-w-2xl mx-auto mb-10">
+    Monitor and manage activity across campuses, colleges, and departments at a glance.
+  </p>
+</section>
+
+<section class="section-light py-12 fade-in">
+  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {% for campus in campuses %}
+    <div class="card p-6">
+      <h3 class="text-2xl font-heading text-crimson mb-2">{{ campus.name }}</h3>
+      <p class="text-gray mb-4">{{ campus.location }}</p>
+      <ul class="text-gray text-sm space-y-1 mb-6">
+        <li>Active Users: <strong>{{ campus.metrics.active_users }}</strong></li>
+        <li>Scholarships Applied: <strong>{{ campus.metrics.scholarships_applied }}</strong></li>
+        <li>Jobs Posted: <strong>{{ campus.metrics.jobs_posted }}</strong></li>
+        <li>Events This Month: <strong>{{ campus.metrics.events_month }}</strong></li>
+      </ul>
+      <a href="{{ url_for('system_bp.campus_detail', id=campus.id) }}" class="btn btn-gold mr-2">View Details</a>
+      <a href="{{ url_for('system_bp.campus_settings', id=campus.id) }}" class="btn btn-crimson">Settings</a>
+    </div>
+    {% else %}
+    <div class="col-span-3 text-center text-gray">No campuses configured yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section py-12 fade-in">
+  <h2 class="text-3xl font-heading text-crimson text-center mb-8">Campus Engagement Trend</h2>
+  <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-md dark:bg-[#1e1e1e]">
+    <canvas id="campusTrend" height="120"></canvas>
+  </div>
+</section>
+
+<section class="section-dark text-center py-16 fade-in">
+  <h2 class="text-3xl font-heading text-gold mb-4">AI Multi-Campus Highlights</h2>
+  <p class="text-white max-w-2xl mx-auto mb-8">
+    Key patterns and risk alerts synthesized across all campuses.
+  </p>
+  <div class="max-w-3xl mx-auto bg-white text-left p-6 rounded-lg shadow-md dark:bg-[#1e1e1e] dark:text-gray">
+    <ul class="list-disc pl-6 space-y-2 text-gray">
+      <li>Campus A: Scholarship completion up <strong>19%</strong>.</li>
+      <li>Campus B: Employer engagement trending downward — recommend outreach.</li>
+      <li>Campus C: Event RSVPs breaking records this quarter.</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById("campusTrend");
+  if (ctx && window.Chart) {
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Campus A","Campus B","Campus C","Campus D"],
+        datasets: [{
+          label: "Engagement Index",
+          data: [86, 72, 91, 77],
+          backgroundColor: "rgba(166,25,46,0.6)"
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max:100 } } }
+    });
+  }
+});
+</script>
+{% endblock %}
