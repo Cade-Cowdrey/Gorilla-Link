@@ -1,56 +1,407 @@
 {% extends "base.html" %}
-{% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
+{% block title %}Insights Explorer | PittState-Connect{% endblock %}
+
 {% block content %}
-<section class="section fade-in" id="analytics-dashboard">
-  <div class="container mx-auto max-w-6xl p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-heading text-crimson">Analytics & Insights</h1>
-      <div class="flex items-center gap-3">
-        <button id="export-btn" class="btn btn-gold">Export CSV</button>
-        <button id="theme-toggle" class="btn btn-crimson" title="Toggle dark mode">🌙</button>
+<section class="section-light py-5">
+  <div class="container fade-in">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <div>
+        <h1 class="font-heading text-crimson mb-0">Insights Explorer</h1>
+        <p class="text-gray mb-0">Long-term trends across students, departments, and scholarships.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button id="btn-export-csv" class="btn btn-gold" aria-label="Export table data to CSV">
+          <i class="bi bi-download me-1"></i>Export CSV
+        </button>
+        <button id="btn-export-png" class="btn btn-crimson" aria-label="Export charts to PNG">
+          <i class="bi bi-image me-1"></i>Export PNG
+        </button>
+        <button id="btn-print" class="btn btn-outline-dark" aria-label="Print insights">
+          <i class="bi bi-printer me-1"></i>Print
+        </button>
       </div>
     </div>
 
-    <!-- KPI Cards -->
-    <div class="grid md:grid-cols-3 gap-6 mb-10" id="kpi-cards">
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Total Users</h3>
-        <p class="text-4xl mt-2" id="users-total">–</p>
+    <!-- =================== FILTER BAR =================== -->
+    <div class="card p-3 mb-4 shadow-sm">
+      <form id="filter-form" class="row g-3 align-items-end" aria-label="Insights filters">
+        <div class="col-md-3">
+          <label for="date-range" class="form-label">Date Range</label>
+          <select id="date-range" class="form-select">
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 6 months</option>
+            <option value="365" selected>Last 12 months</option>
+            <option value="1095">Last 3 years</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="department" class="form-label">Department</label>
+          <select id="department" class="form-select">
+            <option value="all" selected>All Departments</option>
+            <option value="Engineering Tech">Engineering Tech</option>
+            <option value="Business">Business</option>
+            <option value="Education">Education</option>
+            <option value="Arts & Sciences">Arts & Sciences</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="cohort" class="form-label">Cohort</label>
+          <select id="cohort" class="form-select">
+            <option value="all" selected>All Students</option>
+            <option value="first-year">First-Year</option>
+            <option value="transfer">Transfer</option>
+            <option value="graduate">Graduate</option>
+          </select>
+        </div>
+        <div class="col-md-3 d-grid">
+          <button type="submit" class="btn btn-crimson fw-bold"><i class="bi bi-funnel me-1"></i>Apply Filters</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- =================== TIMELINE & HIGHLIGHTS =================== -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-8">
+        <div class="card p-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="font-heading text-crimson m-0">Engagement Timeline</h4>
+            <span id="timeline-last-updated" class="small text-gray">—</span>
+          </div>
+          <div id="chart-timeline" style="height:380px;" role="img" aria-label="Student engagement over time"></div>
+        </div>
       </div>
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Active Sessions</h3>
-        <p class="text-4xl mt-2" id="active-sessions">–</p>
-      </div>
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Open Scholarships</h3>
-        <p class="text-4xl mt-2" id="open-scholarships">–</p>
-      </div>
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Upcoming Events</h3>
-        <p class="text-4xl mt-2" id="events-upcoming">–</p>
-      </div>
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Jobs Posted</h3>
-        <p class="text-4xl mt-2" id="jobs-posted">–</p>
-      </div>
-      <div class="card p-5 text-center">
-        <h3 class="font-bold text-lg">Avg Match Score</h3>
-        <p class="text-4xl mt-2" id="avg-match-score">–%</p>
+      <div class="col-lg-4">
+        <div class="card p-3 shadow-sm h-100">
+          <h4 class="font-heading text-crimson mb-2">Highlights</h4>
+          <ul class="list-unstyled small mb-3" id="highlights-list" aria-live="polite">
+            <li>Loading highlights…</li>
+          </ul>
+          <div class="border rounded p-2 bg-light">
+            <div class="d-flex justify-content-between">
+              <span class="text-gray">YoY Engagement</span>
+              <span id="kpi-yoy" class="fw-bold">—</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-gray">Avg Session Time</span>
+              <span id="kpi-session" class="fw-bold">—</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-gray">Retention (Rolling)</span>
+              <span id="kpi-retention" class="fw-bold">—</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Insight Feed -->
-    <div class="card p-6 mb-8">
-      <h2 class="text-2xl font-heading text-crimson mb-4">AI-Generated Insights</h2>
-      <div id="insight-content" class="prose text-gray">Loading insights...</div>
+    <!-- =================== DEPARTMENT COMPARISON =================== -->
+    <div class="card p-3 mb-4 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="font-heading text-crimson m-0">Department Comparison</h4>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="toggle-normalize" checked>
+          <label class="form-check-label" for="toggle-normalize">Normalize by Enrollment</label>
+        </div>
+      </div>
+      <div id="chart-departments" style="height:380px;" role="img" aria-label="Department comparison"></div>
+      <div class="table-responsive mt-3">
+        <table class="table table-sm align-middle" id="table-departments">
+          <thead class="table-light">
+            <tr>
+              <th>Department</th>
+              <th class="text-end">Engagement</th>
+              <th class="text-end">Scholarship Apps</th>
+              <th class="text-end">Job Views</th>
+              <th class="text-end">Employment Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Trend Chart -->
-    <div class="card p-6">
-      <h2 class="text-2xl font-heading text-crimson mb-4">Engagement Trends</h2>
-      <canvas id="trendChart" height="100"></canvas>
+    <!-- =================== SCHOLARSHIP IMPACT =================== -->
+    <div class="card p-3 mb-4 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="font-heading text-crimson m-0">Scholarship Impact</h4>
+        <select id="impact-dimension" class="form-select w-auto">
+          <option value="retention">Retention</option>
+          <option value="gpa">GPA</option>
+          <option value="employment" selected>Employment</option>
+        </select>
+      </div>
+      <div id="chart-impact" style="height:380px;" role="img" aria-label="Scholarship impact by dimension"></div>
+      <p class="small text-gray mt-2">Impact measures compare scholarship recipients vs matched peers (propensity weighting baseline).</p>
+    </div>
+
+    <!-- =================== AI NARRATIVE =================== -->
+    <div class="card p-3 shadow-sm">
+      <h4 class="font-heading text-crimson mb-2"><i class="bi bi-stars me-2"></i>AI Narrative</h4>
+      <div id="ai-narrative-output" class="p-3 border rounded bg-light small mb-3" style="min-height:120px">Ask Gorilla AI to synthesize these insights.</div>
+      <div class="input-group">
+        <input id="ai-narrative-input" class="form-control" placeholder="Explain the biggest changes across departments in the last year…">
+        <button id="ai-narrative-btn" class="btn btn-crimson"><i class="bi bi-send-fill me-1"></i>Ask AI</button>
+      </div>
     </div>
   </div>
 </section>
-<script src="{{ url_for('static', filename='js/analytics-dashboard.js') }}"></script>
+
+<!-- =============== SCRIPTS (CSP NONCE) =============== -->
+<script nonce="{{ csp_nonce }}" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script nonce="{{ csp_nonce }}">
+(function(){
+  // ---------- Utilities ----------
+  const $ = (sel) => document.querySelector(sel);
+  const $all = (sel) => document.querySelectorAll(sel);
+  const fmtPct = (n) => (n>0? "+":"") + (n*100).toFixed(1) + "%";
+  const themeColor = () => document.body.classList.contains("dark") ? "#fff" : "#111";
+  const plotLayout = () => ({
+    margin: {t:10,r:10,b:50,l:50},
+    paper_bgcolor: "transparent",
+    plot_bgcolor: "transparent",
+    font: { color: themeColor() },
+    xaxis: { gridcolor: "rgba(0,0,0,0.1)" },
+    yaxis: { gridcolor: "rgba(0,0,0,0.1)" }
+  });
+
+  // ---------- State ----------
+  let state = {
+    range: 365,
+    dept: "all",
+    cohort: "all",
+    normalize: true,
+    impactDim: "employment",
+    timeline: [],
+    depts: [],
+    impact: []
+  };
+
+  // ---------- Fetchers (replace with real APIs as they come online) ----------
+  async function fetchTimeline() {
+    // Placeholder: synthesize data locally for now
+    const days = state.range;
+    const today = new Date();
+    const series = [];
+    for (let i=days-1;i>=0;i--){
+      const d = new Date(today); d.setDate(d.getDate()-i);
+      series.push({ date: d.toISOString().slice(0,10), value: 50 + Math.round(15*Math.sin(i/14)) + Math.round(Math.random()*8) });
+    }
+    state.timeline = series;
+    return series;
+  }
+
+  async function fetchDepartments() {
+    const raw = [
+      { name:"Engineering Tech", engagement: 78, scholarships: 64, jobs: 82, employment: 0.92, enroll: 1200 },
+      { name:"Business",         engagement: 74, scholarships: 58, jobs: 77, employment: 0.88, enroll: 1500 },
+      { name:"Education",        engagement: 66, scholarships: 49, jobs: 63, employment: 0.84, enroll: 900  },
+      { name:"Arts & Sciences",  engagement: 70, scholarships: 53, jobs: 71, employment: 0.86, enroll: 1800 },
+    ];
+    state.depts = raw;
+    return raw;
+  }
+
+  async function fetchImpact() {
+    // By dimension; positive means scholarship recipients outperform peers
+    const base = {
+      retention:  [0.06, 0.04, 0.03, 0.05],
+      gpa:        [0.12, 0.08, 0.05, 0.09],      // GPA delta (recipients - peers)
+      employment: [0.07, 0.05, 0.04, 0.06],      // Rate delta
+    }[state.impactDim];
+
+    const labels = ["Engineering Tech","Business","Education","Arts & Sciences"];
+    state.impact = labels.map((l,i)=>({dept:l, delta: base[i]}));
+    return state.impact;
+  }
+
+  // ---------- Renderers ----------
+  async function renderTimeline(){
+    const series = state.timeline.length ? state.timeline : await fetchTimeline();
+    const x = series.map(p=>p.date);
+    const y = series.map(p=>p.value);
+    const trace = {
+      x, y,
+      type: "scatter",
+      mode: "lines",
+      line: { color: "#a6192e", width: 3 },
+      hovertemplate: "%{x}<br>Engagement: %{y}<extra></extra>"
+    };
+    Plotly.newPlot("chart-timeline", [trace], plotLayout(), {displayModeBar:false});
+    $("#timeline-last-updated").textContent = "Updated " + new Date().toLocaleString();
+
+    // Highlights & KPIs
+    const last = y[y.length-1], first = y[0];
+    const yoy = (last-first)/Math.max(1,first);
+    const session = 3 + Math.random()*1.5; // minutes, mocked
+    const retention = 0.82 + Math.random()*0.06;
+
+    $("#kpi-yoy").textContent = fmtPct(yoy);
+    $("#kpi-yoy").className = "fw-bold " + (yoy>=0? "text-success":"text-danger");
+    $("#kpi-session").textContent = session.toFixed(1) + " min";
+    $("#kpi-retention").textContent = Math.round(retention*100) + "%";
+
+    const hl = $("#highlights-list");
+    hl.innerHTML = `
+      <li>Engagement ${yoy>=0? "increased":"decreased"} ${fmtPct(Math.abs(yoy))} over the selected window.</li>
+      <li>Peak activity observed on ${x[y.indexOf(Math.max(...y))]}.</li>
+      <li>Off-peak on ${x[y.indexOf(Math.min(...y))]} — opportunity for outreach.</li>
+    `;
+  }
+
+  async function renderDepartments(){
+    const raw = state.depts.length ? state.depts : await fetchDepartments();
+    const denom = state.normalize ? "enroll" : null;
+
+    const labels = raw.map(d=>d.name);
+    const engagement = raw.map(d => denom ? (d.engagement/d[denom])*1000 : d.engagement);
+    const jobs = raw.map(d => denom ? (d.jobs/d[denom])*1000 : d.jobs);
+    const scholarships = raw.map(d => denom ? (d.scholarships/d[denom])*1000 : d.scholarships);
+
+    const layout = { ...plotLayout(), barmode: "group" };
+    const mkTrace = (name, arr, color) => ({
+      x: labels, y: arr, type: "bar",
+      marker:{ color }, name,
+      hovertemplate:"%{x}<br>"+name+": %{y:.2f}<extra></extra>"
+    });
+
+    Plotly.newPlot("chart-departments", [
+      mkTrace("Engagement", engagement, "#a6192e"),
+      mkTrace("Jobs Viewed", jobs, "#ffb81c"),
+      mkTrace("Scholarship Apps", scholarships, "#6b7280")
+    ], layout, {displayModeBar:false});
+
+    // Table
+    const tb = $("#table-departments tbody");
+    tb.innerHTML = "";
+    raw.forEach(d=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.name}</td>
+        <td class="text-end">${d.engagement.toFixed(0)}</td>
+        <td class="text-end">${d.scholarships.toFixed(0)}</td>
+        <td class="text-end">${d.jobs.toFixed(0)}</td>
+        <td class="text-end">${Math.round(d.employment*100)}%</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  async function renderImpact(){
+    const data = state.impact.length ? state.impact : await fetchImpact();
+    const x = data.map(d=>d.dept);
+    const y = data.map(d=>d.delta*100);
+    const trace = {
+      x, y, type:"bar", marker:{ color:"#a6192e" },
+      hovertemplate: "%{x}<br>Delta: %{y:.1f}%<extra></extra>"
+    };
+    const layout = { ...plotLayout(), yaxis:{ ticksuffix:"%" } };
+    Plotly.newPlot("chart-impact", [trace], layout, {displayModeBar:false});
+  }
+
+  // ---------- AI Narrative ----------
+  async function askAI(){
+    const promptBase = `
+      You are Gorilla AI for PittState-Connect. Summarize long-term trends using:
+      - Engagement timeline
+      - Department comparison
+      - Scholarship impact (${state.impactDim})
+      Provide 3-5 bullet insights + 1 actionable recommendation. Keep it concise.
+    `.trim();
+    const custom = $("#ai-narrative-input").value.trim();
+    const prompt = custom ? `${promptBase}\nUser focus: ${custom}` : promptBase;
+
+    const out = $("#ai-narrative-output");
+    out.innerHTML = "<em>Generating narrative…</em>";
+
+    try {
+      const res = await fetch("/analytics/ai/trends", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.summary) out.innerHTML = data.summary;
+      else out.innerHTML = `<span class="text-danger">AI Error: ${data.error || "Unavailable"}</span>`;
+    } catch(e){
+      out.innerHTML = `<span class="text-danger">AI request failed.</span>`;
+    }
+  }
+
+  // ---------- Exporters ----------
+  function exportCSV(){
+    // Collect department table rows
+    const rows = [["Department","Engagement","Scholarship Apps","Job Views","Employment Rate"]];
+    $all("#table-departments tbody tr").forEach(tr=>{
+      const cells = [...tr.children].map(td=>td.textContent.replace("%",""));
+      rows.push(cells);
+    });
+    const csv = rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "psu_insights_departments.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportPNG(){
+    // Export three core charts in sequence; combine filename suffixes
+    const charts = [
+      {id:"chart-timeline", name:"timeline"},
+      {id:"chart-departments", name:"departments"},
+      {id:"chart-impact", name:"impact"}
+    ];
+    for (const c of charts){
+      const node = document.getElementById(c.id);
+      try {
+        const url = await Plotly.toImage(node, {format:"png", height:600, width:1000, scale:2});
+        const a = document.createElement("a"); a.href = url; a.download = `psu_insights_${c.name}.png`; a.click();
+      } catch(e){
+        console.warn("PNG export failed for", c.id, e);
+      }
+    }
+  }
+
+  // ---------- Events ----------
+  $("#filter-form").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    state.range = +$("#date-range").value;
+    state.dept = $("#department").value;
+    state.cohort = $("#cohort").value;
+    await fetchTimeline(); await renderTimeline();
+    await renderDepartments();
+    await renderImpact();
+  });
+
+  $("#toggle-normalize").addEventListener("change", (e)=>{
+    state.normalize = e.target.checked;
+    renderDepartments();
+  });
+
+  $("#impact-dimension").addEventListener("change", async (e)=>{
+    state.impactDim = e.target.value;
+    await fetchImpact(); await renderImpact();
+  });
+
+  $("#ai-narrative-btn").addEventListener("click", askAI);
+  $("#btn-export-csv").addEventListener("click", exportCSV);
+  $("#btn-export-png").addEventListener("click", exportPNG);
+  $("#btn-print").addEventListener("click", ()=>window.print());
+
+  // Dark mode re-theme on toggle (listen for class changes)
+  const observer = new MutationObserver(()=> {
+    Plotly.relayout("chart-timeline", {font:{color:themeColor()}});
+    Plotly.relayout("chart-departments", {font:{color:themeColor()}});
+    Plotly.relayout("chart-impact", {font:{color:themeColor()}});
+  });
+  observer.observe(document.body, { attributes:true, attributeFilter:["class"] });
+
+  // ---------- Init ----------
+  (async function init(){
+    await fetchTimeline(); await renderTimeline();
+    await fetchDepartments(); await renderDepartments();
+    await fetchImpact(); await renderImpact();
+  })();
+})();
+</script>
 {% endblock %}
