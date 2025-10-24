@@ -1,86 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#a6192e">
-  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}PittState Connect{% endblock %}</title>
 
-  <!-- PSU Colors & Branding -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-  <link rel="icon" href="{{ url_for('static', filename='images/psu-logo.png') }}">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
-  <link rel="manifest" href="{{ url_for('static', filename='pwa/manifest.webmanifest') }}">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}"/>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-
+  <!-- Favicon (optional) -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" />
   {% block head %}{% endblock %}
+  <style>
+    /* Minimal Tailwind-like utilities used in examples */
+    .mx-auto{margin-left:auto;margin-right:auto}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.gap-2{gap:.5rem}.gap-4{gap:1rem}.ml-auto{margin-left:auto}.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.mt-3{margin-top:.75rem}.mb-0{margin-bottom:0}.p-0{padding:0}.p-3{padding:0.75rem}
+  </style>
 </head>
-<body>
-  <!-- ============================================================
-       🟥 NAVBAR
-  ============================================================ -->
-  <nav class="bg-white/90 backdrop-blur-lg shadow-md py-4 sticky top-0 z-50 transition-colors">
-    <div class="container mx-auto px-6 flex justify-between items-center">
-      <a href="{{ url_for('core_bp.home') }}" class="text-2xl font-heading text-crimson">PittState-Connect</a>
-      <div class="flex gap-6 text-gray text-sm font-semibold">
-        <a href="{{ url_for('core_bp.home') }}" class="hover:text-crimson">Home</a>
-        <a href="{{ url_for('careers_bp.dashboard') }}" class="hover:text-crimson">Careers</a>
-        <a href="{{ url_for('scholarships_bp.dashboard') }}" class="hover:text-crimson">Scholarships</a>
-        <a href="{{ url_for('community_bp.feed') }}" class="hover:text-crimson">Community</a>
-        <a href="{{ url_for('events_bp.list') }}" class="hover:text-crimson">Events</a>
-        <a href="{{ url_for('analytics_bp.insights') }}" class="hover:text-crimson">Analytics</a>
-        <a href="{{ url_for('profile_bp.dashboard') }}" class="hover:text-crimson">Profile</a>
-        <a href="{{ url_for('messages_bp.inbox') }}" class="hover:text-crimson">Messages</a>
-        <a href="{{ url_for('notifications_bp.center') }}" class="hover:text-crimson">Notifications</a>
-        <a href="{{ url_for('admin_bp.portal') }}" class="hover:text-crimson">Admin</a>
-        <a href="{{ url_for('system_bp.multicampus') }}" class="hover:text-crimson">Campuses</a>
-        <a href="{{ url_for('pwa_bp.onboarding') }}" class="hover:text-crimson">Install App</a>
+<body class="{% if request.cookies.get('theme','light') == 'dark' %}dark{% endif %}">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container flex items-center justify-between py-2">
+      <a class="brand" href="/">PittState Connect</a>
+      <div class="flex items-center gap-4">
+        <!-- Use safe absolute paths to avoid BuildError if endpoints are not registered -->
+        <a href="/" class="hover:text-crimson">Home</a>
+        <a href="/community" class="hover:text-crimson">Community</a>
+        <a href="/careers" class="hover:text-crimson">Careers</a>
+        <a href="/scholarships" class="hover:text-crimson">Scholarships</a>
+        <a href="/analytics" class="hover:text-crimson">Analytics</a>
+        <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">🌓</button>
       </div>
     </div>
   </nav>
 
-  <!-- ============================================================
-       PAGE CONTENT
-  ============================================================ -->
-  <main class="min-h-screen fade-in">
+  <!-- Global Insight Bar -->
+  <div id="insightBar">
+    <div class="container py-2 flex items-center gap-4">
+      <div><strong>Campus Mood:</strong> <span id="insightSentiment" class="badge">—</span></div>
+      <div><strong>Active Users:</strong> <span id="insightActive">—</span></div>
+      <div class="ml-auto text-gray" id="insightTakeaway">—</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <main class="container section">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ============================================================
-       FOOTER
-  ============================================================ -->
-  <footer class="text-center py-8">
-    <p class="text-white text-sm">&copy; {{ current_year or 2025 }} Pittsburg State University · Built with ❤️ by PSU Students</p>
+  <!-- Footer -->
+  <footer class="psu-footer">
+    <div class="container flex items-center justify-between">
+      <p class="mb-0">© {{ 2025 }} Pittsburg State University</p>
+      <p class="mb-0"><span class="pill pill-gold">Crimson & Gold</span></p>
+    </div>
   </footer>
 
-  <!-- ============================================================
-       GLOBAL SCRIPTS
-  ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // Dark mode toggle
-    const toggle = document.createElement("button");
-    toggle.id = "theme-toggle";
-    toggle.innerHTML = "☀️";
-    toggle.onclick = () => {
-      document.body.classList.toggle("dark");
-      toggle.innerHTML = document.body.classList.contains("dark") ? "🌙" : "☀️";
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    };
-    document.body.appendChild(toggle);
-    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
+  <!-- Scripts: AI client + helper panel -->
+  <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
 
-    // Register PWA
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("{{ url_for('static', filename='pwa/service-worker.js') }}");
+  <script>
+    // Theme toggle (persists via cookie)
+    (function(){
+      const btn = document.getElementById('theme-toggle');
+      if(!btn) return;
+      btn.addEventListener('click', () => {
+        const dark = document.body.classList.toggle('dark');
+        document.cookie = 'theme=' + (dark ? 'dark' : 'light') + ';path=/;SameSite=Lax;max-age=31536000';
       });
-    }
+    })();
+
+    // Insight bar auto-refresh
+    (async function refreshInsight(){
+      try {
+        const feed = Array.from(document.querySelectorAll('.card p')).slice(0,5).map(el=>el.textContent).join(' ');
+        const discussions = document.title || 'general campus discussions';
+        const jobs = 'career fair, internship, part-time';
+
+        const res = await (window.psuAI || new PSUAIClient()).insight({ feed, discussions, jobs });
+        if(res.ok){
+          const s = res.data.sentiment || 'neutral';
+          const mood = document.getElementById('insightSentiment');
+          mood.textContent = s;
+          mood.className = 'badge ' + (s==='positive' ? 'badge-positive' : s==='negative' ? 'badge-negative' : 'badge-neutral');
+          document.getElementById('insightActive').textContent = res.data.activeUsers ?? '—';
+          document.getElementById('insightTakeaway').textContent = res.data.takeaway || '—';
+        }
+      } catch(e) {}
+      setTimeout(refreshInsight, 60 * 60 * 1000);
+    })();
   </script>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>
