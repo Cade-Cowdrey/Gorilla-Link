@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Employer Portal · PittState Connect{% endblock %}
+{% block content %}
+<h1>Employer Portal</h1>
+<div class="card">
+  <div class="card-body">
+    <p><strong>Sponsored Items:</strong> {{ model.sponsored }}</p>
+    <h3>Openings</h3>
+    <table class="table">
+      <thead><tr><th>Role</th><th>Department</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for j in model.openings %}
+          <tr><td>{{ j.title }}</td><td>{{ j.dept }}</td><td>{{ j.status }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
