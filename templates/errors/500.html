@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Server Error | PittState-Connect{% endblock %}
+{% block content %}
+<div class="min-h-screen flex flex-col justify-center items-center text-center p-10 bg-gradient-to-r from-[#A6192E] to-[#FFB81C] text-white">
+  <h1 class="text-6xl font-bold mb-6">500</h1>
+  <p class="text-xl mb-4">Oops! Something went wrong on our end.</p>
+  <p class="text-lg mb-8">The PittState-Connect team has been notified.</p>
+  <a href="/" class="bg-white text-[#A6192E] px-6 py-3 rounded-lg font-semibold hover:bg-[#FFB81C] hover:text-black transition">
+    Return Home
+  </a>
+</div>
+{% endblock %}
