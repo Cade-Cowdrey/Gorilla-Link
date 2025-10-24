@@ -1,61 +1,67 @@
-# /config/prod.py
 import os
+from . import BaseConfig, PSU_BRAND_DEFAULT
 
-class ProdConfig:
-    """Production configuration for PittState-Connect (Render / PSU server)."""
+
+class ProdConfig(BaseConfig):
     DEBUG = False
     TESTING = False
+    TEMPLATES_AUTO_RELOAD = False
 
-    # Secure Database (Render or AWS RDS)
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "").replace("postgres://", "postgresql://")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Render sets DATABASE_URL with postgres:// — SQLAlchemy accepts it
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", BaseConfig.SQLALCHEMY_DATABASE_URI)
 
-    # Secrets and sessions
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    SESSION_TYPE = "redis"
-    SESSION_PERMANENT = False
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = "psc_session:"
-    REDIS_URL = os.getenv("REDIS_URL")
+    # Sessions: prefer Redis in prod if available
+    if os.getenv("REDIS_URL"):
+        SESSION_TYPE = "redis"
+        SESSION_REDIS = os.getenv("REDIS_URL")
 
-    # Flask-Mail (SendGrid recommended)
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
+    # Stricter cookies in prod
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"
 
-    # Flask-Talisman (Strict HTTPS + CSP)
-    TALISMAN_FORCE_HTTPS = True
-    TALISMAN_CONTENT_SECURITY_POLICY = {
-        "default-src": "'self'",
-        "img-src": ["'self'", "data:", "https:"],
-        "script-src": ["'self'", "'nonce-*'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com"],
-        "connect-src": ["'self'", "https://api.openai.com"],
+    # Cache: allow easy swap to RedisCache or Memcached
+    CACHE_TYPE = os.getenv("CACHE_TYPE", BaseConfig.CACHE_TYPE)
+    CACHE_DEFAULT_TIMEOUT = int(os.getenv("CACHE_DEFAULT_TIMEOUT", "300"))
+
+    # Logging level
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+    # Brand (can be overridden by env)
+    PSU_BRAND = {
+        **PSU_BRAND_DEFAULT,
+        "crimson": os.getenv("PSU_COLOR_CRIMSON", PSU_BRAND_DEFAULT["crimson"]),
+        "gold": os.getenv("PSU_COLOR_GOLD", PSU_BRAND_DEFAULT["gold"]),
+        "accent": os.getenv("PSU_COLOR_ACCENT", PSU_BRAND_DEFAULT["accent"]),
+        "tagline": os.getenv("PSU_TAGLINE", PSU_BRAND_DEFAULT["tagline"]),
+        "favicon": os.getenv("PSU_FAVICON", PSU_BRAND_DEFAULT["favicon"]),
     }
 
-    # OpenAI Integration
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    # CORS: lock down to explicit origins in prod by default
+    _origins = os.getenv("CORS_ORIGINS", "")
+    if not _origins or _origins.strip() == "*":
+        # If you truly want *, set CORS_ORIGINS="*"
+        CORS_ORIGINS = ["https://pittstate-connect.onrender.com"]
+    else:
+        CORS_ORIGINS = [o.strip() for o in _origins.split(",") if o.strip()]
 
-    # AWS S3 or compatible cloud bucket
-    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-    AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET", "pittstate-connect-bucket")
+    # Sentry environment tag
+    SENTRY_ENVIRONMENT = "production"
 
-    # Logging
-    LOG_LEVEL = "INFO"
-    LOG_FILE = os.getenv("LOG_FILE", "/var/log/pittstate-connect.log")
-
-    # Scheduler & Analytics
-    SCHEDULER_API_ENABLED = True
-    ANALYTICS_CACHE_TTL = 900  # 15 min Redis cache
-    ANALYTICS_SNAPSHOT_INTERVAL_HOURS = 6
-
-    # Security headers
-    SECURE_COOKIES = True
-    REMEMBER_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
+    # Stronger CSP base (nonce still added at runtime)
+    TALISMAN_CONTENT_SECURITY_POLICY = {
+        "default-src": "'self'",
+        "img-src": ["'self'", "data:", "https://*"],
+        "script-src": ["'self'"],  # nonce added later
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "connect-src": [
+            "'self'",
+            "https://api.openai.com",
+            "https://*.amazonaws.com",
+            "https://pittstate-connect.onrender.com",
+        ],
+        "font-src": ["'self'", "data:"],
+        "frame-ancestors": ["'none'"],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+    }
