@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Donor Portal · PittState Connect{% endblock %}
+{% block content %}
+<h1>Donor Portal</h1>
+<div class="card">
+  <div class="card-body">
+    <p><strong>Active Funds:</strong> {{ model.funds }}</p>
+    <p><strong>Donations this term:</strong> {{ model.donations_this_term }}</p>
+    <p><strong>Average Gift:</strong> ${{ '%.2f'|format(model.avg_gift) }}</p>
+    <h3>Impact</h3>
+    <ul>{% for i in model.impact %}<li>{{ i }}</li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}
