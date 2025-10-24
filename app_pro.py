@@ -1,180 +1,145 @@
-"""
-PittState-Connect — Production Entry Point
------------------------------------------
-Fully enhanced PSU-branded Flask app with blueprints, analytics, AI helper,
-PWA registration, error logging, and security configuration.
-"""
+# app_pro.py
+# ===============================================================
+#  PittState-Connect | PSU-Branded Full Production App (Final)
+#  ---------------------------------------------------------------
+#  Includes:
+#   - Unified blueprint registration
+#   - AI Tools, Digests, Donor, Employer, Security, Analytics
+#   - Flask-Login + SQLAlchemy + Mail setup
+#   - APScheduler for automated reminders
+#   - CORS, Compression, Talisman (security), DebugToolbar
+# ===============================================================
 
-from flask import Flask, render_template, jsonify, request
-from flask_cors import CORS
-from flask_compress import Compress
-from flask_mail import Mail
+from __future__ import annotations
+import os, logging
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mail import Mail
+from flask_compress import Compress
+from flask_cors import CORS
 from flask_session import Session
-from datetime import datetime
-import logging, os
+from flask_talisman import Talisman
+from flask_debugtoolbar import DebugToolbarExtension
+from apscheduler.schedulers.background import BackgroundScheduler
 
-# ------------------------------------------------------------
-#  INIT CORE EXTENSIONS
-# ------------------------------------------------------------
+# Initialize core extensions
 db = SQLAlchemy()
+migrate = Migrate()
 mail = Mail()
 login_manager = LoginManager()
-sess = Session()
+compress = Compress()
+toolbar = DebugToolbarExtension()
 
-# ------------------------------------------------------------
-#  APP FACTORY
-# ------------------------------------------------------------
+
+# ===============================================================
+#  App Factory
+# ===============================================================
 def create_app():
-    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app = Flask(__name__, instance_relative_config=False)
 
-    # --------------------------------------------------------
-    #  CONFIGURATION
-    # --------------------------------------------------------
-    app.config.update(
-        SECRET_KEY=os.getenv("SECRET_KEY", "dev-key-change-this"),
+    # ------------------------------------------------------------
+    #  Configuration
+    # ------------------------------------------------------------
+    app.config.from_mapping(
+        SECRET_KEY=os.getenv("SECRET_KEY", "dev-key"),
         SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///pittstate.db"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        SESSION_TYPE="filesystem",
-        MAIL_SERVER="smtp.sendgrid.net",
-        MAIL_PORT=587,
+        MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+        MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
         MAIL_USE_TLS=True,
-        MAIL_USERNAME=os.getenv("SENDGRID_USERNAME", "apikey"),
-        MAIL_PASSWORD=os.getenv("SENDGRID_API_KEY", ""),
-        MAIL_DEFAULT_SENDER=("PittState Connect", "no-reply@pittstateconnect.com"),
+        MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+        MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+        SESSION_TYPE="filesystem",
+        SESSION_PERMANENT=False,
+        DEBUG_TB_INTERCEPT_REDIRECTS=False,
     )
 
-    # --------------------------------------------------------
-    #  EXTENSION INIT
-    # --------------------------------------------------------
-    CORS(app)
-    Compress(app)
+    # ------------------------------------------------------------
+    #  Extensions Initialization
+    # ------------------------------------------------------------
     db.init_app(app)
+    migrate.init_app(app, db)
     mail.init_app(app)
     login_manager.init_app(app)
-    sess.init_app(app)
+    compress.init_app(app)
+    Session(app)
+    CORS(app)
+    toolbar.init_app(app)
+    Talisman(app, content_security_policy=None)
 
-    # --------------------------------------------------------
-    #  LOGGING
-    # --------------------------------------------------------
-    log_dir = "logs"
-    os.makedirs(log_dir, exist_ok=True)
-    file_handler = logging.FileHandler(f"{log_dir}/pittstate.log")
-    formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] in %(module)s: %(message)s"
-    )
-    file_handler.setFormatter(formatter)
-    app.logger.addHandler(file_handler)
-    app.logger.setLevel(logging.INFO)
-    app.logger.info("🚀 Booting PittState-Connect (env=production)")
-    app.logger.info("Compression: enabled")
+    # ------------------------------------------------------------
+    #  User loader for Flask-Login
+    # ------------------------------------------------------------
+    from models import User  # Ensure your User model exists
 
-    # --------------------------------------------------------
-    #  BLUEPRINT IMPORTS
-    # --------------------------------------------------------
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    login_manager.login_view = "auth_bp.login"
+    login_manager.login_message_category = "info"
+
+    # ------------------------------------------------------------
+    #  Register Blueprints
+    # ------------------------------------------------------------
     from blueprints.core.routes import core_bp
-    from blueprints.careers.routes import careers_bp
-    from blueprints.scholarships.routes import scholarships_bp
-    from blueprints.community.routes import community_bp
-    from blueprints.events.routes import events_bp
+    from blueprints.auth.routes import auth_bp
+    from blueprints.digests import digests_bp
+    from blueprints.ai_tools import ai_tools_bp
+    from blueprints.donor import donor_bp
+    from blueprints.employer import employer_bp
+    from blueprints.security import security_bp
+    from blueprints.api.routes import api_bp
     from blueprints.analytics.routes import analytics_bp
-    from blueprints.profile.routes import profile_bp
-    from blueprints.messages.routes import messages_bp
-    from blueprints.notifications.routes import notifications_bp
-    from blueprints.admin.routes import admin_bp
-    from blueprints.system.routes import system_bp
-    from blueprints.pwa.routes import pwa_bp
 
-    # --------------------------------------------------------
-    #  BLUEPRINT REGISTRATION
-    # --------------------------------------------------------
     app.register_blueprint(core_bp)
-    app.register_blueprint(careers_bp)
-    app.register_blueprint(scholarships_bp)
-    app.register_blueprint(community_bp)
-    app.register_blueprint(events_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(digests_bp)
+    app.register_blueprint(ai_tools_bp)
+    app.register_blueprint(donor_bp)
+    app.register_blueprint(employer_bp)
+    app.register_blueprint(security_bp)
+    app.register_blueprint(api_bp)
     app.register_blueprint(analytics_bp)
-    app.register_blueprint(profile_bp)
-    app.register_blueprint(messages_bp)
-    app.register_blueprint(notifications_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(system_bp)
-    app.register_blueprint(pwa_bp)
 
     app.logger.info("✅ Blueprints registered successfully")
 
-    # --------------------------------------------------------
-    #  GLOBAL CONTEXT
-    # --------------------------------------------------------
-    @app.context_processor
-    def inject_globals():
-        return {
-            "current_year": datetime.now().year,
-            "psu_brand": {
-                "name": "Pittsburg State University",
-                "tagline": "Once a Gorilla, Always a Gorilla",
-                "colors": {"crimson": "#a6192e", "gold": "#ffb81c"}
-            }
-        }
+    # ------------------------------------------------------------
+    #  Scheduler Setup (for Digests + Deadlines)
+    # ------------------------------------------------------------
+    try:
+        from tasks.reminders import run_daily_digest_job, run_deadline_reminders_job
 
-    # --------------------------------------------------------
-    #  ERROR HANDLERS (PSU-STYLED)
-    # --------------------------------------------------------
-    @app.errorhandler(404)
-    def not_found(e):
-        return render_template("core/errors/404.html", error=e), 404
+        scheduler = BackgroundScheduler(daemon=True, timezone="UTC")
+        scheduler.add_job(lambda: run_daily_digest_job(app), "cron", hour=12, minute=0)
+        scheduler.add_job(lambda: run_deadline_reminders_job(app), "cron", hour=13, minute=0)
 
-    @app.errorhandler(500)
-    def internal_error(e):
-        app.logger.error(f"Internal Server Error: {e}")
-        return render_template("core/errors/500.html", error=e), 500
+        # Only start on one dyno in production
+        if os.getenv("SCHEDULER_LEADER", "1") == "1":
+            scheduler.start()
+            app.logger.info("🕒 Scheduler started successfully")
+    except Exception as e:
+        app.logger.error(f"⚠️ Scheduler init failed: {e}")
 
-    # --------------------------------------------------------
-    #  SIMPLE HEALTH ENDPOINT
-    # --------------------------------------------------------
-    @app.route("/health")
-    def health():
-        return jsonify({"status": "ok", "timestamp": datetime.utcnow().isoformat()})
+    # ------------------------------------------------------------
+    #  Logging
+    # ------------------------------------------------------------
+    if not app.debug:
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
 
-    # --------------------------------------------------------
-    #  OPTIONAL AI HELPER ENDPOINT
-    # --------------------------------------------------------
-    @app.route("/api/ai/summary", methods=["POST"])
-    def ai_summary():
-        """Example stub: summarize text using OpenAI key (future-ready)."""
-        text = request.json.get("text", "")
-        summary = f"AI summary (stub): {text[:120]}..."
-        return jsonify({"summary": summary})
-
-    # --------------------------------------------------------
-    #  OPTIONAL ANALYTICS ENDPOINT
-    # --------------------------------------------------------
-    @app.route("/api/metrics")
-    def metrics():
-        """Collect basic metrics for dashboards."""
-        data = {
-            "active_users": 3240,
-            "engagement_score": 82,
-            "uptime": "99.98%",
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-        return jsonify(data)
-
-    # --------------------------------------------------------
-    #  ROOT REDIRECT
-    # --------------------------------------------------------
-    @app.route("/")
-    def index():
-        return render_template("core/home.html")
+    app.logger.info("🚀 Booting PittState-Connect (env=%s)", os.getenv("FLASK_ENV", "production"))
+    app.logger.info("Compression: enabled")
 
     return app
 
 
-# ------------------------------------------------------------
-#  APP INSTANCE FOR WSGI
-# ------------------------------------------------------------
-app = create_app()
-
+# ===============================================================
+#  App Entry Point
+# ===============================================================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000, debug=False)
+    app = create_app()
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
