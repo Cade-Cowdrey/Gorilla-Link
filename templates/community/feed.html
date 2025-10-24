@@ -1,58 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Community Feed | PittState-Connect{% endblock %}
-
+{% block title %}Campus Feed | PittState-Connect{% endblock %}
 {% block content %}
-<!-- ============================================================
-     🦍 COMMUNITY FEED
-============================================================ -->
-<section class="section text-center fade-in">
-  <h1 class="text-5xl font-heading text-crimson mb-4">The Jungle Report</h1>
-  <p class="text-gray max-w-2xl mx-auto mb-8">
-    Stay connected with fellow Gorillas — explore campus updates, student stories, and alumni insights.
-  </p>
+<section class="section section-light fade-in">
+  <div class="container mx-auto">
+    <h1 class="text-crimson font-heading mb-6 text-center">Campus Feed</h1>
+    <p class="text-gray text-center mb-8">Share moments, updates, and celebrate your Gorilla community.</p>
 
-  <form method="GET" action="{{ url_for('community_bp.feed') }}" class="max-w-xl mx-auto flex mb-10">
-    <input type="text" name="q" placeholder="Search posts..." 
-           class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-crimson">
-    <button type="submit" class="btn btn-crimson rounded-l-none">Search</button>
-  </form>
-</section>
-
-<!-- ============================================================
-     🗞️ POST GRID
-============================================================ -->
-<section class="section-light py-16 fade-in">
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-    {% for post in posts %}
-    <div class="card p-6">
-      <h3 class="text-2xl font-heading text-crimson mb-2">{{ post.title }}</h3>
-      <p class="text-sm text-gray mb-3">by {{ post.author_name }} · {{ post.timestamp.strftime('%b %d, %Y') }}</p>
-      {% if post.image_url %}
-      <img src="{{ post.image_url }}" alt="Post image" class="rounded-lg mb-4 w-full h-48 object-cover">
-      {% endif %}
-      <p class="text-gray mb-4">{{ post.content[:180] }}...</p>
-      <a href="{{ url_for('community_bp.post_detail', post_id=post.id) }}" class="btn btn-gold">Read More</a>
+    <!-- New Post Form -->
+    <div class="card p-5 mb-8">
+      <form id="postForm">
+        <textarea class="w-full p-3 rounded border border-gray-300 focus:ring-2 focus:ring-crimson" rows="3" placeholder="What's on your mind?"></textarea>
+        <div class="flex justify-end mt-3">
+          <button type="submit" class="btn btn-gold">Post Update</button>
+        </div>
+      </form>
     </div>
-    {% else %}
-    <div class="col-span-3 text-center text-gray">No posts available yet — be the first to share something!</div>
-    {% endfor %}
-  </div>
-</section>
 
-<!-- ============================================================
-     🧠 AI COMMUNITY INSIGHTS
-============================================================ -->
-<section class="section-dark text-center py-16 fade-in">
-  <h2 class="text-3xl font-heading text-gold mb-4">AI Campus Highlights</h2>
-  <p class="text-white max-w-2xl mx-auto mb-8">
-    Our assistant summarizes trending campus topics and sentiment from current posts.
-  </p>
-  <div class="max-w-3xl mx-auto bg-white text-left p-6 rounded-lg shadow-md dark:bg-[#1e1e1e] dark:text-gray">
-    <ul class="list-disc pl-6 space-y-2 text-gray">
-      <li>Most discussed: <strong>Career Fair 2025</strong></li>
-      <li>Positive trend: Alumni mentorship participation ↑ <strong>18%</strong></li>
-      <li>Top topic: <strong>Scholarship success stories</strong></li>
-    </ul>
+    <!-- Feed Posts -->
+    {% for post in posts %}
+    <div class="card p-5 mb-5 fade-in">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-heading text-crimson">{{ post.user }}</h3>
+        <small class="text-gray">{{ post.time }}</small>
+      </div>
+      <p class="mb-3">{{ post.content }}</p>
+      <div class="flex items-center space-x-4">
+        <button class="text-crimson hover:text-gold transition"><i class="fa-solid fa-heart"></i> Like</button>
+        <button class="text-crimson hover:text-gold transition"><i class="fa-solid fa-comment"></i> Comment</button>
+        <button class="text-crimson hover:text-gold transition"><i class="fa-solid fa-share"></i> Share</button>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Optional Enhancement: AI Feed Summary -->
+    <div class="card p-5 mt-10 text-center fade-in">
+      <h3 class="font-heading text-crimson mb-3">AI Summary</h3>
+      <p class="text-gray mb-3">Curious about campus sentiment this week?</p>
+      <button id="aiSummaryBtn" class="btn btn-crimson">Generate Weekly Summary</button>
+      <p id="aiSummaryText" class="mt-3 text-sm text-gray hidden"></p>
+    </div>
   </div>
 </section>
+<script>
+document.getElementById('aiSummaryBtn').addEventListener('click', async () => {
+  const res = await fetch('/api/ai/summary');
+  const data = await res.json();
+  const out = document.getElementById('aiSummaryText');
+  out.textContent = data.summary || "No summary available.";
+  out.classList.remove('hidden');
+});
+</script>
 {% endblock %}
