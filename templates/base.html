@@ -1,142 +1,42 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-  {% if csp_nonce %}
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 script-src 'self' 'nonce-{{ csp_nonce }}' https:;
-                 style-src 'self' 'unsafe-inline' https:;
-                 img-src 'self' data: https:;
-                 font-src 'self' https: data:;
-                 connect-src 'self' https:;
-                 frame-ancestors 'self';
-                 object-src 'none';">
-  {% endif %}
-  <meta charset="utf-8" nonce="{{ csp_nonce }}">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="description" content="PittState-Connect — Linking Gorillas, Alumni, and Employers.">
-  <meta name="theme-color" content="{{ PSU_BRAND['crimson'] }}">
-  <title>{% block title %}{{ PSU_BRAND['name'] }}{% endblock %}</title>
+{% extends "base_layout.html" %}
+{% block head %}
+<title>PittState-Connect</title>
+<link rel="icon" href="{{ PSU_BRAND.favicon }}" />
+{% endblock %}
 
-  <link rel="icon" href="{{ url_for('static', filename='img/psu_logo.png') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
-  <link rel="preconnect" href="https://fonts.googleapis.com" nonce="{{ csp_nonce }}">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin nonce="{{ csp_nonce }}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap"
-        rel="stylesheet" nonce="{{ csp_nonce }}">
-</head>
-
-<body class="font-body bg-light text-dark fade-in">
-
-  <!-- =====================================================
-       NAVBAR — PSU Crimson & Gold
-  ====================================================== -->
-  <nav class="navbar navbar-expand-lg bg-crimson text-white fixed-top shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center py-2 px-3">
-      <a href="{{ url_for('core_bp.home') }}" class="navbar-brand font-heading text-gold">
-        <img src="{{ url_for('static', filename='img/gorilla_head.svg') }}" alt="PSU Gorilla" height="40" class="me-2">
-        {{ PSU_BRAND['name'] }}
-      </a>
-
-      <ul class="nav">
-        <li class="nav-item"><a href="{{ url_for('core_bp.home') }}" class="nav-link text-white">Home</a></li>
-        <li class="nav-item"><a href="{{ url_for('careers_bp.dashboard') }}" class="nav-link text-white">Careers</a></li>
-        <li class="nav-item"><a href="{{ url_for('departments_bp.list_departments') }}" class="nav-link text-white">Departments</a></li>
-        <li class="nav-item"><a href="{{ url_for('analytics_bp.dashboard') }}" class="nav-link text-white">Analytics</a></li>
-        <li class="nav-item"><a href="{{ url_for('digests_bp.feed') }}" class="nav-link text-white">Digest</a></li>
-        <li class="nav-item"><a href="{{ url_for('community_bp.index') }}" class="nav-link text-white">Community</a></li>
-        {% if current_user.is_authenticated %}
-        <li class="nav-item"><a href="{{ url_for('auth_bp.logout') }}" class="nav-link text-gold">Logout</a></li>
-        {% else %}
-        <li class="nav-item"><a href="{{ url_for('auth_bp.login') }}" class="nav-link text-gold">Login</a></li>
-        {% endif %}
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: {{ PSU_BRAND.gradient }};">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.index') }}">
+      <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="30" class="me-2" />
+      PittState-Connect
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link text-white">Home</a></li>
+        <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link text-white">Departments</a></li>
+        <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link text-white">Careers</a></li>
+        <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link text-white">Scholarships</a></li>
+        <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link text-white">Analytics</a></li>
+        <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link text-white">Alumni</a></li>
+        <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link text-white">Donors</a></li>
+        <li class="nav-item"><a href="{{ url_for('auth_bp.login') }}" class="btn btn-outline-light ms-2">Login</a></li>
       </ul>
-
-      <div class="d-flex align-items-center gap-2">
-        <button id="theme-toggle" class="btn btn-sm btn-outline-light rounded-circle" title="Toggle Dark/Light mode">
-          <i class="bi bi-sun-fill"></i>
-        </button>
-        <button id="ai-helper-btn" class="btn btn-sm btn-gold fw-bold rounded-pill px-3">
-          <i class="bi bi-stars me-1"></i> Ask AI
-        </button>
-      </div>
     </div>
-  </nav>
-
-  <!-- =====================================================
-       MAIN CONTENT WRAPPER
-  ====================================================== -->
-  <main id="main-content" class="pt-5 mt-4">
-    {% block content %}
-    <!-- Page-specific content -->
-    {% endblock %}
-  </main>
-
-  <!-- =====================================================
-       FOOTER — PSU Branding
-  ====================================================== -->
-  <footer class="section-dark text-center py-4 mt-5">
-    <div class="container">
-      <p class="fw-bold mb-1">{{ PSU_BRAND['name'] }}</p>
-      <p class="mb-2">{{ PSU_BRAND['tagline'] }}</p>
-      <p class="small">&copy; <span id="year"></span> Pittsburg State University. All Rights Reserved.</p>
-    </div>
-  </footer>
-
-  <!-- =====================================================
-       AI Helper & Analytics Insights Panels
-  ====================================================== -->
-  <div id="ai-helper-panel" class="ai-panel hidden">
-    <header class="ai-header">
-      <h5><i class="bi bi-robot me-2"></i>Gorilla AI Assistant</h5>
-      <button id="ai-close" class="btn-close" aria-label="Close"></button>
-    </header>
-    <section class="ai-body">
-      <div id="ai-chat-log"></div>
-      <div class="ai-input-group">
-        <input id="ai-input" type="text" class="form-control" placeholder="Ask about scholarships, jobs, or deadlines…">
-        <button id="ai-send" class="btn btn-crimson">Send</button>
-      </div>
-    </section>
   </div>
+</nav>
 
-  <!-- =====================================================
-       SCRIPTS — All inline JS uses CSP Nonce
-  ====================================================== -->
-  <script nonce="{{ csp_nonce }}" src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
-  <script nonce="{{ csp_nonce }}" src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
-  <script nonce="{{ csp_nonce }}" src="{{ url_for('static', filename='js/analytics-dashboard.js') }}"></script>
-  <script nonce="{{ csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', () => {
-      // --- Dark/Light Theme Toggle ---
-      const body = document.body;
-      const toggle = document.getElementById('theme-toggle');
-      const saved = localStorage.getItem('psu-theme');
-      if (saved === 'dark') body.classList.add('dark');
+<main class="container py-4">
+  {% block content %}{% endblock %}
+</main>
 
-      toggle.addEventListener('click', () => {
-        body.classList.toggle('dark');
-        localStorage.setItem('psu-theme', body.classList.contains('dark') ? 'dark' : 'light');
-      });
-
-      // --- Navbar Highlight ---
-      const links = document.querySelectorAll('nav a.nav-link');
-      links.forEach(link => {
-        if (link.href === window.location.href) link.classList.add('text-gold');
-      });
-
-      // --- Footer Year ---
-      document.getElementById('year').textContent = new Date().getFullYear();
-
-      // --- AI Helper Toggle ---
-      const aiBtn = document.getElementById('ai-helper-btn');
-      const aiPanel = document.getElementById('ai-helper-panel');
-      const aiClose = document.getElementById('ai-close');
-      aiBtn.addEventListener('click', () => aiPanel.classList.toggle('hidden'));
-      aiClose.addEventListener('click', () => aiPanel.classList.add('hidden'));
-    });
-  </script>
-</body>
-</html>
+<footer class="text-center py-4 bg-dark text-light">
+  <p class="mb-0 small">
+    &copy; {{ now().year }} Pittsburg State University · <strong>PittState-Connect</strong><br />
+    <span class="text-warning">{{ PSU_BRAND.tagline }}</span>
+  </p>
+</footer>
+{% endblock %}
