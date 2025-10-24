@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Mentorship Hub | PittState-Connect{% endblock %}
+{% block content %}
+<section class="section section-light fade-in">
+  <div class="container mx-auto text-center">
+    <h1 class="text-crimson font-heading mb-4">Mentorship Hub</h1>
+    <p class="text-gray mb-8">Connect with mentors to elevate your PSU experience and career goals.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for mentor in mentors %}
+      <div class="card p-5 fade-in">
+        <h3 class="font-heading text-crimson mb-1">{{ mentor.name }}</h3>
+        <p class="text-gray mb-2">{{ mentor.field }}</p>
+        <span class="inline-block px-3 py-1 rounded-full text-sm {% if mentor.status == 'Available' %}bg-gold text-dark{% else %}bg-crimson text-white{% endif %}">
+          {{ mentor.status }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Optional Enhancement: AI Match -->
+    <div class="card mt-10 p-5 fade-in text-center">
+      <h3 class="font-heading text-crimson mb-2">AI Mentor Match</h3>
+      <p class="text-gray mb-3">Find your best mentor match instantly using AI preferences.</p>
+      <button id="aiMatchBtn" class="btn btn-gold">Find My Mentor</button>
+      <p id="aiMatchResult" class="text-gray mt-3 hidden"></p>
+    </div>
+  </div>
+</section>
+<script>
+document.getElementById('aiMatchBtn').addEventListener('click', async () => {
+  const res = await fetch('/api/ai/match');
+  const data = await res.json();
+  const out = document.getElementById('aiMatchResult');
+  out.textContent = data.match || "AI could not find a match right now.";
+  out.classList.remove('hidden');
+});
+</script>
+{% endblock %}
