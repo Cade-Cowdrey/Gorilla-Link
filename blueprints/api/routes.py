@@ -1,114 +1,99 @@
-# blueprints/api/routes.py
 # ===============================================================
-#  PittState-Connect API Gateway (Final, Enhanced)
-#  ---------------------------------------------------------------
-#  Endpoints:
-#   • POST /api/ai/query
-#   • POST /api/ai/tools/analyze_essay
-#   • POST /api/ai/tools/optimize_resume
-#   • POST /api/ai/moderate
-#   • POST /api/ai/insight
-#   • POST /api/ai/recommendations
-#   • GET  /api/analytics/summary
-#   • GET  /api/analytics/trends
-#  Enhancements:
-#   • RBAC decorator
-#   • Redis cache (fallback to in-memory TTL)
-#   • Per-IP rate limiting
-#   • Activity webhook emitter
-#   • Safe OpenAI call
+#  PittState-Connect API Gateway — Final Polished Version
+#  Includes: OpenAI endpoints, smart analytics, Redis caching,
+#  webhook events, RBAC, rate limiting, AI tools, and resiliency.
 # ===============================================================
 
 from __future__ import annotations
-import os, time, json, traceback, threading
+import os, json, time, traceback, threading
 from datetime import datetime, timedelta
 from functools import wraps
-
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import current_user
 
-# ---------- OpenAI (optional) ----------
+# ----------------------------------------------------------------
+#  Optional Integrations
+# ----------------------------------------------------------------
 try:
     from openai import OpenAI
-    _openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 except Exception:
-    _openai_client = None
+    openai_client = None
 
-# ---------- Redis (optional) ----------
-_redis = None
+# Redis (optional)
 try:
-    import redis  # type: ignore
+    import redis
     redis_url = os.getenv("REDIS_URL")
-    if redis_url:
-        _redis = redis.from_url(redis_url)
+    redis_client = redis.from_url(redis_url) if redis_url else None
 except Exception:
-    _redis = None
+    redis_client = None
 
-# ---------- In-memory fallback cache ----------
-_cache_mem: dict[str, tuple[float, str]] = {}  # key -> (expires_ts, json_str)
+# In-memory cache fallback
+_cache: dict[str, tuple[float, str]] = {}
 _cache_lock = threading.Lock()
 
-def cache_get(key: str) -> dict | None:
-    if _redis:
-        raw = _redis.get(key)
+def cache_get(key: str):
+    if redis_client:
+        raw = redis_client.get(key)
         if raw:
             try: return json.loads(raw)
             except Exception: return None
         return None
     with _cache_lock:
-        v = _cache_mem.get(key)
+        v = _cache.get(key)
         if not v: return None
         exp, data = v
         if time.time() > exp:
-            _cache_mem.pop(key, None)
+            _cache.pop(key, None)
             return None
         try: return json.loads(data)
         except Exception: return None
 
-def cache_set(key: str, value: dict, ttl_sec: int = 300):
+def cache_set(key: str, value: dict, ttl: int = 300):
     payload = json.dumps(value)
-    if _redis:
-        _redis.setex(key, ttl_sec, payload)
+    if redis_client:
+        redis_client.setex(key, ttl, payload)
         return
     with _cache_lock:
-        _cache_mem[key] = (time.time() + ttl_sec, payload)
+        _cache[key] = (time.time() + ttl, payload)
 
-# ---------- Simple per-IP Rate Limiter ----------
-_rate_bucket: dict[str, list[float]] = {}  # ip -> timestamps (seconds)
+# ----------------------------------------------------------------
+#  Rate Limiting
+# ----------------------------------------------------------------
+_rate_map: dict[str, list[float]] = {}
 _rate_lock = threading.Lock()
-RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "60"))       # requests
-RATE_WINDOW = int(os.getenv("API_RATE_WINDOW", "60"))     # seconds
+RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "60"))
+RATE_WINDOW = int(os.getenv("API_RATE_WINDOW", "60"))
 
 def rate_limit(fn):
     @wraps(fn)
-    def _wrap(*args, **kwargs):
-        ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
+    def _wrap(*a, **kw):
+        ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "anon").split(",")[0]).strip()
         now = time.time()
         with _rate_lock:
-            bucket = _rate_bucket.get(ip, [])
-            # drop old
-            bucket = [t for t in bucket if now - t < RATE_WINDOW]
-            if len(bucket) >= RATE_LIMIT:
+            hits = [t for t in _rate_map.get(ip, []) if now - t < RATE_WINDOW]
+            if len(hits) >= RATE_LIMIT:
                 return jsonify({"success": False, "error": "Too many requests"}), 429
-            bucket.append(now)
-            _rate_bucket[ip] = bucket
-        return fn(*args, **kwargs)
+            hits.append(now)
+            _rate_map[ip] = hits
+        return fn(*a, **kw)
     return _wrap
 
-# ---------- RBAC Decorator ----------
-def _user_roles() -> set[str]:
-    # Expect your User model to have .roles (list/str) or .role
+# ----------------------------------------------------------------
+#  RBAC Decorator
+# ----------------------------------------------------------------
+def _roles() -> set[str]:
     try:
         if getattr(current_user, "is_authenticated", False):
-            if hasattr(current_user, "roles") and current_user.roles:
-                if isinstance(current_user.roles, (list, tuple, set)):
-                    return set(map(str.lower, current_user.roles))
-                return {str(current_user.roles).lower()}
-            if hasattr(current_user, "role") and current_user.role:
+            if hasattr(current_user, "roles"):
+                roles = current_user.roles
+                if isinstance(roles, (list, tuple, set)):
+                    return {r.lower() for r in roles}
+                return {str(roles).lower()}
+            if hasattr(current_user, "role"):
                 return {str(current_user.role).lower()}
     except Exception:
         pass
-    # Fallback: header-based role (for dev/test or service calls)
     hdr = request.headers.get("X-PSU-Role")
     return {hdr.lower()} if hdr else set()
 
@@ -116,198 +101,155 @@ def require_roles(*allowed):
     allowed = {r.lower() for r in allowed}
     def decorator(fn):
         @wraps(fn)
-        def _wrap(*args, **kwargs):
-            roles = _user_roles()
-            if not roles & allowed:
+        def _wrap(*a, **kw):
+            if not (_roles() & allowed):
                 return jsonify({"success": False, "error": "Forbidden"}), 403
-            return fn(*args, **kwargs)
+            return fn(*a, **kw)
         return _wrap
     return decorator
 
-# ---------- Safe OpenAI ----------
-def safe_openai_call(prompt: str, system_prompt: str = "You are a helpful PittState assistant.", max_tokens: int = 450, temperature: float = 0.7):
-    if not _openai_client:
-        return {"answer": f"[Offline AI] {prompt[:140]}…"}
-    try:
-        resp = _openai_client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            messages=[{"role":"system","content":system_prompt},{"role":"user","content":prompt}],
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        return {"answer": resp.choices[0].message.content.strip()}
-    except Exception as e:
-        current_app.logger.error(f"OpenAI Error: {e}")
-        return {"answer": "⚠️ AI request failed. Please try again later."}
-
-# ---------- Webhook Emitter ----------
+# ----------------------------------------------------------------
+#  Webhook Logger (Slack / Discord / etc.)
+# ----------------------------------------------------------------
 import urllib.request
-def emit_activity(event_type: str, payload: dict):
+def emit_activity(event: str, data: dict):
     url = os.getenv("WEBHOOK_URL")
     if not url:
-        current_app.logger.info(f"[Webhook:disabled] {event_type} {payload}")
+        current_app.logger.info(f"[Webhook disabled] {event} {data}")
         return
     try:
-        req = urllib.request.Request(url, data=json.dumps({"type": event_type, "data": payload}).encode("utf-8"),
-                                     headers={"Content-Type":"application/json"}, method="POST")
-        with urllib.request.urlopen(req, timeout=5) as _:
-            pass
-        current_app.logger.info(f"[Webhook] emitted {event_type}")
+        req = urllib.request.Request(
+            url,
+            data=json.dumps({"type": event, "data": data}).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        urllib.request.urlopen(req, timeout=5)
     except Exception as e:
-        current_app.logger.warning(f"[Webhook] failed: {e}")
+        current_app.logger.warning(f"[Webhook] Failed: {e}")
 
-# ---------- Helpers ----------
-def json_ok(data: dict, **extra):
-    out = {"success": True, "data": data, "timestamp": datetime.utcnow().isoformat()}
-    out.update(extra)
-    return jsonify(out)
+# ----------------------------------------------------------------
+#  Helpers
+# ----------------------------------------------------------------
+def ok(data: dict, **meta): return jsonify({"success": True, "data": data, "timestamp": datetime.utcnow().isoformat(), **meta})
+def err(msg: str, code=400): return jsonify({"success": False, "error": msg}), code
 
-def json_err(msg: str, code=400):
-    return jsonify({"success": False, "error": msg}), code
+def safe_openai(prompt: str, system: str = "You are a helpful PittState assistant.", temp=0.7, max_tokens=450):
+    if not openai_client:
+        return {"answer": f"[Offline AI] {prompt[:140]}…"}
+    try:
+        r = openai_client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+            temperature=temp,
+            max_tokens=max_tokens,
+        )
+        return {"answer": r.choices[0].message.content.strip()}
+    except Exception as e:
+        current_app.logger.error(f"OpenAI error: {e}")
+        return {"answer": "⚠️ AI service temporarily unavailable."}
 
-# ===============================================================
+# ----------------------------------------------------------------
 #  Blueprint
-# ===============================================================
+# ----------------------------------------------------------------
 api_bp = Blueprint("api_bp", __name__, url_prefix="/api")
 
 # ===============================================================
-#  AI: General Query
+#  AI Endpoints
 # ===============================================================
 @api_bp.route("/ai/query", methods=["POST"])
 @rate_limit
 def ai_query():
-    data = request.get_json(silent=True) or {}
-    q = (data.get("q") or "").strip()
-    if not q:
-        return json_err("Missing query prompt.")
-    result = safe_openai_call(q)
-    emit_activity("ai.query", {"q_len": len(q)})
-    return json_ok(result)
+    q = (request.json or {}).get("q", "").strip()
+    if not q: return err("Missing query.")
+    result = safe_openai(q)
+    emit_activity("ai.query", {"len": len(q)})
+    return ok(result)
 
-# ===============================================================
-#  AI: Essay Analyzer
-# ===============================================================
 @api_bp.route("/ai/tools/analyze_essay", methods=["POST"])
 @rate_limit
-def analyze_essay():
-    data = request.get_json(silent=True) or {}
-    text = (data.get("text") or "").strip()
-    if not text:
-        return json_err("Missing essay text.")
+def ai_essay():
+    text = (request.json or {}).get("text", "").strip()
+    if not text: return err("Missing essay text.")
     prompt = (
-        "You are an academic writing assistant for PittState students. "
-        "Provide concise, actionable feedback with bullets, covering thesis clarity, structure, evidence, voice, and mechanics. "
-        "Then propose 3 concrete revision suggestions.\n\n"
-        f"Essay:\n{text}"
+        "You are an academic writing coach at Pitt State. "
+        "Analyze this essay for clarity, evidence, and tone. "
+        "Provide a 3-part structured summary with strengths, weaknesses, and improvement tips.\n\n"
+        f"{text}"
     )
-    result = safe_openai_call(prompt, max_tokens=550)
-    emit_activity("ai.essay_review", {"chars": len(text)})
-    return json_ok(result)
+    result = safe_openai(prompt, max_tokens=550)
+    emit_activity("ai.essay", {"chars": len(text)})
+    return ok(result)
 
-# ===============================================================
-#  AI: Résumé Optimizer
-# ===============================================================
 @api_bp.route("/ai/tools/optimize_resume", methods=["POST"])
 @rate_limit
-def optimize_resume():
-    data = request.get_json(silent=True) or {}
+def ai_resume():
+    data = request.json or {}
     bullets = data.get("bullets")
     if not isinstance(bullets, list) or not bullets:
-        return json_err("Invalid or missing résumé bullet points.")
+        return err("Missing résumé bullets.")
     prompt = (
-        "You are a career advisor for PittState-Connect. "
-        "Rewrite the following résumé bullets to be concise, results-driven (use metrics), and ATS-friendly. "
-        "Return as an ordered list with improved bullets only.\n\n"
-        + "\n".join(f"- {b}" for b in bullets)
+        "Rewrite these résumé bullets to be concise, action-oriented, and measurable. "
+        "Return an improved bullet list only:\n\n" + "\n".join(f"- {b}" for b in bullets)
     )
-    result = safe_openai_call(prompt, max_tokens=400)
-    emit_activity("ai.resume_optimize", {"count": len(bullets)})
-    return json_ok(result)
+    result = safe_openai(prompt, max_tokens=400)
+    emit_activity("ai.resume", {"count": len(bullets)})
+    return ok(result)
 
-# ===============================================================
-#  AI: Moderation
-# ===============================================================
 @api_bp.route("/ai/moderate", methods=["POST"])
 @rate_limit
-def moderate():
-    data = request.get_json(silent=True) or {}
-    text = (data.get("text") or "").strip()
-    if not text:
-        return json_err("Missing text for moderation.")
-    # Simple heuristic; replace with a proper model or service if needed.
-    flags = any(w in text.lower() for w in ["hate", "violence", "racist", "attack", "sexual", "suicide"])
-    sev = "high" if flags else "none"
-    emit_activity("ai.moderate", {"flagged": flags})
-    return json_ok({"flagged": flags, "severity": sev})
+def ai_moderate():
+    text = (request.json or {}).get("text", "").strip()
+    if not text: return err("Missing text.")
+    flag = any(w in text.lower() for w in ["hate", "violence", "racist", "suicide", "attack"])
+    emit_activity("ai.moderate", {"flagged": flag})
+    return ok({"flagged": flag, "severity": "high" if flag else "none"})
 
-# ===============================================================
-#  AI: Insight (Trend Summarizer)
-# ===============================================================
 @api_bp.route("/ai/insight", methods=["POST"])
 @rate_limit
 def ai_insight():
-    data = request.get_json(silent=True) or {}
-    context = data.get("context") or "Summarize weekly engagement and key growth metrics for PittState-Connect."
-    # Optionally include current vs previous period deltas from cache
+    ctx = (request.json or {}).get("context", "Summarize recent engagement trends for PittState-Connect.")
     cur = cache_get("analytics:summary") or {}
     prev = cache_get("analytics:summary:prev") or {}
-    comparison = {
-        "users_total": (cur.get("users_total"), prev.get("users_total")),
-        "active_sessions": (cur.get("active_sessions"), prev.get("active_sessions")),
-        "jobs_posted": (cur.get("jobs_posted"), prev.get("jobs_posted")),
-        "events_upcoming": (cur.get("events_upcoming"), prev.get("events_upcoming")),
-        "open_scholarships": (cur.get("open_scholarships"), prev.get("open_scholarships")),
-        "avg_match_score": (cur.get("avg_match_score"), prev.get("avg_match_score")),
-    }
     prompt = (
-        "You are PittState-Connect’s analytics summarizer. "
-        "Compare current vs previous period, highlight top changes with % deltas, and provide 3 action items for admins.\n\n"
-        f"Context: {context}\n\n"
-        f"Comparison JSON:\n{json.dumps(comparison)}"
+        "You are PittState-Connect’s analytics summarizer. Compare current and previous metrics, "
+        "highlight changes, and give 3 action insights.\n\n"
+        f"Current: {json.dumps(cur)}\nPrevious: {json.dumps(prev)}"
     )
-    result = safe_openai_call(prompt, max_tokens=350)
-    emit_activity("ai.insight", {"with_compare": True})
-    return json_ok(result)
+    result = safe_openai(prompt, max_tokens=350)
+    emit_activity("ai.insight", {"compared": True})
+    return ok(result)
 
-# ===============================================================
-#  AI: Smart Recommendations
-# ===============================================================
 @api_bp.route("/ai/recommendations", methods=["POST"])
 @rate_limit
-def ai_recommendations():
-    data = request.get_json(silent=True) or {}
-    user_profile = data.get("profile") or {}
-    # In production, fetch matches from DB; here, return structured stub.
-    # Example output structure for scholarships/jobs/events:
+def ai_recommend():
+    profile = (request.json or {}).get("profile", {})
     recs = {
         "scholarships": [
-            {"id": "s123", "title": "PSU Leadership Award", "score": 92},
-            {"id": "s456", "title": "STEM Excellence Grant", "score": 88},
+            {"id": "s100", "title": "Leadership Excellence Award", "score": 93},
+            {"id": "s200", "title": "STEM Future Grant", "score": 89},
         ],
         "jobs": [
-            {"id": "j111", "title": "Marketing Intern", "company": "Gorilla Media", "score": 86},
-            {"id": "j222", "title": "Data Analyst Co-op", "company": "KC Tech", "score": 84},
+            {"id": "j300", "title": "Marketing Intern", "company": "Gorilla Media", "score": 86},
+            {"id": "j400", "title": "Data Analyst Co-op", "company": "KC Tech", "score": 84},
         ],
         "events": [
-            {"id": "e900", "title": "Scholarship Workshop", "when": "Wed 3 PM", "score": 80},
+            {"id": "e500", "title": "Scholarship Writing Workshop", "when": "Wed 3 PM", "score": 80},
         ],
-        "gorilla_impact_score": 78  # Gamified metric (blend of participation + completions)
+        "gorilla_impact_score": 78
     }
-    emit_activity("ai.recommendations", {"profile_keys": list(user_profile.keys())})
-    return json_ok(recs)
+    emit_activity("ai.recommend", {"keys": list(profile.keys())})
+    return ok(recs)
 
 # ===============================================================
-#  Analytics: Summary (Cached)
+#  Analytics Endpoints
 # ===============================================================
 @api_bp.route("/analytics/summary", methods=["GET"])
 @rate_limit
 def analytics_summary():
-    # Try cache first
     cached = cache_get("analytics:summary")
-    if cached:
-        return json_ok(cached, cached=True)
+    if cached: return ok(cached, cached=True)
 
-    # In production: compute from DB. Here: demo metrics.
     metrics = {
         "users_total": 4528,
         "alumni": 1679,
@@ -317,69 +259,59 @@ def analytics_summary():
         "jobs_posted": 89,
         "avg_match_score": 88,
     }
-
-    # rotate "previous period" once per hour as a simple demo
-    if not cache_get("analytics:summary:prev") or (datetime.utcnow().minute < 5):
-        cache_set("analytics:summary:prev", metrics, ttl_sec=3600)
-
-    cache_set("analytics:summary", metrics, ttl_sec=300)  # 5 minutes
+    if not cache_get("analytics:summary:prev") or datetime.utcnow().minute < 5:
+        cache_set("analytics:summary:prev", metrics, ttl=3600)
+    cache_set("analytics:summary", metrics, ttl=300)
     emit_activity("analytics.summary", {"cached": False})
-    return json_ok(metrics, cached=False)
+    return ok(metrics)
 
-# ===============================================================
-#  Analytics: Trends (Cached)
-# ===============================================================
 @api_bp.route("/analytics/trends", methods=["GET"])
 @rate_limit
 def analytics_trends():
     cached = cache_get("analytics:trends")
-    if cached:
-        return json_ok(cached, cached=True)
+    if cached: return ok(cached, cached=True)
 
-    # Example weekly trend data (replace with DB aggregation)
     today = datetime.utcnow().date()
     weeks = [(today - timedelta(days=7*i)) for i in range(7)][::-1]
-    series = {
+    data = {
         "labels": [w.strftime("%b %d") for w in weeks],
-        "users":    [3800, 3925, 4010, 4150, 4275, 4410, 4528],
-        "sessions": [  92,  101,   95,  108,  113,  119,  118],
-        "jobs":     [  70,   72,   74,   78,   80,   85,   89],
-        "events":   [  10,   11,   10,   12,   12,   13,   14],
+        "users": [3800, 3925, 4010, 4150, 4275, 4410, 4528],
+        "sessions": [92, 101, 95, 108, 113, 119, 118],
+        "jobs": [70, 72, 74, 78, 80, 85, 89],
+        "events": [10, 11, 10, 12, 12, 13, 14],
     }
-    cache_set("analytics:trends", series, ttl_sec=600)
-    emit_activity("analytics.trends", {"points": len(series["labels"])})
-    return json_ok(series, cached=False)
+    cache_set("analytics:trends", data, ttl=600)
+    emit_activity("analytics.trends", {"points": len(data["labels"])})
+    return ok(data)
 
 # ===============================================================
-#  Admin-only Example (RBAC)
+#  Admin Utilities
 # ===============================================================
 @api_bp.route("/admin/reload-cache", methods=["POST"])
 @rate_limit
 @require_roles("admin")
-def admin_reload_cache():
-    # Clear keys for demo
+def admin_clear_cache():
     try:
-        if _redis:
-            for key in ("analytics:summary", "analytics:trends"):
-                _redis.delete(key)
+        if redis_client:
+            for k in ("analytics:summary", "analytics:trends"):
+                redis_client.delete(k)
         else:
             with _cache_lock:
-                for key in ("analytics:summary", "analytics:trends"):
-                    _cache_mem.pop(key, None)
-        emit_activity("admin.reload_cache", {"by": request.headers.get("X-PSU-Role", "unknown")})
-        return json_ok({"message": "Cache cleared"})
+                for k in ("analytics:summary", "analytics:trends"):
+                    _cache.pop(k, None)
+        emit_activity("admin.cache_reload", {"by": "admin"})
+        return ok({"message": "Cache cleared."})
     except Exception as e:
-        current_app.logger.error(f"Cache reload failed: {e}")
-        return json_err("Failed to clear cache.", 500)
+        current_app.logger.error(f"Cache clear failed: {e}")
+        return err("Internal cache error", 500)
 
 # ===============================================================
-#  Global Error Handlers (API scope)
+#  Global Error Handlers
 # ===============================================================
 @api_bp.app_errorhandler(404)
-def not_found(e):
-    return json_err("Endpoint not found.", 404)
+def not_found(e): return err("Endpoint not found.", 404)
 
 @api_bp.app_errorhandler(500)
-def internal_error(e):
-    current_app.logger.error(f"500 Error: {traceback.format_exc()}")
-    return json_err("Internal server error.", 500)
+def server_error(e):
+    current_app.logger.error(traceback.format_exc())
+    return err("Internal server error.", 500)
