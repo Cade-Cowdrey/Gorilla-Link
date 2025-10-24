@@ -1,21 +1,18 @@
-# ============================================================
-# FILE: blueprints/donor/routes.py
-# ============================================================
-from flask import render_template, current_app
-from . import donor_bp
+# blueprints/donor/routes.py
+from __future__ import annotations
+from flask import Blueprint, render_template, jsonify
 
-@donor_bp.route("/portal", methods=["GET"])
-def portal():
-    if not current_app.config.get("DONOR_PORTAL_ENABLED", True):
-        return render_template("errors/disabled.html", feature="Donor Portal"), 200
-    tiers = [
-        {"name": "Bronze", "amount": "$1k+", "perks": ["Logo on site & digest"]},
-        {"name": "Silver", "amount": "$5k+", "perks": ["Bronze + spotlight feature"]},
-        {"name": "Gold", "amount": "$10k+", "perks": ["Silver + event signage"]},
-        {"name": "Platinum", "amount": "$25k+", "perks": ["Gold + program naming"]},
-    ]
-    recent_awards = [
-        {"name": "Engineering Leaders Award", "amount": "$2,000", "student": "Maria L."},
-        {"name": "First-Gen Scholars Fund", "amount": "$1,500", "student": "James T."},
-    ]
-    return render_template("donor/portal.html", tiers=tiers, recent_awards=recent_awards)
+donor_bp = Blueprint("donor_bp", __name__, url_prefix="/donor")
+
+@donor_bp.route("/")
+def donor_home():
+    # Replace with real DB reads
+    model = {
+        "funds": 12, "donations_this_term": 384, "avg_gift": 142.75,
+        "impact": ["12 engineering internships", "8 first-gen scholarships", "3 lab upgrades"]
+    }
+    return render_template("donor/overview.html", model=model)
+
+@donor_bp.route("/stats.json")
+def donor_stats_json():
+    return jsonify(ok=True, data={"funds":12, "donations":384, "avg":142.75})
