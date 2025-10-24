@@ -1,6 +1,56 @@
 {% extends "base.html" %}
-{% block title %}Analytics Insights{% endblock %}
+{% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
 {% block content %}
-<h2>Analytics Insights</h2>
-<p>Engagement, scholarships awarded, alumni outcomes.</p>
+<section class="section fade-in" id="analytics-dashboard">
+  <div class="container mx-auto max-w-6xl p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-heading text-crimson">Analytics & Insights</h1>
+      <div class="flex items-center gap-3">
+        <button id="export-btn" class="btn btn-gold">Export CSV</button>
+        <button id="theme-toggle" class="btn btn-crimson" title="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid md:grid-cols-3 gap-6 mb-10" id="kpi-cards">
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Total Users</h3>
+        <p class="text-4xl mt-2" id="users-total">–</p>
+      </div>
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Active Sessions</h3>
+        <p class="text-4xl mt-2" id="active-sessions">–</p>
+      </div>
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Open Scholarships</h3>
+        <p class="text-4xl mt-2" id="open-scholarships">–</p>
+      </div>
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Upcoming Events</h3>
+        <p class="text-4xl mt-2" id="events-upcoming">–</p>
+      </div>
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Jobs Posted</h3>
+        <p class="text-4xl mt-2" id="jobs-posted">–</p>
+      </div>
+      <div class="card p-5 text-center">
+        <h3 class="font-bold text-lg">Avg Match Score</h3>
+        <p class="text-4xl mt-2" id="avg-match-score">–%</p>
+      </div>
+    </div>
+
+    <!-- Insight Feed -->
+    <div class="card p-6 mb-8">
+      <h2 class="text-2xl font-heading text-crimson mb-4">AI-Generated Insights</h2>
+      <div id="insight-content" class="prose text-gray">Loading insights...</div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="card p-6">
+      <h2 class="text-2xl font-heading text-crimson mb-4">Engagement Trends</h2>
+      <canvas id="trendChart" height="100"></canvas>
+    </div>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/analytics-dashboard.js') }}"></script>
 {% endblock %}
