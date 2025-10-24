@@ -1,227 +1,281 @@
 /* ============================================================
-   PITTSTATE-CONNECT THEME — PSU Crimson & Gold Edition (v2)
-   Includes full brand palette, utilities, transitions, dark mode.
+   PITTSTATE-CONNECT THEME — PSU Crimson & Gold Edition (v3 FINAL)
+   - Full brand palette & typography
+   - Buttons, cards, nav, footer
+   - Animations & scrollbars
+   - Sentiment tints & badges
+   - Insight Bar + AI Helper panel tweaks
+   - Light/Dark mode with toggle-ready hooks
    ============================================================ */
 
 /* ------------------------
-   PSU Brand Colors
+   PSU Brand & Base Tokens
 ------------------------ */
 :root {
   --psu-crimson: #a6192e;
+  --psu-crimson-600: #8c1628;
   --psu-gold: #ffb81c;
+  --psu-gold-300: #ffd54f;
   --psu-dark: #1a1a1a;
+  --psu-mid: #2b2b2b;
   --psu-light: #f9f9f9;
-  --psu-gray: #6b7280;
   --psu-white: #ffffff;
+  --psu-gray-500: #6b7280;
+  --psu-gray-600: #4b5563;
+
+  --radius-lg: 1rem;
+  --radius-md: .75rem;
+  --radius-sm: .5rem;
+
+  --shadow-sm: 0 4px 12px rgba(0,0,0,.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.18);
+
+  --anim-fast: .2s ease;
+  --anim-med: .3s ease;
+
+  --container: 1100px;
+}
+
+/* Dark mode variables (opt-in via body.dark) */
+body.dark {
+  --psu-bg: #111;
+  --psu-fg: #f1f1f1;
+  --psu-card: #1a1a1a;
+  --psu-border: #252525;
+} 
+body:not(.dark){
+  --psu-bg: var(--psu-light);
+  --psu-fg: var(--psu-dark);
+  --psu-card: var(--psu-white);
+  --psu-border: #ececec;
 }
 
 /* ------------------------
-   Base Elements
+   Document
 ------------------------ */
+html { scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', 'Montserrat', 'Segoe UI', sans-serif;
-  background-color: var(--psu-light);
-  color: var(--psu-dark);
+  font-family: 'Inter', 'Montserrat', 'Segoe UI', -apple-system, system-ui, sans-serif;
+  background: var(--psu-bg);
+  color: var(--psu-fg);
   line-height: 1.6;
-  scroll-behavior: smooth;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color .35s ease, color .35s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+.container, .container-fluid {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.container { max-width: var(--container); }
+
+/* Links */
 a {
   color: var(--psu-crimson);
   text-decoration: none;
-  transition: color 0.25s ease, background-color 0.25s ease;
+  transition: color var(--anim-fast), background-color var(--anim-fast);
 }
+a:hover { color: var(--psu-gold); }
 
-a:hover {
-  color: var(--psu-gold);
+/* Headings */
+h1, h2, h3, h4, h5 {
+  font-family: 'Montserrat', 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--psu-crimson);
+  margin: .25rem 0 .5rem;
 }
+h1 { font-size: 2.25rem; line-height: 1.15; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
 
-/* ------------------------
-   Utility Classes
------------------------- */
-.bg-crimson { background-color: var(--psu-crimson) !important; }
+/* Text util */
+.text-gray { color: var(--psu-gray-500) !important; }
 .text-crimson { color: var(--psu-crimson) !important; }
-
-.bg-gold { background-color: var(--psu-gold) !important; }
 .text-gold { color: var(--psu-gold) !important; }
 
-.bg-light { background-color: var(--psu-light) !important; }
-.text-gray { color: var(--psu-gray) !important; }
+/* Background util */
+.bg-light { background: var(--psu-light) !important; }
+.bg-crimson { background: var(--psu-crimson) !important; color: var(--psu-white) !important; }
+.bg-gold { background: var(--psu-gold) !important; color: #111 !important; }
 
+/* Font util */
 .font-heading { font-family: 'Montserrat', 'Inter', sans-serif; font-weight: 700; }
 .font-body { font-family: 'Inter', sans-serif; }
+
+/* Spacing helpers */
+.section { padding: 3.5rem 1.25rem; }
+.section-tight { padding: 2rem 1.25rem; }
 
 /* ------------------------
    Buttons
 ------------------------ */
 .btn {
   display: inline-block;
-  padding: 0.6rem 1.25rem;
-  border-radius: 0.5rem;
+  padding: .65rem 1.1rem;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   text-align: center;
-  transition: all 0.25s ease;
   cursor: pointer;
+  transition: transform var(--anim-fast), box-shadow var(--anim-fast), background-color var(--anim-fast), color var(--anim-fast);
+  border: 1px solid transparent;
+  user-select: none;
 }
-
-.btn-gold {
-  background-color: var(--psu-gold);
-  color: var(--psu-dark);
-}
-
-.btn-gold:hover {
-  background-color: #ffd54f;
-  transform: translateY(-1px);
-}
+.btn:disabled { opacity: .7; pointer-events: none; }
 
 .btn-crimson {
-  background-color: var(--psu-crimson);
+  background: var(--psu-crimson);
   color: var(--psu-white);
+  box-shadow: var(--shadow-sm);
 }
+.btn-crimson:hover { background: var(--psu-crimson-600); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-.btn-crimson:hover {
-  background-color: #8c1628;
-  transform: translateY(-1px);
+.btn-gold {
+  background: var(--psu-gold);
+  color: #111;
+  box-shadow: var(--shadow-sm);
 }
+.btn-gold:hover { background: var(--psu-gold-300); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-/* ------------------------
-   Navbar
------------------------- */
-nav {
-  backdrop-filter: blur(6px);
-  transition: background-color 0.3s ease;
+.btn-outline {
+  background: transparent;
+  color: var(--psu-crimson);
+  border-color: var(--psu-crimson);
 }
-
-nav a {
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-nav a:hover {
-  color: var(--psu-gold);
-}
-
-/* ------------------------
-   Footer
------------------------- */
-footer {
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-  font-size: 0.9rem;
-}
-
-footer p { margin: 0.25rem 0; }
+.btn-outline:hover { background: rgba(166,25,46,.08); }
 
 /* ------------------------
    Cards
 ------------------------ */
 .card {
-  background-color: var(--psu-white);
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: var(--psu-card);
+  border: 1px solid var(--psu-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--anim-med), box-shadow var(--anim-med), background var(--anim-med), border-color var(--anim-med);
 }
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.card .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--psu-border); }
+.card .card-body { padding: 1.25rem; }
+.card .card-footer { padding: .9rem 1.25rem; border-top: 1px solid var(--psu-border); }
 
 /* ------------------------
-   Headings
+   Navbar
 ------------------------ */
-h1, h2, h3, h4, h5 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  color: var(--psu-crimson);
+.navbar {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,.75);
+  border-bottom: 1px solid #eee;
+  transition: background var(--anim-med);
 }
-
-h1 { font-size: 2.25rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.5rem; }
+body.dark .navbar { background: rgba(0,0,0,.5); border-bottom-color: var(--psu-border); }
+.navbar .brand { font-weight: 800; letter-spacing: .3px; color: var(--psu-crimson); }
+.navbar a { font-weight: 600; color: var(--psu-dark); }
+body.dark .navbar a { color: var(--psu-fg); }
+.navbar a:hover { color: var(--psu-gold); }
 
 /* ------------------------
-   Section Helpers
+   Footer
 ------------------------ */
-.section { padding: 4rem 1.5rem; }
-.section-light { background-color: var(--psu-light); }
-.section-dark { background-color: var(--psu-crimson); color: var(--psu-white); }
+footer.psu-footer {
+  background: var(--psu-crimson);
+  color: var(--psu-white);
+  padding: 1.25rem 0;
+}
+footer.psu-footer p { margin: .25rem 0; }
 
 /* ------------------------
    Animations
 ------------------------ */
 .fade-in {
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0; transform: translateY(10px);
+  animation: fadeInUp .6s ease-out forwards;
 }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(15px);} to { opacity:1; transform:translateY(0);} }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ------------------------
+   Scrollbar (WebKit)
+------------------------ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background-color: var(--psu-crimson); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background-color: var(--psu-crimson-600); }
+
+/* ------------------------
+   Dark Mode Overrides
+------------------------ */
+body.dark a { color: #ffcd5e; }
+body.dark a:hover { color: #ffe18f; }
+body.dark .card:hover { box-shadow: 0 8px 24px rgba(255,255,255,.06); }
+
+/* ------------------------
+   Insight Bar
+------------------------ */
+#insightBar {
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--psu-border);
+}
+#insightBar .badge {
+  display: inline-block; padding: .15rem .5rem; border-radius: 999px;
+  font-weight: 600; font-size: .8rem;
 }
 
 /* ------------------------
-   Scrollbar
+   Sentiment Styles
 ------------------------ */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb {
-  background-color: var(--psu-crimson);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover { background-color: #8c1628; }
+.psu-positive { background: rgba(16,185,129,.06) !important; }
+.psu-neutral  { background: rgba(234,179,8,.06) !important; }
+.psu-negative { background: rgba(220,38,38,.06) !important; }
+
+.badge-positive { background: #dcfce7; color:#065f46; }
+.badge-neutral  { background: #fef3c7; color:#92400e; }
+.badge-negative { background: #fee2e2; color:#991b1b; }
+
+/* optional micro-badge used by JS */
+.sentiment-tag { vertical-align: middle; }
 
 /* ------------------------
-   Dark Mode Styles
+   Floating AI Helper Panel (base tweaks)
 ------------------------ */
-body.dark {
-  background-color: #111;
-  color: #f1f1f1;
+.psu-ai-min { border: none; }
+.psu-ai-panel { border: 1px solid var(--psu-border); }
+body.dark .psu-ai-panel { background: #161616; border-color: #262626; }
+body.dark .psu-ai-head { background: linear-gradient(135deg,#a6192e,#ffb81c); }
+
+/* ------------------------
+   Utility Pills & Chips
+------------------------ */
+.pill { display:inline-block; padding:.25rem .6rem; border-radius:999px; border:1px solid var(--psu-border); }
+.pill-crimson { border-color: var(--psu-crimson); color: var(--psu-crimson); }
+.pill-gold { border-color: var(--psu-gold); color: #6b4b00; }
+
+/* ------------------------
+   Tables (lightweight)
+------------------------ */
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { padding:.6rem .75rem; border-bottom:1px solid var(--psu-border); }
+.table th { text-align:left; font-weight:700; color: var(--psu-crimson); }
+
+/* ------------------------
+   Forms
+------------------------ */
+.input, textarea, select {
+  width: 100%; background: var(--psu-card); color: var(--psu-fg);
+  border: 1px solid var(--psu-border); border-radius: var(--radius-sm);
+  padding: .65rem .75rem; transition: border-color var(--anim-fast), box-shadow var(--anim-fast);
 }
-
-body.dark nav { background-color: #222; }
-
-body.dark .bg-crimson { background-color: #800016 !important; }
-body.dark .text-crimson { color: #ff7a7a !important; }
-
-body.dark .btn-gold {
-  background-color: #d4a017;
-  color: #111;
-}
-
-body.dark .card {
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
-}
-
-body.dark footer {
-  background-color: #000;
-  color: var(--psu-gold);
+.input:focus, textarea:focus, select:focus {
+  outline: none; border-color: var(--psu-gold); box-shadow: 0 0 0 3px rgba(255,184,28,.25);
 }
 
 /* ------------------------
-   Dark Mode Toggle Button
+   Helper classes
 ------------------------ */
-#theme-toggle {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-  border: none;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  font-size: 1.25rem;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  z-index: 999;
-}
-
-#theme-toggle:hover {
-  background-color: var(--psu-gold);
-  color: var(--psu-dark);
-  transform: scale(1.05);
-}
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.rounded { border-radius: var(--radius-sm); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.hidden { display: none !important; }
