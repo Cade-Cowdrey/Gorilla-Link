@@ -1,118 +1,173 @@
-from __future__ import annotations
-import os, time, json, math, re
-from typing import Any, Dict
-from flask import Blueprint, jsonify, request
+# blueprints/api/routes.py
+# ===============================================================
+#  PittState-Connect API Gateway
+#  ---------------------------------------------------------------
+#  Exposes:
+#   • /api/ai/query                → Chat / general AI Q&A
+#   • /api/ai/tools/analyze_essay  → Essay feedback helper
+#   • /api/ai/tools/optimize_resume→ Résumé optimization helper
+#   • /api/ai/moderate             → Content moderation
+#   • /api/ai/insight              → Analytics AI insight generation
+#   • /api/analytics/summary       → Dashboard data feed
+# ===============================================================
 
-# Import the advanced AI endpoints blueprint from ai_routes.py
-# Ensure your project path is: blueprints/api/ai_routes.py
-from .ai_routes import ai_bp  # exposed for app registration
+from __future__ import annotations
+import os, traceback
+from flask import Blueprint, request, jsonify, current_app
+from flask_login import current_user
+from datetime import datetime
+
+# Optional: OpenAI client (works if key is configured)
+try:
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+except Exception:
+    client = None
 
 api_bp = Blueprint("api_bp", __name__, url_prefix="/api")
 
-# ----------------------
-# Utils (safe identity)
-# ----------------------
-def identity_from_request() -> str:
-    ip = request.headers.get("X-Forwarded-For") or request.remote_addr or "unknown"
-    ua = request.headers.get("User-Agent", "")[:60]
-    return f"ip:{ip}|ua:{ua}"
+# ---------------------------------------------------------------
+#  Helper Utilities
+# ---------------------------------------------------------------
+def safe_openai_call(prompt: str, system_prompt: str = "You are a helpful PittState assistant."):
+    """Safely call OpenAI if configured, else fallback with generic text."""
+    if not client:
+        return {"answer": f"[Offline Mode] AI unavailable. (Prompt: {prompt[:100]})"}
 
-def ok(data: Any, **meta):
-    return jsonify({"ok": True, "data": data, "meta": meta}), 200
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=400,
+            temperature=0.7,
+        )
+        return {"answer": response.choices[0].message.content.strip()}
+    except Exception as e:
+        current_app.logger.error(f"OpenAI Error: {e}")
+        return {"answer": f"⚠️ AI request failed. Please try again later."}
 
-def fail(message: str, code: int = 400, **meta):
-    return jsonify({"ok": False, "error": {"message": message, "code": code}, "meta": meta}), code
+def json_error(msg, code=400):
+    return jsonify({"success": False, "error": msg}), code
 
-# ----------------------
-# Health & Config
-# ----------------------
-@api_bp.route("/health")
-def health():
-    return ok({
-        "service": "PittState-Connect API",
-        "env": os.getenv("FLASK_ENV", "production"),
-        "version": os.getenv("APP_VERSION", "v1-final"),
-        "time": int(time.time()),
-    })
 
-@api_bp.route("/config")
-def public_config():
-    # Expose safe, non-secret config to the client as needed
-    return ok({
-        "brand": "PittState Connect",
-        "features": {
-            "ai_insight_bar": True,
-            "ai_helper_panel": True,
-            "essay_analyzer": True,
-            "resume_optimizer": True,
-            "mentor_match_2": True,
-        }
-    })
+# ---------------------------------------------------------------
+#  AI: General Query Endpoint
+# ---------------------------------------------------------------
+@api_bp.route("/ai/query", methods=["POST"])
+def ai_query():
+    data = request.get_json() or {}
+    q = data.get("q", "").strip()
 
-# ----------------------
-# Lightweight Stats (mock-ready, replace with DB later)
-# ----------------------
-@api_bp.route("/stats")
-def stats():
-    # Example aggregate. Replace with real DB queries as needed.
-    return ok({
-        "users": 4210,
-        "posts": 18234,
-        "mentors": 128,
-        "jobs": 456,
-        "updated_at": int(time.time())
-    })
+    if not q:
+        return json_error("Missing query prompt.")
 
-# ----------------------
-# Analytics (trend stub — separate from AI sentiment trend)
-# ----------------------
-@api_bp.route("/analytics/engagement")
-def analytics_engagement():
-    # basic engagement line (fake demo numbers)
-    days = int(request.args.get("days", 7))
-    data = [{"day": i, "active": int(2600 + 400 * math.sin(i)), "posts": int(300 + 60 * math.cos(i))} for i in range(1, days+1)]
-    return ok({"series": data})
+    result = safe_openai_call(q)
+    return jsonify({"success": True, "data": result, "timestamp": datetime.utcnow().isoformat()})
 
-# ----------------------
-# Moderation passthrough (client may call /api/ai/moderate directly too)
-# Provided here if you want a unified entry like /api/security/moderate
-# ----------------------
-@api_bp.route("/security/moderate", methods=["POST"])
-def security_moderate():
-    # Forward to AI moderation or run a local heuristic
-    data = request.json or {}
-    text = data.get("text", "")
+
+# ---------------------------------------------------------------
+#  AI: Essay Analyzer
+# ---------------------------------------------------------------
+@api_bp.route("/ai/tools/analyze_essay", methods=["POST"])
+def analyze_essay():
+    data = request.get_json() or {}
+    text = data.get("text", "").strip()
+
     if not text:
-        return fail("Missing 'text'.", 422)
-    # simple heuristic
-    bad_words = ["hate", "stupid", "idiot", "kill", "dumb", "trash", "screw you"]
-    score = min(1.0, sum(text.lower().count(w) for w in bad_words) * 0.25)
-    return ok({"flagged": score >= float(data.get("threshold", 0.8)), "score": round(score, 2)})
+        return json_error("Missing essay text.")
 
-# ----------------------
-# Donor mini-analytics (non-AI)
-# ----------------------
-@api_bp.route("/donor/summary")
-def donor_summary():
-    # Replace with real DB summaries
-    resp = {
-        "funds": 12,
-        "donations_this_term": 384,
-        "avg_gift": 142.75,
-        "top_fund": "Crimson Legacy",
-        "impact_examples": [
-            "12 engineering internships supported",
-            "8 first-gen scholarships awarded",
-            "3 new lab upgrades completed"
-        ]
+    prompt = f"Review this student essay and give clear feedback:\n\n{text}"
+    result = safe_openai_call(prompt, system_prompt="You are an academic writing assistant for PittState students.")
+    return jsonify({"success": True, "data": result})
+
+
+# ---------------------------------------------------------------
+#  AI: Résumé Optimizer
+# ---------------------------------------------------------------
+@api_bp.route("/ai/tools/optimize_resume", methods=["POST"])
+def optimize_resume():
+    data = request.get_json() or {}
+    bullets = data.get("bullets", [])
+
+    if not bullets or not isinstance(bullets, list):
+        return json_error("Invalid or missing résumé bullet points.")
+
+    prompt = "Optimize the following résumé bullets for clarity, impact, and professionalism:\n" + "\n".join(bullets)
+    result = safe_openai_call(prompt, system_prompt="You are a career development advisor for PittState-Connect.")
+    return jsonify({"success": True, "data": result})
+
+
+# ---------------------------------------------------------------
+#  AI: Content Moderation
+# ---------------------------------------------------------------
+@api_bp.route("/ai/moderate", methods=["POST"])
+def moderate():
+    data = request.get_json() or {}
+    text = data.get("text", "")
+
+    if not text:
+        return json_error("Missing text for moderation.")
+
+    flags = any(word in text.lower() for word in ["hate", "violence", "racist", "attack", "sexual"])
+    response = {
+        "flagged": flags,
+        "severity": "high" if flags else "none",
+        "timestamp": datetime.utcnow().isoformat(),
     }
-    return ok(resp)
+    return jsonify({"success": True, "data": response})
 
-# NOTE:
-# - In app_pro.py you should:
-#     from blueprints.api.routes import api_bp
-#     from blueprints.api.ai_routes import ai_bp
-#     app.register_blueprint(api_bp)
-#     app.register_blueprint(ai_bp)
-#
-# - Keeping AI in its own blueprint (`ai_bp`) avoids circular imports and keeps responsibilities clean.
+
+# ---------------------------------------------------------------
+#  AI: Insight / Analytics Summary
+# ---------------------------------------------------------------
+@api_bp.route("/ai/insight", methods=["POST"])
+def ai_insight():
+    data = request.get_json() or {}
+    context = data.get("context", "Generate a high-level summary of current campus engagement metrics.")
+
+    result = safe_openai_call(context, system_prompt="You are PittState-Connect’s analytics summarizer.")
+    return jsonify({"success": True, "data": result})
+
+
+# ---------------------------------------------------------------
+#  Analytics: Summary Data (Dashboard Feed)
+# ---------------------------------------------------------------
+@api_bp.route("/analytics/summary", methods=["GET"])
+def analytics_summary():
+    """Provide latest site-level statistics for dashboards."""
+    try:
+        # These would normally be fetched from your DB or analytics table
+        metrics = {
+            "users_total": 4521,
+            "alumni": 1673,
+            "active_sessions": 121,
+            "open_scholarships": 38,
+            "events_upcoming": 12,
+            "jobs_posted": 84,
+            "avg_match_score": 87,
+        }
+
+        return jsonify({
+            "success": True,
+            "data": metrics,
+            "timestamp": datetime.utcnow().isoformat(),
+        })
+    except Exception as e:
+        current_app.logger.error(f"Analytics Summary Error: {traceback.format_exc()}")
+        return json_error("Unable to retrieve analytics.")
+
+
+# ---------------------------------------------------------------
+#  Global Error Handlers (API-only)
+# ---------------------------------------------------------------
+@api_bp.app_errorhandler(404)
+def not_found(e):
+    return json_error("Endpoint not found.", 404)
+
+@api_bp.app_errorhandler(500)
+def internal_error(e):
+    current_app.logger.error(f"500 Error: {traceback.format_exc()}")
+    return json_error("Internal server error.", 500)
