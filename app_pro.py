@@ -1,6 +1,6 @@
 # ================================================================
 #  PittState-Connect | Advanced Flask Application Factory
-#  PSU-branded | Secure | AI & Analytics Enabled | Production-Ready
+#  PSU-branded · Secure · AI-Ready · Analytics-Driven · Production-Optimized
 # ================================================================
 
 import os
@@ -21,11 +21,11 @@ from flask_caching import Cache
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
-# --- Config Selectors ---
+# --- Config helpers ---
 from config import select_config, attach_nonce, boot_sentry
 
 # ------------------------------------------------
-#  Global Extensions
+#  Global Flask extensions
 # ------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
@@ -37,27 +37,20 @@ scheduler = BackgroundScheduler()
 cache = Cache()
 
 # ------------------------------------------------
-#  Factory: Create App
+#  App Factory
 # ------------------------------------------------
 def create_app():
     app = Flask(__name__)
+
+    # Load configuration
     app_config = select_config()
     app.config.from_object(app_config)
     logger.info(f"Loaded config: {app_config.__name__}")
 
     # ------------------------------------------------
-    #  Security: HTTPS + CSP + Nonce
+    #  Security middleware (Talisman + CSP nonce)
     # ------------------------------------------------
-    csp = getattr(
-        app_config,
-        "TALISMAN_CONTENT_SECURITY_POLICY",
-        {
-            "default-src": "'self'",
-            "img-src": ["'self'", "data:", "https://*"],
-            "script-src": ["'self'", "'unsafe-inline'"],
-            "style-src": ["'self'", "'unsafe-inline'"],
-        },
-    )
+    csp = app_config.TALISMAN_CONTENT_SECURITY_POLICY
     Talisman(
         app,
         content_security_policy=csp,
@@ -67,15 +60,15 @@ def create_app():
     app.after_request(attach_nonce)
 
     # ------------------------------------------------
-    #  Extensions Initialization
+    #  Initialize extensions
     # ------------------------------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     sess.init_app(app)
     compress.init_app(app)
-    cache.init_app(app, config={"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 300})
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    cache.init_app(app, config={"CACHE_TYPE": app.config.get("CACHE_TYPE", "SimpleCache")})
+    CORS(app, resources={r"/*": {"origins": app.config.get("CORS_ORIGINS", "*")}})
 
     # ------------------------------------------------
     #  Logging
@@ -84,14 +77,14 @@ def create_app():
     logger.info("Logging configured successfully.")
 
     # ------------------------------------------------
-    #  Background Scheduler
+    #  Background scheduler
     # ------------------------------------------------
     if app.config.get("SCHEDULER_API_ENABLED", True):
         scheduler.start()
         logger.info("Background scheduler started.")
 
     # ------------------------------------------------
-    #  Flask-Login Setup
+    #  Flask-Login
     # ------------------------------------------------
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
@@ -107,7 +100,7 @@ def create_app():
             return None
 
     # ------------------------------------------------
-    #  Register Blueprints Automatically
+    #  Register blueprints automatically
     # ------------------------------------------------
     blueprints = [
         "core",
@@ -120,6 +113,11 @@ def create_app():
         "campus",
         "badges",
         "admin",
+        "api",  # ✅ API blueprint added
+        "donor",
+        "scholarships",
+        "mentors",
+        "notifications",
     ]
 
     for bp in blueprints:
@@ -135,7 +133,7 @@ def create_app():
             logger.error(f"⚠️  Failed to register {bp}: {e}")
 
     # ------------------------------------------------
-    #  AI / OpenAI Integration
+    #  OpenAI / AI Integration (optional)
     # ------------------------------------------------
     openai_key = app.config.get("OPENAI_API_KEY")
     if openai_key:
@@ -148,12 +146,28 @@ def create_app():
             logger.warning(f"OpenAI setup skipped: {e}")
 
     # ------------------------------------------------
-    #  PSU Branding (Global Jinja Context)
+    #  Redis connection (optional)
+    # ------------------------------------------------
+    redis_url = app.config.get("REDIS_URL")
+    if redis_url:
+        try:
+            import redis
+
+            app.redis_client = redis.from_url(redis_url)
+            logger.info("✅ Redis connected successfully.")
+        except Exception as e:
+            logger.warning(f"Redis not available: {e}")
+    else:
+        app.redis_client = None
+
+    # ------------------------------------------------
+    #  PSU Branding (Global Jinja context)
     # ------------------------------------------------
     @app.context_processor
     def inject_globals():
-        return {
-            "PSU_BRAND": {
+        brand = app.config.get("PSU_BRAND", {})
+        if not brand:
+            brand = {
                 "crimson": "#A6192E",
                 "gold": "#FFB81C",
                 "gray": "#5A5A5A",
@@ -163,20 +177,47 @@ def create_app():
                 "gradient": "linear-gradient(90deg, #A6192E 0%, #FFB81C 100%)",
                 "tagline": "PittState-Connect — Linking Gorillas for Life",
                 "favicon": "/static/images/psu_logo.png",
-            },
+            }
+        return {
+            "PSU_BRAND": brand,
             "APP_VERSION": "2.0-Final",
             "APP_ENV": app.config.get("FLASK_ENV", "production").capitalize(),
         }
 
     # ------------------------------------------------
-    #  Health Check Endpoint
+    #  Analytics / Dashboard Power-Ups
+    # ------------------------------------------------
+    def collect_usage_metrics():
+        """Example scheduled analytics aggregation job."""
+        try:
+            from models import User
+            total_users = db.session.query(User).count()
+            cache.set("analytics:total_users", total_users)
+            logger.info(f"[Scheduler] Updated analytics cache — total users: {total_users}")
+        except Exception as e:
+            logger.warning(f"[Scheduler] Analytics job failed: {e}")
+
+    scheduler.add_job(collect_usage_metrics, "interval", hours=1, id="analytics_job", replace_existing=True)
+
+    # ------------------------------------------------
+    #  Health check & system routes
     # ------------------------------------------------
     @app.route("/health")
     def health():
-        return {"status": "ok", "uptime": "active", "env": app.config.get("FLASK_ENV")}, 200
+        return {
+            "status": "ok",
+            "uptime": "active",
+            "redis": bool(app.redis_client),
+            "env": app.config.get("FLASK_ENV"),
+        }, 200
+
+    @app.route("/")
+    def index():
+        logger.info(f"Visitor from {request.remote_addr}")
+        return render_template("core/home.html")
 
     # ------------------------------------------------
-    #  Error Handlers
+    #  Error handlers
     # ------------------------------------------------
     @app.errorhandler(404)
     def not_found(e):
@@ -188,15 +229,7 @@ def create_app():
         return render_template("errors/500.html"), 500
 
     # ------------------------------------------------
-    #  Root Route (Fallback)
-    # ------------------------------------------------
-    @app.route("/")
-    def index():
-        logger.info(f"Visitor from {request.remote_addr}")
-        return render_template("core/home.html")
-
-    # ------------------------------------------------
-    #  Boot Integrations
+    #  Boot integrations
     # ------------------------------------------------
     boot_sentry(app)
     app.permanent_session_lifetime = timedelta(hours=8)
@@ -205,7 +238,7 @@ def create_app():
 
 
 # ------------------------------------------------
-#  Entry Point for Gunicorn
+#  Gunicorn entry point
 # ------------------------------------------------
 app = create_app()
 
