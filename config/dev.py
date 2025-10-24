@@ -1,53 +1,42 @@
-# /config/dev.py
 import os
+from . import BaseConfig, PSU_BRAND_DEFAULT
 
-class DevConfig:
-    """Development configuration for PittState-Connect."""
+
+class DevConfig(BaseConfig):
     DEBUG = True
     TESTING = False
+    TEMPLATES_AUTO_RELOAD = True
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 
-    # Database (local Postgres or SQLite fallback)
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///dev.db"
-    ).replace("postgres://", "postgresql://")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Local sqlite by default
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///instance/dev.db")
 
-    # Secret key & session
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-    SESSION_TYPE = "filesystem"
+    # Cookies: easier local testing
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
 
-    # Email (local test)
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "dev@pittstateconnect.local")
+    # CORS: allow all in dev
+    CORS_ORIGINS = "*"
 
-    # Redis caching
-    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-    # Flask-Talisman security
-    TALISMAN_FORCE_HTTPS = False
-    TALISMAN_CONTENT_SECURITY_POLICY = {
-        "default-src": "'self'",
-        "img-src": "* data:",
-        "script-src": ["'self'", "'unsafe-inline'"],
-        "style-src": ["'self'", "'unsafe-inline'"],
+    # Brand (dev can use alternate accent for visibility)
+    PSU_BRAND = {
+        **PSU_BRAND_DEFAULT,
+        "accent": os.getenv("PSU_COLOR_ACCENT", "#D7A22A"),
+        "tagline": os.getenv("PSU_TAGLINE", "PittState-Connect — Dev"),
     }
 
-    # OpenAI API for dev AI helper
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-    OPENAI_MODEL = "gpt-4o-mini"
+    SENTRY_ENVIRONMENT = "development"
 
-    # File storage
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
-
-    # Scheduler
-    SCHEDULER_API_ENABLED = True
-
-    # Logging
-    LOG_LEVEL = "DEBUG"
-
-    # Analytics mock mode
-    ANALYTICS_SIMULATION = True
+    # Slightly looser CSP (still nonce-enforced at runtime)
+    TALISMAN_CONTENT_SECURITY_POLICY = {
+        "default-src": "'self'",
+        "img-src": ["'self'", "data:", "https://*"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "connect-src": ["'self'", "http://localhost:*", "https://*"],
+        "font-src": ["'self'", "data:"],
+        "frame-ancestors": ["'none'"],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+    }
