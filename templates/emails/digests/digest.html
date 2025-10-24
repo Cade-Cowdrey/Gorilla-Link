@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>PittState Daily Digest – {{ date }}</title>
+    <style>
+      body { font-family: Inter, Arial, sans-serif; color: #1a1a1a; }
+      h1, h2 { color: #a6192e; }
+      .tag { display: inline-block; padding: .15rem .5rem; border-radius: 999px;
+             background: #fff3e0; border: 1px solid #ffd38a; margin: .15rem; }
+      .card { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>PittState Daily Digest</h1>
+    <p><strong>Takeaway:</strong> {{ takeaway }}</p>
+
+    <h2>Top Posts</h2>
+    {% for p in posts %}
+      <div class="card">
+        <div><strong>{{ p.title }}</strong></div>
+        <div>{{ p.summary or '' }}</div>
+        <div>❤️ {{ p.likes or 0 }} &nbsp; 💬 {{ p.comments or 0 }}</div>
+      </div>
+    {% else %}
+      <p>No trending posts yet.</p>
+    {% endfor %}
+
+    <h2>Hot Topics</h2>
+    {% for tag, count in tags %}
+      <span class="tag">#{{ tag }} ({{ count }})</span>
+    {% else %}
+      <p>No tags.</p>
+    {% endfor %}
+
+    <h2>Jobs</h2>
+    <ul>
+      {% for j in jobs %}
+        <li><strong>{{ j.title }}</strong> — {{ j.company }}</li>
+      {% else %}
+        <li>No jobs listed.</li>
+      {% endfor %}
+    </ul>
+
+    <h2>Events</h2>
+    <ul>
+      {% for e in events %}
+        <li><strong>{{ e.title }}</strong> — {{ e.when }}</li>
+      {% else %}
+        <li>No upcoming events.</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
