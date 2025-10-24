@@ -1,12 +1,14 @@
 # ================================================================
 #  PittState-Connect | Advanced Flask Application Factory
-#  PSU-branded | Secure | Analytics & AI Enabled
+#  PSU-branded | Secure | AI & Analytics Enabled | Production-Ready
 # ================================================================
 
 import os
 import logging
 from datetime import timedelta
-from flask import Flask, render_template
+from importlib import import_module
+
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -15,14 +17,15 @@ from flask_session import Session
 from flask_compress import Compress
 from flask_cors import CORS
 from flask_talisman import Talisman
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask_caching import Cache
+from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
+# --- Config Selectors ---
 from config import select_config, attach_nonce, boot_sentry
 
 # ------------------------------------------------
-#  Extension Instances
+#  Global Extensions
 # ------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
@@ -42,30 +45,54 @@ def create_app():
     app.config.from_object(app_config)
     logger.info(f"Loaded config: {app_config.__name__}")
 
-    # --- Security / HTTPS ---
-    csp = getattr(app_config, "TALISMAN_CONTENT_SECURITY_POLICY", {"default-src": "'self'"})
-    Talisman(app, content_security_policy=csp, force_https=True)
+    # ------------------------------------------------
+    #  Security: HTTPS + CSP + Nonce
+    # ------------------------------------------------
+    csp = getattr(
+        app_config,
+        "TALISMAN_CONTENT_SECURITY_POLICY",
+        {
+            "default-src": "'self'",
+            "img-src": ["'self'", "data:", "https://*"],
+            "script-src": ["'self'", "'unsafe-inline'"],
+            "style-src": ["'self'", "'unsafe-inline'"],
+        },
+    )
+    Talisman(
+        app,
+        content_security_policy=csp,
+        force_https=True,
+        session_cookie_secure=True,
+    )
     app.after_request(attach_nonce)
 
-    # --- Core Extensions ---
+    # ------------------------------------------------
+    #  Extensions Initialization
+    # ------------------------------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     sess.init_app(app)
     compress.init_app(app)
-    CORS(app)
     cache.init_app(app, config={"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 300})
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
-    # --- Logging ---
+    # ------------------------------------------------
+    #  Logging
+    # ------------------------------------------------
     logging.basicConfig(level=app.config.get("LOG_LEVEL", "INFO"))
     logger.info("Logging configured successfully.")
 
-    # --- Scheduler ---
+    # ------------------------------------------------
+    #  Background Scheduler
+    # ------------------------------------------------
     if app.config.get("SCHEDULER_API_ENABLED", True):
         scheduler.start()
         logger.info("Background scheduler started.")
 
-    # --- Flask-Login ---
+    # ------------------------------------------------
+    #  Flask-Login Setup
+    # ------------------------------------------------
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
 
@@ -79,8 +106,9 @@ def create_app():
             logger.error(f"User load failed: {e}")
             return None
 
-    # --- Blueprints ---
-    from importlib import import_module
+    # ------------------------------------------------
+    #  Register Blueprints Automatically
+    # ------------------------------------------------
     blueprints = [
         "core",
         "auth",
@@ -102,21 +130,54 @@ def create_app():
                 app.register_blueprint(bp_obj)
                 logger.info(f"✅ Registered blueprint: {bp}")
             else:
-                logger.warning(f"⚠️  No blueprint found for {bp}")
+                logger.warning(f"⚠️  No blueprint object found in: {bp}")
         except Exception as e:
             logger.error(f"⚠️  Failed to register {bp}: {e}")
 
-    # --- AI / OpenAI Integration ---
+    # ------------------------------------------------
+    #  AI / OpenAI Integration
+    # ------------------------------------------------
     openai_key = app.config.get("OPENAI_API_KEY")
     if openai_key:
         try:
             import openai
+
             openai.api_key = openai_key
             logger.info("OpenAI API connected successfully.")
         except Exception as e:
             logger.warning(f"OpenAI setup skipped: {e}")
 
-    # --- Error Pages ---
+    # ------------------------------------------------
+    #  PSU Branding (Global Jinja Context)
+    # ------------------------------------------------
+    @app.context_processor
+    def inject_globals():
+        return {
+            "PSU_BRAND": {
+                "crimson": "#A6192E",
+                "gold": "#FFB81C",
+                "gray": "#5A5A5A",
+                "white": "#FFFFFF",
+                "black": "#000000",
+                "accent": "#D7A22A",
+                "gradient": "linear-gradient(90deg, #A6192E 0%, #FFB81C 100%)",
+                "tagline": "PittState-Connect — Linking Gorillas for Life",
+                "favicon": "/static/images/psu_logo.png",
+            },
+            "APP_VERSION": "2.0-Final",
+            "APP_ENV": app.config.get("FLASK_ENV", "production").capitalize(),
+        }
+
+    # ------------------------------------------------
+    #  Health Check Endpoint
+    # ------------------------------------------------
+    @app.route("/health")
+    def health():
+        return {"status": "ok", "uptime": "active", "env": app.config.get("FLASK_ENV")}, 200
+
+    # ------------------------------------------------
+    #  Error Handlers
+    # ------------------------------------------------
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
@@ -126,18 +187,25 @@ def create_app():
         db.session.rollback()
         return render_template("errors/500.html"), 500
 
+    # ------------------------------------------------
+    #  Root Route (Fallback)
+    # ------------------------------------------------
     @app.route("/")
     def index():
+        logger.info(f"Visitor from {request.remote_addr}")
         return render_template("core/home.html")
 
-    # --- Final System Hooks ---
+    # ------------------------------------------------
+    #  Boot Integrations
+    # ------------------------------------------------
     boot_sentry(app)
     app.permanent_session_lifetime = timedelta(hours=8)
+
     return app
 
 
 # ------------------------------------------------
-#  Gunicorn Entry
+#  Entry Point for Gunicorn
 # ------------------------------------------------
 app = create_app()
 
