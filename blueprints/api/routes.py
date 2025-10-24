@@ -1,317 +1,223 @@
-# ===============================================================
-#  PittState-Connect API Gateway — Final Polished Version
-#  Includes: OpenAI endpoints, smart analytics, Redis caching,
-#  webhook events, RBAC, rate limiting, AI tools, and resiliency.
-# ===============================================================
+"""
+PittState-Connect API Blueprint
+Advanced PSU-branded REST/AI/Analytics interface.
 
-from __future__ import annotations
-import os, json, time, traceback, threading
+Endpoints:
+  /api/ping               → Health check
+  /api/ai/ask             → Chat/AI assistant (OpenAI)
+  /api/analytics/summary  → Aggregate analytics data
+  /api/reminders/schedule → Smart reminder scheduler
+"""
+
+from flask import Blueprint, jsonify, request, current_app
 from datetime import datetime, timedelta
-from functools import wraps
-from flask import Blueprint, request, jsonify, current_app
-from flask_login import current_user
+import traceback
+import time
 
-# ----------------------------------------------------------------
-#  Optional Integrations
-# ----------------------------------------------------------------
-try:
-    from openai import OpenAI
-    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-except Exception:
-    openai_client = None
-
-# Redis (optional)
-try:
-    import redis
-    redis_url = os.getenv("REDIS_URL")
-    redis_client = redis.from_url(redis_url) if redis_url else None
-except Exception:
-    redis_client = None
-
-# In-memory cache fallback
-_cache: dict[str, tuple[float, str]] = {}
-_cache_lock = threading.Lock()
-
-def cache_get(key: str):
-    if redis_client:
-        raw = redis_client.get(key)
-        if raw:
-            try: return json.loads(raw)
-            except Exception: return None
-        return None
-    with _cache_lock:
-        v = _cache.get(key)
-        if not v: return None
-        exp, data = v
-        if time.time() > exp:
-            _cache.pop(key, None)
-            return None
-        try: return json.loads(data)
-        except Exception: return None
-
-def cache_set(key: str, value: dict, ttl: int = 300):
-    payload = json.dumps(value)
-    if redis_client:
-        redis_client.setex(key, ttl, payload)
-        return
-    with _cache_lock:
-        _cache[key] = (time.time() + ttl, payload)
-
-# ----------------------------------------------------------------
-#  Rate Limiting
-# ----------------------------------------------------------------
-_rate_map: dict[str, list[float]] = {}
-_rate_lock = threading.Lock()
-RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "60"))
-RATE_WINDOW = int(os.getenv("API_RATE_WINDOW", "60"))
-
-def rate_limit(fn):
-    @wraps(fn)
-    def _wrap(*a, **kw):
-        ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "anon").split(",")[0]).strip()
-        now = time.time()
-        with _rate_lock:
-            hits = [t for t in _rate_map.get(ip, []) if now - t < RATE_WINDOW]
-            if len(hits) >= RATE_LIMIT:
-                return jsonify({"success": False, "error": "Too many requests"}), 429
-            hits.append(now)
-            _rate_map[ip] = hits
-        return fn(*a, **kw)
-    return _wrap
-
-# ----------------------------------------------------------------
-#  RBAC Decorator
-# ----------------------------------------------------------------
-def _roles() -> set[str]:
-    try:
-        if getattr(current_user, "is_authenticated", False):
-            if hasattr(current_user, "roles"):
-                roles = current_user.roles
-                if isinstance(roles, (list, tuple, set)):
-                    return {r.lower() for r in roles}
-                return {str(roles).lower()}
-            if hasattr(current_user, "role"):
-                return {str(current_user.role).lower()}
-    except Exception:
-        pass
-    hdr = request.headers.get("X-PSU-Role")
-    return {hdr.lower()} if hdr else set()
-
-def require_roles(*allowed):
-    allowed = {r.lower() for r in allowed}
-    def decorator(fn):
-        @wraps(fn)
-        def _wrap(*a, **kw):
-            if not (_roles() & allowed):
-                return jsonify({"success": False, "error": "Forbidden"}), 403
-            return fn(*a, **kw)
-        return _wrap
-    return decorator
-
-# ----------------------------------------------------------------
-#  Webhook Logger (Slack / Discord / etc.)
-# ----------------------------------------------------------------
-import urllib.request
-def emit_activity(event: str, data: dict):
-    url = os.getenv("WEBHOOK_URL")
-    if not url:
-        current_app.logger.info(f"[Webhook disabled] {event} {data}")
-        return
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps({"type": event, "data": data}).encode(),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        urllib.request.urlopen(req, timeout=5)
-    except Exception as e:
-        current_app.logger.warning(f"[Webhook] Failed: {e}")
-
-# ----------------------------------------------------------------
-#  Helpers
-# ----------------------------------------------------------------
-def ok(data: dict, **meta): return jsonify({"success": True, "data": data, "timestamp": datetime.utcnow().isoformat(), **meta})
-def err(msg: str, code=400): return jsonify({"success": False, "error": msg}), code
-
-def safe_openai(prompt: str, system: str = "You are a helpful PittState assistant.", temp=0.7, max_tokens=450):
-    if not openai_client:
-        return {"answer": f"[Offline AI] {prompt[:140]}…"}
-    try:
-        r = openai_client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            temperature=temp,
-            max_tokens=max_tokens,
-        )
-        return {"answer": r.choices[0].message.content.strip()}
-    except Exception as e:
-        current_app.logger.error(f"OpenAI error: {e}")
-        return {"answer": "⚠️ AI service temporarily unavailable."}
-
-# ----------------------------------------------------------------
-#  Blueprint
-# ----------------------------------------------------------------
 api_bp = Blueprint("api_bp", __name__, url_prefix="/api")
 
-# ===============================================================
-#  AI Endpoints
-# ===============================================================
-@api_bp.route("/ai/query", methods=["POST"])
-@rate_limit
-def ai_query():
-    q = (request.json or {}).get("q", "").strip()
-    if not q: return err("Missing query.")
-    result = safe_openai(q)
-    emit_activity("ai.query", {"len": len(q)})
-    return ok(result)
+# ---------------------------------------------------------
+# Utility helpers
+# ---------------------------------------------------------
+def _json_response(success=True, **data):
+    """Standardized PSU API response format."""
+    return jsonify({
+        "success": success,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "data": data,
+    })
 
-@api_bp.route("/ai/tools/analyze_essay", methods=["POST"])
-@rate_limit
-def ai_essay():
-    text = (request.json or {}).get("text", "").strip()
-    if not text: return err("Missing essay text.")
-    prompt = (
-        "You are an academic writing coach at Pitt State. "
-        "Analyze this essay for clarity, evidence, and tone. "
-        "Provide a 3-part structured summary with strengths, weaknesses, and improvement tips.\n\n"
-        f"{text}"
-    )
-    result = safe_openai(prompt, max_tokens=550)
-    emit_activity("ai.essay", {"chars": len(text)})
-    return ok(result)
 
-@api_bp.route("/ai/tools/optimize_resume", methods=["POST"])
-@rate_limit
-def ai_resume():
-    data = request.json or {}
-    bullets = data.get("bullets")
-    if not isinstance(bullets, list) or not bullets:
-        return err("Missing résumé bullets.")
-    prompt = (
-        "Rewrite these résumé bullets to be concise, action-oriented, and measurable. "
-        "Return an improved bullet list only:\n\n" + "\n".join(f"- {b}" for b in bullets)
-    )
-    result = safe_openai(prompt, max_tokens=400)
-    emit_activity("ai.resume", {"count": len(bullets)})
-    return ok(result)
-
-@api_bp.route("/ai/moderate", methods=["POST"])
-@rate_limit
-def ai_moderate():
-    text = (request.json or {}).get("text", "").strip()
-    if not text: return err("Missing text.")
-    flag = any(w in text.lower() for w in ["hate", "violence", "racist", "suicide", "attack"])
-    emit_activity("ai.moderate", {"flagged": flag})
-    return ok({"flagged": flag, "severity": "high" if flag else "none"})
-
-@api_bp.route("/ai/insight", methods=["POST"])
-@rate_limit
-def ai_insight():
-    ctx = (request.json or {}).get("context", "Summarize recent engagement trends for PittState-Connect.")
-    cur = cache_get("analytics:summary") or {}
-    prev = cache_get("analytics:summary:prev") or {}
-    prompt = (
-        "You are PittState-Connect’s analytics summarizer. Compare current and previous metrics, "
-        "highlight changes, and give 3 action insights.\n\n"
-        f"Current: {json.dumps(cur)}\nPrevious: {json.dumps(prev)}"
-    )
-    result = safe_openai(prompt, max_tokens=350)
-    emit_activity("ai.insight", {"compared": True})
-    return ok(result)
-
-@api_bp.route("/ai/recommendations", methods=["POST"])
-@rate_limit
-def ai_recommend():
-    profile = (request.json or {}).get("profile", {})
-    recs = {
-        "scholarships": [
-            {"id": "s100", "title": "Leadership Excellence Award", "score": 93},
-            {"id": "s200", "title": "STEM Future Grant", "score": 89},
-        ],
-        "jobs": [
-            {"id": "j300", "title": "Marketing Intern", "company": "Gorilla Media", "score": 86},
-            {"id": "j400", "title": "Data Analyst Co-op", "company": "KC Tech", "score": 84},
-        ],
-        "events": [
-            {"id": "e500", "title": "Scholarship Writing Workshop", "when": "Wed 3 PM", "score": 80},
-        ],
-        "gorilla_impact_score": 78
+def _error_response(message, code=400, trace=None):
+    """Unified error wrapper for client responses."""
+    payload = {
+        "success": False,
+        "error": {"message": message, "code": code},
+        "timestamp": datetime.utcnow().isoformat() + "Z",
     }
-    emit_activity("ai.recommend", {"keys": list(profile.keys())})
-    return ok(recs)
+    if trace and current_app.config.get("DEBUG"):
+        payload["error"]["trace"] = trace
+    return jsonify(payload), code
 
-# ===============================================================
-#  Analytics Endpoints
-# ===============================================================
-@api_bp.route("/analytics/summary", methods=["GET"])
-@rate_limit
-def analytics_summary():
-    cached = cache_get("analytics:summary")
-    if cached: return ok(cached, cached=True)
 
-    metrics = {
-        "users_total": 4528,
-        "alumni": 1679,
-        "active_sessions": 118,
-        "open_scholarships": 41,
-        "events_upcoming": 14,
-        "jobs_posted": 89,
-        "avg_match_score": 88,
-    }
-    if not cache_get("analytics:summary:prev") or datetime.utcnow().minute < 5:
-        cache_set("analytics:summary:prev", metrics, ttl=3600)
-    cache_set("analytics:summary", metrics, ttl=300)
-    emit_activity("analytics.summary", {"cached": False})
-    return ok(metrics)
+# ---------------------------------------------------------
+# 1️⃣ Health check
+# ---------------------------------------------------------
+@api_bp.route("/ping", methods=["GET"])
+def ping():
+    """Simple health endpoint for uptime and latency checks."""
+    start = time.perf_counter()
+    redis_status = bool(getattr(current_app, "redis_client", None))
+    openai_status = bool(current_app.config.get("OPENAI_API_KEY"))
+    db_status = False
 
-@api_bp.route("/analytics/trends", methods=["GET"])
-@rate_limit
-def analytics_trends():
-    cached = cache_get("analytics:trends")
-    if cached: return ok(cached, cached=True)
-
-    today = datetime.utcnow().date()
-    weeks = [(today - timedelta(days=7*i)) for i in range(7)][::-1]
-    data = {
-        "labels": [w.strftime("%b %d") for w in weeks],
-        "users": [3800, 3925, 4010, 4150, 4275, 4410, 4528],
-        "sessions": [92, 101, 95, 108, 113, 119, 118],
-        "jobs": [70, 72, 74, 78, 80, 85, 89],
-        "events": [10, 11, 10, 12, 12, 13, 14],
-    }
-    cache_set("analytics:trends", data, ttl=600)
-    emit_activity("analytics.trends", {"points": len(data["labels"])})
-    return ok(data)
-
-# ===============================================================
-#  Admin Utilities
-# ===============================================================
-@api_bp.route("/admin/reload-cache", methods=["POST"])
-@rate_limit
-@require_roles("admin")
-def admin_clear_cache():
     try:
-        if redis_client:
-            for k in ("analytics:summary", "analytics:trends"):
-                redis_client.delete(k)
-        else:
-            with _cache_lock:
-                for k in ("analytics:summary", "analytics:trends"):
-                    _cache.pop(k, None)
-        emit_activity("admin.cache_reload", {"by": "admin"})
-        return ok({"message": "Cache cleared."})
+        from models import User
+        User.query.first()
+        db_status = True
+    except Exception:
+        db_status = False
+
+    latency = round((time.perf_counter() - start) * 1000, 2)
+    return _json_response(
+        status="ok",
+        latency_ms=latency,
+        database=db_status,
+        redis=redis_status,
+        openai=openai_status,
+        version="2.0-Final",
+    )
+
+
+# ---------------------------------------------------------
+# 2️⃣ AI Assistant Endpoint (OpenAI integration)
+# ---------------------------------------------------------
+@api_bp.route("/ai/ask", methods=["POST"])
+def ai_ask():
+    """
+    Smart AI endpoint — responds to queries using OpenAI.
+    Requires: { "prompt": "..." }
+    """
+    if not current_app.config.get("OPENAI_API_KEY"):
+        return _error_response("OpenAI API not configured.", 503)
+
+    payload = request.get_json(silent=True)
+    if not payload or "prompt" not in payload:
+        return _error_response("Missing prompt field.", 400)
+
+    prompt = payload.get("prompt", "").strip()
+    if not prompt:
+        return _error_response("Prompt cannot be empty.", 400)
+
+    try:
+        import openai
+
+        openai.api_key = current_app.config["OPENAI_API_KEY"]
+
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are PittState-Connect's helpful AI assistant, tailored to PSU students, alumni, and staff."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.7,
+            max_tokens=500,
+        )
+
+        answer = response.choices[0].message.content.strip()
+        return _json_response(prompt=prompt, response=answer)
     except Exception as e:
-        current_app.logger.error(f"Cache clear failed: {e}")
-        return err("Internal cache error", 500)
+        return _error_response("AI generation failed.", 500, trace=traceback.format_exc())
 
-# ===============================================================
-#  Global Error Handlers
-# ===============================================================
-@api_bp.app_errorhandler(404)
-def not_found(e): return err("Endpoint not found.", 404)
 
-@api_bp.app_errorhandler(500)
-def server_error(e):
-    current_app.logger.error(traceback.format_exc())
-    return err("Internal server error.", 500)
+# ---------------------------------------------------------
+# 3️⃣ Analytics Summary Endpoint
+# ---------------------------------------------------------
+@api_bp.route("/analytics/summary", methods=["GET"])
+def analytics_summary():
+    """
+    Returns cached or live metrics for dashboard analytics.
+    Example return:
+    {
+      "users_total": 523,
+      "active_today": 97,
+      "posts_created": 134,
+      "scholarships_applied": 43,
+      "timestamp": "..."
+    }
+    """
+    try:
+        cache = current_app.extensions.get("cache")
+        data = cache.get("analytics:summary")
+
+        if not data:
+            from models import User, Post, ScholarshipApplication
+
+            total_users = User.query.count()
+            posts = Post.query.count() if "Post" in globals() else 0
+            scholarships = (
+                ScholarshipApplication.query.count()
+                if "ScholarshipApplication" in globals()
+                else 0
+            )
+
+            data = {
+                "users_total": total_users,
+                "posts_created": posts,
+                "scholarships_applied": scholarships,
+                "active_today": min(total_users, int(total_users * 0.2)),  # rough sample
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+            }
+
+            cache.set("analytics:summary", data, timeout=3600)
+
+        return _json_response(**data)
+
+    except Exception as e:
+        return _error_response("Analytics aggregation failed.", 500, trace=traceback.format_exc())
+
+
+# ---------------------------------------------------------
+# 4️⃣ Smart Reminder Scheduler
+# ---------------------------------------------------------
+@api_bp.route("/reminders/schedule", methods=["POST"])
+def schedule_reminder():
+    """
+    Queue a reminder job via APScheduler or Redis queue.
+    Request JSON: { "user_id": 12, "message": "...", "when": "2025-10-26T15:00:00Z" }
+    """
+    scheduler = getattr(current_app, "scheduler", None)
+    if not scheduler:
+        return _error_response("Scheduler not available.", 503)
+
+    payload = request.get_json(silent=True)
+    if not payload:
+        return _error_response("Missing JSON body.", 400)
+
+    try:
+        user_id = int(payload.get("user_id"))
+        message = payload.get("message", "")
+        when_str = payload.get("when")
+        when = datetime.fromisoformat(when_str.replace("Z", "")) if when_str else None
+
+        if not all([user_id, message, when]):
+            return _error_response("Missing user_id, message, or when.", 400)
+
+        def send_reminder(user_id=user_id, msg=message):
+            try:
+                from utils.mail_util import send_email
+                from models import User
+
+                user = User.query.get(user_id)
+                if not user or not user.email:
+                    return
+                send_email(
+                    user.email,
+                    "PittState-Connect Reminder",
+                    f"<p>{msg}</p><br><small>Sent automatically by PittState-Connect.</small>",
+                )
+                current_app.logger.info(f"✅ Reminder sent to user {user_id}: {msg}")
+            except Exception as e:
+                current_app.logger.warning(f"Reminder job failed: {e}")
+
+        job_id = f"reminder_{user_id}_{int(time.time())}"
+        scheduler.add_job(
+            send_reminder,
+            "date",
+            run_date=when,
+            id=job_id,
+            replace_existing=True,
+        )
+
+        return _json_response(message="Reminder scheduled successfully.", job_id=job_id, run_date=when.isoformat())
+
+    except Exception as e:
+        return _error_response("Failed to schedule reminder.", 500, trace=traceback.format_exc())
+
+
+# ---------------------------------------------------------
+# 5️⃣ Error handler for /api
+# ---------------------------------------------------------
+@api_bp.errorhandler(404)
+def api_not_found(_):
+    return _error_response("Endpoint not found.", 404)
