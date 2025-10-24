@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Admin Audit · PittState Connect{% endblock %}
+{% block content %}
+<h1>Admin Audit</h1>
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Text</th><th>Score</th><th>Flagged</th></tr></thead>
+      <tbody>
+        {% for i in items %}
+          <tr><td>{{ i.text }}</td><td>{{ i.score }}</td><td>{{ i.flagged }}</td></tr>
+        {% else %}
+          <tr><td colspan="3">No flagged items.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
