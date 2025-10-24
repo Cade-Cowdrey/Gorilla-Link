@@ -1,25 +1,19 @@
-# /config/test.py
 import os
+from . import BaseConfig, PSU_BRAND_DEFAULT
 
-class TestConfig:
-    """Testing configuration for automated tests."""
+
+class TestConfig(BaseConfig):
     DEBUG = False
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL", "sqlite:///:memory:")
+    WTF_CSRF_ENABLED = False  # make form tests easier
 
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = "test-secret-key"
-    WTF_CSRF_ENABLED = False
+    # Fast tests: minimal caching + simple sessions
+    CACHE_TYPE = "SimpleCache"
+    SESSION_TYPE = "filesystem"
+    SESSION_COOKIE_SECURE = False
 
-    MAIL_SUPPRESS_SEND = True
-    MAIL_DEFAULT_SENDER = "test@pittstateconnect.local"
+    # Deterministic brand for snapshots
+    PSU_BRAND = PSU_BRAND_DEFAULT.copy()
 
-    REDIS_URL = "redis://localhost:6379/1"
-
-    TALISMAN_FORCE_HTTPS = False
-    TALISMAN_CONTENT_SECURITY_POLICY = {"default-src": "'self'"}
-
-    OPENAI_API_KEY = "test-key"
-    OPENAI_MODEL = "gpt-4o-mini"
-
-    LOG_LEVEL = "CRITICAL"
+    SENTRY_ENVIRONMENT = "testing"
