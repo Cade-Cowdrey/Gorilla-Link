@@ -1,2 +1,1 @@
-# blueprints/digests/__init__.py
-from . import routes # noqa: F401
+from .routes import digests_bp
