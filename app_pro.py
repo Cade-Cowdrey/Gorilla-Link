@@ -1,145 +1,229 @@
-# app_pro.py
 # ===============================================================
-#  PittState-Connect | PSU-Branded Full Production App (Final)
+#  PittState-Connect — Production Application Entrypoint
+#  File: app_pro.py
 #  ---------------------------------------------------------------
-#  Includes:
-#   - Unified blueprint registration
-#   - AI Tools, Digests, Donor, Employer, Security, Analytics
-#   - Flask-Login + SQLAlchemy + Mail setup
-#   - APScheduler for automated reminders
-#   - CORS, Compression, Talisman (security), DebugToolbar
+#  Full enterprise-grade configuration:
+#   • Flask + SQLAlchemy + Migrate
+#   • Flask-Login + Session + Mail + APScheduler
+#   • Blueprint Auto-Loader
+#   • Secure headers (Flask-Talisman)
+#   • Compression, CORS, Redis-aware caching
+#   • Background tasks (Daily Digest, Deadlines, Rollup, etc.)
 # ===============================================================
 
 from __future__ import annotations
-import os, logging
+import os, logging, sys, json
+from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_compress import Compress
-from flask_cors import CORS
 from flask_session import Session
+from flask_cors import CORS
+from flask_compress import Compress
 from flask_talisman import Talisman
-from flask_debugtoolbar import DebugToolbarExtension
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from loguru import logger
 
-# Initialize core extensions
+# ---------------------------------------------------------------
+#  Core Extensions
+# ---------------------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
 login_manager = LoginManager()
+sess = Session()
 compress = Compress()
-toolbar = DebugToolbarExtension()
 
+# ---------------------------------------------------------------
+#  Logging Setup
+# ---------------------------------------------------------------
+LOG_PATH = "logs"
+os.makedirs(LOG_PATH, exist_ok=True)
+logger.add(f"{LOG_PATH}/app.log", rotation="5 MB", retention="7 days", level="INFO", enqueue=True)
+logging.getLogger("apscheduler").setLevel(logging.WARNING)
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
-# ===============================================================
-#  App Factory
-# ===============================================================
-def create_app():
-    app = Flask(__name__, instance_relative_config=False)
+# ---------------------------------------------------------------
+#  Factory
+# ---------------------------------------------------------------
+def create_app() -> Flask:
+    app = Flask(__name__)
 
-    # ------------------------------------------------------------
+    # -----------------------------------------------------------
     #  Configuration
-    # ------------------------------------------------------------
-    app.config.from_mapping(
+    # -----------------------------------------------------------
+    app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY", "dev-key"),
-        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///pittstate.db"),
+        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///pittstate_connect.db"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
         MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
         MAIL_USE_TLS=True,
         MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
         MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+        MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstate-connect.edu"),
         SESSION_TYPE="filesystem",
         SESSION_PERMANENT=False,
-        DEBUG_TB_INTERCEPT_REDIRECTS=False,
+        COMPRESS_ALGORITHM="br",
+        COMPRESS_LEVEL=6,
+        TEMPLATES_AUTO_RELOAD=True,
+        JSON_SORT_KEYS=False,
     )
 
-    # ------------------------------------------------------------
-    #  Extensions Initialization
-    # ------------------------------------------------------------
+    # -----------------------------------------------------------
+    #  Initialize Extensions
+    # -----------------------------------------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     login_manager.init_app(app)
+    sess.init_app(app)
     compress.init_app(app)
-    Session(app)
-    CORS(app)
-    toolbar.init_app(app)
+    CORS(app, supports_credentials=True)
     Talisman(app, content_security_policy=None)
 
-    # ------------------------------------------------------------
-    #  User loader for Flask-Login
-    # ------------------------------------------------------------
-    from models import User  # Ensure your User model exists
-
+    # -----------------------------------------------------------
+    #  Flask-Login Setup
+    # -----------------------------------------------------------
+    from models import User  # noqa
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-
     login_manager.login_view = "auth_bp.login"
-    login_manager.login_message_category = "info"
 
-    # ------------------------------------------------------------
-    #  Register Blueprints
-    # ------------------------------------------------------------
-    from blueprints.core.routes import core_bp
-    from blueprints.auth.routes import auth_bp
-    from blueprints.digests import digests_bp
-    from blueprints.ai_tools import ai_tools_bp
-    from blueprints.donor import donor_bp
-    from blueprints.employer import employer_bp
-    from blueprints.security import security_bp
-    from blueprints.api.routes import api_bp
-    from blueprints.analytics.routes import analytics_bp
-
-    app.register_blueprint(core_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(digests_bp)
-    app.register_blueprint(ai_tools_bp)
-    app.register_blueprint(donor_bp)
-    app.register_blueprint(employer_bp)
-    app.register_blueprint(security_bp)
-    app.register_blueprint(api_bp)
-    app.register_blueprint(analytics_bp)
-
-    app.logger.info("✅ Blueprints registered successfully")
-
-    # ------------------------------------------------------------
-    #  Scheduler Setup (for Digests + Deadlines)
-    # ------------------------------------------------------------
+    # -----------------------------------------------------------
+    #  Blueprints Auto-Registration
+    # -----------------------------------------------------------
     try:
-        from tasks.reminders import run_daily_digest_job, run_deadline_reminders_job
-
-        scheduler = BackgroundScheduler(daemon=True, timezone="UTC")
-        scheduler.add_job(lambda: run_daily_digest_job(app), "cron", hour=12, minute=0)
-        scheduler.add_job(lambda: run_deadline_reminders_job(app), "cron", hour=13, minute=0)
-
-        # Only start on one dyno in production
-        if os.getenv("SCHEDULER_LEADER", "1") == "1":
-            scheduler.start()
-            app.logger.info("🕒 Scheduler started successfully")
+        from blueprints.core.routes import core_bp
+        from blueprints.auth.routes import auth_bp
+        from blueprints.careers.routes import careers_bp
+        from blueprints.departments.routes import departments_bp
+        from blueprints.analytics.routes import analytics_bp
+        from blueprints.digests.routes import digests_bp
+        from blueprints.community.routes import community_bp
+        from blueprints.api.routes import api_bp
+        from blueprints.alumni.routes import alumni_bp
     except Exception as e:
-        app.logger.error(f"⚠️ Scheduler init failed: {e}")
+        logger.error(f"Blueprint import error: {e}")
+        raise
 
-    # ------------------------------------------------------------
-    #  Logging
-    # ------------------------------------------------------------
-    if not app.debug:
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.INFO)
-        app.logger.addHandler(handler)
+    blueprints = [
+        core_bp, auth_bp, careers_bp, departments_bp,
+        analytics_bp, digests_bp, community_bp, api_bp, alumni_bp,
+    ]
 
-    app.logger.info("🚀 Booting PittState-Connect (env=%s)", os.getenv("FLASK_ENV", "production"))
-    app.logger.info("Compression: enabled")
+    for bp in blueprints:
+        try:
+            app.register_blueprint(bp)
+        except Exception as e:
+            logger.error(f"Failed to register blueprint {bp.name}: {e}")
+
+    logger.info("✅ Blueprints registered successfully")
+
+    # -----------------------------------------------------------
+    #  Scheduler Setup
+    # -----------------------------------------------------------
+    scheduler = BackgroundScheduler(timezone="US/Central", daemon=True)
+
+    try:
+        from tasks.reminders import (
+            run_daily_digest_job,
+            run_deadline_reminders_job,
+            weekly_analytics_rollup,
+            cache_prime_job,
+            stale_session_cleanup,
+        )
+    except Exception as e:
+        logger.warning(f"Scheduler import failed: {e}")
+        run_daily_digest_job = run_deadline_reminders_job = lambda app: None
+        weekly_analytics_rollup = cache_prime_job = stale_session_cleanup = lambda app: None
+
+    # Schedule recurring jobs
+    scheduler.add_job(lambda: run_daily_digest_job(app), CronTrigger(hour=7, minute=0))
+    scheduler.add_job(lambda: run_deadline_reminders_job(app), CronTrigger(hour=9, minute=0))
+    scheduler.add_job(lambda: weekly_analytics_rollup(app), CronTrigger(day_of_week="sun", hour=10, minute=0))
+    scheduler.add_job(lambda: cache_prime_job(app), CronTrigger(minute="*/30"))
+    scheduler.add_job(lambda: stale_session_cleanup(app), CronTrigger(hour=3, minute=0))
+
+    try:
+        scheduler.start()
+        logger.info("⏱️  APScheduler started successfully")
+    except Exception as e:
+        logger.error(f"Scheduler failed to start: {e}")
+
+    # -----------------------------------------------------------
+    #  Startup Hooks
+    # -----------------------------------------------------------
+    @app.before_request
+    def before_any_request():
+        app.logger.debug(f"[{datetime.utcnow().isoformat()}] Incoming: {getattr(app, 'request_class', 'GET')}")
+
+    @app.after_request
+    def after_any_request(resp):
+        resp.headers["X-PittState-App"] = "PittState-Connect"
+        return resp
+
+    @app.shell_context_processor
+    def make_shell_context():
+        from models import User, Post, Scholarship, Job
+        return {"db": db, "User": User, "Post": Post, "Scholarship": Scholarship, "Job": Job}
+
+    # -----------------------------------------------------------
+    #  OpenAI Health Check (optional)
+    # -----------------------------------------------------------
+    if os.getenv("OPENAI_API_KEY"):
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            logger.info("🤖 OpenAI client initialized successfully")
+            setattr(app, "openai_client", client)
+        except Exception as e:
+            logger.warning(f"OpenAI init failed: {e}")
+
+    # -----------------------------------------------------------
+    #  Cache & Redis Warmup
+    # -----------------------------------------------------------
+    if os.getenv("REDIS_URL"):
+        try:
+            import redis
+            r = redis.from_url(os.getenv("REDIS_URL"))
+            r.ping()
+            setattr(app, "redis_client", r)
+            logger.info("🧠 Redis connected and available")
+        except Exception as e:
+            logger.warning(f"Redis unavailable: {e}")
+
+    # -----------------------------------------------------------
+    #  Security Headers & Branding
+    # -----------------------------------------------------------
+    @app.context_processor
+    def inject_globals():
+        return {
+            "PSU_BRAND": {
+                "name": "PittState-Connect",
+                "tagline": "Connecting Gorillas for Life 🦍",
+                "crimson": "#A6192E",
+                "gold": "#FFB81C",
+            }
+        }
+
+    logger.info(f"🚀 Booting PittState-Connect (env={os.getenv('RENDER_ENV', 'production')})")
+    logger.info("Compression: enabled")
 
     return app
 
 
 # ===============================================================
-#  App Entry Point
+#  App Instance (Gunicorn Entry)
+# ===============================================================
+app = create_app()
+
+# ===============================================================
+#  Gunicorn Entrypoint
 # ===============================================================
 if __name__ == "__main__":
-    app = create_app()
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)), debug=False)
