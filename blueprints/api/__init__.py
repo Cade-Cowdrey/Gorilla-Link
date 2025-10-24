@@ -1,1 +1,1 @@
-# keeps the package importable
+from .routes import api_bp
