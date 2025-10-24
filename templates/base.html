@@ -1,95 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="h-100">
 <head>
+  <!-- Meta -->
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% block title %}PittState Connect{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-  <!-- Theme -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}"/>
+  <!-- SEO / Social -->
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <meta name="description" content="PittState-Connect — scholarships, jobs, events & alumni networking for PSU." />
+  <meta property="og:title" content="PittState-Connect" />
+  <meta property="og:description" content="Scholarships, careers, events, and alumni networking — all in one PSU-branded hub." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="{{ url_for('static', filename='img/og-card.png', _external=False) }}" />
+  <meta name="theme-color" content="#a6192e" />
 
-  <!-- Favicon (optional) -->
-  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" />
-  {% block head %}{% endblock %}
+  <!-- Favicons (optional placeholders) -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- PSU Theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
+
+  <!-- Minimal utility styles (safe, no Tailwind required) -->
   <style>
-    /* Minimal Tailwind-like utilities used in examples */
-    .mx-auto{margin-left:auto;margin-right:auto}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.gap-2{gap:.5rem}.gap-4{gap:1rem}.ml-auto{margin-left:auto}.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.mt-3{margin-top:.75rem}.mb-0{margin-bottom:0}.p-0{padding:0}.p-3{padding:0.75rem}
-  </style>
-</head>
-<body class="{% if request.cookies.get('theme','light') == 'dark' %}dark{% endif %}">
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="container flex items-center justify-between py-2">
-      <a class="brand" href="/">PittState Connect</a>
-      <div class="flex items-center gap-4">
-        <!-- Use safe absolute paths to avoid BuildError if endpoints are not registered -->
-        <a href="/" class="hover:text-crimson">Home</a>
-        <a href="/community" class="hover:text-crimson">Community</a>
-        <a href="/careers" class="hover:text-crimson">Careers</a>
-        <a href="/scholarships" class="hover:text-crimson">Scholarships</a>
-        <a href="/analytics" class="hover:text-crimson">Analytics</a>
-        <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">🌓</button>
-      </div>
-    </div>
-  </nav>
+    /* Layout helpers */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    .grid { display: grid; gap: 1rem; }
+    .btn-outline { background: transparent; border: 1px solid #e5e7eb; color: #1a1a1a; }
+    .btn-outline:hover { border-color: #a6192e; color: #a6192e; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: .65rem .8rem; border-bottom: 1px solid #eee; text-align: left; }
 
-  <!-- Global Insight Bar -->
-  <div id="insightBar">
-    <div class="container py-2 flex items-center gap-4">
-      <div><strong>Campus Mood:</strong> <span id="insightSentiment" class="badge">—</span></div>
-      <div><strong>Active Users:</strong> <span id="insightActive">—</span></div>
-      <div class="ml-auto text-gray" id="insightTakeaway">—</div>
-    </div>
+    /* Accessibility: focus outlines */
+    a:focus, button:focus, input:focus, textarea:focus {
+      outline: 3px solid #ffb81c; outline-offset: 2px;
+    }
+
+    /* Toasts */
+    .psu-toast { position: fixed; right: 20px; bottom: 20px; z-index: 9999; border-radius: 12px; padding: 12px 16px;
+                 color: #fff; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+    .psu-toast.info  { background: #a6192e; }
+    .psu-toast.warn  { background: #ffb81c; color:#222; }
+    .psu-toast.error { background: #8c1628; }
+
+    /* Skeleton shimmer (for loading states) */
+    .skeleton { position: relative; overflow: hidden; background: #eee; border-radius: 8px; min-height: 1.25rem; }
+    .skeleton::after { content:""; position:absolute; inset:0; transform: translateX(-100%);
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 100%);
+      animation: shimmer 1.6s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    /* Header shadow on scroll */
+    .nav-glass { backdrop-filter: blur(6px); background: rgba(255,255,255,.75); }
+    body.dark .nav-glass { background: rgba(30,30,30,.6); }
+  </style>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="min-h-screen">
+  <!-- Accessibility: Skip link -->
+  <a href="#main" class="btn btn-gold" style="position:absolute;left:-9999px;top:-9999px;"
+     onfocus="this.style.left='12px';this.style.top='12px'">Skip to content</a>
+
+  <!-- Header / Navbar -->
+  <header id="site-header" class="nav-glass" style="position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(0,0,0,.05);">
+    <nav class="container" style="display:flex;align-items:center;justify-content:space-between;height:64px;">
+      <div class="flex" style="display:flex;align-items:center;gap:.75rem;">
+        <a href="{{ url_for('core_bp.home') }}" class="font-heading text-crimson" style="font-size:1.2rem;">
+          🦍 PittState-Connect
+        </a>
+      </div>
+      <div class="flex" style="display:flex;align-items:center;gap:1rem;">
+        <a href="{{ url_for('core_bp.home') }}" class="hover:text-crimson">Home</a>
+        <a href="/analytics" class="hover:text-crimson">Analytics</a>
+        <a href="/donor/" class="hover:text-crimson">Donor</a>
+        <a href="/employer/" class="hover:text-crimson">Employer</a>
+        <a href="/admin/audit" class="hover:text-crimson">Admin</a>
+        <!-- Global theme toggle (also respected by page-specific toggles) -->
+        <button id="theme-toggle-global" class="btn btn-outline" title="Toggle dark mode">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Flash messages -->
+  <div class="container" aria-live="polite" aria-atomic="true" style="margin-top:1rem;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="card" role="status" style="padding:.9rem;border-left:6px solid {% if category=='error' %}#8c1628{% elif category=='warning' %}#ffb81c{% else %}#a6192e{% endif %};">
+            <strong style="margin-right:.4rem;text-transform:capitalize;">{{ category or 'info' }}:</strong> {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
   </div>
 
-  <!-- Content -->
-  <main class="container section">
-    {% block content %}{% endblock %}
+  <!-- Main content -->
+  <main id="main" class="container section" style="padding-top:2rem;">
+    {% block content %}
+      <!-- Default landing skeleton (safe if a view forgets to extend) -->
+      <div class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card" style="padding:1rem;">
+          <div class="skeleton" style="height:32px;width:60%;margin-bottom:.5rem;"></div>
+          <div class="skeleton" style="height:16px;width:90%;margin-bottom:.35rem;"></div>
+          <div class="skeleton" style="height:16px;width:80%;"></div>
+        </div>
+        <div class="card" style="padding:1rem;">
+          <div class="skeleton" style="height:180px;width:100%;"></div>
+        </div>
+      </div>
+    {% endblock %}
   </main>
 
   <!-- Footer -->
-  <footer class="psu-footer">
-    <div class="container flex items-center justify-between">
-      <p class="mb-0">© {{ 2025 }} Pittsburg State University</p>
-      <p class="mb-0"><span class="pill pill-gold">Crimson & Gold</span></p>
+  <footer class="section-dark" style="padding:1.25rem 0;margin-top:2rem;">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <p class="font-body">© {{ 2025 }} Pittsburg State University · PittState-Connect</p>
+      <p class="font-body">
+        <a href="/privacy" class="text-gold">Privacy</a> ·
+        <a href="/terms" class="text-gold">Terms</a>
+      </p>
     </div>
   </footer>
 
-  <!-- Scripts: AI client + helper panel -->
-  <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
+  <!-- Vendor: Chart.js (for analytics pages) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Global helpers -->
   <script>
-    // Theme toggle (persists via cookie)
-    (function(){
-      const btn = document.getElementById('theme-toggle');
-      if(!btn) return;
-      btn.addEventListener('click', () => {
-        const dark = document.body.classList.toggle('dark');
-        document.cookie = 'theme=' + (dark ? 'dark' : 'light') + ';path=/;SameSite=Lax;max-age=31536000';
+    // Toast helper (PSU-branded)
+    window.psuToast = function (msg, type = "info") {
+      try {
+        const old = document.querySelector(".psu-toast"); if (old) old.remove();
+        const el = document.createElement("div");
+        el.className = `psu-toast ${type}`;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => { el.style.opacity = "0"; }, 3500);
+        setTimeout(() => { el.remove(); }, 4200);
+      } catch (e) { console.log(msg); }
+    };
+
+    // Persisted dark mode (shared with page-specific toggles)
+    (function initTheme(){
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") document.body.classList.add("dark");
+    })();
+
+    // Header shadow on scroll (visual polish)
+    (function headerShadow(){
+      const hdr = document.getElementById("site-header");
+      let on = false;
+      window.addEventListener("scroll", () => {
+        const should = window.scrollY > 6;
+        if (should !== on) {
+          on = should;
+          hdr.style.boxShadow = on ? "0 6px 18px rgba(0,0,0,.07)" : "none";
+        }
       });
     })();
 
-    // Insight bar auto-refresh
-    (async function refreshInsight(){
-      try {
-        const feed = Array.from(document.querySelectorAll('.card p')).slice(0,5).map(el=>el.textContent).join(' ');
-        const discussions = document.title || 'general campus discussions';
-        const jobs = 'career fair, internship, part-time';
-
-        const res = await (window.psuAI || new PSUAIClient()).insight({ feed, discussions, jobs });
-        if(res.ok){
-          const s = res.data.sentiment || 'neutral';
-          const mood = document.getElementById('insightSentiment');
-          mood.textContent = s;
-          mood.className = 'badge ' + (s==='positive' ? 'badge-positive' : s==='negative' ? 'badge-negative' : 'badge-neutral');
-          document.getElementById('insightActive').textContent = res.data.activeUsers ?? '—';
-          document.getElementById('insightTakeaway').textContent = res.data.takeaway || '—';
-        }
-      } catch(e) {}
-      setTimeout(refreshInsight, 60 * 60 * 1000);
+    // Global theme button
+    (function(){
+      const btn = document.getElementById("theme-toggle-global");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const isDark = document.body.classList.toggle("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
     })();
   </script>
+
+  <!-- AI client + Floating campus assistant -->
+  <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
 
   {% block scripts %}{% endblock %}
 </body>
