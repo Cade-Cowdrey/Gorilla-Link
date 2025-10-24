@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}PittState-Connect{% endblock %}</title>
 
-  <!-- PSU Brand Theme -->
+  <!-- PSU Brand Identity -->
   <link rel="icon" href="{{ PSU_BRAND.favicon }}" />
   <meta name="theme-color" content="#990000" />
-  <meta name="description" content="PittState-Connect — the official PSU platform connecting students, alumni, employers, and departments." />
+  <meta name="description" content="PittState-Connect — the official PSU platform connecting students, alumni, faculty, employers, and alumni." />
 
   <!-- Bootstrap + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -17,7 +17,7 @@
   <!-- Custom PSU Theme -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
 
-  <!-- Analytics Hook -->
+  <!-- Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -29,11 +29,10 @@
   {% block head %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column min-vh-100 bg-light text-dark">
+<body class="d-flex flex-column min-vh-100">
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top"
-       style="background: {{ PSU_BRAND.gradient }};">
+  <nav id="mainNav" class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top psu-gradient">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.index') }}">
         <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="32" class="me-2 align-text-top" />
@@ -48,13 +47,20 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link text-white">Home</a></li>
-          <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link text-white">Departments</a></li>
-          <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link text-white">Careers</a></li>
-          <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link text-white">Scholarships</a></li>
-          <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link text-white">Analytics</a></li>
-          <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link text-white">Alumni</a></li>
-          <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link text-white">Donors</a></li>
+          <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link">Departments</a></li>
+          <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a></li>
+          <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a></li>
+          <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link">Analytics</a></li>
+          <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni</a></li>
+          <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link">Donors</a></li>
+
+          <li class="nav-item ms-3">
+            <button id="theme-toggle" class="btn btn-outline-light btn-sm rounded-circle" title="Toggle theme (L/D)">
+              <i class="bi bi-sun-fill"></i>
+            </button>
+          </li>
+
           <li class="nav-item ms-2">
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-outline-light btn-sm px-3">
@@ -71,55 +77,39 @@
     </div>
   </nav>
 
+  <!-- Command Palette -->
+  <div id="command-palette" class="command-palette hidden">
+    <input id="cmdInput" type="text" placeholder="Search or jump (Ctrl + K)" class="form-control rounded-3 shadow" />
+    <ul id="cmdResults" class="list-group mt-2"></ul>
+  </div>
+
   <!-- Content -->
   <main class="flex-grow-1 container py-4">
     {% block content %}{% endblock %}
   </main>
 
   <!-- Footer -->
-  <footer class="py-4 text-center mt-auto"
-          style="background:#212529; color:#fff;">
+  <footer class="py-4 text-center mt-auto bg-dark text-light">
     <p class="mb-0 small">
       &copy; {{ now().year }} <strong>Pittsburg State University</strong> · PittState-Connect<br />
       <span class="text-warning">{{ PSU_BRAND.tagline }}</span>
     </p>
-    <div class="social-icons mt-2">
-      <a href="https://www.facebook.com/pittstate" class="text-light me-3"><i class="bi bi-facebook"></i></a>
+    <div class="mt-2">
+      <a href="https://facebook.com/pittstate" class="text-light me-3"><i class="bi bi-facebook"></i></a>
       <a href="https://x.com/pittstate" class="text-light me-3"><i class="bi bi-twitter-x"></i></a>
-      <a href="https://www.linkedin.com/school/pittsburg-state-university/" class="text-light me-3"><i class="bi bi-linkedin"></i></a>
-      <a href="https://www.instagram.com/pittsburg_state_university/" class="text-light"><i class="bi bi-instagram"></i></a>
+      <a href="https://linkedin.com/school/pittsburg-state-university/" class="text-light me-3"><i class="bi bi-linkedin"></i></a>
+      <a href="https://instagram.com/pittsburg_state_university/" class="text-light"><i class="bi bi-instagram"></i></a>
     </div>
   </footer>
 
   <!-- AI Helper Panel -->
   <div id="ai-helper-panel"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
   <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
-
-  <!-- Bootstrap Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Optional Enhancements -->
-  <script>
-    // Smooth scroll and active nav highlight
-    document.addEventListener("DOMContentLoaded", () => {
-      const path = window.location.pathname;
-      document.querySelectorAll(".nav-link").forEach(link => {
-        if (link.getAttribute("href") === path) link.classList.add("fw-bold", "text-warning");
-      });
-    });
-
-    // Scroll to top button (UX enhancement)
-    const scrollBtn = document.createElement("button");
-    scrollBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
-    scrollBtn.className = "btn btn-warning position-fixed bottom-0 end-0 m-4 rounded-circle shadow";
-    scrollBtn.style.display = "none";
-    document.body.appendChild(scrollBtn);
-    window.addEventListener("scroll", () => {
-      scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
-    });
-    scrollBtn.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
-  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 
   {% block scripts %}{% endblock %}
 </body>
