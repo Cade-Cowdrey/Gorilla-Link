@@ -1,86 +1,20 @@
-<!-- =========================================================
-FILE: src/templates/analytics/dashboard.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Analytics Dashboard · PittState-Connect{% endblock %}
+{% block title %}Analytics Dashboard · PittState Connect{% endblock %}
 {% block content %}
-<section class="section max-w-7xl mx-auto px-6 fade-in">
-  <!-- Header -->
-  <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-    <div>
-      <h1 class="text-4xl font-bold">Analytics Dashboard</h1>
-      <p class="text-gray mt-1">Placement rates, engagement, and scholarship impact across PSU.</p>
-    </div>
-    <div class="flex gap-3 mt-4 md:mt-0">
-      <button class="btn btn-gold">Export CSV</button>
-      <button class="btn btn-crimson">Export PDF</button>
-    </div>
-  </div>
+<h1 class="font-heading">Analytics Dashboard</h1>
 
-  <!-- KPI Cards -->
-  <div class="grid md:grid-cols-4 gap-6 mb-8">
-    <div class="card p-6 text-center">
-      <h3 class="text-sm text-gray">Overall Placement</h3>
-      <p class="text-3xl font-bold text-crimson mt-1">87%</p>
-      <p class="text-xs text-gray">Last 12 mo</p>
-    </div>
-    <div class="card p-6 text-center">
-      <h3 class="text-sm text-gray">Scholarships Awarded</h3>
-      <p class="text-3xl font-bold text-gold mt-1">312</p>
-      <p class="text-xs text-gray">+12% YoY</p>
-    </div>
-    <div class="card p-6 text-center">
-      <h3 class="text-sm text-gray">Active Mentors</h3>
-      <p class="text-3xl font-bold mt-1">148</p>
-      <p class="text-xs text-gray">Verified alumni</p>
-    </div>
-    <div class="card p-6 text-center">
-      <h3 class="text-sm text-gray">Engagement Score</h3>
-      <p class="text-3xl font-bold mt-1">76</p>
-      <p class="text-xs text-gray">Sitewide index</p>
-    </div>
+<div class="grid" style="display:grid;grid-template-columns:1fr;gap:1rem">
+  <div class="card">
+    <div class="card-header"><strong>Engagement (Last 14 days)</strong></div>
+    <div class="card-body"><div id="chart-engagement" style="height:380px"></div></div>
   </div>
-
-  <!-- Charts Row (placeholders) -->
-  <div class="grid md:grid-cols-2 gap-6">
-    <div class="card p-6">
-      <h3 class="text-xl font-semibold mb-2">Placement by Department</h3>
-      <div class="h-56 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-        <span class="text-gray text-sm">[Chart Placeholder – Bar]</span>
-      </div>
-      <p class="text-xs text-gray mt-2">Tip: Attach your chart lib later; container is ready.</p>
-    </div>
-    <div class="card p-6">
-      <h3 class="text-xl font-semibold mb-2">Engagement Over Time</h3>
-      <div class="h-56 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-        <span class="text-gray text-sm">[Chart Placeholder – Line]</span>
-      </div>
-      <p class="text-xs text-gray mt-2">Tracks logins, mentor messages, scholarship views.</p>
-    </div>
+  <div class="card">
+    <div class="card-header"><strong>Sentiment Trend (AI)</strong></div>
+    <div class="card-body"><div id="chart-sentiment" style="height:380px"></div></div>
   </div>
-
-  <!-- Impact Table -->
-  <div class="card p-6 mt-8 bg-gray-50 dark:bg-gray-800">
-    <h3 class="text-2xl font-semibold mb-3">Scholarship Impact by College</h3>
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="text-gray uppercase border-b border-gray-200 dark:border-gray-700">
-          <tr>
-            <th class="py-2">College</th>
-            <th>Awards</th>
-            <th>Avg $</th>
-            <th>On-Time Apps</th>
-            <th>Placement</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="py-2">Technology</td><td>118</td><td>$2,150</td><td>92%</td><td>89%</td></tr>
-          <tr><td class="py-2">Business</td><td>86</td><td>$1,980</td><td>88%</td><td>85%</td></tr>
-          <tr><td class="py-2">Education</td><td>54</td><td>$1,620</td><td>84%</td><td>82%</td></tr>
-          <tr><td class="py-2">Arts & Sciences</td><td>54</td><td>$1,740</td><td>80%</td><td>79%</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{{ url_for('static', filename='js/analytics-dashboard.js') }}"></script>
 {% endblock %}
