@@ -1,11 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Page Not Found | PittState-Connect{% endblock %}
+{% block title %}Not Found · PittState-Connect{% endblock %}
 {% block content %}
-<div class="min-h-screen flex flex-col justify-center items-center text-center p-10 bg-gradient-to-r from-[#A6192E] to-[#FFB81C] text-white">
-  <h1 class="text-6xl font-bold mb-6">404</h1>
-  <p class="text-xl mb-4">We couldn’t find the page you were looking for.</p>
-  <a href="/" class="bg-white text-[#A6192E] px-6 py-3 rounded-lg font-semibold hover:bg-[#FFB81C] hover:text-black transition">
-    Return Home
-  </a>
+<div class="alert alert-info shadow-sm">
+  <h4 class="alert-heading">Page not found</h4>
+  <p>We couldn’t find what you were looking for.</p>
+  <a class="btn btn-secondary" href="{{ url_for('core_bp.home') }}">Back to Home</a>
 </div>
 {% endblock %}
