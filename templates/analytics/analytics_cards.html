@@ -1,110 +1,453 @@
-<!-- templates/analytics/analytics_cards.html -->
-<div class="row g-4 mt-3">
-  <!-- User Activity Overview -->
-  <div class="col-md-6 col-lg-4">
-    <div class="analytics-card p-4">
-      <h5><i class="bi bi-people-fill me-2"></i>User Engagement</h5>
-      <div class="chart-container"><canvas id="chartUsers"></canvas></div>
-      <div class="analytics-stats">
-        <div class="stat">
-          <h6 id="active-users">0</h6><small>Active Users</small>
-        </div>
-        <div class="stat">
-          <h6 id="growth-rate">0%</h6><small>Growth</small>
-        </div>
+{# ============================================================================
+   PSU Analytics Dashboard Card UI
+   Drop-in partial. Include from templates/analytics/index.html:
+     {% extends "base.html" %}
+     {% block title %}Analytics · PittState-Connect{% endblock %}
+     {% block content %}{% include "analytics/analytics_cards.html" %}{% endblock %}
+   Dependencies: Bootstrap 5 (from base.html), Plotly (CDN below), Socket.IO (CDN below).
+   Server endpoints provided by blueprints/analytics/routes.py:
+     GET  /analytics/api/summary
+     GET  /analytics/api/timeseries?fields=...
+     WS   /ws   (event: "analytics:update")
+   ============================================================================ #}
+
+<section class="container-xxl" id="psu-analytics" aria-labelledby="analyticsHeading">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <h1 id="analyticsHeading" class="h3 mb-0">
+        <span class="me-2">Analytics Dashboard</span>
+        <span class="badge rounded-pill text-bg-warning align-middle">Live</span>
+      </h1>
+      <span class="text-muted small" id="lastUpdated" aria-live="polite" aria-atomic="true">—</span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <div class="input-group input-group-sm" style="width: 320px;">
+        <span class="input-group-text"><i class="bi bi-graph-up"></i></span>
+        <input id="fieldsInput" class="form-control" type="text"
+               placeholder="Timeseries fields (comma-separated)"
+               value="active_users,total_scholarships,total_donations"
+               aria-label="Timeseries fields" />
+        <button id="applyFieldsBtn" class="btn btn-outline-primary">Apply</button>
+      </div>
+
+      <div class="btn-group btn-group-sm" role="group" aria-label="Export">
+        <button class="btn btn-outline-secondary" id="exportSummaryBtn" title="Export summary as CSV">
+          <i class="bi bi-download me-1"></i>Summary
+        </button>
+        <button class="btn btn-outline-secondary" id="exportSeriesBtn" title="Export visible series as CSV">
+          <i class="bi bi-download me-1"></i>Series
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Scholarships Tracker -->
-  <div class="col-md-6 col-lg-4">
-    <div class="analytics-card p-4">
-      <h5><i class="bi bi-award-fill me-2"></i>Scholarship Insights</h5>
-      <div class="chart-container"><canvas id="chartScholarships"></canvas></div>
-      <div class="analytics-stats">
-        <div class="stat">
-          <h6 id="total-scholarships">0</h6><small>Active Scholarships</small>
+  <!-- KPI Cards -->
+  <div class="row g-3" id="kpiRow" aria-live="polite" aria-atomic="true">
+    {% set cards = [
+      ('active_users', 'Active Users', 'bi-people-fill', 'primary', 'Total active users'),
+      ('growth_rate', 'Growth Rate', 'bi-graph-up-arrow', 'success', 'Month-over-month growth (%)'),
+      ('total_scholarships', 'Scholarships', 'bi-mortarboard-fill', 'warning', 'Scholarships available'),
+      ('applications', 'Applications', 'bi-ui-checks-grid', 'info', 'Active applications'),
+      ('total_donations', 'Donations (USD)', 'bi-piggy-bank-fill', 'danger', 'Total donations to date'),
+      ('new_donors', 'New Donors', 'bi-person-plus-fill', 'secondary', 'Donors in the current period'),
+    ] %}
+
+    {% for key, label, icon, theme, help in cards %}
+    <div class="col-12 col-sm-6 col-xl-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <div class="text-muted small" data-bs-toggle="tooltip" data-bs-title="{{ help }}">{{ help }}</div>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi {{ icon }} text-{{ theme }}" aria-hidden="true"></i>
+                <h2 class="h6 mb-0">{{ label }}</h2>
+              </div>
+            </div>
+            <span class="badge rounded-pill text-bg-{{ theme }} align-middle" id="{{ key }}-delta" aria-hidden="true" hidden>+0</span>
+          </div>
+
+          <!-- Value -->
+          <div class="display-6 fw-semibold mt-2" id="{{ key }}-value" style="min-height:2.4rem;">
+            <span class="placeholder-glow"><span class="placeholder col-6"></span></span>
+          </div>
+
+          <!-- Mini status -->
+          <div class="small text-muted" id="{{ key }}-status">
+            <span class="placeholder-glow"><span class="placeholder col-4"></span></span>
+          </div>
         </div>
-        <div class="stat">
-          <h6 id="applications">0</h6><small>Applications</small>
-        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Time Series Chart -->
+  <div class="card shadow-sm border-0 mt-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-activity" aria-hidden="true"></i>
+        <span class="fw-semibold">Trends (last samples)</span>
+      </div>
+      <div class="form-check form-switch m-0">
+        <input class="form-check-input" type="checkbox" id="autoRefreshSwitch" checked />
+        <label class="form-check-label small" for="autoRefreshSwitch">Auto refresh</label>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="analyticsChart" style="height: 360px;">
+        <div class="placeholder-glow"><span class="placeholder col-12" style="height: 320px; display:block;"></span></div>
       </div>
     </div>
   </div>
 
-  <!-- Funding and Donor Overview -->
-  <div class="col-md-6 col-lg-4">
-    <div class="analytics-card p-4">
-      <h5><i class="bi bi-cash-coin me-2"></i>Funding & Donors</h5>
-      <div class="chart-container"><canvas id="chartFunding"></canvas></div>
-      <div class="analytics-stats">
-        <div class="stat">
-          <h6 id="total-donations">$0</h6><small>Total Donations</small>
-        </div>
-        <div class="stat">
-          <h6 id="new-donors">0</h6><small>New Donors</small>
-        </div>
+  <!-- Toast (errors/info) -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="psuToast" class="toast align-items-center text-bg-danger border-0" role="status" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="psuToastBody">Error</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Load Chart.js + SocketIO -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+{# ------- Scripts (kept inline for this partial so it’s drop-in) -------- #}
+<link rel="preload" as="script" href="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" />
+<script defer src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const socket = io("/ws");
+(() => {
+  "use strict";
 
-  // Helper for chart creation
-  const makeChart = (id, label, color) => {
-    const ctx = document.getElementById(id);
-    return new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label,
-          data: [],
-          borderColor: color,
-          tension: 0.3,
-          fill: false,
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        scales: { x: { display: false }, y: { beginAtZero: true } }
-      }
-    });
+  // ----------------------------- Utilities ---------------------------------
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  const toastEl = $("#psuToast");
+  const toastBody = $("#psuToastBody");
+  const showToast = (msg, variant = "danger") => {
+    toastEl.classList.remove("text-bg-danger","text-bg-success","text-bg-info","text-bg-warning");
+    toastEl.classList.add(`text-bg-${variant}`);
+    toastBody.textContent = msg;
+    const t = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
+    t.show();
   };
 
-  const chartUsers = makeChart("chartUsers", "Users", "#ffcc00");
-  const chartScholarships = makeChart("chartScholarships", "Scholarships", "#990000");
-  const chartFunding = makeChart("chartFunding", "Funding", "#28a745");
+  const formatMoney = (n) => {
+    try { return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n); }
+    catch { return `$${Number(n).toLocaleString()}`; }
+  };
 
-  // Live updates from analytics feed
-  socket.on("analytics:update", (data) => {
-    if (!data) return;
-    document.getElementById("active-users").textContent = data.active_users || 0;
-    document.getElementById("growth-rate").textContent = data.growth_rate + "%" || "0%";
-    document.getElementById("total-scholarships").textContent = data.total_scholarships || 0;
-    document.getElementById("applications").textContent = data.applications || 0;
-    document.getElementById("total-donations").textContent = "$" + (data.total_donations || 0);
-    document.getElementById("new-donors").textContent = data.new_donors || 0;
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    const push = (chart, val) => {
-      const now = new Date().toLocaleTimeString();
-      if (chart.data.labels.length > 10) chart.data.labels.shift();
-      if (chart.data.datasets[0].data.length > 10) chart.data.datasets[0].data.shift();
-      chart.data.labels.push(now);
-      chart.data.datasets[0].data.push(val);
-      chart.update();
+  // URL <-> state for selected fields
+  const fieldsInput = $("#fieldsInput");
+  const applyFieldsBtn = $("#applyFieldsBtn");
+  const params = new URLSearchParams(location.search);
+  if (params.get("fields")) fieldsInput.value = params.get("fields");
+
+  const syncUrl = () => {
+    const p = new URLSearchParams(location.search);
+    p.set("fields", fieldsInput.value.trim());
+    const url = `${location.pathname}?${p.toString()}${location.hash}`;
+    history.replaceState(null, "", url);
+  };
+
+  // --------------------------- Data Layer -----------------------------------
+  const ENDPOINT_SUMMARY = "{{ url_for('analytics_bp.api_summary') }}";
+  const ENDPOINT_SERIES  = (fields) => "{{ url_for('analytics_bp.api_timeseries') }}" + "?fields=" + encodeURIComponent(fields);
+
+  // Basic cache (session-only)
+  const cache = new Map();
+
+  async function getJSON(url, { cacheTTL = 30, signal } = {}) {
+    const now = Date.now();
+    const c = cache.get(url);
+    if (c && (now - c.t) < cacheTTL * 1000) return c.v;
+
+    // fetch with retries/backoff
+    let attempt = 0, lastErr;
+    while (attempt < 3) {
+      try {
+        const res = await fetch(url, { credentials: "same-origin", signal });
+        if (!res.ok && res.status !== 304) throw new Error(`HTTP ${res.status}`);
+        const v = res.status === 304 ? c?.v : await res.json();
+        cache.set(url, { t: now, v });
+        return v;
+      } catch (err) {
+        lastErr = err;
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 250));
+        attempt++;
+      }
+    }
+    throw lastErr || new Error("Network error");
+  }
+
+  // --------------------------- UI Bindings ----------------------------------
+  const kpiKeys = [
+    "active_users",
+    "growth_rate",
+    "total_scholarships",
+    "applications",
+    "total_donations",
+    "new_donors"
+  ];
+  const previous = Object.create(null);
+
+  function skeletonOff() {
+    kpiKeys.forEach(k => {
+      const valEl = $(`#${k}-value`);
+      const statusEl = $(`#${k}-status`);
+      if (!valEl || !statusEl) return;
+      valEl.innerHTML = valEl.textContent; // clears placeholder if present
+      statusEl.innerHTML = statusEl.textContent;
+    });
+  }
+
+  function updateKpis(summary) {
+    const ts = summary.updated_at ? new Date(summary.updated_at * 1000) : new Date();
+    $("#lastUpdated").textContent = `Updated ${ts.toLocaleString()}`;
+
+    const fmt = {
+      active_users: (v) => Number(v).toLocaleString(),
+      growth_rate:  (v) => `${Number(v).toFixed(2)}%`,
+      total_scholarships: (v) => Number(v).toLocaleString(),
+      applications: (v) => Number(v).toLocaleString(),
+      total_donations: (v) => formatMoney(Number(v)),
+      new_donors: (v) => Number(v).toLocaleString()
     };
 
-    push(chartUsers, data.active_users);
-    push(chartScholarships, data.total_scholarships);
-    push(chartFunding, data.total_donations);
-  });
-});
+    kpiKeys.forEach(k => {
+      const val = summary[k] ?? 0;
+      const valEl = $(`#${k}-value`);
+      const statusEl = $(`#${k}-status`);
+      const deltaEl = $(`#${k}-delta`);
+      if (!valEl || !statusEl) return;
+
+      // Smooth number tween
+      const start = Number(valEl.dataset.value || 0);
+      const end = Number(val);
+      const dur = 350;
+      const startT = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - startT) / dur);
+        const cur = start + (end - start) * p;
+        valEl.textContent = fmt[k](k==="growth_rate" ? cur : Math.round(cur));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      valEl.dataset.value = end;
+
+      // Delta badge
+      const delta = end - (previous[k] ?? end);
+      previous[k] = end;
+      if (deltaEl) {
+        if (delta !== 0) {
+          deltaEl.hidden = false;
+          const sign = delta > 0 ? "+" : "";
+          deltaEl.textContent = `${sign}${k === "growth_rate" ? delta.toFixed(2) : Math.round(delta)}`;
+          deltaEl.classList.toggle("text-bg-success", delta > 0);
+          deltaEl.classList.toggle("text-bg-danger", delta < 0);
+          deltaEl.classList.toggle("text-bg-secondary", delta === 0);
+        } else {
+          deltaEl.hidden = true;
+        }
+      }
+
+      // Status line
+      statusEl.textContent = (k === "growth_rate")
+        ? (end >= 0 ? "Trending up" : "Trending down")
+        : "Latest value";
+    });
+  }
+
+  // --------------------------- Chart Layer ----------------------------------
+  let chartInited = false;
+  let chartFields = fieldsInput.value.trim();
+  let chartDataCache = null;
+
+  function plotSeries(seriesByField) {
+    const layout = {
+      margin: { l: 40, r: 20, t: 10, b: 40 },
+      paper_bgcolor: "transparent",
+      plot_bgcolor: "transparent",
+      xaxis: { title: "Time", showgrid: true, gridcolor: prefersDark ? "#444" : "#e9ecef" },
+      yaxis: { title: "Value", showgrid: true, gridcolor: prefersDark ? "#444" : "#e9ecef" },
+      legend: { orientation: "h", y: -0.2 },
+      font: { color: getComputedStyle(document.body).getPropertyValue("--bs-body-color").trim() || (prefersDark ? "#e9ecef" : "#212529") },
+      autosize: true
+    };
+
+    const traces = Object.entries(seriesByField).map(([field, arr]) => {
+      const x = arr.map(p => new Date(p[0] * 1000));
+      const y = arr.map(p => p[1]);
+      return {
+        type: "scatter",
+        mode: "lines+markers",
+        name: field,
+        x, y,
+        hovertemplate: "%{x|%Y-%m-%d %H:%M}<br>%{y}<extra>" + field + "</extra>"
+      };
+    });
+
+    Plotly.react("analyticsChart", traces, layout, { displayModeBar: false, responsive: true });
+    chartInited = true;
+  }
+
+  async function refreshSeries({ signal } = {}) {
+    const fields = fieldsInput.value.trim() || "active_users,total_scholarships,total_donations";
+    const data = await getJSON(ENDPOINT_SERIES(fields), { cacheTTL: 10, signal });
+    chartDataCache = data.series || {};
+    plotSeries(chartDataCache);
+  }
+
+  // --------------------------- Exporters ------------------------------------
+  function toCSVRow(arr) { return arr.map(v => `"${String(v).replace(/"/g,'""')}"`).join(","); }
+  function download(name, content, type = "text/csv") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+  }
+
+  $("#exportSummaryBtn")?.addEventListener("click", async () => {
+    try {
+      const data = await getJSON(ENDPOINT_SUMMARY, { cacheTTL: 0 });
+      const keys = Object.keys(data);
+      const values = keys.map(k => data[k]);
+      const csv = [toCSVRow(keys), toCSVRow(values)].join("\n");
+      download(`psu-summary-${Date.now()}.csv`, csv);
+      showToast("Summary exported.", "success");
+    } catch (e) {
+      showToast("Failed to export summary.");
+    }
+  }, { passive: true });
+
+  $("#exportSeriesBtn")?.addEventListener("click", () => {
+    if (!chartDataCache) return showToast("No series loaded.");
+    const allRows = [["field","timestamp","value"]];
+    for (const [field, pts] of Object.entries(chartDataCache)) {
+      pts.forEach(([ts, v]) => allRows.push([field, new Date(ts*1000).toISOString(), v]));
+    }
+    const csv = allRows.map(toCSVRow).join("\n");
+    download(`psu-series-${Date.now()}.csv`, csv);
+    showToast("Series exported.", "success");
+  }, { passive: true });
+
+  // --------------------------- Live Updates ---------------------------------
+  let socket = null;
+  let pollingTimer = null;
+
+  function startPolling() {
+    if (pollingTimer) return;
+    const tick = async () => {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 8000);
+        const summary = await getJSON(ENDPOINT_SUMMARY, { cacheTTL: 0, signal: ctrl.signal });
+        clearTimeout(t);
+        skeletonOff();
+        updateKpis(summary);
+
+        if ($("#autoRefreshSwitch")?.checked) {
+          await refreshSeries({ signal: ctrl.signal });
+        }
+      } catch (e) {
+        // silent; next interval will retry
+      }
+    };
+    pollingTimer = setInterval(tick, 60000);
+    tick(); // immediate first
+  }
+
+  function stopPolling() {
+    if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+  }
+
+  function initSocket() {
+    try {
+      socket = io("/ws", { transports: ["websocket"], timeout: 5000 });
+      socket.on("connect", () => {
+        showToast("Live updates connected.", "info");
+      });
+      socket.on("disconnect", () => {
+        showToast("Live updates disconnected. Falling back to polling.");
+      });
+      socket.on("analytics:update", (payload) => {
+        skeletonOff();
+        updateKpis(payload);
+        if ($("#autoRefreshSwitch")?.checked) refreshSeries().catch(()=>{});
+      });
+    } catch (e) {
+      socket = null;
+    }
+  }
+
+  // ----------------------------- Init ---------------------------------------
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Tooltips
+    $$("[data-bs-toggle='tooltip']").forEach(el => bootstrap.Tooltip.getOrCreateInstance(el));
+
+    // Apply fields
+    applyFieldsBtn?.addEventListener("click", async () => {
+      syncUrl();
+      try {
+        await refreshSeries();
+      } catch {
+        showToast("Failed to load series for selected fields.");
+      }
+    });
+
+    // Auto refresh toggle
+    $("#autoRefreshSwitch")?.addEventListener("change", (e) => {
+      if (e.target.checked) refreshSeries().catch(()=>{});
+    });
+
+    // Initial load
+    try {
+      const summary = await getJSON(ENDPOINT_SUMMARY, { cacheTTL: 0 });
+      skeletonOff();
+      updateKpis(summary);
+    } catch {
+      showToast("Failed to load summary. Retrying in background…");
+    }
+
+    try {
+      await refreshSeries();
+    } catch {
+      // Chart will retry on next poll or live event
+    }
+
+    // Live channel + polling fallback
+    initSocket();
+    startPolling();
+
+    // Resize Plotly when layout changes
+    const ro = new ResizeObserver(() => {
+      if (chartInited) Plotly.Plots.resize("analyticsChart");
+    });
+    ro.observe($("#analyticsChart"));
+
+    // Passive scroll listener for tiny perf win (no-op, ensures page not janky)
+    window.addEventListener("scroll", () => {}, { passive: true });
+  }, { once: true });
+})();
 </script>
+
+<style>
+/* Minor adjustments for dark mode & card polish; complements psu-theme.css */
+@media (prefers-color-scheme: dark) {
+  #psu-analytics .card {
+    background-color: #1d1f20;
+    color: #e9ecef;
+  }
+  #psu-analytics .card .text-muted { color: #adb5bd !important; }
+}
+#psu-analytics .card .display-6 { letter-spacing: .2px; }
+#psu-analytics .badge { user-select: none; }
+</style>
