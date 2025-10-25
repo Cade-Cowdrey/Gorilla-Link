@@ -1,38 +1,78 @@
 {% extends "base.html" %}
-{% block title %}Analytics — PittState-Connect{% endblock %}
+
+{% block title %}Analytics · PittState-Connect{% endblock %}
+
+{% block head %}
+  <meta name="description" content="PSU Analytics Dashboard — Real-time engagement, scholarships, and donor performance insights for PittState-Connect." />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:title" content="PittState-Connect Analytics" />
+  <meta property="og:description" content="Live analytics for PSU: engagement, scholarships, alumni, and donor trends." />
+  <meta property="og:image" content="{{ url_for('static', filename='img/psu_analytics_preview.png') }}" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#990000" />
+
+  <style>
+    /* Page-specific intro animation */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp .6s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Decorative PSU divider line */
+    .psu-divider {
+      border: none;
+      height: 3px;
+      background: linear-gradient(90deg, #990000, #ffcc00);
+      width: 120px;
+      border-radius: 6px;
+      margin: 1.5rem 0;
+    }
+
+    /* Loading shimmer fallback */
+    .placeholder-glow .placeholder {
+      animation-duration: 1.2s !important;
+      animation-iteration-count: infinite;
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h2 class="mb-0">Analytics</h2>
-  <span class="badge bg-secondary text-uppercase">{{ role }}</span>
-</div>
-
-<div class="row g-3">
-  {% for c in cards %}
-  <div class="col-12 col-md-6 col-xl-3">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <div class="d-flex justify-content-between">
-          <div>
-            <div class="text-secondary small">{{ c.label }}</div>
-            <div class="fs-3 fw-bold">{{ c.value }}</div>
-          </div>
-          <div class="align-self-start">
-            <span class="badge {{ 'bg-success' if c.delta >=0 else 'bg-danger' }}">
-              {{ '+' if c.delta>=0 else ''}}{{ c.delta }}%
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+<section class="fade-in-up">
+  <div class="text-center mb-4">
+    <h1 class="fw-bold text-uppercase text-danger">University Analytics Dashboard</h1>
+    <p class="lead text-muted mb-1">Real-time insights on PittState-Connect engagement, scholarships, and donor trends.</p>
+    <hr class="psu-divider mx-auto" />
   </div>
-  {% endfor %}
-</div>
 
-<div class="card mt-4 shadow-sm">
-  <div class="card-body">
-    <h5 class="card-title">Active Users (7d)</h5>
-    <img src="{{ chart_url }}" class="img-fluid rounded border" alt="Active Users Chart">
-  </div>
+  <!-- Dashboard Core -->
+  {% include "analytics/analytics_cards.html" %}
+</section>
+
+<!-- Optional PSU data policy footer note -->
+<div class="text-center small mt-4 text-muted">
+  <p>
+    Analytics data is anonymized and aggregated according to <a href="{{ url_for('core_bp.index') }}#privacy" class="text-decoration-none text-danger">PSU data privacy standards</a>.
+  </p>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Lazy fade-in for large components
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('fade-in-up');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('section, .card').forEach(el => observer.observe(el));
+});
+</script>
 {% endblock %}
