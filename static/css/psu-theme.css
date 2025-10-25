@@ -1,220 +1,234 @@
-/* ============================================
-   PittState-Connect Theme Styles
-   Production Ready | PSU Branding | v3.0
-   ============================================ */
+/* ============================================================
+   PittState-Connect Production Theme
+   ------------------------------------------------------------
+   PSU-branded, performance-optimized, WCAG-compliant styling.
+   Includes dark-mode, analytics cards, hover effects, and
+   optional UI enhancements for dashboards and modals.
+   ============================================================ */
 
-/* ---- Root Variables ---- */
+/* ---------- Root Palette ---------- */
 :root {
   --psu-crimson: #740001;
-  --psu-gold: #eeb211;
-  --psu-dark: #212529;
-  --psu-light: #f8f9fa;
-  --psu-gradient: linear-gradient(135deg, #740001, #eeb211);
-  --transition-fast: 0.25s ease;
-  --transition-slow: 0.6s ease;
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-strong: 0 8px 20px rgba(0, 0, 0, 0.15);
+  --psu-gold: #ffcc00;
+  --psu-gray: #f8f9fa;
+  --psu-charcoal: #212529;
+  --psu-accent: #990000;
+  --psu-link: #b20000;
+  --psu-hover: #a00000;
+  --psu-border: #e0e0e0;
+  --psu-radius: 0.75rem;
+  --psu-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  --psu-transition: 0.25s ease-in-out;
+
+  --font-heading: "Poppins", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+
+  /* Dark-mode equivalents */
+  --dm-bg: #1b1b1b;
+  --dm-card: #262626;
+  --dm-text: #f8f9fa;
+  --dm-muted: #c5c5c5;
+  --dm-border: #333;
+  --dm-link: #ffd54f;
 }
 
-/* ---- Typography ---- */
-body {
-  font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-  background-color: var(--psu-light);
-  color: var(--psu-dark);
-  line-height: 1.6;
+/* ---------- Global Reset ---------- */
+html, body {
+  font-family: var(--font-body);
+  background-color: var(--psu-gray);
+  color: var(--psu-charcoal);
   scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
-/* Headings */
+body.dark-mode {
+  background-color: var(--dm-bg);
+  color: var(--dm-text);
+}
+
+/* ---------- Typography ---------- */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-/* Links */
+.display-6, .display-5, .display-4 {
+  font-weight: 700;
+}
+
 a {
-  color: var(--psu-crimson);
-  text-decoration: none;
-  transition: color var(--transition-fast);
+  color: var(--psu-link);
+  transition: color var(--psu-transition);
 }
 a:hover {
-  color: var(--psu-gold);
+  color: var(--psu-hover);
+  text-decoration: underline;
 }
 
-/* ---- Navbar ---- */
-.navbar {
-  background: var(--psu-gradient) !important;
-  transition: background var(--transition-fast);
-}
-.navbar .nav-link {
-  font-weight: 500;
-  transition: opacity var(--transition-fast);
-}
-.navbar .nav-link:hover {
-  opacity: 0.85;
-}
-
-/* ---- Hero Section ---- */
-.hero-section {
-  background: var(--psu-gradient);
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  overflow: hidden;
-}
-.hero-section .overlay {
-  pointer-events: none;
-}
-.hero-section h1,
-.hero-section p {
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeUp 1s ease forwards;
-}
-.hero-section h1 { animation-delay: 0.2s; }
-.hero-section p { animation-delay: 0.4s; }
-
-/* ---- Card Hover Effects ---- */
-.hover-raise {
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-.hover-raise:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-strong);
-}
-
-/* ---- Scroll Progress ---- */
-#scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 4px;
-  background: var(--psu-gold);
-  width: 0%;
-  z-index: 2000;
-  transition: width 0.15s linear;
-}
-
-/* ---- Buttons ---- */
-.btn-danger {
-  background-color: var(--psu-crimson);
-  border-color: var(--psu-crimson);
-}
-.btn-danger:hover {
-  background-color: #8b0000;
-  border-color: #8b0000;
-}
-.btn-outline-danger:hover {
+/* ---------- Buttons ---------- */
+.btn-psu {
   background-color: var(--psu-crimson);
   color: #fff;
+  border-radius: var(--psu-radius);
+  border: none;
+  transition: background-color var(--psu-transition);
 }
-.btn-light:hover {
+.btn-psu:hover {
+  background-color: var(--psu-accent);
+  color: #fff;
+}
+
+.btn-gold {
   background-color: var(--psu-gold);
+  color: var(--psu-charcoal);
+  border-radius: var(--psu-radius);
+}
+.btn-gold:hover {
+  background-color: #e6b800;
+  color: var(--psu-charcoal);
 }
 
-/* ---- Section Styles ---- */
-section {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-  position: relative;
-  z-index: 2;
+/* ---------- Navbar ---------- */
+.navbar {
+  background: linear-gradient(90deg, var(--psu-crimson), #8b0000);
+  box-shadow: var(--psu-shadow);
 }
-.bg-gradient {
-  background: var(--psu-gradient);
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.nav-link {
+  transition: opacity var(--psu-transition);
+}
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+/* ---------- Cards & Panels ---------- */
+.card {
+  border-radius: var(--psu-radius);
+  box-shadow: var(--psu-shadow);
+  border: 1px solid var(--psu-border);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+body.dark-mode .card {
+  background-color: var(--dm-card);
+  border-color: var(--dm-border);
+}
+
+/* ---------- Gradient Hero Section ---------- */
+.hero-gradient {
+  background: linear-gradient(135deg, var(--psu-crimson), var(--psu-gold));
   color: #fff;
+  border-radius: var(--psu-radius);
+  padding: 4rem 2rem;
+  box-shadow: var(--psu-shadow);
+  text-align: center;
+}
+body.dark-mode .hero-gradient {
+  background: linear-gradient(135deg, var(--psu-accent), #e6b800);
+  color: var(--dm-text);
 }
 
-/* ---- Footer ---- */
+/* ---------- Dashboard / Analytics Cards ---------- */
+.dashboard-card {
+  border-radius: var(--psu-radius);
+  background-color: #fff;
+  padding: 1.5rem;
+  box-shadow: var(--psu-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--psu-transition);
+}
+.dashboard-card:hover {
+  transform: translateY(-2px);
+}
+.dashboard-card h5 {
+  font-weight: 600;
+  color: var(--psu-crimson);
+}
+.dashboard-card .metric {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--psu-charcoal);
+}
+.dashboard-card small {
+  color: #6c757d;
+}
+body.dark-mode .dashboard-card {
+  background-color: var(--dm-card);
+  color: var(--dm-text);
+}
+
+/* ---------- Chart Container ---------- */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  margin-top: 1rem;
+}
+
+/* ---------- Alerts & Toasts ---------- */
+.alert-psu {
+  border-left: 6px solid var(--psu-crimson);
+  background-color: #fff3cd;
+  color: #333;
+  border-radius: var(--psu-radius);
+}
+.alert-psu strong {
+  color: var(--psu-crimson);
+}
+body.dark-mode .alert-psu {
+  background-color: #2b2b2b;
+  color: var(--dm-text);
+}
+
+/* ---------- Footer ---------- */
 footer {
-  background: #111;
-  color: #ccc;
-  font-size: 0.9rem;
+  background-color: var(--psu-crimson);
+  color: #fff;
 }
 footer a {
   color: var(--psu-gold);
+  text-decoration: none;
 }
 footer a:hover {
-  color: #fff;
+  text-decoration: underline;
 }
 
-/* ---- Charts ---- */
-canvas {
-  max-width: 100%;
+/* ---------- Utility Enhancements ---------- */
+.shadow-psu { box-shadow: var(--psu-shadow) !important; }
+.rounded-psu { border-radius: var(--psu-radius) !important; }
+
+.bg-crimson { background-color: var(--psu-crimson) !important; color: #fff !important; }
+.bg-gold { background-color: var(--psu-gold) !important; color: var(--psu-charcoal) !important; }
+
+.text-crimson { color: var(--psu-crimson) !important; }
+.text-gold { color: var(--psu-gold) !important; }
+
+.glass-effect {
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.25);
+}
+body.dark-mode .glass-effect {
+  background-color: rgba(0, 0, 0, 0.25);
 }
 
-/* ---- Animations ---- */
-@keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(25px); }
+/* ---------- Animation Enhancements ---------- */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up {
-  opacity: 0;
-  transform: translateY(25px);
-  animation: fadeUp 0.8s ease forwards;
-}
-.animate-fade-up.delay-1 { animation-delay: 0.2s; }
-.animate-fade-up.delay-2 { animation-delay: 0.4s; }
-.animate-fade-up.delay-3 { animation-delay: 0.6s; }
 
-/* ---- Dark Mode (optional enhancement) ---- */
-[data-theme="dark"] {
-  --psu-light: #181818;
-  --psu-dark: #f8f9fa;
-  background-color: var(--psu-light);
-  color: var(--psu-dark);
-}
-[data-theme="dark"] a {
-  color: var(--psu-gold);
-}
-[data-theme="dark"] footer {
-  background: #000;
-  color: #ddd;
-}
-
-/* ---- Scrollbars ---- */
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--psu-crimson);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #b50000;
-}
-
-/* ---- Responsive Adjustments ---- */
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
-  .hero-section {
-    text-align: center;
-    padding: 4rem 1rem;
-  }
-  h1.display-4 {
-    font-size: 2.2rem;
-  }
-}
-
-/* ---- SmartMatch + Analytics Cards ---- */
-.smartmatch-card {
-  border: 1px solid #eee;
-  border-left: 5px solid var(--psu-crimson);
-  background-color: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition-fast);
-}
-.smartmatch-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-strong);
-}
-
-/* ---- Tooltips ---- */
-.tooltip-inner {
-  background-color: var(--psu-crimson);
-}
-.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
-  border-top-color: var(--psu-crimson);
+  .hero-gradient { padding: 2rem 1rem; }
+  .dashboard-card .metric { font-size: 1.5rem; }
 }
