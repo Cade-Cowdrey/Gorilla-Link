@@ -1,20 +1,17 @@
 # blueprints/analytics/routes.py
 from __future__ import annotations
-from flask import Blueprint, render_template, jsonify, request, current_app
+from flask import Blueprint, render_template, jsonify
 from flask_login import login_required, current_user
-from loguru import logger
 
 analytics_bp = Blueprint("analytics_bp", __name__, url_prefix="/analytics")
 
 def _user_role():
-    # Example helper; integrate with your real User model/roles
     return getattr(current_user, "role", "student")
 
 @analytics_bp.get("/")
 @login_required
 def index():
     role = _user_role()
-    # Role-aware data slices
     if role in {"admin", "executive"}:
         cards = [
             {"label": "Active Users", "value": 1287, "delta": +4.3},
@@ -33,14 +30,12 @@ def index():
             {"label": "My Applications", "value": 3, "delta": +1.0},
             {"label": "Recommended Jobs", "value": 6, "delta": +2.0},
         ]
-
-    chart_url = "/static/analytics/active_users.png"  # written by scheduler
+    chart_url = "/static/analytics/active_users.png"
     return render_template("analytics/index.html", cards=cards, chart_url=chart_url, role=role)
 
 @analytics_bp.get("/api/kpis")
 @login_required
 def kpis():
-    # In real code, query DB; here demo values
     data = {
         "kpis": [
             {"label": "Active Users", "value": 1287, "delta": 4.3, "unit": ""},
@@ -54,5 +49,4 @@ def kpis():
 @analytics_bp.get("/api/series/active-users")
 @login_required
 def active_users_series():
-    # demo time series; replace with DB query
     return jsonify({"series": [1180, 1192, 1201, 1215, 1228, 1276, 1287]})
