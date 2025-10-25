@@ -1,31 +1,30 @@
 import os
 import logging
 from datetime import datetime
-from flask import Flask, render_template, jsonify, current_app
+from flask import Flask, render_template, jsonify
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
-from apscheduler.schedulers.background import BackgroundScheduler
-from redis import Redis
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from redis import Redis
 from dotenv import load_dotenv
 
-# --------------------------------------------------------------------
-# Load environment & setup globals
-# --------------------------------------------------------------------
+# -----------------------------------------------------------
+# Load environment and initialize core extensions
+# -----------------------------------------------------------
 load_dotenv()
 db = SQLAlchemy()
 mail = Mail()
-scheduler = BackgroundScheduler()
 redis_client = None
 
-# --------------------------------------------------------------------
-# Configuration Classes
-# --------------------------------------------------------------------
+
+# -----------------------------------------------------------
+# Config Classes
+# -----------------------------------------------------------
 class BaseConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "psu_secret")
+    SECRET_KEY = os.getenv("SECRET_KEY", "psu_secret_key")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_DEFAULT_SENDER = ("PittState Connect", "noreply@pittstate.edu")
     MAIL_USE_TLS = True
@@ -43,66 +42,51 @@ class BaseConfig:
         "favicon": "/static/img/psu_logo.png"
     }
 
+
 class DevConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
+
 
 class ProdConfig(BaseConfig):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///prod.db")
 
-# --------------------------------------------------------------------
-# Helper: Select environment config
-# --------------------------------------------------------------------
+
+# -----------------------------------------------------------
+# Config Selector
+# -----------------------------------------------------------
 def select_config():
     env = os.getenv("FLASK_ENV", "production").lower()
     config = DevConfig if env == "development" else ProdConfig
     print(f"[config] Selecting configuration for environment: {env}")
     return config
 
-# --------------------------------------------------------------------
-# Background Job: Analytics Collector (with context safety)
-# --------------------------------------------------------------------
-def collect_usage_metrics():
-    """Hourly analytics aggregation (runs under app context)."""
-    try:
-        with current_app.app_context():
-            app = current_app
-            app.logger.info("[Scheduler] Running analytics job...")
-            now = datetime.utcnow().isoformat()
 
-            # Example cache update
-            redis_client.hset("psu:last_metrics", "last_run", now)
-            app.logger.info(f"[Scheduler] Metrics collected successfully @ {now}")
-    except Exception as e:
-        print(f"Scheduler error: {e}")
-
-# --------------------------------------------------------------------
+# -----------------------------------------------------------
 # Create Flask App
-# --------------------------------------------------------------------
+# -----------------------------------------------------------
 def create_app():
     app = Flask(__name__)
     app.config.from_object(select_config())
 
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
     # Logging Setup
-    # ----------------------------------------------------------------
-    log_level = logging.INFO
+    # -------------------------------------------------------
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(
-        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"))
+    handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s"))
     app.logger.addHandler(handler)
-    app.logger.setLevel(log_level)
+    app.logger.setLevel(logging.INFO)
     app.logger.info("Logging configured successfully.")
 
-    # ----------------------------------------------------------------
-    # Extensions Initialization
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
+    # Initialize Extensions
+    # -------------------------------------------------------
     CORS(app)
     db.init_app(app)
     mail.init_app(app)
 
-    # Rate limiter with Redis backend (if available)
+    # Rate limiter
     limiter = Limiter(
         get_remote_address,
         app=app,
@@ -110,7 +94,9 @@ def create_app():
         default_limits=["100 per minute"]
     )
 
-    # Redis Client (for caching and metrics)
+    # -------------------------------------------------------
+    # Redis Connection
+    # -------------------------------------------------------
     global redis_client
     try:
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -120,22 +106,25 @@ def create_app():
     except Exception as e:
         redis_client = None
         app.logger.warning(f"⚠️ Redis unavailable: {e}")
+    app.extensions["redis"] = redis_client
 
-    # APScheduler
-    scheduler.start()
-    scheduler.add_job(collect_usage_metrics, "interval", hours=1, id="usage_metrics")
-    app.logger.info("✅ Background scheduler started.")
+    # -------------------------------------------------------
+    # Initialize Scheduler (new centralized version)
+    # -------------------------------------------------------
+    from utils.scheduler import init_scheduler
+    init_scheduler(app)
+    app.logger.info("✅ Background scheduler initialized via utils.scheduler.")
 
-    # ----------------------------------------------------------------
-    # Flask-Login setup
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
+    # Flask-Login Setup
+    # -------------------------------------------------------
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
 
-    # ----------------------------------------------------------------
-    # Optional: Sentry integration (only if DSN set)
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
+    # Sentry (optional)
+    # -------------------------------------------------------
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
         try:
@@ -148,9 +137,9 @@ def create_app():
     else:
         app.logger.info("Sentry DSN not found — skipping initialization.")
 
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
     # PSU Branding Globals
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
     @app.context_processor
     def inject_globals():
         return {
@@ -159,9 +148,9 @@ def create_app():
             "now": datetime.utcnow
         }
 
-    # ----------------------------------------------------------------
-    # Blueprint Registration (with safe context)
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
+    # Blueprint Registration
+    # -------------------------------------------------------
     with app.app_context():
         from blueprints.core.routes import core_bp
         from blueprints.auth.routes import auth_bp
@@ -174,40 +163,41 @@ def create_app():
         from blueprints.emails.routes import emails_bp
         from blueprints.notifications.routes import notifications_bp
 
-        # Analytics blueprint wrapped safely
+        # Safe Analytics Import
         try:
             from blueprints.analytics.routes import analytics_bp
         except Exception as e:
             from flask import Blueprint
             analytics_bp = Blueprint("analytics_bp", __name__, url_prefix="/analytics")
-            app.logger.warning(f"Using STUB blueprint for analytics_bp (/analytics). Reason: {e}")
+            app.logger.warning(f"⚠️ Using STUB blueprint for analytics_bp: {e}")
 
-        # Register all blueprints
-        for bp in [
+        blueprints = [
             core_bp, auth_bp, careers_bp, departments_bp,
             scholarships_bp, mentors_bp, alumni_bp,
             analytics_bp, donor_bp, emails_bp, notifications_bp
-        ]:
+        ]
+
+        for bp in blueprints:
             try:
                 app.register_blueprint(bp)
                 app.logger.info(f"✅ Registered blueprint: {bp.name}")
             except Exception as e:
                 app.logger.warning(f"⚠️ Failed to register blueprint {bp.name}: {e}")
 
-    # ----------------------------------------------------------------
-    # OpenAI Key Verification
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
+    # OpenAI Verification
+    # -------------------------------------------------------
     if os.getenv("OPENAI_API_KEY"):
         try:
             import openai
             openai.api_key = os.getenv("OPENAI_API_KEY")
-            app.logger.info("✅ OpenAI API key loaded successfully.")
+            app.logger.info("✅ OpenAI API key verified.")
         except Exception as e:
-            app.logger.warning(f"⚠️ OpenAI key error: {e}")
+            app.logger.warning(f"⚠️ OpenAI key verification failed: {e}")
 
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
     # Error Handlers
-    # ----------------------------------------------------------------
+    # -------------------------------------------------------
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
@@ -219,6 +209,19 @@ def create_app():
 
     @app.route("/health")
     def health():
-        return jsonify({"status": "ok", "time": datetime.utcnow().isoformat()}), 200
+        return jsonify({
+            "status": "ok",
+            "environment": os.getenv("FLASK_ENV", "production"),
+            "timestamp": datetime.utcnow().isoformat()
+        }), 200
 
     return app
+
+
+# -----------------------------------------------------------
+# Entrypoint for Render (Gunicorn)
+# -----------------------------------------------------------
+app = create_app()
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
