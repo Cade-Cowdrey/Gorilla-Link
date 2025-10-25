@@ -18,6 +18,7 @@ load_dotenv()
 db = SQLAlchemy()
 mail = Mail()
 redis_client = None
+login_manager = LoginManager()  # moved to top-level safely
 
 # -----------------------------------------------------------
 # Configuration
@@ -61,32 +62,21 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(select_config())
 
-    # -------------------------------------------------------
-    # Logging Setup
-    # -------------------------------------------------------
+    # Logging
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s"))
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.INFO)
     app.logger.info("Logging configured successfully.")
 
-    # -------------------------------------------------------
-    # Initialize Core Extensions
-    # -------------------------------------------------------
+    # Core extensions
     CORS(app)
     db.init_app(app)
     mail.init_app(app)
+    login_manager.init_app(app)
+    limiter = Limiter(get_remote_address, app=app, storage_uri=app.config.get("RATELIMIT_STORAGE_URI", "memory://"), default_limits=["100 per minute"])
 
-    limiter = Limiter(
-        get_remote_address,
-        app=app,
-        storage_uri=app.config.get("RATELIMIT_STORAGE_URI", "memory://"),
-        default_limits=["100 per minute"]
-    )
-
-    # -------------------------------------------------------
-    # Redis Connection
-    # -------------------------------------------------------
+    # Redis
     global redis_client
     try:
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -98,50 +88,39 @@ def create_app():
         app.logger.warning(f"⚠️ Redis unavailable: {e}")
     app.extensions["redis"] = redis_client
 
-    # -------------------------------------------------------
-    # Initialize Scheduler (centralized)
-    # -------------------------------------------------------
+    # Scheduler
     from utils.scheduler import init_scheduler
     init_scheduler(app)
-    app.logger.info("✅ Background scheduler initialized via utils.scheduler.")
+    app.logger.info("✅ Background scheduler initialized.")
 
-    # -------------------------------------------------------
-    # Flask-Login Setup
-    # -------------------------------------------------------
-    from models import User  # ensure this imports your user model
-    login_manager = LoginManager()
-    login_manager.init_app(app)
+    # Flask-Login setup
     login_manager.login_view = "auth_bp.login"
     login_manager.login_message_category = "info"
 
-    # Standard user loader (for session cookies)
+    # Lazy import to avoid circular import
     @login_manager.user_loader
     def load_user(user_id):
+        from models import User
         try:
             return User.query.get(int(user_id))
         except Exception as e:
-            app.logger.warning(f"⚠️ user_loader failed for user_id {user_id}: {e}")
+            app.logger.warning(f"⚠️ user_loader failed for {user_id}: {e}")
             return None
 
-    # Optional API token loader (for Authorization Bearer)
     @login_manager.request_loader
-    def load_user_from_request(req: request):
+    def load_user_from_request(req):
         token = req.headers.get("Authorization")
         if token and token.startswith("Bearer "):
-            from models import UserToken  # optional model if using API tokens
-            token_str = token[7:]
             try:
-                user_token = UserToken.verify_token(token_str)
+                from models import UserToken
+                user_token = UserToken.verify_token(token[7:])
                 if user_token:
-                    app.logger.info(f"✅ Authenticated API user via token {token_str[:6]}...")
                     return user_token.user
             except Exception as e:
-                app.logger.warning(f"⚠️ Token validation failed: {e}")
+                app.logger.warning(f"⚠️ Token auth failed: {e}")
         return None
 
-    # -------------------------------------------------------
-    # Sentry Integration (optional)
-    # -------------------------------------------------------
+    # Sentry (optional)
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
         try:
@@ -151,12 +130,8 @@ def create_app():
             app.logger.info("✅ Sentry initialized.")
         except Exception as e:
             app.logger.warning(f"Sentry init failed: {e}")
-    else:
-        app.logger.info("Sentry DSN not found — skipping initialization.")
 
-    # -------------------------------------------------------
-    # PSU Branding Globals
-    # -------------------------------------------------------
+    # Branding globals
     @app.context_processor
     def inject_globals():
         return {
@@ -165,9 +140,7 @@ def create_app():
             "now": datetime.utcnow
         }
 
-    # -------------------------------------------------------
-    # Blueprint Registration
-    # -------------------------------------------------------
+    # Blueprint registration
     with app.app_context():
         from blueprints.core.routes import core_bp
         from blueprints.auth.routes import auth_bp
@@ -194,20 +167,16 @@ def create_app():
             except Exception as e:
                 app.logger.warning(f"⚠️ Failed to register blueprint {bp.name}: {e}")
 
-    # -------------------------------------------------------
-    # OpenAI API Verification
-    # -------------------------------------------------------
+    # OpenAI key verification
     if os.getenv("OPENAI_API_KEY"):
         try:
             import openai
             openai.api_key = os.getenv("OPENAI_API_KEY")
-            app.logger.info("✅ OpenAI API key verified.")
+            app.logger.info("✅ OpenAI key verified.")
         except Exception as e:
-            app.logger.warning(f"⚠️ OpenAI key verification failed: {e}")
+            app.logger.warning(f"⚠️ OpenAI init failed: {e}")
 
-    # -------------------------------------------------------
-    # Error Handlers
-    # -------------------------------------------------------
+    # Error handlers
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
@@ -228,9 +197,7 @@ def create_app():
     return app
 
 
-# -----------------------------------------------------------
-# Entrypoint for Gunicorn / Render
-# -----------------------------------------------------------
+# Entrypoint
 app = create_app()
 
 if __name__ == "__main__":
