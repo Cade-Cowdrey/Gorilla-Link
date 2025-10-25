@@ -1,24 +1,51 @@
-{% if not request.cookies.get('psu_consent') %}
-<div class="position-fixed bottom-0 start-0 end-0 p-3" style="z-index:1080;">
-  <div class="alert alert-dark shadow rounded d-flex align-items-center justify-content-between">
-    <div>
-      <strong>Cookies & Analytics</strong> — we use necessary cookies and pseudonymous analytics to improve PSU services.
-      <a href="{{ url_for('core_bp.privacy') }}" class="link-warning">Learn more</a>
+<!-- templates/partials/consent_banner.html -->
+<div id="consent-banner" class="psu-consent-banner fade show" role="region" aria-label="Cookie and Analytics Consent">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center py-3 px-3">
+    <div class="text-section text-center text-md-start mb-2 mb-md-0">
+      <i class="bi bi-shield-check text-warning me-2"></i>
+      <span class="fw-semibold">PittState-Connect values your privacy.</span><br class="d-md-none" />
+      <small class="opacity-75">
+        We use cookies and analytics to enhance your experience, improve services, and support PSU research.
+        You can manage your preferences anytime.
+      </small>
     </div>
-    <div>
-      <button id="consent-accept" class="btn btn-warning me-2">Accept</button>
-      <button id="consent-decline" class="btn btn-outline-light">Decline</button>
+
+    <div class="button-section d-flex gap-2">
+      <button class="btn btn-outline-light btn-sm px-3" id="decline-analytics">
+        <i class="bi bi-x-circle me-1"></i> Decline
+      </button>
+      <button class="btn btn-warning btn-sm px-3" id="accept-analytics">
+        <i class="bi bi-check-circle me-1"></i> Accept
+      </button>
     </div>
   </div>
 </div>
+
 <script>
-  document.getElementById('consent-accept')?.addEventListener('click', () => {
-    document.cookie = "psu_consent=1; path=/; max-age=31536000; SameSite=Lax";
-    location.reload();
+(() => {
+  const banner = document.getElementById("consent-banner");
+  const STORAGE_KEY = "psu-analytics-consent";
+  const accepted = localStorage.getItem(STORAGE_KEY);
+
+  if (accepted === "true") banner.style.display = "none";
+
+  const hideBanner = () => banner.classList.remove("show");
+  const enableAnalytics = () => {
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+  };
+
+  document.getElementById("accept-analytics")?.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    hideBanner();
+    enableAnalytics();
   });
-  document.getElementById('consent-decline')?.addEventListener('click', () => {
-    document.cookie = "psu_consent=0; path=/; max-age=31536000; SameSite=Lax";
-    location.reload();
+
+  document.getElementById("decline-analytics")?.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEY, "false");
+    hideBanner();
   });
+})();
 </script>
-{% endif %}
