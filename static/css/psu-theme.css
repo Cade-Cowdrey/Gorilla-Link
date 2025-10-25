@@ -1,225 +1,220 @@
-/* =========================================================
-   PSU Universal Theme (Light & Dark)
-   ========================================================= */
+/* ============================================
+   PittState-Connect Theme Styles
+   Production Ready | PSU Branding | v3.0
+   ============================================ */
+
+/* ---- Root Variables ---- */
 :root {
-  --psu-red: #990000;
-  --psu-gold: #ffcc00;
-  --psu-dark: #121416;
+  --psu-crimson: #740001;
+  --psu-gold: #eeb211;
+  --psu-dark: #212529;
   --psu-light: #f8f9fa;
-  --psu-gray: #212529;
-  --psu-gradient: linear-gradient(90deg, #990000, #cc0000);
-  --transition-speed: 0.3s;
+  --psu-gradient: linear-gradient(135deg, #740001, #eeb211);
+  --transition-fast: 0.25s ease;
+  --transition-slow: 0.6s ease;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Universal transition for theme switching */
-html, body {
-  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-}
-
-/* ========== LIGHT MODE ========== */
-[data-theme="light"] body {
+/* ---- Typography ---- */
+body {
+  font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
   background-color: var(--psu-light);
-  color: var(--psu-gray);
+  color: var(--psu-dark);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
-[data-theme="light"] .navbar-psu {
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Links */
+a {
+  color: var(--psu-crimson);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover {
+  color: var(--psu-gold);
+}
+
+/* ---- Navbar ---- */
+.navbar {
+  background: var(--psu-gradient) !important;
+  transition: background var(--transition-fast);
+}
+.navbar .nav-link {
+  font-weight: 500;
+  transition: opacity var(--transition-fast);
+}
+.navbar .nav-link:hover {
+  opacity: 0.85;
+}
+
+/* ---- Hero Section ---- */
+.hero-section {
   background: var(--psu-gradient);
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.hero-section .overlay {
+  pointer-events: none;
+}
+.hero-section h1,
+.hero-section p {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s ease forwards;
+}
+.hero-section h1 { animation-delay: 0.2s; }
+.hero-section p { animation-delay: 0.4s; }
+
+/* ---- Card Hover Effects ---- */
+.hover-raise {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.hover-raise:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-strong);
 }
 
-[data-theme="light"] .psu-footer {
-  background: #212529;
+/* ---- Scroll Progress ---- */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: var(--psu-gold);
+  width: 0%;
+  z-index: 2000;
+  transition: width 0.15s linear;
+}
+
+/* ---- Buttons ---- */
+.btn-danger {
+  background-color: var(--psu-crimson);
+  border-color: var(--psu-crimson);
+}
+.btn-danger:hover {
+  background-color: #8b0000;
+  border-color: #8b0000;
+}
+.btn-outline-danger:hover {
+  background-color: var(--psu-crimson);
+  color: #fff;
+}
+.btn-light:hover {
+  background-color: var(--psu-gold);
+}
+
+/* ---- Section Styles ---- */
+section {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  position: relative;
+  z-index: 2;
+}
+.bg-gradient {
+  background: var(--psu-gradient);
   color: #fff;
 }
 
-/* ========== DARK MODE ========== */
-[data-theme="dark"] body {
-  background-color: var(--psu-dark);
-  color: #e0e0e0;
+/* ---- Footer ---- */
+footer {
+  background: #111;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+footer a {
+  color: var(--psu-gold);
+}
+footer a:hover {
+  color: #fff;
 }
 
-[data-theme="dark"] .navbar-psu {
-  background: linear-gradient(90deg, #000, #330000);
-  color: #f8f9fa;
+/* ---- Charts ---- */
+canvas {
+  max-width: 100%;
 }
 
-[data-theme="dark"] .psu-footer {
+/* ---- Animations ---- */
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(25px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  opacity: 0;
+  transform: translateY(25px);
+  animation: fadeUp 0.8s ease forwards;
+}
+.animate-fade-up.delay-1 { animation-delay: 0.2s; }
+.animate-fade-up.delay-2 { animation-delay: 0.4s; }
+.animate-fade-up.delay-3 { animation-delay: 0.6s; }
+
+/* ---- Dark Mode (optional enhancement) ---- */
+[data-theme="dark"] {
+  --psu-light: #181818;
+  --psu-dark: #f8f9fa;
+  background-color: var(--psu-light);
+  color: var(--psu-dark);
+}
+[data-theme="dark"] a {
+  color: var(--psu-gold);
+}
+[data-theme="dark"] footer {
   background: #000;
   color: #ddd;
-  border-top: 1px solid #333;
 }
 
-[data-theme="dark"] a:hover {
-  color: var(--psu-gold);
+/* ---- Scrollbars ---- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--psu-crimson);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b50000;
 }
 
-/* ========== SHARED ELEMENTS ========== */
-.navbar-brand img {
-  border-radius: 8px;
-}
-
-.nav-link {
-  color: #f8f9fa !important;
-  transition: color 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--psu-gold) !important;
-}
-
-.btn-warning {
-  background-color: var(--psu-gold);
-  border: none;
-}
-
-.btn-warning:hover {
-  background-color: #e6b800;
-}
-
-.psu-footer a {
-  color: var(--psu-gold);
-  transition: color 0.3s;
-}
-
-.psu-footer a:hover {
-  color: #fff;
-}
-
-/* Social icon hover animation */
-.social-icons i {
-  transition: transform 0.3s, color 0.3s;
-}
-
-.social-icons i:hover {
-  transform: scale(1.1);
-  color: var(--psu-gold);
-}
-
-/* Scroll button style */
-.btn-warning.rounded-circle {
-  width: 45px;
-  height: 45px;
-  font-size: 1.25rem;
-}
-
-/* Responsive adjustments */
+/* ---- Responsive Adjustments ---- */
 @media (max-width: 768px) {
-  .navbar-nav .btn {
-    margin-top: 0.5rem;
+  .hero-section {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+  h1.display-4 {
+    font-size: 2.2rem;
   }
 }
 
-/* =========================================================
-   PSU Consent Banner — Adaptive Light/Dark Styles
-   ========================================================= */
-.psu-consent-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: var(--psu-gradient);
-  color: #fff;
-  z-index: 1050;
-  transition: all 0.4s ease;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+/* ---- SmartMatch + Analytics Cards ---- */
+.smartmatch-card {
+  border: 1px solid #eee;
+  border-left: 5px solid var(--psu-crimson);
+  background-color: #fff;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-fast);
+}
+.smartmatch-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-strong);
 }
 
-.psu-consent-banner.fade.show {
-  opacity: 1;
-  transform: translateY(0);
+/* ---- Tooltips ---- */
+.tooltip-inner {
+  background-color: var(--psu-crimson);
 }
-
-.psu-consent-banner.fade {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-[data-theme="dark"] .psu-consent-banner {
-  background: linear-gradient(90deg, #000, #330000);
-  color: #f1f1f1;
-}
-
-.psu-consent-banner .btn-outline-light {
-  border-color: #ccc;
-  color: #fff;
-}
-
-.psu-consent-banner .btn-outline-light:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: var(--psu-gold);
-}
-
-.psu-consent-banner .btn-warning {
-  background-color: var(--psu-gold);
-  border: none;
-  color: #000;
-  font-weight: 500;
-}
-
-.psu-consent-banner .btn-warning:hover {
-  background-color: #e6b800;
-}
-
-/* =========================================================
-   PSU Analytics Dashboard Cards
-   ========================================================= */
-.analytics-card {
-  background: var(--psu-light);
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-
-[data-theme="dark"] .analytics-card {
-  background: #1c1f22;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-  color: #f1f1f1;
-}
-
-.analytics-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 16px rgba(0,0,0,0.2);
-}
-
-.analytics-card h5 {
-  font-weight: 600;
-  color: var(--psu-red);
-}
-
-[data-theme="dark"] .analytics-card h5 {
-  color: var(--psu-gold);
-}
-
-.chart-container {
-  position: relative;
-  height: 240px;
-  width: 100%;
-}
-
-.chart-container canvas {
-  max-height: 240px;
-}
-
-/* Card stats row */
-.analytics-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 1rem;
-}
-
-.analytics-stats .stat {
-  text-align: center;
-}
-
-.analytics-stats .stat h6 {
-  font-weight: 700;
-  color: var(--psu-gold);
-}
-
-.analytics-stats .stat small {
-  display: block;
-  color: #777;
-}
-
-[data-theme="dark"] .analytics-stats .stat small {
-  color: #bbb;
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: var(--psu-crimson);
 }
