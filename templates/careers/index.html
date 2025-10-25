@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}PittState-Connect | Careers{% endblock %}
+{% block content %}
+<div class="container-fluid py-5 fade-in">
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-crimson">PittState Careers Hub</h1>
+    <p class="lead text-secondary">Explore internships, full-time roles, and alumni-sponsored opportunities.</p>
+  </div>
+
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-4 col-lg-3">
+      <div class="card shadow-sm hover-rise h-100 border-0">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-gold fw-semibold">{{ job.title }}</h5>
+          <p class="text-muted mb-2 small">{{ job.company }}</p>
+          <p class="text-muted small mb-4">{{ job.department.name if job.department else "General" }}</p>
+          <p class="flex-grow-1">{{ job.description[:140] }}...</p>
+          <a href="{{ url_for('careers_bp.job_detail', job_id=job.id) }}" class="btn btn-crimson mt-auto">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-5" />
+
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-gold">Featured Departments</h2>
+  </div>
+
+  <div class="row g-4">
+    {% for dept in featured_depts %}
+    <div class="col-md-4 col-lg-2 text-center">
+      <div class="psu-glass p-3 rounded-4 hover-rise">
+        <h5 class="fw-bold text-crimson">{{ dept.name }}</h5>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if ai_enabled %}
+  <section class="mt-5">
+    <div class="psu-glass p-4 rounded-4 shadow-sm">
+      <h3 class="text-crimson fw-bold mb-3">🎯 Smart Match Assistant (AI-Powered)</h3>
+      <p class="text-secondary">Get personalized recommendations based on your profile and career interests.</p>
+      <form id="ai-job-form" class="mt-3">
+        <div class="input-group">
+          <input type="text" id="career-query" class="form-control" placeholder="e.g. Marketing, Engineering, IT Support..." />
+          <button type="submit" class="btn btn-gold">Get Insights</button>
+        </div>
+      </form>
+      <div id="ai-result" class="mt-3 text-secondary small"></div>
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+<script>
+document.getElementById("ai-job-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const query = document.getElementById("career-query").value;
+  const res = await fetch("/api/ai-insight?query=" + encodeURIComponent(query));
+  const data = await res.json();
+  document.getElementById("ai-result").innerHTML = data.insight || "No insights available yet.";
+});
+</script>
+{% endblock %}
