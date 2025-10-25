@@ -1,0 +1,24 @@
+{% if not request.cookies.get('psu_consent') %}
+<div class="position-fixed bottom-0 start-0 end-0 p-3" style="z-index:1080;">
+  <div class="alert alert-dark shadow rounded d-flex align-items-center justify-content-between">
+    <div>
+      <strong>Cookies & Analytics</strong> — we use necessary cookies and pseudonymous analytics to improve PSU services.
+      <a href="{{ url_for('core_bp.privacy') }}" class="link-warning">Learn more</a>
+    </div>
+    <div>
+      <button id="consent-accept" class="btn btn-warning me-2">Accept</button>
+      <button id="consent-decline" class="btn btn-outline-light">Decline</button>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById('consent-accept')?.addEventListener('click', () => {
+    document.cookie = "psu_consent=1; path=/; max-age=31536000; SameSite=Lax";
+    location.reload();
+  });
+  document.getElementById('consent-decline')?.addEventListener('click', () => {
+    document.cookie = "psu_consent=0; path=/; max-age=31536000; SameSite=Lax";
+    location.reload();
+  });
+</script>
+{% endif %}
