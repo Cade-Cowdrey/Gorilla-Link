@@ -1,85 +1,47 @@
-<!DOCTYPE html>
+{# templates/base.html #}
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PittState-Connect{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{{ PSU_BRAND.favicon }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-
-    {% if GOOGLE_ANALYTICS_ID %}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
-    </script>
-    {% endif %}
+  <meta charset="utf-8">
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  {% block head %}{% endblock %}
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
-
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" style="background: {{ PSU_BRAND.gradient }}">
-  <div class="container-fluid px-4">
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#740001;">
+  <div class="container">
     <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.home') }}">
-        <img src="{{ PSU_BRAND.favicon }}" alt="PSU Logo" width="34" class="me-2">
-        PittState-Connect
+      PittState-Connect
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item"><a href="{{ url_for('careers_bp.dashboard') }}" class="nav-link text-light">Careers</a></li>
-        <li class="nav-item"><a href="{{ url_for('scholarships_bp.hub') }}" class="nav-link text-light">Scholarships</a></li>
+    <div id="mainNav" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link text-light">Scholarships</a></li>
+        <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link text-light">Careers</a></li>
+        <li class="nav-item"><a href="{{ url_for('mentors_bp.index') }}" class="nav-link text-light">Mentors</a></li>
+        <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link text-light">Alumni</a></li>
+        <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link text-light">Departments</a></li>
         <li class="nav-item"><a href="{{ url_for('analytics_bp.dashboard') }}" class="nav-link text-light">Analytics</a></li>
-        <li class="nav-item"><a href="{{ url_for('alumni_bp.directory') }}" class="nav-link text-light">Alumni</a></li>
-        <li class="nav-item"><a href="{{ url_for('core_bp.about') }}" class="nav-link text-light">About</a></li>
-        {% if current_user.is_authenticated %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-warning" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-              {{ current_user.username }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a href="{{ url_for('profile_bp.my_profile') }}" class="dropdown-item">Profile</a></li>
-              <li><a href="{{ url_for('auth_bp.logout') }}" class="dropdown-item text-danger">Logout</a></li>
-            </ul>
-          </li>
-        {% else %}
-          <li class="nav-item"><a href="{{ url_for('auth_bp.login') }}" class="btn btn-sm btn-light text-dark px-3">Login</a></li>
-        {% endif %}
+        <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link text-light">Donors</a></li>
+        <li class="nav-item"><a href="{{ url_for('emails_bp.index') }}" class="nav-link text-light">Emails</a></li>
+        <li class="nav-item"><a href="{{ url_for('notifications_bp.index') }}" class="nav-link text-light">Notifications</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="container mt-3">
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-{% endwith %}
-
-<main class="flex-grow-1">
+<main class="container my-4">
   {% block content %}{% endblock %}
 </main>
 
-<footer class="mt-auto py-4 text-center text-muted border-top bg-white">
-  <div class="small">
-    © {{ now().year }} Pittsburg State University | <strong>{{ PSU_BRAND.tagline }}</strong>  
-    <br>Powered by <a href="https://pittstate-connect.onrender.com" class="text-decoration-none text-danger fw-semibold">PittState-Connect</a>
-  </div>
+<footer class="border-top py-4 text-center text-muted">
+  <small>&copy; {{ 2025 }} Pittsburg State University — PittState-Connect</small>
 </footer>
 
-<script>
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>
