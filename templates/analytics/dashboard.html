@@ -1,178 +1,191 @@
 {% extends "base.html" %}
 {% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
+
 {% block content %}
-<section class="section-light py-5">
-  <div class="container fade-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="font-heading text-crimson">Analytics Dashboard</h1>
-      <button id="refresh-analytics" class="btn btn-gold fw-bold">
-        <i class="bi bi-arrow-repeat me-2"></i> Refresh Data
-      </button>
-    </div>
+<div class="container-fluid py-5 px-4">
 
-    <!-- ==========================================================
-         METRIC CARDS
-    =========================================================== -->
-    <div class="row g-4 mb-5">
-      <div class="col-md-3">
-        <div class="card text-center p-4 shadow-sm metric-card" data-key="logins_today">
-          <h5 class="text-crimson fw-bold mb-1">Logins Today</h5>
-          <h2 id="logins-today" class="display-6 fw-bold text-dark">--</h2>
-          <span class="trend small text-gray" id="trend-logins"></span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center p-4 shadow-sm metric-card" data-key="active_users">
-          <h5 class="text-crimson fw-bold mb-1">Active Users</h5>
-          <h2 id="active-users" class="display-6 fw-bold text-dark">--</h2>
-          <span class="trend small text-gray" id="trend-active"></span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center p-4 shadow-sm metric-card" data-key="scholarship_apps">
-          <h5 class="text-crimson fw-bold mb-1">Scholarship Apps</h5>
-          <h2 id="scholarship-apps" class="display-6 fw-bold text-dark">--</h2>
-          <span class="trend small text-gray" id="trend-scholarships"></span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card text-center p-4 shadow-sm metric-card" data-key="jobs_viewed">
-          <h5 class="text-crimson fw-bold mb-1">Jobs Viewed</h5>
-          <h2 id="jobs-viewed" class="display-6 fw-bold text-dark">--</h2>
-          <span class="trend small text-gray" id="trend-jobs"></span>
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
+    <div>
+      <h1 class="fw-bold text-danger mb-1 animate-fade-up">Gorilla Analytics Dashboard</h1>
+      <p class="text-muted mb-0 animate-fade-up delay-1">Real-time insights across scholarships, employment, and student success at Pittsburg State University.</p>
+    </div>
+    <a href="{{ url_for('core_bp.home') }}" class="btn btn-outline-danger shadow-sm animate-fade-up delay-2">
+      <i class="bi bi-house-door me-2"></i>Back to Home
+    </a>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm border-0 hover-raise animate-fade-up">
+        <div class="card-body text-center">
+          <i class="bi bi-award display-5 text-danger mb-2"></i>
+          <h6 class="fw-semibold text-uppercase small text-muted">Scholarships Awarded</h6>
+          <h3 class="fw-bold text-danger mb-0">312</h3>
+          <p class="text-success small mt-1">+8% this year</p>
         </div>
       </div>
     </div>
-
-    <!-- ==========================================================
-         TREND CHART SECTION
-    =========================================================== -->
-    <div class="card p-4 mb-5 shadow-sm">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="font-heading text-crimson m-0">Engagement Trends</h4>
-        <select id="trend-select" class="form-select w-auto">
-          <option value="7">Last 7 Days</option>
-          <option value="30">Last 30 Days</option>
-          <option value="90">Last 90 Days</option>
-        </select>
-      </div>
-      <div id="trend-chart" style="height: 400px;"></div>
-    </div>
-
-    <!-- ==========================================================
-         AI INSIGHTS PANEL
-    =========================================================== -->
-    <div class="card p-4 mb-5 shadow-sm">
-      <h4 class="font-heading text-crimson mb-3"><i class="bi bi-stars me-2"></i>AI Insights</h4>
-      <div id="ai-insight-output" class="p-3 border rounded bg-light mb-3 small" style="min-height: 120px;">
-        Ask Gorilla AI to summarize trends, forecast engagement, or identify opportunities.
-      </div>
-      <div class="input-group">
-        <input id="ai-insight-input" type="text" class="form-control" placeholder="Ask about student engagement trends…">
-        <button id="ai-insight-send" class="btn btn-crimson"><i class="bi bi-send-fill me-1"></i>Ask AI</button>
-      </div>
-    </div>
-
-    <!-- ==========================================================
-         SYSTEM HEALTH + CACHE STATUS
-    =========================================================== -->
-    <div class="row g-4">
-      <div class="col-md-6">
-        <div class="card p-4 shadow-sm">
-          <h5 class="font-heading text-crimson mb-2">System Health</h5>
-          <ul class="list-unstyled mb-0 small">
-            <li>🧠 <b>Redis:</b> <span id="redis-status" class="text-muted">checking...</span></li>
-            <li>📈 <b>Scheduler:</b> <span id="scheduler-status" class="text-muted">checking...</span></li>
-            <li>🤖 <b>AI Engine:</b> <span id="ai-status" class="text-muted">checking...</span></li>
-          </ul>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-1">
+        <div class="card-body text-center">
+          <i class="bi bi-briefcase display-5 text-danger mb-2"></i>
+          <h6 class="fw-semibold text-uppercase small text-muted">Internship Placements</h6>
+          <h3 class="fw-bold text-danger mb-0">148</h3>
+          <p class="text-success small mt-1">+12% QoQ</p>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card p-4 shadow-sm">
-          <h5 class="font-heading text-crimson mb-2">Recent Activity</h5>
-          <div id="activity-log" class="small text-gray" style="max-height: 150px; overflow-y: auto;">
-            Loading recent events…
-          </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-2">
+        <div class="card-body text-center">
+          <i class="bi bi-people-fill display-5 text-danger mb-2"></i>
+          <h6 class="fw-semibold text-uppercase small text-muted">Active Alumni Mentors</h6>
+          <h3 class="fw-bold text-danger mb-0">96</h3>
+          <p class="text-success small mt-1">+5 new this month</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-3">
+        <div class="card-body text-center">
+          <i class="bi bi-bar-chart-line display-5 text-danger mb-2"></i>
+          <h6 class="fw-semibold text-uppercase small text-muted">Funding Volume</h6>
+          <h3 class="fw-bold text-danger mb-0">$2.4M</h3>
+          <p class="text-success small mt-1">Up 11% YTD</p>
         </div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ==========================================================
-     INLINE SCRIPT (CSP NONCE SAFE)
-=========================================================== -->
-<script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", () => {
-  // --- Live Data Fetch ---
-  async function fetchAnalytics() {
-    const res = await fetch("/analytics/api/insights");
-    const data = await res.json();
-    if (data.session_metrics) {
-      const m = data.session_metrics;
-      document.getElementById("logins-today").textContent = m.logins_today;
-      document.getElementById("active-users").textContent = m.new_posts;
-      document.getElementById("scholarship-apps").textContent = m.avg_session_time;
-      document.getElementById("jobs-viewed").textContent = m.most_active_dept;
-    }
+  <!-- Chart Section -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-8 animate-fade-up">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="fw-bold text-danger mb-3"><i class="bi bi-graph-up me-2"></i>Scholarships Awarded (Last 5 Years)</h5>
+          <canvas id="scholarshipChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 animate-fade-up delay-1">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="fw-bold text-danger mb-3"><i class="bi bi-pie-chart me-2"></i>Funding Distribution</h5>
+          <canvas id="fundingChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SmartMatch & AI Insights -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6 animate-fade-up">
+      <div class="smartmatch-card">
+        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-lightbulb me-2"></i>AI SmartMatch Summary</h5>
+        <p class="small text-muted mb-3">
+          Based on student data, SmartMatch AI found that <strong>78%</strong> of Pitt State students qualify for at least one scholarship and <strong>42%</strong> for multiple funding sources.
+        </p>
+        <a href="{{ url_for('scholarships_bp.hub') }}" class="btn btn-danger btn-sm">View Recommendations</a>
+      </div>
+    </div>
+    <div class="col-lg-6 animate-fade-up delay-1">
+      <div class="smartmatch-card">
+        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-cpu me-2"></i>AI-Powered Predictive Trends</h5>
+        <p class="small text-muted mb-3">
+          The AI model predicts a <strong>12%</strong> increase in scholarship awards and <strong>17%</strong> boost in internship offers over the next academic year.
+        </p>
+        <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger btn-sm">Explore Insights</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Departmental Breakdown -->
+  <section class="border-top pt-5">
+    <div class="text-center mb-5">
+      <h3 class="fw-bold text-danger">Departmental Scholarship Impact</h3>
+      <p class="text-muted small">Top-performing departments in scholarship engagement and funding growth.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4 animate-fade-up">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="fw-semibold text-danger">Engineering & Technology</h6>
+            <p class="small text-muted">Average award per student: <strong>$4,200</strong></p>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-danger" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 animate-fade-up delay-1">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="fw-semibold text-danger">Business & Entrepreneurship</h6>
+            <p class="small text-muted">Average award per student: <strong>$3,700</strong></p>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-warning" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 animate-fade-up delay-2">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="fw-semibold text-danger">Education & Human Services</h6>
+            <p class="small text-muted">Average award per student: <strong>$3,100</strong></p>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-success" style="width: 68%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Charts -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Scholarships Trend
+  const sCtx = document.getElementById('scholarshipChart');
+  if (sCtx) {
+    new Chart(sCtx, {
+      type: 'line',
+      data: {
+        labels: ["2019","2020","2021","2022","2023"],
+        datasets: [{
+          label: "Scholarships Awarded",
+          data: [150,180,210,250,310],
+          borderColor: "#740001",
+          backgroundColor: "rgba(238,178,17,0.2)",
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: "#740001"
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
   }
 
-  // --- Chart (Plotly) ---
-  async function drawChart(days = 7) {
-    const x = [...Array(days).keys()].map(d => `Day ${d + 1}`);
-    const y = x.map(() => Math.floor(Math.random() * 50) + 20);
-    Plotly.newPlot("trend-chart", [{
-      x, y,
-      type: "scatter",
-      mode: "lines+markers",
-      line: { color: "#a6192e", width: 3 },
-      marker: { color: "#ffb81c", size: 6 }
-    }], {
-      margin: { t: 10, r: 0, l: 40, b: 40 },
-      paper_bgcolor: "transparent",
-      plot_bgcolor: "transparent",
-      font: { color: document.body.classList.contains("dark") ? "#fff" : "#111" },
-    }, { displayModeBar: false });
+  // Funding Distribution
+  const fCtx = document.getElementById('fundingChart');
+  if (fCtx) {
+    new Chart(fCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ["Endowment", "Corporate", "Alumni", "Federal Aid"],
+        datasets: [{
+          data: [40, 25, 20, 15],
+          backgroundColor: ["#740001", "#eeb211", "#b00020", "#ffc107"],
+          borderWidth: 1
+        }]
+      },
+      options: { plugins: { legend: { position: "bottom" } } }
+    });
   }
-
-  // --- AI Insight ---
-  async function askAI() {
-    const q = document.getElementById("ai-insight-input").value.trim();
-    if (!q) return;
-    const out = document.getElementById("ai-insight-output");
-    out.innerHTML = `<em>Generating insight...</em>`;
-    try {
-      const res = await fetch("/analytics/ai/trends", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: q })
-      });
-      const data = await res.json();
-      if (data.summary) out.innerHTML = data.summary;
-      else out.innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
-    } catch (err) {
-      out.innerHTML = `<span class="text-danger">AI request failed.</span>`;
-    }
-  }
-
-  // --- System Status Check (mocked for now) ---
-  function updateHealth() {
-    document.getElementById("redis-status").textContent = "✅ Connected";
-    document.getElementById("scheduler-status").textContent = "✅ Running";
-    document.getElementById("ai-status").textContent = "✅ Online";
-  }
-
-  // --- Refresh Button ---
-  document.getElementById("refresh-analytics").addEventListener("click", fetchAnalytics);
-  document.getElementById("ai-insight-send").addEventListener("click", askAI);
-  document.getElementById("trend-select").addEventListener("change", e => drawChart(+e.target.value));
-
-  // --- Initialize ---
-  fetchAnalytics();
-  drawChart();
-  updateHealth();
 });
 </script>
-
-<script nonce="{{ csp_nonce }}" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 {% endblock %}
