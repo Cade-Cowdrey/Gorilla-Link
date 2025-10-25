@@ -1,0 +1,25 @@
+/* static/css/report-print.css */
+@page {
+  size: A4;
+  margin: 18mm 14mm;
+}
+
+html, body {
+  background: #fafafa !important;
+  color: #222 !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+a { color: #990000; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1,h2,h3 { page-break-after: avoid; }
+table { page-break-inside: auto; }
+tr, img { page-break-inside: avoid; page-break-after: auto; }
+
+/* Force section breaks for long reports */
+.section-break {
+  page-break-before: always;
+  margin-top: 0 !important;
+}
