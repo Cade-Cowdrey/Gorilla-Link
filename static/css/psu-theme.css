@@ -1,31 +1,109 @@
+/* =========================================================
+   PSU Universal Theme (Light & Dark)
+   ========================================================= */
 :root {
-  --psu-crimson: #990000;
+  --psu-red: #990000;
   --psu-gold: #ffcc00;
-  --psu-ink: #212529;
-  --psu-paper: #f8f9fa;
-  --psu-accent: #006699;
+  --psu-dark: #121416;
+  --psu-light: #f8f9fa;
+  --psu-gray: #212529;
+  --psu-gradient: linear-gradient(90deg, #990000, #cc0000);
+  --transition-speed: 0.3s;
 }
 
-:root[data-theme="dark"] {
-  --psu-ink: #e9ecef;
-  --psu-paper: #1b1f22;
-  --psu-crimson: #b30000;
-  --psu-accent: #3aa0ff;
+/* Universal transition for theme switching */
+html, body {
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
 }
 
-body {
-  background: var(--psu-paper);
-  color: var(--psu-ink);
+/* ========== LIGHT MODE ========== */
+[data-theme="light"] body {
+  background-color: var(--psu-light);
+  color: var(--psu-gray);
 }
 
-.card { border-radius: 0.75rem; }
+[data-theme="light"] .navbar-psu {
+  background: var(--psu-gradient);
+}
 
-.btn-warning { background: var(--psu-gold); border-color: var(--psu-gold); color: #1b1b1b; }
-.btn-outline-light { color: #fff; border-color: rgba(255,255,255,.5); }
+[data-theme="light"] .psu-footer {
+  background: #212529;
+  color: #fff;
+}
 
-.navbar-psu { background: linear-gradient(90deg, var(--psu-crimson), #b81212); }
+/* ========== DARK MODE ========== */
+[data-theme="dark"] body {
+  background-color: var(--psu-dark);
+  color: #e0e0e0;
+}
 
-a:hover { opacity: .9; }
+[data-theme="dark"] .navbar-psu {
+  background: linear-gradient(90deg, #000, #330000);
+  color: #f8f9fa;
+}
 
-[data-theme="dark"] .card { background: #20262b; border-color: #2b3238; }
-[data-theme="dark"] .navbar { background: linear-gradient(90deg, #111, #222); }
+[data-theme="dark"] .psu-footer {
+  background: #000;
+  color: #ddd;
+  border-top: 1px solid #333;
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--psu-gold);
+}
+
+/* ========== SHARED ELEMENTS ========== */
+.navbar-brand img {
+  border-radius: 8px;
+}
+
+.nav-link {
+  color: #f8f9fa !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--psu-gold) !important;
+}
+
+.btn-warning {
+  background-color: var(--psu-gold);
+  border: none;
+}
+
+.btn-warning:hover {
+  background-color: #e6b800;
+}
+
+.psu-footer a {
+  color: var(--psu-gold);
+  transition: color 0.3s;
+}
+
+.psu-footer a:hover {
+  color: #fff;
+}
+
+/* Social icon hover animation */
+.social-icons i {
+  transition: transform 0.3s, color 0.3s;
+}
+
+.social-icons i:hover {
+  transform: scale(1.1);
+  color: var(--psu-gold);
+}
+
+/* Scroll button style */
+.btn-warning.rounded-circle {
+  width: 45px;
+  height: 45px;
+  font-size: 1.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-nav .btn {
+    margin-top: 0.5rem;
+  }
+}
