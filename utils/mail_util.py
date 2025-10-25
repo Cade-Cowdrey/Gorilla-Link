@@ -1,100 +1,90 @@
-# =============================================================
-# FILE: utils/mail_util.py
-# PittState-Connect — Advanced Email Utility
-# Supports HTML + plaintext emails, SendGrid API, and fallback SMTP.
-# Used for confirmations, admin alerts, digests, and notifications.
-# =============================================================
-
-import os
-import logging
 from flask_mail import Message
-from flask import current_app, render_template
-import requests
+from flask import render_template, current_app
+from datetime import datetime
+from openai import OpenAI
+from app_pro import mail, db
+from utils.analytics_util import run_usage_analytics
+from utils.report_pdf import build_monthly_report_pdf
+import os
 
-log = logging.getLogger("mail_util")
-
-# -------------------------------------------------------------
-# CONFIGURATION
-# -------------------------------------------------------------
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@pittstate.edu")
-FROM_EMAIL = os.getenv("FROM_EMAIL", "no-reply@pittstateconnect.com")
-APP_NAME = "PittState-Connect"
-
-# -------------------------------------------------------------
-# FLASK-MAIL fallback
-# -------------------------------------------------------------
-def send_via_flaskmail(subject, recipients, html_body, text_body=None):
+# --- Weekly Analytics Digest -------------------------------------------------
+def send_weekly_analytics_digest(recipient_email, recipient_name="Administrator"):
+    """Send PSU-branded weekly analytics + AI insight email digest."""
     try:
-        from app_pro import mail
-        msg = Message(subject, sender=FROM_EMAIL, recipients=recipients)
-        msg.body = text_body or html_body
-        msg.html = html_body
+        data = run_usage_analytics(db)
+        users = data.get("users", 0)
+        posts = data.get("posts", 0)
+        departments = data.get("departments", 0)
+        scholarships = data.get("scholarships", 0)
+
+        ai_text = "Data insights unavailable."
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            client = OpenAI(api_key=api_key)
+            prompt = (
+                f"Analyze PSU PittState-Connect weekly data: {users} users, {posts} posts, "
+                f"{departments} departments, {scholarships} scholarships. "
+                "Provide a 1-sentence, upbeat summary suitable for an analytics email."
+            )
+            completion = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "system", "content": "You are a PSU analytics assistant."},
+                          {"role": "user", "content": prompt}],
+                max_tokens=80
+            )
+            ai_text = completion.choices[0].message.content.strip()
+
+        html_body = render_template(
+            "emails/analytics_weekly_digest.html",
+            recipient_name=recipient_name,
+            generated_at=datetime.utcnow().strftime("%B %d, %Y"),
+            users=users, posts=posts,
+            departments=departments, scholarships=scholarships,
+            ai_insight=ai_text
+        )
+        text_body = render_template(
+            "emails/analytics_weekly_digest.txt",
+            recipient_name=recipient_name,
+            generated_at=datetime.utcnow().strftime("%B %d, %Y"),
+            users=users, posts=posts,
+            departments=departments, scholarships=scholarships,
+            ai_insight=ai_text
+        )
+
+        msg = Message(
+            subject="📊 PittState-Connect Weekly Analytics Digest",
+            recipients=[recipient_email],
+            html=html_body, body=text_body,
+            sender=("PittState-Connect", "noreply@pittstate.edu")
+        )
         mail.send(msg)
-        log.info("📧 Flask-Mail: Sent to %s", recipients)
+        current_app.logger.info(f"Weekly digest sent to {recipient_email}")
         return True
     except Exception as e:
-        log.error("❌ Flask-Mail failed: %s", e)
+        current_app.logger.error(f"Weekly digest failed: {e}")
         return False
 
 
-# -------------------------------------------------------------
-# SENDGRID DELIVERY
-# -------------------------------------------------------------
-def send_via_sendgrid(subject, recipients, html_body, text_body=None):
-    if not SENDGRID_API_KEY:
-        return False
-
+# --- Monthly Report PDF Sender ----------------------------------------------
+def send_monthly_report_pdf(recipient_emails, month, year, department_id=None):
+    """Generate & email monthly PDF report."""
     try:
-        response = requests.post(
-            "https://api.sendgrid.com/v3/mail/send",
-            headers={
-                "Authorization": f"Bearer {SENDGRID_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "personalizations": [{"to": [{"email": r} for r in recipients]}],
-                "from": {"email": FROM_EMAIL, "name": APP_NAME},
-                "subject": subject,
-                "content": [
-                    {"type": "text/plain", "value": text_body or ""},
-                    {"type": "text/html", "value": html_body},
-                ],
-            },
-            timeout=10,
+        filename, pdf_bytes, meta = build_monthly_report_pdf(db, month, year, department_id)
+        subject = f"📄 PSU Monthly Analytics — {meta['period_label']}"
+        body = (
+            f"Attached is the PittState-Connect monthly analytics report for {meta['period_label']}.\n\n"
+            "— PittState-Connect"
         )
-        if response.status_code in (200, 202):
-            log.info("✅ SendGrid: Sent to %s", recipients)
-            return True
-        else:
-            log.warning("⚠️ SendGrid response %s: %s", response.status_code, response.text)
-            return False
+        msg = Message(
+            subject=subject,
+            recipients=recipient_emails,
+            body=body,
+            sender=("PittState-Connect", "noreply@pittstate.edu")
+        )
+        msg.attach(filename, "application/pdf", pdf_bytes)
+        mail.send(msg)
+        current_app.logger.info(f"[MAIL] Monthly PDF sent to {recipient_emails} ({filename})")
+        return True
     except Exception as e:
-        log.error("❌ SendGrid error: %s", e)
+        current_app.logger.error(f"[MAIL] Monthly PDF send failed: {e}")
         return False
-
-
-# -------------------------------------------------------------
-# MAIN SEND FUNCTION
-# -------------------------------------------------------------
-def send_email(subject, recipients, template_name=None, context=None, text_body=None):
-    """Send an email using HTML template or plain text fallback."""
-    context = context or {}
-    html_body = None
-    try:
-        if template_name:
-            html_body = render_template(template_name, **context)
-    except Exception as e:
-        log.error("❌ Template render failed: %s", e)
-
-    # Fallback: simple plaintext message
-    if not html_body:
-        html_body = text_body or "(No content)"
-
-    # Try SendGrid first, then fallback
-    if SENDGRID_API_KEY:
-        ok = send_via_sendgrid(subject, recipients, html_body, text_body)
-        if ok:
-            return True
-
-    return send_via_flaskmail(subject, recipients, html_body, text_body)
