@@ -8,14 +8,9 @@ from flask import current_app
 _mail: Optional[Mail] = None
 
 def init_mail(app):
-    """
-    Initialize Flask-Mail with sensible production defaults.
-    Safe to call multiple times; will reuse instance.
-    """
     global _mail
     if _mail:
         return _mail
-
     app.config.setdefault("MAIL_SERVER", os.getenv("MAIL_SERVER", "smtp.sendgrid.net"))
     app.config.setdefault("MAIL_PORT", int(os.getenv("MAIL_PORT", "587")))
     app.config.setdefault("MAIL_USE_TLS", True)
@@ -35,9 +30,6 @@ def send_email(
     attachments: list[tuple[str, str, bytes]] | None = None,
     reply_to: str | None = None,
 ):
-    """
-    Production-friendly email utility with HTML + attachments.
-    """
     mail = _mail or init_mail(current_app)
     msg = Message(
         subject=subject,
@@ -52,5 +44,4 @@ def send_email(
     if attachments:
         for filename, mimetype, data in attachments:
             msg.attach(filename=filename, content_type=mimetype, data=data)
-
     mail.send(msg)
