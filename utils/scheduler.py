@@ -1,35 +1,63 @@
-import datetime as dt
-from apscheduler.schedulers.background import BackgroundScheduler
-from flask import current_app
+# utils/scheduler_util.py
+# ---------------------------------------------------------------------
+# PSU Scheduler Utility
+# Provides health checks, analytics syncing, and alert monitoring
+# for PittState-Connect background jobs.
+# ---------------------------------------------------------------------
 
-def job_health_ping(app):
-    """Simple heartbeat check."""
-    with app.app_context():
-        app.logger.info(f"[Scheduler] ✅ Health ping @ {dt.datetime.utcnow().isoformat()}")
+from datetime import datetime, timedelta
+from extensions import redis_client
+from utils.mail_util import send_system_alert
+import json
+import logging
 
-def job_collect_usage(app):
-    """Collects analytics and usage metrics every hour."""
-    from models import UsageMetric, db
-    with app.app_context():
-        metric = UsageMetric(metric_name="system_health", metric_value=1.0)
-        db.session.add(metric)
-        db.session.commit()
-        app.logger.info("[Scheduler] 📊 Usage metrics collected successfully.")
 
-def job_ai_scholarship_match(app):
-    """Optional: run SmartMatch AI recommender batch."""
+def monitor_scheduler_health(app):
+    """
+    Check the scheduler's runtime heartbeat and trigger alerts
+    if a background job has not reported recently.
+    """
     try:
-        with app.app_context():
-            app.logger.info("[Scheduler] 🤖 Running SmartMatch AI recommender update...")
-            # placeholder for AI pipeline logic
-    except Exception as e:
-        app.logger.warning(f"[Scheduler] SmartMatch error: {e}")
+        key = "scheduler:last_check"
+        now = datetime.utcnow()
 
-def init_scheduler(app):
-    """Attach background tasks safely with Flask context."""
-    scheduler = BackgroundScheduler(daemon=True)
-    scheduler.add_job(lambda: job_health_ping(app), trigger="interval", minutes=5, id="health_ping")
-    scheduler.add_job(lambda: job_collect_usage(app), trigger="interval", hours=1, id="usage_collect")
-    scheduler.add_job(lambda: job_ai_scholarship_match(app), trigger="interval", hours=6, id="ai_matcher")
-    scheduler.start()
-    app.logger.info("✅ Background scheduler started successfully.")
+        # Retrieve previous timestamp
+        last_check_raw = redis_client.get(key)
+        if last_check_raw:
+            last_check = datetime.fromisoformat(last_check_raw.decode("utf-8"))
+            delta = now - last_check
+            if delta > timedelta(hours=3):
+                msg = f"Scheduler heartbeat delay: {delta.total_seconds()/3600:.2f} hours."
+                app.logger.warning(msg)
+                send_system_alert("⚠️ Scheduler Health Alert", msg)
+        else:
+            app.logger.info("🕒 Initial scheduler health check created.")
+
+        # Update current timestamp
+        redis_client.set(key, now.isoformat())
+        app.logger.info(f"[Scheduler Health] OK @ {now.isoformat()}")
+
+    except Exception as e:
+        app.logger.error(f"[Scheduler Health] Failed: {e}")
+        try:
+            send_system_alert("Scheduler Health Error", str(e))
+        except Exception:
+            pass
+
+
+def log_job_status(job_name: str, success: bool, message: str = ""):
+    """
+    Log and cache job status updates for analytics monitoring.
+    """
+    try:
+        status_entry = {
+            "job": job_name,
+            "timestamp": datetime.utcnow().isoformat(),
+            "success": success,
+            "message": message
+        }
+        redis_client.lpush("scheduler:job_history", json.dumps(status_entry))
+        redis_client.ltrim("scheduler:job_history", 0, 49)  # Keep last 50 jobs
+        logging.info(f"🧭 Job {job_name}: {'✅' if success else '❌'} {message}")
+    except Exception as e:
+        logging.error(f"[Scheduler Job Log] Error: {e}")
