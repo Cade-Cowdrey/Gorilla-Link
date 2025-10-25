@@ -1,154 +1,202 @@
 # app_pro.py
+# ---------------------------------------------------------------------
+# Production entrypoint for PittState-Connect
+# - Central app factory pattern
+# - Scheduler jobs for analytics, maintenance, and AI
+# - PSU branding, advanced logging, security hardening
+# ---------------------------------------------------------------------
+
 import os
 import logging
-from logging.handlers import RotatingFileHandler
-from datetime import timedelta
-from flask import Flask, render_template, request, g
-from flask_cors import CORS
-from loguru import logger
+from flask import Flask, jsonify, render_template, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-from extensions import db, login_manager, cache, limiter, mail, migrate, socketio
+# ---------------------------------------------------------------------
+# Local imports
+# ---------------------------------------------------------------------
+from extensions import init_extensions, db, redis_client
+from utils.mail_util import send_system_alert
+from utils.analytics_util import flush_redis_to_db, get_dashboard_metrics
+from utils.scheduler_util import monitor_scheduler_health
 
-# --- Configs ---------------------------------------------------
-class BaseConfig:
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-    REMEMBER_COOKIE_DURATION = timedelta(days=14)
-
-    CACHE_TYPE = os.getenv("CACHE_TYPE", "SimpleCache")
-    CACHE_DEFAULT_TIMEOUT = 300
-
-    RATELIMIT_DEFAULT = "200/hour"
-    RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
-
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
-    SECURITY_CSP = (
-        "default-src 'self'; img-src 'self' data: https:; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
-        "font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.openai.com; "
-        "object-src 'none'; frame-ancestors 'self';"
-    )
-
-    # Analytics flags
-    ANALYTICS_DEMO_MODE = os.getenv("ANALYTICS_DEMO_MODE", "true")
-    ANALYTICS_REQUIRE_LOGIN = os.getenv("ANALYTICS_REQUIRE_LOGIN", "false")
-    FEATURE_SMARTMATCH_AI = os.getenv("FEATURE_SMARTMATCH_AI", "true")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-class ProdConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///site.db")
-    PREFERRED_URL_SCHEME = "https"
-
-class DevConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
-    DEBUG = True
-
-# --- Factory ---------------------------------------------------
-def create_app() -> Flask:
-    env = os.getenv("FLASK_ENV", "production").lower()
-    cfg = ProdConfig if env == "production" else DevConfig
+# ---------------------------------------------------------------------
+# Application Factory
+# ---------------------------------------------------------------------
+def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
-    app.config.from_object(cfg)
 
-    # Logging
-    _configure_logging(app)
+    # -----------------------------------------------------------------
+    # Config
+    # -----------------------------------------------------------------
+    env = os.getenv("FLASK_ENV", "production")
+    app.config.from_object(f"config.{env.capitalize()}Config")
 
-    # CORS
-    CORS(app, resources={r"/*": {"origins": app.config["CORS_ORIGINS"]}})
+    # -----------------------------------------------------------------
+    # Logging setup
+    # -----------------------------------------------------------------
+    log_dir = os.path.join(app.root_path, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    file_handler = logging.FileHandler(os.path.join(log_dir, "psu_app.log"))
+    file_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+    app.logger.info(f"[INIT] PittState-Connect started in {env.upper()} mode.")
 
-    # Extensions init
-    db.init_app(app)
-    cache.init_app(app)
+    # -----------------------------------------------------------------
+    # Extension initialization
+    # -----------------------------------------------------------------
+    init_extensions(app)
+
+    # Proxy fix (for Render + Nginx)
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+
+    # -----------------------------------------------------------------
+    # Rate Limiter
+    # -----------------------------------------------------------------
+    limiter = Limiter(
+        key_func=get_remote_address,
+        default_limits=["200 per hour"],
+        storage_uri=os.getenv("REDIS_URL", "memory://"),
+    )
     limiter.init_app(app)
-    mail.init_app(app)
-    migrate.init_app(app, db)
-    socketio.init_app(app)
-    login_manager.init_app(app)
-    login_manager.login_view = "auth_bp.login"
 
-    # Request Loader (token or header-based auth)
-    @login_manager.request_loader
-    def load_user_from_request(req):
-        # 1) Authorization: Bearer <token>
-        auth = req.headers.get("Authorization", "")
-        if auth.startswith("Bearer "):
-            token = auth.split(" ", 1)[1].strip()
-            from models import User
-            return User.query.filter_by(api_token=token).first()
-        # 2) X-Auth-Token header
-        token = req.headers.get("X-Auth-Token")
-        if token:
-            from models import User
-            return User.query.filter_by(api_token=token).first()
-        return None
+    # -----------------------------------------------------------------
+    # Blueprint registration
+    # -----------------------------------------------------------------
+    try:
+        from blueprints.core.routes import core_bp
+        from blueprints.auth.routes import auth_bp
+        from blueprints.careers.routes import careers_bp
+        from blueprints.departments.routes import departments_bp
+        from blueprints.scholarships.routes import scholarships_bp
+        from blueprints.mentors.routes import mentors_bp
+        from blueprints.alumni.routes import alumni_bp
+        from blueprints.analytics.routes import analytics_bp
+        from blueprints.donor.routes import donor_bp
+        from blueprints.emails.routes import emails_bp
+        from blueprints.notifications.routes import notifications_bp
 
-    # Blueprints
-    from blueprints.core.routes import core_bp
-    from blueprints.auth.routes import auth_bp
-    from blueprints.careers.routes import careers_bp
-    from blueprints.departments.routes import departments_bp
-    from blueprints.scholarships.routes import scholarships_bp
-    from blueprints.mentors.routes import mentors_bp
-    from blueprints.alumni.routes import alumni_bp
-    from blueprints.analytics.routes import analytics_bp
-    from blueprints.donor.routes import donor_bp
-    from blueprints.emails.routes import emails_bp
-    from blueprints.notifications.routes import notifications_bp
+        app.register_blueprint(core_bp)
+        app.register_blueprint(auth_bp, url_prefix="/auth")
+        app.register_blueprint(careers_bp, url_prefix="/careers")
+        app.register_blueprint(departments_bp, url_prefix="/departments")
+        app.register_blueprint(scholarships_bp, url_prefix="/scholarships")
+        app.register_blueprint(mentors_bp, url_prefix="/mentors")
+        app.register_blueprint(alumni_bp, url_prefix="/alumni")
+        app.register_blueprint(analytics_bp, url_prefix="/analytics")
+        app.register_blueprint(donor_bp, url_prefix="/donor")
+        app.register_blueprint(emails_bp, url_prefix="/emails")
+        app.register_blueprint(notifications_bp, url_prefix="/notifications")
+        app.logger.info("✅ Blueprints registered successfully.")
+    except Exception as e:
+        app.logger.error(f"⚠️ Error loading blueprints: {e}")
 
-    app.register_blueprint(core_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(careers_bp)
-    app.register_blueprint(departments_bp)
-    app.register_blueprint(scholarships_bp)
-    app.register_blueprint(mentors_bp)
-    app.register_blueprint(alumni_bp)
-    app.register_blueprint(analytics_bp)
-    app.register_blueprint(donor_bp)
-    app.register_blueprint(emails_bp)
-    app.register_blueprint(notifications_bp)
+    # -----------------------------------------------------------------
+    # Scheduler configuration
+    # -----------------------------------------------------------------
+    scheduler = BackgroundScheduler(daemon=True, timezone="UTC")
 
-    logger.info("✅ Registered blueprints.")
+    @scheduler.scheduled_job(IntervalTrigger(hours=1))
+    def job_flush_redis():
+        """Hourly Redis → DB analytics flush."""
+        with app.app_context():
+            flush_redis_to_db()
+            app.logger.info("🧮 Analytics buffer flushed.")
 
-    # Global security headers
+    @scheduler.scheduled_job(IntervalTrigger(hours=12))
+    def job_monitor_scheduler():
+        """Monitor scheduler health every 12h."""
+        with app.app_context():
+            monitor_scheduler_health(app)
+            app.logger.info("🩺 Scheduler health checked.")
+
+    @scheduler.scheduled_job(IntervalTrigger(hours=24))
+    def job_generate_metrics():
+        """Daily summary snapshot for PSU Analytics Dashboard."""
+        with app.app_context():
+            metrics = get_dashboard_metrics()
+            app.logger.info(f"📊 Daily PSU dashboard snapshot: {metrics}")
+
+    scheduler.start()
+    app.logger.info("🕒 Scheduler initialized successfully.")
+
+    # -----------------------------------------------------------------
+    # Security & Request Enhancements
+    # -----------------------------------------------------------------
+    @app.before_request
+    def secure_headers():
+        """Set security and performance headers."""
+        headers = {
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "SAMEORIGIN",
+            "X-XSS-Protection": "1; mode=block",
+            "Referrer-Policy": "no-referrer-when-downgrade",
+            "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+        }
+        for k, v in headers.items():
+            request.headers[k] = v
+
     @app.after_request
-    def _secure(resp):
-        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
-        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        resp.headers.setdefault("Permissions-Policy", "interest-cohort=()")
-        resp.headers.setdefault("Content-Security-Policy", app.config["SECURITY_CSP"])
-        return resp
+    def add_caching_headers(response):
+        response.headers["Cache-Control"] = "public, max-age=300"
+        return response
 
-    # Errors
-    @app.errorhandler(401)
-    def unauthorized(_e): return render_template("errors/401.html"), 401
-
+    # -----------------------------------------------------------------
+    # Error Handlers
+    # -----------------------------------------------------------------
     @app.errorhandler(404)
-    def not_found(_e): return render_template("errors/404.html"), 404
-
-    @app.errorhandler(429)
-    def ratelimited(_e): return render_template("errors/429.html"), 429
+    def not_found(e):
+        app.logger.warning(f"404 Not Found: {request.path}")
+        return render_template("errors/404.html"), 404
 
     @app.errorhandler(500)
-    def server_error(_e): return render_template("errors/500.html"), 500
+    def server_error(e):
+        app.logger.error(f"500 Error: {e}")
+        try:
+            send_system_alert("Internal Server Error", str(e))
+        except Exception:
+            pass
+        return render_template("errors/500.html"), 500
+
+    # -----------------------------------------------------------------
+    # Request Loader (for API Tokens)
+    # -----------------------------------------------------------------
+    from flask_login import LoginManager
+    from models import User
+
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    @login_manager.request_loader
+    def load_user_from_request(request):
+        """Allows API calls via Authorization header token."""
+        token = request.headers.get("Authorization")
+        if token and token.startswith("Bearer "):
+            token_value = token.split(" ")[1]
+            user = User.verify_auth_token(token_value)
+            if user:
+                return user
+        return None
+
+    # -----------------------------------------------------------------
+    # Root route (fallback)
+    # -----------------------------------------------------------------
+    @app.route("/")
+    def index():
+        return render_template("core/home.html")
 
     return app
 
-def _configure_logging(app: Flask):
-    app.logger.setLevel(logging.INFO)
-    logger.remove()
-    logger.add(lambda msg: app.logger.info(msg.rstrip("\n")), level="INFO")
 
-    log_dir = os.getenv("LOG_DIR")
-    if log_dir:
-        os.makedirs(log_dir, exist_ok=True)
-        file_handler = RotatingFileHandler(os.path.join(log_dir, "app.log"), maxBytes=5_000_000, backupCount=3)
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
-    app.logger.info("Logging configured successfully.")
-
-app = create_app()
+# ---------------------------------------------------------------------
+# Production Entrypoint
+# ---------------------------------------------------------------------
+if __name__ == "__main__":
+    app = create_app()
+    port = int(os.getenv("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
