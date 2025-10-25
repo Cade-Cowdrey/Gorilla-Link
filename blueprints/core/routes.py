@@ -1,31 +1,21 @@
-from flask import Blueprint, render_template, current_app
+# blueprints/core/routes.py
+from flask import Blueprint, render_template
+from loguru import logger
 
-core_bp = Blueprint("core_bp", __name__, template_folder="../../templates/core")
+core_bp = Blueprint("core_bp", __name__)
 
-@core_bp.route("/")
-@core_bp.route("/index")
+@core_bp.route("/", methods=["GET"])
 def home():
     hero = {
         "title": "Welcome to PittState-Connect",
         "subtitle": "Your hub for scholarships, careers, mentors, and alumni connections.",
         "cta_text": "Explore Opportunities",
-        "cta_link": "/careers"
+        "cta_href": "/scholarships/",
     }
-
     panels = [
         {"title": "Scholarship Hub", "desc": "Discover funding and apply with ease.", "icon": "bi-award"},
-        {"title": "Career Center", "desc": "Find internships and high-paying jobs.", "icon": "bi-briefcase"},
-        {"title": "Analytics Dashboard", "desc": "Track progress and insights.", "icon": "bi-graph-up"},
-        {"title": "Alumni Network", "desc": "Connect with successful Gorillas worldwide.", "icon": "bi-people-fill"}
+        {"title": "Career Center", "desc": "Internships, jobs, and skill-building.", "icon": "bi-briefcase"},
+        {"title": "Mentors & Alumni", "desc": "Get guidance and grow your network.", "icon": "bi-people-fill"},
     ]
-
-    current_app.logger.info("✅ Core home route rendered successfully.")
+    logger.info("✅ Core home route rendered successfully.")
     return render_template("core/home.html", hero=hero, panels=panels)
-
-@core_bp.route("/about")
-def about():
-    context = {
-        "mission": "PittState-Connect empowers students, alumni, and employers through integrated data and opportunity pipelines.",
-        "values": ["Innovation", "Accessibility", "Growth", "Community"],
-    }
-    return render_template("core/about.html", **context)
