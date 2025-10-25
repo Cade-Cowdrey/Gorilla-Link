@@ -1,301 +1,157 @@
-/* ============================================================
-   PITTSTATE-CONNECT THEME — PSU Crimson & Gold Edition (v3)
-   Fully polished, responsive, dark-mode ready, with all optional
-   enhancements, glass nav, animations, shadows, and utilities.
-   ============================================================ */
+/* ==========================================================
+   PSU BRAND THEME — PittState-Connect
+   Author: Cade Vandenberg / ChatGPT Collaborative
+   ========================================================== */
 
-/* ------------------------
-   PSU Brand Colors
------------------------- */
+/* Root color definitions */
 :root {
-  --psu-crimson: #a6192e;
-  --psu-crimson-dark: #8c1628;
-  --psu-gold: #ffb81c;
-  --psu-gold-light: #ffd24c;
-  --psu-dark: #1a1a1a;
-  --psu-light: #f9f9f9;
-  --psu-gray: #6b7280;
-  --psu-white: #ffffff;
-  --psu-glass: rgba(255,255,255,0.75);
-  --psu-radius: 1rem;
-  --psu-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  --psu-crimson: #990000;
+  --psu-gold: #ffc72c;
+  --psu-gray: #f5f5f5;
+  --psu-dark: #1e1e1e;
+  --psu-gradient: linear-gradient(90deg, #990000 0%, #ffc72c 100%);
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Dark Mode Variables */
-body.dark {
-  --psu-bg: #111;
-  --psu-surface: #1f1f1f;
-  --psu-text: #f5f5f5;
-  --psu-muted: #b5b5b5;
-  --psu-crimson: #ff5860;
-  --psu-gold: #ffd76b;
+/* Dark mode */
+[data-theme="dark"] {
+  --psu-crimson: #ffb3b3;
+  --psu-gold: #ffe480;
+  --psu-gray: #2a2a2a;
+  --psu-dark: #f5f5f5;
+  --psu-gradient: linear-gradient(90deg, #c43b18 0%, #ffd84c 100%);
 }
 
-/* ------------------------
-   Base Typography
------------------------- */
+/* Typography */
 body {
-  font-family: 'Inter', 'Montserrat', 'Segoe UI', sans-serif;
-  background-color: var(--psu-light);
+  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
   color: var(--psu-dark);
-  line-height: 1.6;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  background-color: var(--psu-gray);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-body.dark {
-  background-color: var(--psu-bg);
-  color: var(--psu-text);
-}
-
-h1, h2, h3, h4, h5 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  color: var(--psu-crimson);
-  margin-bottom: .5rem;
-}
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-
-/* ------------------------
-   Links
------------------------- */
+/* Links & Buttons */
 a {
-  color: var(--psu-crimson);
   text-decoration: none;
-  transition: color 0.25s ease;
+  color: var(--psu-crimson);
 }
 a:hover {
   color: var(--psu-gold);
 }
-a:focus {
-  outline: 3px solid var(--psu-gold);
-  outline-offset: 2px;
-}
 
-/* ------------------------
-   Buttons
------------------------- */
-.btn {
-  display: inline-block;
-  padding: 0.7rem 1.4rem;
-  border-radius: 0.6rem;
-  font-weight: 600;
-  text-align: center;
-  transition: all 0.25s ease;
-  cursor: pointer;
+.btn-psu {
+  background: var(--psu-gradient);
+  color: #fff;
   border: none;
+  transition: transform 0.2s ease;
+}
+.btn-psu:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow);
 }
 
-.btn-gold {
-  background-color: var(--psu-gold);
-  color: var(--psu-dark);
-  box-shadow: var(--psu-shadow);
+/* Navbar */
+.navbar {
+  background: var(--psu-gradient) !important;
 }
-.btn-gold:hover {
-  background-color: var(--psu-gold-light);
-  transform: translateY(-1px);
+.navbar-brand img {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
 }
-
-.btn-crimson {
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-  box-shadow: var(--psu-shadow);
+.nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
-.btn-crimson:hover {
-  background-color: var(--psu-crimson-dark);
-  transform: translateY(-1px);
+.nav-link:hover {
+  color: var(--psu-gold) !important;
 }
 
-.btn-outline {
-  border: 1.5px solid var(--psu-crimson);
-  color: var(--psu-crimson);
-  background: transparent;
-}
-.btn-outline:hover {
-  background: var(--psu-crimson);
-  color: var(--psu-white);
-}
-
-/* ------------------------
-   Cards
------------------------- */
-.card {
-  background-color: var(--psu-white);
-  border-radius: var(--psu-radius);
-  box-shadow: var(--psu-shadow);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.3s;
-}
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-body.dark .card {
-  background-color: var(--psu-surface);
-  box-shadow: 0 4px 12px rgba(255,255,255,0.05);
-}
-
-/* ------------------------
-   Navbar / Header Glass
------------------------- */
-nav {
-  backdrop-filter: blur(10px);
-  background-color: var(--psu-glass);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-body.dark nav {
-  background-color: rgba(20,20,20,0.75);
-}
-
-/* ------------------------
-   Footer
------------------------- */
+/* Footer */
 footer {
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-  font-size: 0.9rem;
-  padding: 1.25rem 0;
+  background: #212529;
+  color: #eee;
 }
 footer a {
   color: var(--psu-gold);
-  text-decoration: underline;
 }
-body.dark footer {
-  background-color: #000;
-  color: var(--psu-gold);
-}
-
-/* ------------------------
-   Utility Classes
------------------------- */
-.bg-crimson { background-color: var(--psu-crimson) !important; color: var(--psu-white); }
-.bg-gold { background-color: var(--psu-gold) !important; color: var(--psu-dark); }
-.bg-light { background-color: var(--psu-light) !important; }
-.text-crimson { color: var(--psu-crimson) !important; }
-.text-gold { color: var(--psu-gold) !important; }
-.text-gray { color: var(--psu-gray) !important; }
-.text-center { text-align: center; }
-.font-heading { font-family: 'Montserrat', sans-serif; font-weight: 700; }
-.font-body { font-family: 'Inter', sans-serif; }
-
-/* ------------------------
-   Sections
------------------------- */
-.section {
-  padding: 4rem 1.5rem;
-}
-.section-dark {
-  background-color: var(--psu-crimson);
-  color: var(--psu-white);
-}
-.section-light {
-  background-color: var(--psu-light);
-}
-
-/* Hero section with gradient */
-#hero {
-  background: linear-gradient(120deg, var(--psu-gold) 0%, var(--psu-crimson) 100%);
-  color: var(--psu-white);
-}
-#hero h1 {
-  color: var(--psu-white);
-  text-shadow: 0 3px 10px rgba(0,0,0,0.25);
-}
-
-/* AI Assistant Section Gradient */
-#assistant {
-  background: linear-gradient(120deg, var(--psu-crimson) 0%, var(--psu-gold) 100%);
-  color: var(--psu-white);
-}
-
-/* ------------------------
-   Animations
------------------------- */
-.fade-in {
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Glow Pulse (optional highlight) */
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(255,184,28,0.4); }
-  50% { box-shadow: 0 0 18px rgba(255,184,28,0.9); }
-}
-.glow {
-  animation: glowPulse 2s infinite ease-in-out;
-}
-
-/* ------------------------
-   Skeleton / Loading
------------------------- */
-.skeleton {
-  background: linear-gradient(90deg, #eee 25%, #f9f9f9 50%, #eee 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
-  border-radius: 6px;
-}
-@keyframes shimmer {
-  100% { background-position: -200% 0; }
-}
-body.dark .skeleton {
-  background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
-}
-
-/* ------------------------
-   Scrollbar
------------------------- */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb {
-  background-color: var(--psu-crimson);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover { background-color: var(--psu-crimson-dark); }
-
-/* ------------------------
-   Toasts / Alerts
------------------------- */
-.psu-toast {
-  border-radius: 12px;
-  padding: 12px 16px;
+footer a:hover {
   color: #fff;
-  font-weight: 600;
-  box-shadow: 0 8px 24px rgba(0,0,0,.16);
-}
-.psu-toast.info { background: var(--psu-crimson); }
-.psu-toast.warn { background: var(--psu-gold); color:#222; }
-.psu-toast.error { background: var(--psu-crimson-dark); }
-
-/* ------------------------
-   Charts / Analytics
------------------------- */
-canvas {
-  width: 100% !important;
-  height: auto !important;
-}
-#trendChart {
-  background: var(--psu-white);
-  border-radius: var(--psu-radius);
-  box-shadow: var(--psu-shadow);
-  padding: 1rem;
-}
-body.dark #trendChart {
-  background: var(--psu-surface);
-  box-shadow: 0 4px 10px rgba(255,255,255,0.06);
 }
 
-/* ------------------------
-   Media Queries
------------------------- */
-@media (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.5rem; }
-  .section { padding: 2.5rem 1rem; }
-  nav { font-size: 0.95rem; }
+/* Metric cards */
+.metric-card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+[data-theme="dark"] .metric-card {
+  background: #333;
+}
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+/* Chart containers */
+.card {
+  border-radius: 16px;
+}
+.card-header.bg-psu-gradient {
+  background: var(--psu-gradient);
+}
+.card-body {
+  background: #fff;
+}
+[data-theme="dark"] .card-body {
+  background: #2c2c2c;
+}
+
+/* Scroll to top button */
+.btn-warning.position-fixed {
+  background: var(--psu-gold) !important;
+  border: none;
+  color: #000;
+}
+.btn-warning.position-fixed:hover {
+  background: #ffda5a !important;
+}
+
+/* Transition smoothness */
+* {
+  scroll-behavior: smooth;
+}
+
+/* AI Helper Panel */
+#ai-helper-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 360px;
+  height: 480px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  display: none;
+  overflow: hidden;
+  z-index: 1050;
+}
+[data-theme="dark"] #ai-helper-panel {
+  background: #2e2e2e;
+}
+
+/* PSU Logo Gradient Text */
+.text-psu-gradient {
+  background: var(--psu-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+/* Small animations */
+@keyframes fadeInUp {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
 }
