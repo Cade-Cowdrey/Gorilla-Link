@@ -1,152 +1,85 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}PittState-Connect{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PittState-Connect{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ PSU_BRAND.favicon }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 
-  <!-- PSU Identity -->
-  <link rel="icon" href="{{ PSU_BRAND.favicon }}" />
-  <meta name="theme-color" content="#990000" />
-  <meta name="description" content="PittState-Connect — the official Pittsburg State University platform connecting students, alumni, employers, and departments." />
-
-  <!-- Bootstrap & Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-
-  <!-- PSU Theme -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}" />
-
-  <!-- Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
-  </script>
-
-  {% block head %}{% endblock %}
+    {% if GOOGLE_ANALYTICS_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+    </script>
+    {% endif %}
 </head>
+<body class="bg-light d-flex flex-column min-vh-100">
 
-<body class="d-flex flex-column min-vh-100">
-
-  <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg shadow-sm sticky-top navbar-psu">
-    <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.index') }}">
-        <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="32" class="me-2 align-text-top" />
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" style="background: {{ PSU_BRAND.gradient }}">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.home') }}">
+        <img src="{{ PSU_BRAND.favicon }}" alt="PSU Logo" width="34" class="me-2">
         PittState-Connect
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navbarNav" aria-controls="navbarNav"
-              aria-expanded="false" aria-label="Toggle navigation">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link">Home</a></li>
-          <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link">Departments</a></li>
-          <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a></li>
-          <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a></li>
-          <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link">Analytics</a></li>
-          <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni</a></li>
-          <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link">Donors</a></li>
-          <li class="nav-item"><a href="{{ url_for('announcements_bp.index') }}" class="nav-link">News</a></li>
-
-          <!-- Theme Toggle -->
-          <li class="nav-item ms-2">
-            <button class="btn btn-outline-light btn-sm px-3" data-toggle-theme aria-label="Toggle theme">
-              <i class="bi bi-sun-fill"></i>
-            </button>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a href="{{ url_for('careers_bp.dashboard') }}" class="nav-link text-light">Careers</a></li>
+        <li class="nav-item"><a href="{{ url_for('scholarships_bp.hub') }}" class="nav-link text-light">Scholarships</a></li>
+        <li class="nav-item"><a href="{{ url_for('analytics_bp.dashboard') }}" class="nav-link text-light">Analytics</a></li>
+        <li class="nav-item"><a href="{{ url_for('alumni_bp.directory') }}" class="nav-link text-light">Alumni</a></li>
+        <li class="nav-item"><a href="{{ url_for('core_bp.about') }}" class="nav-link text-light">About</a></li>
+        {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-warning" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+              {{ current_user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a href="{{ url_for('profile_bp.my_profile') }}" class="dropdown-item">Profile</a></li>
+              <li><a href="{{ url_for('auth_bp.logout') }}" class="dropdown-item text-danger">Logout</a></li>
+            </ul>
           </li>
-
-          <!-- Auth -->
-          <li class="nav-item ms-2">
-            {% if current_user.is_authenticated %}
-              <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-outline-light btn-sm px-3">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-              </a>
-            {% else %}
-              <a href="{{ url_for('auth_bp.login') }}" class="btn btn-outline-light btn-sm px-3">
-                <i class="bi bi-person-fill me-1"></i> Login
-              </a>
-            {% endif %}
-          </li>
-        </ul>
-      </div>
+        {% else %}
+          <li class="nav-item"><a href="{{ url_for('auth_bp.login') }}" class="btn btn-sm btn-light text-dark px-3">Login</a></li>
+        {% endif %}
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <!-- CONTENT -->
-  <main class="flex-grow-1 container py-4">
-    {% block content %}{% endblock %}
-  </main>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="container mt-3">
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
 
-  <!-- FOOTER -->
-  <footer class="psu-footer mt-auto text-center py-4">
-    <p class="mb-0 small">
-      &copy; {{ now().year }} <strong>Pittsburg State University</strong> · PittState-Connect<br />
-      <span class="text-warning">{{ PSU_BRAND.tagline }}</span>
-    </p>
-    <div class="social-icons mt-2">
-      <a href="https://www.facebook.com/pittstate" class="text-light me-3"><i class="bi bi-facebook"></i></a>
-      <a href="https://x.com/pittstate" class="text-light me-3"><i class="bi bi-twitter-x"></i></a>
-      <a href="https://www.linkedin.com/school/pittsburg-state-university/" class="text-light me-3"><i class="bi bi-linkedin"></i></a>
-      <a href="https://www.instagram.com/pittsburg_state_university/" class="text-light"><i class="bi bi-instagram"></i></a>
-    </div>
-  </footer>
+<main class="flex-grow-1">
+  {% block content %}{% endblock %}
+</main>
 
-  <!-- AI Helper -->
-  <div id="ai-helper-panel"></div>
-  <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
+<footer class="mt-auto py-4 text-center text-muted border-top bg-white">
+  <div class="small">
+    © {{ now().year }} Pittsburg State University | <strong>{{ PSU_BRAND.tagline }}</strong>  
+    <br>Powered by <a href="https://pittstate-connect.onrender.com" class="text-decoration-none text-danger fw-semibold">PittState-Connect</a>
+  </div>
+</footer>
 
-  <!-- Bootstrap Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+</script>
 
-  <!-- Smart Auto Theme -->
-  <script src="{{ url_for('static', filename='js/theme-auto.js') }}"></script>
-
-  <!-- SocketIO (optional analytics live feed) -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
-    const socket = io("/ws");
-    socket.on("analytics:update", data => console.log("[Live Analytics]", data));
-  </script>
-
-  <!-- Scroll to Top -->
-  <script>
-    const scrollBtn = document.createElement("button");
-    scrollBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
-    scrollBtn.className = "btn btn-warning position-fixed bottom-0 end-0 m-4 rounded-circle shadow";
-    scrollBtn.style.display = "none";
-    document.body.appendChild(scrollBtn);
-    window.addEventListener("scroll", () => {
-      scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
-    });
-    scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  </script>
-
-  <!-- Smooth Scroll + Active Nav Highlight -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const path = window.location.pathname;
-      document.querySelectorAll(".nav-link").forEach(link => {
-        if (link.getAttribute("href") === path) link.classList.add("fw-bold", "text-warning");
-      });
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", e => {
-          e.preventDefault();
-          document.querySelector(anchor.getAttribute("href"))?.scrollIntoView({ behavior: "smooth" });
-        });
-      });
-    });
-  </script>
-
-  {% include "partials/consent_banner.html" %}
-  {% block scripts %}{% endblock %}
 </body>
 </html>
