@@ -1,41 +1,31 @@
-/* static/css/psu-theme.css */
-/* PSU brand palette + utility helpers. */
-
-:root{
-  --psu-crimson:#990000;
-  --psu-gold:#FFC72C;
-  --psu-smoke:#f8f9fa;
-  --psu-ink:#212529;
+:root {
+  --psu-crimson: #990000;
+  --psu-gold: #ffcc00;
+  --psu-ink: #212529;
+  --psu-paper: #f8f9fa;
+  --psu-accent: #006699;
 }
 
-body{
-  background:var(--psu-smoke);
-  color:var(--psu-ink);
+:root[data-theme="dark"] {
+  --psu-ink: #e9ecef;
+  --psu-paper: #1b1f22;
+  --psu-crimson: #b30000;
+  --psu-accent: #3aa0ff;
 }
 
-.navbar{
-  backdrop-filter:saturate(180%) blur(8px);
+body {
+  background: var(--psu-paper);
+  color: var(--psu-ink);
 }
 
-.btn-psu{
-  background:var(--psu-crimson);
-  color:#fff;
-  border:none;
-}
-.btn-psu:hover{ background:#7a0000; color:#fff; }
+.card { border-radius: 0.75rem; }
 
-.badge-psu{
-  background:var(--psu-gold);
-  color:#111;
-}
+.btn-warning { background: var(--psu-gold); border-color: var(--psu-gold); color: #1b1b1b; }
+.btn-outline-light { color: #fff; border-color: rgba(255,255,255,.5); }
 
-.card-psu{
-  border:1px solid #eee;
-  border-radius:.75rem;
-  box-shadow:0 10px 25px rgba(0,0,0,.05);
-}
+.navbar-psu { background: linear-gradient(90deg, var(--psu-crimson), #b81212); }
 
-/* Progress bar accent */
-.progress-bar-psu{
-  background:linear-gradient(90deg,var(--psu-crimson),#b0191e,var(--psu-gold));
-}
+a:hover { opacity: .9; }
+
+[data-theme="dark"] .card { background: #20262b; border-color: #2b3238; }
+[data-theme="dark"] .navbar { background: linear-gradient(90deg, #111, #222); }
