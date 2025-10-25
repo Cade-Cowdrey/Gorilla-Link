@@ -2,132 +2,102 @@
 {% block title %}PittState-Connect | Home{% endblock %}
 
 {% block content %}
-<section id="hero" class="fade-in section" style="padding:4rem 0 3rem;">
-  <div class="container text-center">
-    <h1 class="text-5xl font-heading text-crimson mb-4">
-      Welcome to PittState-Connect
-    </h1>
-    <p class="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-      Your one-stop platform for <strong>scholarships, jobs, events, alumni networking,</strong>
-      and campus insights — all built for Gorillas 🦍.
-    </p>
-
-    <div class="flex justify-center gap-4 mt-8 flex-wrap">
-      <a href="/scholarships" class="btn btn-gold px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-        🎓 Explore Scholarships
-      </a>
-      <a href="/careers" class="btn btn-crimson px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-        💼 Find Jobs & Internships
-      </a>
-      <a href="/analytics" class="btn btn-outline px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-        📊 View Analytics
-      </a>
-    </div>
+<!-- Hero Section -->
+<section class="hero-section text-center text-light d-flex align-items-center justify-content-center position-relative overflow-hidden" style="background: linear-gradient(135deg, #740001, #eeb211); min-height: 75vh;">
+  <div class="overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.4);"></div>
+  <div class="container position-relative py-5">
+    <h1 class="display-4 fw-bold animate-fade-up">{{ hero.title }}</h1>
+    <p class="lead mb-4 animate-fade-up delay-1">{{ hero.subtitle }}</p>
+    <a href="{{ hero.cta_link }}" class="btn btn-lg btn-light text-dark shadow-sm px-4 py-2 fw-semibold animate-fade-up delay-2">{{ hero.cta_text }}</a>
   </div>
 </section>
 
-<!-- Live Highlights / Stats -->
-<section id="highlights" class="section py-10 bg-gray-50 dark:bg-zinc-900">
-  <div class="container grid md:grid-cols-3 gap-8 text-center">
-    <div class="card p-6 shadow-md">
-      <h3 class="font-bold text-lg text-crimson">Active Users</h3>
-      <p class="text-4xl mt-2 font-heading text-gold" id="metric-users">–</p>
+<!-- Quick Panels -->
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold text-uppercase text-danger">Explore the Gorilla Network</h2>
+    <p class="text-muted">Everything you need to thrive at Pittsburg State — scholarships, jobs, analytics, and community.</p>
+  </div>
+
+  <div class="row g-4">
+    {% for p in panels %}
+    <div class="col-md-6 col-lg-3 animate-fade-up delay-{{ loop.index }}">
+      <div class="card shadow-sm border-0 h-100 hover-raise">
+        <div class="card-body text-center py-5">
+          <i class="bi {{ p.icon }} display-5 text-danger mb-3"></i>
+          <h5 class="fw-semibold mb-2">{{ p.title }}</h5>
+          <p class="text-muted small">{{ p.desc }}</p>
+        </div>
+      </div>
     </div>
-    <div class="card p-6 shadow-md">
-      <h3 class="font-bold text-lg text-crimson">Open Scholarships</h3>
-      <p class="text-4xl mt-2 font-heading text-gold" id="metric-scholarships">–</p>
-    </div>
-    <div class="card p-6 shadow-md">
-      <h3 class="font-bold text-lg text-crimson">Upcoming Events</h3>
-      <p class="text-4xl mt-2 font-heading text-gold" id="metric-events">–</p>
-    </div>
+    {% endfor %}
   </div>
 </section>
 
-<!-- Feature Tiles -->
-<section id="features" class="section py-16">
+<!-- PSU Analytics Snapshot -->
+<section class="bg-white border-top border-bottom py-5">
   <div class="container">
-    <h2 class="text-3xl font-heading text-center text-crimson mb-8">Everything You Need to Succeed</h2>
-    <div class="grid md:grid-cols-3 gap-10">
-      <div class="card p-6 hover:shadow-lg transition">
-        <h3 class="text-xl font-semibold mb-2">🎓 Scholarship Hub</h3>
-        <p>Smart matching, essay AI helper, and progress tracking so you never miss a deadline.</p>
-        <a href="/scholarships" class="text-gold font-semibold mt-3 inline-block hover:underline">Open Hub →</a>
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div class="col-md-5">
+        <h3 class="fw-bold text-danger">Gorilla Insights Dashboard</h3>
+        <p class="text-muted small">
+          Live campus-wide analytics showcasing scholarships awarded, internship placements, and alumni connections powered by the PSU data cloud.
+        </p>
+        <a href="{{ url_for('analytics_bp.dashboard') }}" class="btn btn-outline-danger mt-2">View Dashboard</a>
       </div>
-      <div class="card p-6 hover:shadow-lg transition">
-        <h3 class="text-xl font-semibold mb-2">💼 Career Gateway</h3>
-        <p>Jobs, internships, and employer partnerships — all vetted for Pitt State students.</p>
-        <a href="/careers" class="text-gold font-semibold mt-3 inline-block hover:underline">Browse Careers →</a>
-      </div>
-      <div class="card p-6 hover:shadow-lg transition">
-        <h3 class="text-xl font-semibold mb-2">📊 Analytics Dashboard</h3>
-        <p>Track engagement, scholarships, and funding impact — powered by AI insights.</p>
-        <a href="/analytics" class="text-gold font-semibold mt-3 inline-block hover:underline">Open Dashboard →</a>
+      <div class="col-md-6">
+        <canvas id="psuAnalyticsChart" height="180"></canvas>
       </div>
     </div>
   </div>
 </section>
 
-<!-- AI Section -->
-<section id="assistant" class="section py-16 bg-gradient-to-r from-crimson to-gold text-white text-center">
-  <div class="container">
-    <h2 class="text-3xl font-heading mb-3">Need Help? Ask the AI Gorilla Assistant 🦍</h2>
-    <p class="max-w-2xl mx-auto text-lg opacity-90 mb-8">
-      Whether it’s scholarships, résumé tips, or campus events — the AI assistant’s got your back 24/7.
-    </p>
-    <button onclick="openAiPanel()" class="btn bg-white text-crimson px-6 py-3 rounded-xl font-bold hover:opacity-90">
-      💬 Chat with AI
-    </button>
+<!-- AI Recommender Spotlight -->
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h3 class="fw-bold text-danger">AI-Powered SmartMatch</h3>
+    <p class="text-muted small">Let our AI analyze your profile to suggest scholarships, mentors, and employers tailored for your journey.</p>
   </div>
-</section>
-
-<!-- News Feed -->
-<section id="news" class="section py-16 bg-gray-50 dark:bg-zinc-900">
-  <div class="container">
-    <h2 class="text-3xl font-heading text-center text-crimson mb-8">Campus Highlights</h2>
-    <div id="news-feed" class="grid md:grid-cols-3 gap-6">
-      <div class="card p-5">
-        <h3 class="font-bold text-lg mb-2">Gorilla Scholars Program Launch</h3>
-        <p>Pitt State introduces its exclusive mentor network for high-achieving students and alumni.</p>
-      </div>
-      <div class="card p-5">
-        <h3 class="font-bold text-lg mb-2">Career Fair Record Attendance</h3>
-        <p>Over 120 employers joined the Fall Career Expo — setting a new record for campus engagement.</p>
-      </div>
-      <div class="card p-5">
-        <h3 class="font-bold text-lg mb-2">Scholarship Hub 2.0 Live</h3>
-        <p>Now featuring smart-match AI recommendations and automated essay feedback tools.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PSU Brand CTA -->
-<section id="cta" class="section py-16 text-center">
-  <div class="container">
-    <h2 class="text-3xl font-heading text-crimson mb-4">Join the Gorilla Network</h2>
-    <p class="text-lg mb-6 max-w-2xl mx-auto text-gray-700 dark:text-gray-300">
-      Connect with peers, alumni, and employers who are shaping the future of Pitt State.
-    </p>
-    <a href="/register" class="btn btn-gold px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-      🚀 Get Started
+  <div class="text-center">
+    <a href="{{ url_for('scholarships_bp.hub') }}" class="btn btn-danger px-4 py-2 shadow-sm">
+      Launch SmartMatch
     </a>
   </div>
 </section>
 
+<!-- Scroll progress -->
+<div id="scroll-progress"></div>
+
 <script>
-  // Live metric loader for home cards
-  async function loadHomeMetrics() {
-    try {
-      const res = await fetch("/api/analytics/summary");
-      const data = await res.json();
-      if (!data.success) return;
-      const m = data.data;
-      document.getElementById("metric-users").textContent = m.users_total || "–";
-      document.getElementById("metric-scholarships").textContent = m.open_scholarships || "–";
-      document.getElementById("metric-events").textContent = m.events_upcoming || "–";
-    } catch (err) { console.error(err); }
-  }
-  window.addEventListener("DOMContentLoaded", loadHomeMetrics);
+  // Scroll progress bar
+  const progressBar = document.getElementById('scroll-progress');
+  window.onscroll = function() {
+    const scrollTop = document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    progressBar.style.width = progress + "%";
+  };
+
+  // Chart (sample analytics)
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('psuAnalyticsChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ["2019", "2020", "2021", "2022", "2023"],
+          datasets: [{
+            label: "Scholarships Awarded",
+            data: [150, 180, 210, 250, 310],
+            borderColor: "#740001",
+            backgroundColor: "rgba(238,178,17,0.2)",
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+  });
 </script>
 {% endblock %}
