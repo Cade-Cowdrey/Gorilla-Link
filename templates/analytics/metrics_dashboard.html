@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="fw-bold text-psu-crimson mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Analytics Dashboard</h1>
+      <p class="text-muted mb-0">University-wide intelligence: students, alumni, scholarships, and engagement.</p>
+    </div>
+    <div>
+      <button id="refreshMetrics" class="btn btn-warning shadow-sm">
+        <i class="bi bi-arrow-repeat me-1"></i> Refresh Data
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card metric-card shadow-sm text-center border-0">
+        <div class="card-body">
+          <i class="bi bi-people-fill fs-1 text-psu-gold"></i>
+          <h5 class="fw-bold mt-2">Users</h5>
+          <p id="metric-users" class="fs-4 mb-0">—</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card metric-card shadow-sm text-center border-0">
+        <div class="card-body">
+          <i class="bi bi-chat-left-text-fill fs-1 text-psu-gold"></i>
+          <h5 class="fw-bold mt-2">Posts</h5>
+          <p id="metric-posts" class="fs-4 mb-0">—</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card metric-card shadow-sm text-center border-0">
+        <div class="card-body">
+          <i class="bi bi-building fs-1 text-psu-gold"></i>
+          <h5 class="fw-bold mt-2">Departments</h5>
+          <p id="metric-departments" class="fs-4 mb-0">—</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card metric-card shadow-sm text-center border-0">
+        <div class="card-body">
+          <i class="bi bi-award-fill fs-1 text-psu-gold"></i>
+          <h5 class="fw-bold mt-2">Scholarships</h5>
+          <p id="metric-scholarships" class="fs-4 mb-0">—</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-psu-gradient text-white fw-semibold">
+          <i class="bi bi-bar-chart-line-fill me-2"></i>Engagement Growth
+        </div>
+        <div class="card-body">
+          <canvas id="engagementChart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-psu-gradient text-white fw-semibold">
+          <i class="bi bi-pie-chart-fill me-2"></i>Department Distribution
+        </div>
+        <div class="card-body">
+          <canvas id="deptChart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI-powered Insight Panel -->
+  <div class="card shadow-sm border-0 mt-4">
+    <div class="card-header bg-psu-gradient text-white fw-semibold">
+      <i class="bi bi-lightbulb-fill me-2"></i>AI Insight
+    </div>
+    <div class="card-body">
+      <p id="aiInsight" class="mb-0 text-secondary fst-italic">Analyzing latest data...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const apiUrl = "/api/analytics/latest";
+  const ctxEng = document.getElementById("engagementChart");
+  const ctxDept = document.getElementById("deptChart");
+  const refreshBtn = document.getElementById("refreshMetrics");
+  const aiInsight = document.getElementById("aiInsight");
+
+  let engagementChart, deptChart;
+
+  async function fetchMetrics() {
+    try {
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      updateMetrics(data);
+      updateCharts(data);
+      generateAIInsight(data);
+    } catch (err) {
+      console.error("Metric load error:", err);
+    }
+  }
+
+  function updateMetrics(data) {
+    document.getElementById("metric-users").textContent = data.users ?? "—";
+    document.getElementById("metric-posts").textContent = data.posts ?? "—";
+    document.getElementById("metric-departments").textContent = data.departments ?? "—";
+    document.getElementById("metric-scholarships").textContent = data.scholarships ?? "—";
+  }
+
+  function updateCharts(data) {
+    const labels = ["Users", "Posts", "Departments", "Scholarships"];
+    const values = [data.users, data.posts, data.departments, data.scholarships];
+    const colors = ["#990000", "#FFC72C", "#c43b18", "#ffd84c"];
+
+    if (engagementChart) engagementChart.destroy();
+    engagementChart = new Chart(ctxEng, {
+      type: "bar",
+      data: { labels, datasets: [{ label: "Activity", data: values, backgroundColor: colors }] },
+      options: { plugins: { legend: { display: false } }, responsive: true }
+    });
+
+    if (deptChart) deptChart.destroy();
+    deptChart = new Chart(ctxDept, {
+      type: "doughnut",
+      data: {
+        labels: ["Business", "Technology", "Education", "Arts"],
+        datasets: [{ data: [12, 8, 15, 9], backgroundColor: colors }]
+      },
+      options: { plugins: { legend: { position: "bottom" } } }
+    });
+  }
+
+  async function generateAIInsight(data) {
+    try {
+      const prompt = `Provide a concise PSU-style data insight based on: users=${data.users}, posts=${data.posts}, departments=${data.departments}, scholarships=${data.scholarships}`;
+      const res = await fetch("/api/ai/insight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const aiData = await res.json();
+      aiInsight.textContent = aiData.insight || "Insight unavailable.";
+    } catch (err) {
+      aiInsight.textContent = "Unable to fetch AI insight.";
+    }
+  }
+
+  refreshBtn.addEventListener("click", fetchMetrics);
+  fetchMetrics();
+});
+</script>
+{% endblock %}
