@@ -1,103 +1,27 @@
 {% extends "base.html" %}
-{% block title %}PittState-Connect | Home{% endblock %}
-
+{% block title %}Home · PittState-Connect{% endblock %}
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section text-center text-light d-flex align-items-center justify-content-center position-relative overflow-hidden" style="background: linear-gradient(135deg, #740001, #eeb211); min-height: 75vh;">
-  <div class="overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.4);"></div>
-  <div class="container position-relative py-5">
-    <h1 class="display-4 fw-bold animate-fade-up">{{ hero.title }}</h1>
-    <p class="lead mb-4 animate-fade-up delay-1">{{ hero.subtitle }}</p>
-    <a href="{{ hero.cta_link }}" class="btn btn-lg btn-light text-dark shadow-sm px-4 py-2 fw-semibold animate-fade-up delay-2">{{ hero.cta_text }}</a>
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+  <div class="container-fluid py-5">
+    <h1 class="display-5 fw-bold">{{ hero.title }}</h1>
+    <p class="col-md-8 fs-5">{{ hero.subtitle }}</p>
+    <a class="btn btn-warning btn-lg" href="{{ hero.cta_href }}">{{ hero.cta_text }}</a>
   </div>
-</section>
+</div>
 
-<!-- Quick Panels -->
-<section class="container py-5">
-  <div class="text-center mb-5">
-    <h2 class="fw-bold text-uppercase text-danger">Explore the Gorilla Network</h2>
-    <p class="text-muted">Everything you need to thrive at Pittsburg State — scholarships, jobs, analytics, and community.</p>
-  </div>
-
-  <div class="row g-4">
-    {% for p in panels %}
-    <div class="col-md-6 col-lg-3 animate-fade-up delay-{{ loop.index }}">
-      <div class="card shadow-sm border-0 h-100 hover-raise">
-        <div class="card-body text-center py-5">
-          <i class="bi {{ p.icon }} display-5 text-danger mb-3"></i>
-          <h5 class="fw-semibold mb-2">{{ p.title }}</h5>
-          <p class="text-muted small">{{ p.desc }}</p>
+<div class="row g-4">
+  {% for p in panels %}
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+          <i class="bi {{ p.icon }} me-2"></i>
+          <h5 class="card-title mb-0">{{ p.title }}</h5>
         </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- PSU Analytics Snapshot -->
-<section class="bg-white border-top border-bottom py-5">
-  <div class="container">
-    <div class="d-flex flex-wrap align-items-center justify-content-between">
-      <div class="col-md-5">
-        <h3 class="fw-bold text-danger">Gorilla Insights Dashboard</h3>
-        <p class="text-muted small">
-          Live campus-wide analytics showcasing scholarships awarded, internship placements, and alumni connections powered by the PSU data cloud.
-        </p>
-        <a href="{{ url_for('analytics_bp.dashboard') }}" class="btn btn-outline-danger mt-2">View Dashboard</a>
-      </div>
-      <div class="col-md-6">
-        <canvas id="psuAnalyticsChart" height="180"></canvas>
+        <p class="card-text text-muted">{{ p.desc }}</p>
       </div>
     </div>
   </div>
-</section>
-
-<!-- AI Recommender Spotlight -->
-<section class="container py-5">
-  <div class="text-center mb-5">
-    <h3 class="fw-bold text-danger">AI-Powered SmartMatch</h3>
-    <p class="text-muted small">Let our AI analyze your profile to suggest scholarships, mentors, and employers tailored for your journey.</p>
-  </div>
-  <div class="text-center">
-    <a href="{{ url_for('scholarships_bp.hub') }}" class="btn btn-danger px-4 py-2 shadow-sm">
-      Launch SmartMatch
-    </a>
-  </div>
-</section>
-
-<!-- Scroll progress -->
-<div id="scroll-progress"></div>
-
-<script>
-  // Scroll progress bar
-  const progressBar = document.getElementById('scroll-progress');
-  window.onscroll = function() {
-    const scrollTop = document.documentElement.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const progress = (scrollTop / scrollHeight) * 100;
-    progressBar.style.width = progress + "%";
-  };
-
-  // Chart (sample analytics)
-  document.addEventListener("DOMContentLoaded", function() {
-    const ctx = document.getElementById('psuAnalyticsChart');
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ["2019", "2020", "2021", "2022", "2023"],
-          datasets: [{
-            label: "Scholarships Awarded",
-            data: [150, 180, 210, 250, 310],
-            borderColor: "#740001",
-            backgroundColor: "rgba(238,178,17,0.2)",
-            tension: 0.4,
-            fill: true
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-      });
-    }
-  });
-</script>
+  {% endfor %}
+</div>
 {% endblock %}
