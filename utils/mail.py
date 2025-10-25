@@ -1,47 +1,56 @@
 # utils/mail.py
 from __future__ import annotations
-
 import os
-from typing import Dict, Optional
-from flask import Flask, render_template
+from typing import Iterable, Optional
 from flask_mail import Mail, Message
-from tenacity import retry, stop_after_attempt, wait_exponential
+from flask import current_app
 
-mail = Mail()
+_mail: Optional[Mail] = None
 
-def init_mail(app: Flask) -> None:
-    app.config.setdefault("MAIL_SERVER", os.environ.get("MAIL_SERVER", "localhost"))
-    app.config.setdefault("MAIL_PORT", int(os.environ.get("MAIL_PORT", "25")))
-    app.config.setdefault("MAIL_USE_TLS", os.environ.get("MAIL_USE_TLS", "false").lower() == "true")
-    app.config.setdefault("MAIL_USE_SSL", os.environ.get("MAIL_USE_SSL", "false").lower() == "true")
-    app.config.setdefault("MAIL_USERNAME", os.environ.get("MAIL_USERNAME"))
-    app.config.setdefault("MAIL_PASSWORD", os.environ.get("MAIL_PASSWORD"))
-    app.config.setdefault("MAIL_DEFAULT_SENDER", os.environ.get("MAIL_DEFAULT_SENDER", "noreply@pittstate.edu"))
-    mail.init_app(app)
+def init_mail(app):
+    """
+    Initialize Flask-Mail with sensible production defaults.
+    Safe to call multiple times; will reuse instance.
+    """
+    global _mail
+    if _mail:
+        return _mail
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
-def send_templated_email(
+    app.config.setdefault("MAIL_SERVER", os.getenv("MAIL_SERVER", "smtp.sendgrid.net"))
+    app.config.setdefault("MAIL_PORT", int(os.getenv("MAIL_PORT", "587")))
+    app.config.setdefault("MAIL_USE_TLS", True)
+    app.config.setdefault("MAIL_USERNAME", os.getenv("MAIL_USERNAME", "apikey"))
+    app.config.setdefault("MAIL_PASSWORD", os.getenv("MAIL_PASSWORD", ""))
+    app.config.setdefault("MAIL_DEFAULT_SENDER", os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstate.edu"))
+    app.config.setdefault("MAIL_SUPPRESS_SEND", app.config.get("TESTING", False))
+    _mail = Mail(app)
+    return _mail
+
+def send_email(
     subject: str,
-    recipients: list[str],
-    template: str,
-    context: Optional[Dict] = None,
-    bcc: Optional[list[str]] = None,
-    attachments: Optional[list[tuple[str, str, bytes]]] = None,
-) -> None:
+    recipients: Iterable[str],
+    html: str | None = None,
+    body: str | None = None,
+    bcc: Iterable[str] | None = None,
+    attachments: list[tuple[str, str, bytes]] | None = None,
+    reply_to: str | None = None,
+):
     """
-    template: base name without extension, resolves to:
-      templates/emails/{template}.html and templates/emails/{template}.txt
+    Production-friendly email utility with HTML + attachments.
     """
-    context = context or {}
-    html = render_template(f"emails/{template}.html", **context)
-    text = render_template(f"emails/{template}.txt", **context)
-
-    msg = Message(subject=subject, recipients=recipients, bcc=bcc or [])
-    msg.body = text
-    msg.html = html
-
+    mail = _mail or init_mail(current_app)
+    msg = Message(
+        subject=subject,
+        recipients=list(recipients),
+        bcc=list(bcc) if bcc else None,
+        reply_to=reply_to or current_app.config.get("MAIL_REPLY_TO"),
+    )
+    if body:
+        msg.body = body
+    if html:
+        msg.html = html
     if attachments:
-        for fname, mimetype, data in attachments:
-            msg.attach(filename=fname, content_type=mimetype, data=data)
+        for filename, mimetype, data in attachments:
+            msg.attach(filename=filename, content_type=mimetype, data=data)
 
     mail.send(msg)
