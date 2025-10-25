@@ -1,0 +1,110 @@
+<!-- templates/analytics/analytics_cards.html -->
+<div class="row g-4 mt-3">
+  <!-- User Activity Overview -->
+  <div class="col-md-6 col-lg-4">
+    <div class="analytics-card p-4">
+      <h5><i class="bi bi-people-fill me-2"></i>User Engagement</h5>
+      <div class="chart-container"><canvas id="chartUsers"></canvas></div>
+      <div class="analytics-stats">
+        <div class="stat">
+          <h6 id="active-users">0</h6><small>Active Users</small>
+        </div>
+        <div class="stat">
+          <h6 id="growth-rate">0%</h6><small>Growth</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scholarships Tracker -->
+  <div class="col-md-6 col-lg-4">
+    <div class="analytics-card p-4">
+      <h5><i class="bi bi-award-fill me-2"></i>Scholarship Insights</h5>
+      <div class="chart-container"><canvas id="chartScholarships"></canvas></div>
+      <div class="analytics-stats">
+        <div class="stat">
+          <h6 id="total-scholarships">0</h6><small>Active Scholarships</small>
+        </div>
+        <div class="stat">
+          <h6 id="applications">0</h6><small>Applications</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Funding and Donor Overview -->
+  <div class="col-md-6 col-lg-4">
+    <div class="analytics-card p-4">
+      <h5><i class="bi bi-cash-coin me-2"></i>Funding & Donors</h5>
+      <div class="chart-container"><canvas id="chartFunding"></canvas></div>
+      <div class="analytics-stats">
+        <div class="stat">
+          <h6 id="total-donations">$0</h6><small>Total Donations</small>
+        </div>
+        <div class="stat">
+          <h6 id="new-donors">0</h6><small>New Donors</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Load Chart.js + SocketIO -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const socket = io("/ws");
+
+  // Helper for chart creation
+  const makeChart = (id, label, color) => {
+    const ctx = document.getElementById(id);
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label,
+          data: [],
+          borderColor: color,
+          tension: 0.3,
+          fill: false,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { beginAtZero: true } }
+      }
+    });
+  };
+
+  const chartUsers = makeChart("chartUsers", "Users", "#ffcc00");
+  const chartScholarships = makeChart("chartScholarships", "Scholarships", "#990000");
+  const chartFunding = makeChart("chartFunding", "Funding", "#28a745");
+
+  // Live updates from analytics feed
+  socket.on("analytics:update", (data) => {
+    if (!data) return;
+    document.getElementById("active-users").textContent = data.active_users || 0;
+    document.getElementById("growth-rate").textContent = data.growth_rate + "%" || "0%";
+    document.getElementById("total-scholarships").textContent = data.total_scholarships || 0;
+    document.getElementById("applications").textContent = data.applications || 0;
+    document.getElementById("total-donations").textContent = "$" + (data.total_donations || 0);
+    document.getElementById("new-donors").textContent = data.new_donors || 0;
+
+    const push = (chart, val) => {
+      const now = new Date().toLocaleTimeString();
+      if (chart.data.labels.length > 10) chart.data.labels.shift();
+      if (chart.data.datasets[0].data.length > 10) chart.data.datasets[0].data.shift();
+      chart.data.labels.push(now);
+      chart.data.datasets[0].data.push(val);
+      chart.update();
+    };
+
+    push(chartUsers, data.active_users);
+    push(chartScholarships, data.total_scholarships);
+    push(chartFunding, data.total_donations);
+  });
+});
+</script>
