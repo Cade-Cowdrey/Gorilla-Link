@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Analytics — PittState-Connect{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h2 class="mb-0">Analytics</h2>
+  <span class="badge bg-secondary text-uppercase">{{ role }}</span>
+</div>
+
+<div class="row g-3">
+  {% for c in cards %}
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="text-secondary small">{{ c.label }}</div>
+            <div class="fs-3 fw-bold">{{ c.value }}</div>
+          </div>
+          <div class="align-self-start">
+            <span class="badge {{ 'bg-success' if c.delta >=0 else 'bg-danger' }}">
+              {{ '+' if c.delta>=0 else ''}}{{ c.delta }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card mt-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title">Active Users (7d)</h5>
+    <img src="{{ chart_url }}" class="img-fluid rounded border" alt="Active Users Chart">
+  </div>
+</div>
+{% endblock %}
