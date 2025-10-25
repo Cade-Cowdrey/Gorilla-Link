@@ -1,0 +1,138 @@
+<!-- templates/reports/monthly_report.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PSU Monthly Analytics — {{ period_label }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/psu-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report-print.css') }}">
+<style>
+  /* Inline safety for email/pdf engines that ignore external files */
+  .psu-gradient { background: linear-gradient(90deg, #990000, #ffc72c); }
+  .kpi { border:1px solid #eee; border-radius:12px; padding:16px; margin-bottom:14px; background:#fff; }
+  .kpi h3 { margin:4px 0 0; color:#990000; font-size:24px; }
+  .kpi small { color:#666; }
+  .section-hdr { color:#990000; border-left:6px solid #ffc72c; padding-left:10px; margin:26px 0 12px; }
+  .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff4cc; color:#5c4500; margin:4px 6px 0 0; font-size:12px; }
+  .td-muted { color:#555; }
+  .stamp { font-size:12px; color:#666; }
+  .divider { height:1px; background:#eee; margin:16px 0; }
+</style>
+</head>
+<body style="background:#fafafa; color:#333; font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+
+  <!-- Header -->
+  <header class="psu-gradient" style="color:#fff; padding:22px 24px; border-bottom:6px solid #ffd35c;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="48" height="48" style="border-radius:8px;">
+      <div>
+        <h1 style="margin:0; font-size:22px; font-weight:800;">PittState-Connect — Monthly Analytics</h1>
+        <div class="stamp">Period: <strong>{{ period_label }}</strong> &nbsp;|&nbsp; Generated: {{ generated_at }}</div>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding:20px 24px;">
+    <!-- Executive Summary -->
+    <section aria-labelledby="exec-summary">
+      <h2 id="exec-summary" class="section-hdr">Executive Summary</h2>
+      <p style="margin-top:8px; line-height:1.6;">
+        {{ ai_summary }}
+      </p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- KPI Grid -->
+    <section aria-labelledby="kpis">
+      <h2 id="kpis" class="section-hdr">Key Performance Indicators</h2>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;">
+        <div class="kpi" role="group" aria-label="Total Users">
+          <small>Total Users</small>
+          <h3>{{ metrics.users | int }}</h3>
+          <div class="td-muted">New this month: <strong>{{ metrics.new_users | int }}</strong></div>
+        </div>
+        <div class="kpi" role="group" aria-label="Active Users">
+          <small>Active Users</small>
+          <h3>{{ metrics.active_users | int }}</h3>
+          <div class="td-muted">Engagement Rate: <strong>{{ (metrics.engagement_rate or 0) | round(2) }}%</strong></div>
+        </div>
+        <div class="kpi" role="group" aria-label="Content Posts">
+          <small>Posts</small>
+          <h3>{{ metrics.posts | int }}</h3>
+          <div class="td-muted">Scholarships Listed: <strong>{{ metrics.scholarships | int }}</strong></div>
+        </div>
+        <div class="kpi" role="group" aria-label="Applications">
+          <small>Applications</small>
+          <h3>{{ metrics.applications | int }}</h3>
+          <div class="td-muted">Placements: <strong>{{ metrics.placements | int }}</strong></div>
+        </div>
+        <div class="kpi" role="group" aria-label="Departments">
+          <small>Departments</small>
+          <h3>{{ metrics.departments | int }}</h3>
+          <div class="td-muted">Top performers listed below</div>
+        </div>
+        <div class="kpi" role="group" aria-label="Trending Topics">
+          <small>Trending Topics</small>
+          {% if metrics.trending_topics %}
+            <div aria-label="Topics">
+              {% for t in metrics.trending_topics %}
+                <span class="pill">{{ t }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="td-muted">No trending topics detected</div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Departments -->
+    <section aria-labelledby="top-depts" style="margin-top:22px;">
+      <h2 id="top-depts" class="section-hdr">Top Departments</h2>
+      <table aria-label="Top Departments Table" style="width:100%; border-collapse:collapse; background:#fff;">
+        <thead>
+          <tr style="background:#fff4e0;">
+            <th style="text-align:left; padding:10px;">Department</th>
+            <th style="text-align:right; padding:10px;">Users</th>
+            <th style="text-align:right; padding:10px;">Posts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if metrics.top_departments %}
+            {% for d in metrics.top_departments %}
+              <tr style="border-top:1px solid #eee;">
+                <td style="padding:10px;">{{ d.name }}</td>
+                <td style="padding:10px; text-align:right;">{{ d.users }}</td>
+                <td style="padding:10px; text-align:right;">{{ d.posts }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="3" style="padding:14px; color:#666;">No departmental data for this period.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Time Series (optional image placeholder) -->
+    {% if metrics.time_series and metrics.time_series|length > 1 %}
+    <section aria-labelledby="timeseries" style="margin-top:22px;">
+      <h2 id="timeseries" class="section-hdr">Monthly Trend</h2>
+      <p class="td-muted" style="margin-top:-6px;">Peak and trough points highlight engagement shifts.</p>
+      <!-- If you have a base64 PNG string (e.g., data:image/png;base64,...) expose it here -->
+      {% if metrics.chart_img_base64 %}
+        <img src="{{ metrics.chart_img_base64 }}" alt="Usage trend line chart" style="width:100%; border:1px solid #eee; border-radius:10px;">
+      {% else %}
+        <div class="kpi" style="text-align:center; font-style:italic;">Chart unavailable. (Enable chart generation to embed PNG)</div>
+      {% endif %}
+    </section>
+    {% endif %}
+  </main>
+
+  <footer style="padding:18px 24px; background:#111; color:#fff; text-align:center;">
+    &copy; {{ now().year }} Pittsburg State University · PittState-Connect<br>
+    <span style="color:#ffd35c;">Once a Gorilla, Always a Gorilla.</span>
+  </footer>
+</body>
+</html>
