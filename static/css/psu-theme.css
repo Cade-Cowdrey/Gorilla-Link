@@ -107,3 +107,119 @@ html, body {
     margin-top: 0.5rem;
   }
 }
+
+/* =========================================================
+   PSU Consent Banner — Adaptive Light/Dark Styles
+   ========================================================= */
+.psu-consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--psu-gradient);
+  color: #fff;
+  z-index: 1050;
+  transition: all 0.4s ease;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+}
+
+.psu-consent-banner.fade.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.psu-consent-banner.fade {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+[data-theme="dark"] .psu-consent-banner {
+  background: linear-gradient(90deg, #000, #330000);
+  color: #f1f1f1;
+}
+
+.psu-consent-banner .btn-outline-light {
+  border-color: #ccc;
+  color: #fff;
+}
+
+.psu-consent-banner .btn-outline-light:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--psu-gold);
+}
+
+.psu-consent-banner .btn-warning {
+  background-color: var(--psu-gold);
+  border: none;
+  color: #000;
+  font-weight: 500;
+}
+
+.psu-consent-banner .btn-warning:hover {
+  background-color: #e6b800;
+}
+
+/* =========================================================
+   PSU Analytics Dashboard Cards
+   ========================================================= */
+.analytics-card {
+  background: var(--psu-light);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .analytics-card {
+  background: #1c1f22;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  color: #f1f1f1;
+}
+
+.analytics-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 16px rgba(0,0,0,0.2);
+}
+
+.analytics-card h5 {
+  font-weight: 600;
+  color: var(--psu-red);
+}
+
+[data-theme="dark"] .analytics-card h5 {
+  color: var(--psu-gold);
+}
+
+.chart-container {
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+.chart-container canvas {
+  max-height: 240px;
+}
+
+/* Card stats row */
+.analytics-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.analytics-stats .stat {
+  text-align: center;
+}
+
+.analytics-stats .stat h6 {
+  font-weight: 700;
+  color: var(--psu-gold);
+}
+
+.analytics-stats .stat small {
+  display: block;
+  color: #777;
+}
+
+[data-theme="dark"] .analytics-stats .stat small {
+  color: #bbb;
+}
