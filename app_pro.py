@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import datetime
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -12,16 +12,15 @@ from redis import Redis
 from dotenv import load_dotenv
 
 # -----------------------------------------------------------
-# Load environment and initialize core extensions
+# Load environment and initialize extensions
 # -----------------------------------------------------------
 load_dotenv()
 db = SQLAlchemy()
 mail = Mail()
 redis_client = None
 
-
 # -----------------------------------------------------------
-# Config Classes
+# Configuration
 # -----------------------------------------------------------
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "psu_secret_key")
@@ -42,29 +41,21 @@ class BaseConfig:
         "favicon": "/static/img/psu_logo.png"
     }
 
-
 class DevConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
-
 
 class ProdConfig(BaseConfig):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///prod.db")
 
-
-# -----------------------------------------------------------
-# Config Selector
-# -----------------------------------------------------------
 def select_config():
     env = os.getenv("FLASK_ENV", "production").lower()
-    config = DevConfig if env == "development" else ProdConfig
-    print(f"[config] Selecting configuration for environment: {env}")
-    return config
-
+    print(f"[config] Using configuration for environment: {env}")
+    return DevConfig if env == "development" else ProdConfig
 
 # -----------------------------------------------------------
-# Create Flask App
+# App Factory
 # -----------------------------------------------------------
 def create_app():
     app = Flask(__name__)
@@ -80,13 +71,12 @@ def create_app():
     app.logger.info("Logging configured successfully.")
 
     # -------------------------------------------------------
-    # Initialize Extensions
+    # Initialize Core Extensions
     # -------------------------------------------------------
     CORS(app)
     db.init_app(app)
     mail.init_app(app)
 
-    # Rate limiter
     limiter = Limiter(
         get_remote_address,
         app=app,
@@ -109,7 +99,7 @@ def create_app():
     app.extensions["redis"] = redis_client
 
     # -------------------------------------------------------
-    # Initialize Scheduler (new centralized version)
+    # Initialize Scheduler (centralized)
     # -------------------------------------------------------
     from utils.scheduler import init_scheduler
     init_scheduler(app)
@@ -118,12 +108,39 @@ def create_app():
     # -------------------------------------------------------
     # Flask-Login Setup
     # -------------------------------------------------------
+    from models import User  # ensure this imports your user model
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
+    login_manager.login_message_category = "info"
+
+    # Standard user loader (for session cookies)
+    @login_manager.user_loader
+    def load_user(user_id):
+        try:
+            return User.query.get(int(user_id))
+        except Exception as e:
+            app.logger.warning(f"⚠️ user_loader failed for user_id {user_id}: {e}")
+            return None
+
+    # Optional API token loader (for Authorization Bearer)
+    @login_manager.request_loader
+    def load_user_from_request(req: request):
+        token = req.headers.get("Authorization")
+        if token and token.startswith("Bearer "):
+            from models import UserToken  # optional model if using API tokens
+            token_str = token[7:]
+            try:
+                user_token = UserToken.verify_token(token_str)
+                if user_token:
+                    app.logger.info(f"✅ Authenticated API user via token {token_str[:6]}...")
+                    return user_token.user
+            except Exception as e:
+                app.logger.warning(f"⚠️ Token validation failed: {e}")
+        return None
 
     # -------------------------------------------------------
-    # Sentry (optional)
+    # Sentry Integration (optional)
     # -------------------------------------------------------
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
@@ -159,17 +176,10 @@ def create_app():
         from blueprints.scholarships.routes import scholarships_bp
         from blueprints.mentors.routes import mentors_bp
         from blueprints.alumni.routes import alumni_bp
+        from blueprints.analytics.routes import analytics_bp
         from blueprints.donor.routes import donor_bp
         from blueprints.emails.routes import emails_bp
         from blueprints.notifications.routes import notifications_bp
-
-        # Safe Analytics Import
-        try:
-            from blueprints.analytics.routes import analytics_bp
-        except Exception as e:
-            from flask import Blueprint
-            analytics_bp = Blueprint("analytics_bp", __name__, url_prefix="/analytics")
-            app.logger.warning(f"⚠️ Using STUB blueprint for analytics_bp: {e}")
 
         blueprints = [
             core_bp, auth_bp, careers_bp, departments_bp,
@@ -185,7 +195,7 @@ def create_app():
                 app.logger.warning(f"⚠️ Failed to register blueprint {bp.name}: {e}")
 
     # -------------------------------------------------------
-    # OpenAI Verification
+    # OpenAI API Verification
     # -------------------------------------------------------
     if os.getenv("OPENAI_API_KEY"):
         try:
@@ -219,7 +229,7 @@ def create_app():
 
 
 # -----------------------------------------------------------
-# Entrypoint for Render (Gunicorn)
+# Entrypoint for Gunicorn / Render
 # -----------------------------------------------------------
 app = create_app()
 
