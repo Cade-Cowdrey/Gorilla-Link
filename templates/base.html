@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}PittState-Connect{% endblock %}</title>
 
-  <!-- PSU Brand Theme -->
+  <!-- PSU Identity -->
   <link rel="icon" href="{{ PSU_BRAND.favicon }}" />
   <meta name="theme-color" content="#990000" />
-  <meta name="description" content="PittState-Connect — the official PSU platform connecting students, alumni, employers, and departments." />
+  <meta name="description" content="PittState-Connect — the official Pittsburg State University platform connecting students, alumni, employers, and departments." />
 
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -21,7 +21,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
+    function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
   </script>
@@ -29,10 +29,10 @@
   {% block head %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column min-vh-100 bg-light text-dark">
+<body class="d-flex flex-column min-vh-100">
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top navbar-psu">
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg shadow-sm sticky-top navbar-psu">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold text-light" href="{{ url_for('core_bp.index') }}">
         <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="32" class="me-2 align-text-top" />
@@ -47,19 +47,19 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link text-white">Home</a></li>
-          <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link text-white">Departments</a></li>
-          <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link text-white">Careers</a></li>
-          <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link text-white">Scholarships</a></li>
-          <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link text-white">Analytics</a></li>
-          <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link text-white">Alumni</a></li>
-          <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link text-white">Donors</a></li>
-          <li class="nav-item"><a href="{{ url_for('announcements_bp.index') }}" class="nav-link text-white">News</a></li>
+          <li class="nav-item"><a href="{{ url_for('core_bp.index') }}" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="{{ url_for('departments_bp.index') }}" class="nav-link">Departments</a></li>
+          <li class="nav-item"><a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a></li>
+          <li class="nav-item"><a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a></li>
+          <li class="nav-item"><a href="{{ url_for('analytics_bp.index') }}" class="nav-link">Analytics</a></li>
+          <li class="nav-item"><a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni</a></li>
+          <li class="nav-item"><a href="{{ url_for('donor_bp.index') }}" class="nav-link">Donors</a></li>
+          <li class="nav-item"><a href="{{ url_for('announcements_bp.index') }}" class="nav-link">News</a></li>
 
-          <!-- Dark/Light Mode Toggle -->
+          <!-- Theme Toggle -->
           <li class="nav-item ms-2">
-            <button class="btn btn-outline-light btn-sm px-3" data-toggle-theme>
-              <i class="bi bi-moon-stars"></i>
+            <button class="btn btn-outline-light btn-sm px-3" data-toggle-theme aria-label="Toggle theme">
+              <i class="bi bi-sun-fill"></i>
             </button>
           </li>
 
@@ -80,13 +80,13 @@
     </div>
   </nav>
 
-  <!-- Content -->
+  <!-- CONTENT -->
   <main class="flex-grow-1 container py-4">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
-  <footer class="py-4 text-center mt-auto" style="background:#212529; color:#fff;">
+  <!-- FOOTER -->
+  <footer class="psu-footer mt-auto text-center py-4">
     <p class="mb-0 small">
       &copy; {{ now().year }} <strong>Pittsburg State University</strong> · PittState-Connect<br />
       <span class="text-warning">{{ PSU_BRAND.tagline }}</span>
@@ -99,7 +99,7 @@
     </div>
   </footer>
 
-  <!-- AI Helper Panel -->
+  <!-- AI Helper -->
   <div id="ai-helper-panel"></div>
   <script src="{{ url_for('static', filename='js/ai-client.js') }}"></script>
   <script src="{{ url_for('static', filename='js/ai-helper-panel.js') }}"></script>
@@ -107,19 +107,17 @@
   <!-- Bootstrap Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- PSU Theme / Dark Mode -->
-  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <!-- Smart Auto Theme -->
+  <script src="{{ url_for('static', filename='js/theme-auto.js') }}"></script>
 
-  <!-- SocketIO (optional live updates) -->
+  <!-- SocketIO (optional analytics live feed) -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const socket = io("/ws");
-    socket.on("analytics:update", (data) => {
-      console.log("[Live Analytics]", data);
-    });
+    socket.on("analytics:update", data => console.log("[Live Analytics]", data));
   </script>
 
-  <!-- Scroll to top button -->
+  <!-- Scroll to Top -->
   <script>
     const scrollBtn = document.createElement("button");
     scrollBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
@@ -129,10 +127,10 @@
     window.addEventListener("scroll", () => {
       scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
     });
-    scrollBtn.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+    scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
   </script>
 
-  <!-- Smooth scroll + active nav highlight -->
+  <!-- Smooth Scroll + Active Nav Highlight -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const path = window.location.pathname;
@@ -140,9 +138,9 @@
         if (link.getAttribute("href") === path) link.classList.add("fw-bold", "text-warning");
       });
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function(e) {
+        anchor.addEventListener("click", e => {
           e.preventDefault();
-          document.querySelector(this.getAttribute("href"))?.scrollIntoView({ behavior: "smooth" });
+          document.querySelector(anchor.getAttribute("href"))?.scrollIntoView({ behavior: "smooth" });
         });
       });
     });
