@@ -1,252 +1,147 @@
-# ================================================================
-#  PittState-Connect | Advanced Flask Application Factory
-#  PSU-branded · Secure · AI-Ready · Analytics-Driven · Production-Optimized
-# ================================================================
-
 import os
 import logging
-from datetime import timedelta
-from importlib import import_module
-from flask import Flask, render_template, request
-
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
-from flask_mail import Mail
-from flask_session import Session
-from flask_compress import Compress
+from datetime import datetime
+from flask import Flask, jsonify, render_template, request, g
 from flask_cors import CORS
-from flask_talisman import Talisman
-from flask_caching import Cache
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from apscheduler.schedulers.background import BackgroundScheduler
-from loguru import logger
-
-# --- Config helpers ---
+from redis import Redis
+from openai import OpenAI
 from config import select_config, attach_nonce, boot_sentry
 
-# ------------------------------------------------
-#  Global Flask extensions
-# ------------------------------------------------
+# ------------------------------------------------------
+# App-level globals
+# ------------------------------------------------------
 db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
 mail = Mail()
-sess = Session()
-compress = Compress()
-scheduler = BackgroundScheduler()
-cache = Cache()
+login_manager = LoginManager()
+scheduler = BackgroundScheduler(timezone="UTC")
+
+redis_client = None
+openai_client = None
 
 
-# ------------------------------------------------
-#  App Factory
-# ------------------------------------------------
+# ------------------------------------------------------
+# Factory pattern
+# ------------------------------------------------------
 def create_app():
     app = Flask(__name__)
+    config_class = select_config()
+    app.config.from_object(config_class)
 
-    # ------------------------------------------------
-    #  Load environment config
-    # ------------------------------------------------
-    app_config = select_config()
-    app.config.from_object(app_config)
-    logger.info(f"Loaded config: {app_config.__name__}")
-
-    # ------------------------------------------------
-    #  Security middleware (Talisman + CSP nonce)
-    # ------------------------------------------------
-    csp = app_config.TALISMAN_CONTENT_SECURITY_POLICY
-    Talisman(
-        app,
-        content_security_policy=csp,
-        force_https=True,
-        session_cookie_secure=True,
-        content_security_policy_nonce_in=["script-src"],
-    )
-    app.after_request(attach_nonce)
-
-    # ------------------------------------------------
-    #  Initialize extensions
-    # ------------------------------------------------
+    # Core extensions
+    CORS(app)
     db.init_app(app)
-    migrate.init_app(app, db)
     mail.init_app(app)
-    sess.init_app(app)
-    compress.init_app(app)
-    cache.init_app(app, config={"CACHE_TYPE": app.config.get("CACHE_TYPE", "SimpleCache")})
-    CORS(app, resources={r"/*": {"origins": app.config.get("CORS_ORIGINS", "*")}})
-
-    # ------------------------------------------------
-    #  Logging configuration (case-safe fix)
-    # ------------------------------------------------
-    log_level = app.config.get("LOG_LEVEL", "INFO")
-    if isinstance(log_level, str):
-        log_level = log_level.upper()
-    logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
-    logger.info("Logging configured successfully.")
-
-    # ------------------------------------------------
-    #  Scheduler
-    # ------------------------------------------------
-    if app.config.get("SCHEDULER_API_ENABLED", True):
-        scheduler.start()
-        logger.info("Background scheduler started.")
-
-    # ------------------------------------------------
-    #  Flask-Login setup
-    # ------------------------------------------------
     login_manager.init_app(app)
-    login_manager.login_view = "auth.login"
 
-    from models import User
+    # Logging setup
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-8s | %(message)s")
+    app.logger.info(f"Loaded config: {config_class.__name__}")
+    app.logger.info("Logging configured successfully.")
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        try:
-            return User.query.get(int(user_id))
-        except Exception as e:
-            logger.error(f"User load failed: {e}")
-            return None
+    # Sentry initialization
+    boot_sentry(app)
 
-    # ------------------------------------------------
-    #  Auto-register blueprints
-    # ------------------------------------------------
+    # Security nonce
+    @app.before_request
+    def add_nonce():
+        attach_nonce(app)
+
+    # Redis + OpenAI
+    global redis_client, openai_client
+    try:
+        redis_client = Redis.from_url(app.config.get("REDIS_URL"))
+        app.logger.info("✅ Redis connected successfully.")
+    except Exception as e:
+        app.logger.warning(f"⚠️ Redis unavailable: {e}")
+
+    try:
+        openai_client = OpenAI(api_key=app.config.get("OPENAI_API_KEY"))
+        app.logger.info("✅ OpenAI API connected successfully.")
+    except Exception as e:
+        app.logger.warning(f"⚠️ OpenAI unavailable: {e}")
+
+    # ------------------------------------------------------
+    # Blueprints registration (auto)
+    # ------------------------------------------------------
+    from blueprints import (
+        core_bp, auth_bp, analytics_bp, careers_bp, alumni_bp, departments_bp,
+        emails_bp, campus_bp, badges_bp, admin_bp, api_bp,
+        donor_bp, scholarships_bp, mentors_bp, notifications_bp
+    )
+
     blueprints = [
-        "core",
-        "auth",
-        "analytics",
-        "careers",
-        "alumni",
-        "departments",
-        "emails",
-        "campus",
-        "badges",
-        "admin",
-        "api",  # ✅ new API layer
-        "donor",
-        "scholarships",
-        "mentors",
-        "notifications",
+        core_bp, auth_bp, analytics_bp, careers_bp, alumni_bp,
+        departments_bp, emails_bp, campus_bp, badges_bp, admin_bp,
+        api_bp, donor_bp, scholarships_bp, mentors_bp, notifications_bp
     ]
-
     for bp in blueprints:
-        try:
-            mod = import_module(f"blueprints.{bp}.routes")
-            bp_obj = getattr(mod, f"{bp}_bp", None)
-            if bp_obj:
-                app.register_blueprint(bp_obj)
-                logger.info(f"✅ Registered blueprint: {bp}")
-            else:
-                logger.warning(f"⚠️ No blueprint object found in {bp}")
-        except Exception as e:
-            logger.error(f"❌ Failed to register {bp}: {e}")
+        app.register_blueprint(bp)
+        app.logger.info(f"✅ Registered blueprint: {bp.name}")
 
-    # ------------------------------------------------
-    #  AI Integration (OpenAI)
-    # ------------------------------------------------
-    openai_key = app.config.get("OPENAI_API_KEY")
-    if openai_key:
-        try:
-            import openai
-            openai.api_key = openai_key
-            logger.info("OpenAI API connected successfully.")
-        except Exception as e:
-            logger.warning(f"OpenAI setup skipped: {e}")
-
-    # ------------------------------------------------
-    #  Redis integration
-    # ------------------------------------------------
-    redis_url = app.config.get("REDIS_URL")
-    if redis_url:
-        try:
-            import redis
-            app.redis_client = redis.from_url(redis_url)
-            logger.info("✅ Redis connected successfully.")
-        except Exception as e:
-            logger.warning(f"Redis unavailable: {e}")
-            app.redis_client = None
-    else:
-        app.redis_client = None
-
-    # ------------------------------------------------
-    #  PSU Branding (Jinja context)
-    # ------------------------------------------------
+    # ------------------------------------------------------
+    # Context processors (global template vars)
+    # ------------------------------------------------------
     @app.context_processor
     def inject_globals():
-        brand = app.config.get("PSU_BRAND", {}) or {
-            "crimson": "#A6192E",
-            "gold": "#FFB81C",
-            "gray": "#5A5A5A",
-            "white": "#FFFFFF",
-            "black": "#000000",
-            "accent": "#D7A22A",
-            "gradient": "linear-gradient(90deg, #A6192E 0%, #FFB81C 100%)",
-            "tagline": "PittState-Connect — Linking Gorillas for Life",
-            "favicon": "/static/images/psu_logo.png",
-        }
-        return {
-            "PSU_BRAND": brand,
-            "APP_VERSION": "2.0-Final",
-            "APP_ENV": app.config.get("FLASK_ENV", "production").capitalize(),
-        }
+        return dict(
+            PSU_BRAND={
+                "favicon": "/static/img/psu_logo.png",
+                "gradient": "linear-gradient(90deg, #990000, #FFC72C)",
+                "tagline": "Once a Gorilla, Always a Gorilla."
+            },
+            GOOGLE_ANALYTICS_ID=app.config.get("GOOGLE_ANALYTICS_ID", "G-XXXXXXX"),
+            now=datetime.utcnow
+        )
 
-    # ------------------------------------------------
-    #  Analytics auto-update job
-    # ------------------------------------------------
-    def collect_usage_metrics():
-        """Example scheduled analytics aggregation job."""
-        try:
-            from models import User
-            total = db.session.query(User).count()
-            cache.set("analytics:total_users", total, timeout=3600)
-            logger.info(f"[Scheduler] Cached total users: {total}")
-        except Exception as e:
-            logger.warning(f"[Scheduler] Analytics job failed: {e}")
-
-    scheduler.add_job(collect_usage_metrics, "interval", hours=1, id="analytics_job", replace_existing=True)
-
-    # ------------------------------------------------
-    #  Health & system routes
-    # ------------------------------------------------
-    @app.route("/health")
-    def health():
-        return {
-            "status": "ok",
-            "redis": bool(app.redis_client),
-            "ai_enabled": bool(openai_key),
-            "env": app.config.get("FLASK_ENV"),
-            "version": "2.0-Final",
-        }, 200
-
-    @app.route("/")
-    def index():
-        logger.info(f"Visitor from {request.remote_addr}")
-        return render_template("core/home.html")
-
-    # ------------------------------------------------
-    #  Error handlers
-    # ------------------------------------------------
+    # ------------------------------------------------------
+    # Error handlers
+    # ------------------------------------------------------
     @app.errorhandler(404)
     def not_found(e):
+        app.logger.warning(f"404 Error: {request.path}")
         return render_template("errors/404.html"), 404
 
     @app.errorhandler(500)
     def server_error(e):
-        db.session.rollback()
+        app.logger.error(f"500 Error: {e}")
         return render_template("errors/500.html"), 500
 
-    # ------------------------------------------------
-    #  Boot sentry & finalize
-    # ------------------------------------------------
-    boot_sentry(app)
-    app.permanent_session_lifetime = timedelta(hours=8)
+    # ------------------------------------------------------
+    # Background jobs (with safe context)
+    # ------------------------------------------------------
+    from utils.analytics_util import run_usage_analytics
+
+    def collect_usage_metrics():
+        """Safely collect app analytics inside proper context."""
+        with app.app_context():
+            try:
+                data = run_usage_analytics(db)
+                app.logger.info(f"[Scheduler] Analytics updated: {data}")
+            except Exception as e:
+                app.logger.warning(f"[Scheduler] Analytics job failed: {e}")
+
+    # Start scheduler
+    scheduler.add_job(func=collect_usage_metrics, trigger="interval", hours=1)
+    scheduler.start()
+    app.logger.info("Background scheduler started.")
+
+    # ------------------------------------------------------
+    # Health endpoint
+    # ------------------------------------------------------
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok", "timestamp": datetime.utcnow().isoformat()})
 
     return app
 
 
-# ------------------------------------------------
-#  Gunicorn entry point
-# ------------------------------------------------
-app = create_app()
-
+# ------------------------------------------------------
+# Run directly
+# ------------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app = create_app()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
