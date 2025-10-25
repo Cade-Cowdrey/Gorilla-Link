@@ -2,212 +2,39 @@
 {% block title %}About PittState-Connect{% endblock %}
 
 {% block content %}
-<!-- =========================================================
-     PSU-Branded About Page
-     Highlights mission, user roles, and system features
-     Optional Enhancements: Animated counters, fade-in scroll,
-     PSU crimson-gold gradient, responsive hero.
-     ========================================================= -->
-<section class="relative overflow-hidden bg-gradient-to-r from-crimson-700 via-crimson-600 to-gold-500 text-white py-5 shadow-lg">
-  <div class="container text-center py-5">
-    <h1 class="display-5 fw-bold mb-3 text-shadow-lg">How PittState-Connect Works</h1>
-    <p class="lead mb-0">A unified digital ecosystem built for <span class="fw-bold text-gold">students</span>, <span class="fw-bold text-gold">alumni</span>, and <span class="fw-bold text-gold">employers</span> to connect, grow, and thrive.</p>
-  </div>
-</section>
-
-<!-- Mission Section -->
-<section class="py-5 bg-light">
-  <div class="container text-center">
-    <h2 class="fw-bold mb-4 text-crimson">Our Mission</h2>
-    <p class="lead text-muted col-lg-10 mx-auto">
-      PittState-Connect bridges academic excellence, career readiness, and alumni engagement through one seamless platform. By merging
-      <span class="fw-semibold text-gold">AI-driven tools</span>, <span class="fw-semibold text-gold">department analytics</span>, and <span class="fw-semibold text-gold">human mentorship</span>,
-      it transforms the way Gorillas connect — from admission to alumni.
+<section class="py-5 bg-gradient position-relative overflow-hidden">
+  <div class="container text-center text-light">
+    <h1 class="fw-bold display-5 animate-fade-up">About PittState-Connect</h1>
+    <p class="lead animate-fade-up delay-1">
+      Empowering Gorillas through innovation, connection, and opportunity.
     </p>
   </div>
 </section>
 
-<!-- Stats Section (Optional Enhancement: animated counters) -->
-<section class="py-5 text-center bg-white border-top border-bottom">
-  <div class="container">
-    <div class="row gy-4">
-      <div class="col-6 col-md-3">
-        <h2 class="text-crimson fw-bold counter" data-target="6400">0</h2>
-        <p class="text-muted">Active Students</p>
-      </div>
-      <div class="col-6 col-md-3">
-        <h2 class="text-gold fw-bold counter" data-target="12500">0</h2>
-        <p class="text-muted">Connected Alumni</p>
-      </div>
-      <div class="col-6 col-md-3">
-        <h2 class="text-crimson fw-bold counter" data-target="480">0</h2>
-        <p class="text-muted">Scholarships Listed</p>
-      </div>
-      <div class="col-6 col-md-3">
-        <h2 class="text-gold fw-bold counter" data-target="320">0</h2>
-        <p class="text-muted">Partner Employers</p>
-      </div>
+<section class="container py-5">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-6">
+      <img src="/static/img/psu-campus.jpg" class="img-fluid rounded-3 shadow-sm" alt="Pittsburg State Campus">
+    </div>
+    <div class="col-lg-6">
+      <h3 class="fw-bold text-danger mb-3">Our Mission</h3>
+      <p class="text-muted">{{ mission }}</p>
+      <h4 class="fw-semibold mt-4 text-warning">Our Core Values</h4>
+      <ul class="list-unstyled small">
+        {% for v in values %}
+          <li><i class="bi bi-check-circle text-danger me-2"></i>{{ v }}</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('core_bp.home') }}" class="btn btn-outline-danger mt-3">Back to Home</a>
     </div>
   </div>
 </section>
 
-<!-- Sections by User Type -->
-<section class="py-5 bg-light">
-  <div class="container">
-    <h2 class="text-center fw-bold mb-5 text-crimson">What You Can Do</h2>
-
-    <div class="row g-4">
-      <!-- Students -->
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 fade-in">
-          <div class="card-body text-center">
-            <div class="icon-circle bg-crimson text-white mb-3">
-              <i class="fa-solid fa-user-graduate fa-2x"></i>
-            </div>
-            <h5 class="fw-bold text-crimson mb-3">For Students</h5>
-            <ul class="list-unstyled small text-muted text-start">
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Get AI-powered scholarship recommendations.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Track career progress via analytics dashboards.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Connect with alumni mentors and recruiters.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Alumni -->
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 fade-in" style="animation-delay: 0.2s;">
-          <div class="card-body text-center">
-            <div class="icon-circle bg-gold text-crimson mb-3">
-              <i class="fa-solid fa-handshake-angle fa-2x"></i>
-            </div>
-            <h5 class="fw-bold text-crimson mb-3">For Alumni</h5>
-            <ul class="list-unstyled small text-muted text-start">
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Mentor current students through guided programs.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Share success stories on the Gorilla Scholars board.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Contribute to scholarship funds or department causes.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Employers -->
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0 fade-in" style="animation-delay: 0.4s;">
-          <div class="card-body text-center">
-            <div class="icon-circle bg-crimson text-white mb-3">
-              <i class="fa-solid fa-briefcase fa-2x"></i>
-            </div>
-            <h5 class="fw-bold text-crimson mb-3">For Employers</h5>
-            <ul class="list-unstyled small text-muted text-start">
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Post jobs and internships with PSU-verified access.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Gain analytics on applicant engagement.</li>
-              <li><i class="fa-solid fa-check text-gold me-2"></i> Sponsor scholarships to attract top PSU talent.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+<section class="py-5 bg-light border-top">
+  <div class="container text-center">
+    <h3 class="fw-bold text-danger mb-3">Join the Journey</h3>
+    <p class="text-muted">Together we elevate education, career success, and community growth at Pittsburg State University.</p>
+    <a href="{{ url_for('auth_bp.register') }}" class="btn btn-danger px-4 py-2 shadow-sm">Create Your Account</a>
   </div>
 </section>
-
-<!-- Feature Highlights Section -->
-<section class="py-5 text-center bg-white">
-  <div class="container">
-    <h2 class="fw-bold text-crimson mb-4">Core Platform Features</h2>
-    <div class="row g-4">
-      <div class="col-md-3 col-6">
-        <div class="feature-box">
-          <i class="fa-solid fa-bell fa-2x text-gold mb-2"></i>
-          <p class="small text-muted">Auto reminders for scholarships & events.</p>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="feature-box">
-          <i class="fa-solid fa-chart-line fa-2x text-crimson mb-2"></i>
-          <p class="small text-muted">Student analytics & career insights.</p>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="feature-box">
-          <i class="fa-solid fa-robot fa-2x text-gold mb-2"></i>
-          <p class="small text-muted">AI Essay helper & SmartMatch system.</p>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="feature-box">
-          <i class="fa-solid fa-database fa-2x text-crimson mb-2"></i>
-          <p class="small text-muted">Secure PSU cloud data storage.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA Section -->
-<section class="py-5 bg-gradient-to-r from-gold-500 to-crimson-700 text-white text-center shadow-lg">
-  <div class="container">
-    <h2 class="fw-bold mb-3">Join the Gorilla Network</h2>
-    <p class="lead mb-4">Empower your PSU journey with smarter tools for scholarships, mentorships, and career growth.</p>
-    <a href="{{ url_for('auth_bp.register') }}" class="btn btn-light btn-lg fw-bold text-crimson">Get Started Now</a>
-  </div>
-</section>
-
-<!-- Optional Enhancement: Counter & Animation Scripts -->
-<script>
-  // Animated counter effect
-  document.addEventListener("DOMContentLoaded", () => {
-    const counters = document.querySelectorAll(".counter");
-    counters.forEach(counter => {
-      const updateCount = () => {
-        const target = +counter.getAttribute("data-target");
-        const count = +counter.innerText;
-        const increment = target / 100;
-        if (count < target) {
-          counter.innerText = Math.ceil(count + increment);
-          setTimeout(updateCount, 20);
-        } else {
-          counter.innerText = target.toLocaleString();
-        }
-      };
-      updateCount();
-    });
-  });
-
-  // Fade-in animation on scroll
-  const fadeElements = document.querySelectorAll('.fade-in');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('fade-in-visible');
-      }
-    });
-  }, { threshold: 0.2 });
-  fadeElements.forEach(el => observer.observe(el));
-</script>
-
-<style>
-  .text-gold { color: #f5c518; }
-  .bg-crimson { background-color: #a6192e; }
-  .bg-gold { background-color: #f5c518; }
-  .icon-circle {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
-  .fade-in-visible { opacity: 1; transform: translateY(0); }
-  .feature-box {
-    padding: 15px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-  }
-  .feature-box:hover {
-    transform: translateY(-5px);
-    background-color: rgba(166, 25, 46, 0.05);
-  }
-</style>
 {% endblock %}
