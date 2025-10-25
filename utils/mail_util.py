@@ -1,90 +1,138 @@
-from flask_mail import Message
-from flask import render_template, current_app
-from datetime import datetime
-from openai import OpenAI
-from app_pro import mail, db
-from utils.analytics_util import run_usage_analytics
-from utils.report_pdf import build_monthly_report_pdf
+# utils/mail_util.py
+# ---------------------------------------------------------------------
+# Production-ready mail utility for PittState-Connect
+# - Supports HTML + plaintext emails
+# - send_system_alert for admins
+# - PSU-branded templates and logging
+# - Graceful fallbacks if mail server unavailable
+# ---------------------------------------------------------------------
+
 import os
+import logging
+from flask_mail import Message
+from flask import current_app, render_template
+from smtplib import SMTPException
+from datetime import datetime
 
-# --- Weekly Analytics Digest -------------------------------------------------
-def send_weekly_analytics_digest(recipient_email, recipient_name="Administrator"):
-    """Send PSU-branded weekly analytics + AI insight email digest."""
+# ---------------------------------------------------------------------
+# Flask-Mail object is initialized in app_pro.py and imported via extensions
+# ---------------------------------------------------------------------
+from extensions import mail
+
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | mail_util | %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+# ---------------------------------------------------------------------
+# Configurable admin addresses
+# ---------------------------------------------------------------------
+ADMIN_EMAILS = [
+    os.getenv("ADMIN_EMAIL", "psuconnect-admin@pittstate.edu"),
+]
+SYSTEM_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@pittstateconnect.com")
+
+# ---------------------------------------------------------------------
+# PSU-branded footer (used for HTML)
+# ---------------------------------------------------------------------
+PSU_FOOTER_HTML = """
+<br><br>
+<hr style='border:0;border-top:1px solid #ddd;margin-top:20px;margin-bottom:10px;'>
+<p style='font-size:12px;color:#888;'>
+  <strong>PittState-Connect</strong><br>
+  Empowering Gorillas — Connecting Students, Alumni, and Employers.<br>
+  &copy; {year} Pittsburg State University. All rights reserved.
+</p>
+"""
+
+# ---------------------------------------------------------------------
+# Core send function
+# ---------------------------------------------------------------------
+def send_html_email(subject, recipients, html_body, text_body=None, sender=None, cc=None, bcc=None):
+    """
+    Send an email with both HTML and plaintext bodies.
+    Automatically logs success/failure and returns True/False.
+    """
+    sender = sender or SYSTEM_SENDER
+    text_body = text_body or strip_html_tags(html_body)
+
     try:
-        data = run_usage_analytics(db)
-        users = data.get("users", 0)
-        posts = data.get("posts", 0)
-        departments = data.get("departments", 0)
-        scholarships = data.get("scholarships", 0)
-
-        ai_text = "Data insights unavailable."
-        api_key = os.getenv("OPENAI_API_KEY")
-        if api_key:
-            client = OpenAI(api_key=api_key)
-            prompt = (
-                f"Analyze PSU PittState-Connect weekly data: {users} users, {posts} posts, "
-                f"{departments} departments, {scholarships} scholarships. "
-                "Provide a 1-sentence, upbeat summary suitable for an analytics email."
-            )
-            completion = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "system", "content": "You are a PSU analytics assistant."},
-                          {"role": "user", "content": prompt}],
-                max_tokens=80
-            )
-            ai_text = completion.choices[0].message.content.strip()
-
-        html_body = render_template(
-            "emails/analytics_weekly_digest.html",
-            recipient_name=recipient_name,
-            generated_at=datetime.utcnow().strftime("%B %d, %Y"),
-            users=users, posts=posts,
-            departments=departments, scholarships=scholarships,
-            ai_insight=ai_text
-        )
-        text_body = render_template(
-            "emails/analytics_weekly_digest.txt",
-            recipient_name=recipient_name,
-            generated_at=datetime.utcnow().strftime("%B %d, %Y"),
-            users=users, posts=posts,
-            departments=departments, scholarships=scholarships,
-            ai_insight=ai_text
-        )
-
         msg = Message(
-            subject="📊 PittState-Connect Weekly Analytics Digest",
-            recipients=[recipient_email],
-            html=html_body, body=text_body,
-            sender=("PittState-Connect", "noreply@pittstate.edu")
+            subject=subject,
+            sender=sender,
+            recipients=recipients,
+            cc=cc,
+            bcc=bcc,
+            body=text_body,
+            html=html_body + PSU_FOOTER_HTML.format(year=datetime.now().year),
         )
         mail.send(msg)
-        current_app.logger.info(f"Weekly digest sent to {recipient_email}")
+        logger.info(f"✅ Email sent to {recipients} | Subject: {subject}")
         return True
+    except SMTPException as e:
+        logger.error(f"❌ SMTPException sending email '{subject}': {e}")
+        return False
     except Exception as e:
-        current_app.logger.error(f"Weekly digest failed: {e}")
+        logger.exception(f"❌ Unknown error sending email '{subject}': {e}")
         return False
 
 
-# --- Monthly Report PDF Sender ----------------------------------------------
-def send_monthly_report_pdf(recipient_emails, month, year, department_id=None):
-    """Generate & email monthly PDF report."""
+# ---------------------------------------------------------------------
+# Utility: strip HTML for plaintext fallback
+# ---------------------------------------------------------------------
+def strip_html_tags(html_text):
+    """Rudimentary HTML tag stripper for plaintext bodies."""
+    import re
+    clean = re.compile("<.*?>")
+    return re.sub(clean, "", html_text)
+
+
+# ---------------------------------------------------------------------
+# System alert: used by utils.ai_util or any critical failure
+# ---------------------------------------------------------------------
+def send_system_alert(title: str, message: str):
+    """
+    Send a critical system alert to admin(s).
+    Called automatically by API / AI / Scheduler when errors occur.
+    """
+    subject = f"🚨 PSU-Connect Alert: {title}"
+    html = f"""
+    <h3 style='color:#b71c1c;'>System Alert</h3>
+    <p><strong>Event:</strong> {title}</p>
+    <p><strong>Message:</strong><br>{message}</p>
+    <p><strong>Time (UTC):</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    """
+
+    logger.warning(f"⚠️ Sending system alert: {title}")
+    ok = send_html_email(subject, ADMIN_EMAILS, html)
+
+    if not ok:
+        logger.error("❌ System alert failed to send (mail server unavailable).")
+    return ok
+
+
+# ---------------------------------------------------------------------
+# Optional enhancement: user notifications (email + in-app)
+# ---------------------------------------------------------------------
+def send_user_notification(user, subject: str, message: str, html_template: str = None, **kwargs):
+    """
+    Sends PSU-branded notification to a user.
+    If html_template is provided, renders from /templates/emails/.
+    """
     try:
-        filename, pdf_bytes, meta = build_monthly_report_pdf(db, month, year, department_id)
-        subject = f"📄 PSU Monthly Analytics — {meta['period_label']}"
-        body = (
-            f"Attached is the PittState-Connect monthly analytics report for {meta['period_label']}.\n\n"
-            "— PittState-Connect"
-        )
-        msg = Message(
-            subject=subject,
-            recipients=recipient_emails,
-            body=body,
-            sender=("PittState-Connect", "noreply@pittstate.edu")
-        )
-        msg.attach(filename, "application/pdf", pdf_bytes)
-        mail.send(msg)
-        current_app.logger.info(f"[MAIL] Monthly PDF sent to {recipient_emails} ({filename})")
+        if html_template:
+            html_body = render_template(html_template, user=user, message=message, **kwargs)
+        else:
+            html_body = f"<p>{message}</p>"
+
+        recipients = [user.email]
+        send_html_email(subject, recipients, html_body)
+        logger.info(f"📧 User notification sent to {user.email}")
         return True
+
     except Exception as e:
-        current_app.logger.error(f"[MAIL] Monthly PDF send failed: {e}")
+        logger.error(f"❌ Failed to send user notification to {getattr(user, 'email', 'unknown')}: {e}")
         return False
