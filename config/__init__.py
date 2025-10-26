@@ -1,122 +1,211 @@
-# ============================================================
-#  config/__init__.py — PittState-Connect Configuration
-# ============================================================
+# config/__init__.py
+# ---------------------------------------------------------------------
+# PittState-Connect Configuration Suite (Production Ready)
+# ---------------------------------------------------------------------
+# Provides:
+#  - Environment-aware configuration classes (Development, Testing, Production)
+#  - Secure defaults for Flask, SQLAlchemy, Mail, Redis, and CORS
+#  - Integrated Sentry monitoring (optional, auto-disabled if DSN missing)
+#  - PSU branding metadata and UI constants
+#  - Optional OpenAI / analytics / task scheduler support
+#  - Render-safe and local-friendly auto-detection
+# ---------------------------------------------------------------------
 
 import os
-from dotenv import load_dotenv
-from sentry_sdk.integrations.flask import FlaskIntegration
-import sentry_sdk
-import redis
+import logging
+from datetime import timedelta
 
-# Load environment variables
-load_dotenv()
+# Optional: Sentry error monitoring
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+    SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+    if SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[FlaskIntegration(), RedisIntegration(), SqlalchemyIntegration()],
+            traces_sample_rate=1.0,
+            send_default_pii=True,
+            environment=os.getenv("FLASK_ENV", "production").capitalize(),
+        )
+        logging.info("✅ Sentry monitoring initialized")
+    else:
+        logging.info("⚠️ Sentry DSN not provided — monitoring disabled")
+except ImportError:
+    logging.warning("⚠️ Sentry SDK not installed — skipping Sentry integration")
+except Exception as e:
+    logging.warning(f"⚠️ Sentry initialization error: {e}")
 
 
-# ------------------------------------------------------------
-#  Base Config
-# ------------------------------------------------------------
-class BaseConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///app.db")
+# ---------------------------------------------------------------------
+# Core Configuration Base
+# ---------------------------------------------------------------------
+class Config:
+    """Base configuration for all environments."""
+
+    # General
+    APP_NAME = "PittState-Connect"
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
+    FLASK_ENV = os.getenv("FLASK_ENV", "production")
+    DEBUG = False
+    TESTING = False
+
+    # Security
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_DURATION = timedelta(days=14)
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
+
+    # Database
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///pittstate_connect.db"
+    ).replace("postgres://", "postgresql://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
-    SESSION_TYPE = os.getenv("SESSION_TYPE", "redis")
-    SESSION_PERMANENT = False
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = "psu_sess:"
+    # Redis / Cache
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-    # Caching
-    CACHE_TYPE = os.getenv("CACHE_TYPE", "SimpleCache")
 
     # Mail
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
     MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() in ("true", "1", "yes")
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "apikey")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.edu")
+    MAIL_SUPPRESS_SEND = False
 
-    # Logging
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    # Scheduler / Jobs
+    SCHEDULER_API_ENABLED = True
+    JOBS_REFRESH_INTERVAL = 60  # seconds
 
-    # OpenAI / AI Features
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    # OpenAI / Smart Assistant
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    AI_ASSISTANT_ENABLED = bool(OPENAI_API_KEY)
 
-    # Security
-    TALISMAN_CONTENT_SECURITY_POLICY = {
-        "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com"],
-        "img-src": ["'self'", "data:", "https://*"],
-        "connect-src": ["'self'", "https://api.openai.com"],
+    # Analytics & Telemetry
+    ENABLE_ANALYTICS = True
+    ANALYTICS_STORAGE_BACKEND = os.getenv("ANALYTICS_BACKEND", "redis")
+    ANALYTICS_CACHE_TTL = 300  # seconds
+
+    # PSU Branding
+    PSU_PRIMARY_COLOR = "#DAAA00"  # PSU Gold
+    PSU_SECONDARY_COLOR = "#861F41"  # PSU Crimson
+    PSU_TAGLINE = "PittState-Connect: Linking Students, Alumni, and Opportunity."
+    PSU_LOGO_PATH = "/static/img/psu_logo.svg"
+
+    # Rate Limiting (via Flask-Limiter)
+    RATELIMIT_DEFAULT = "100 per minute"
+    RATELIMIT_STORAGE_URL = REDIS_URL
+
+    # Security Headers
+    CSP = {
+        "default-src": "'self'",
+        "script-src": ["'self'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
+        "style-src": ["'self'", "fonts.googleapis.com", "cdn.jsdelivr.net"],
+        "font-src": ["'self'", "fonts.gstatic.com"],
+        "img-src": ["'self'", "data:", "cdn.pittstateconnect.edu"],
+        "connect-src": ["'self'", "api.openai.com"],
     }
 
-    SCHEDULER_API_ENABLED = True
-    PERMANENT_SESSION_LIFETIME = 60 * 60 * 8  # 8 hours
+    # Logging
+    LOG_LEVEL = logging.INFO
+    LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+
+    # Audit / Retention
+    AUDIT_RETENTION_DAYS = int(os.getenv("AUDIT_RETENTION_DAYS", 30))
+
+    # Feature Flags
+    ENABLE_SCHOLARSHIP_HUB = True
+    ENABLE_JOB_MATCHING = True
+    ENABLE_DONOR_PORTAL = True
+    ENABLE_DEPARTMENT_ANALYTICS = True
+    ENABLE_AI_RECOMMENDER = True
+    ENABLE_PEER_MENTORS = True
 
 
-# ------------------------------------------------------------
-#  Environment-specific configs
-# ------------------------------------------------------------
-class DevConfig(BaseConfig):
+# ---------------------------------------------------------------------
+# Environment-specific Configs
+# ---------------------------------------------------------------------
+
+class DevelopmentConfig(Config):
+    """Local Development Settings"""
     DEBUG = True
-    FLASK_ENV = "development"
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL", "sqlite:///pittstate_connect_dev.db"
+    )
+    SESSION_COOKIE_SECURE = False
+    MAIL_SUPPRESS_SEND = True
+    RATELIMIT_ENABLED = False
+    ENABLE_ANALYTICS = True
+    ENV_NAME = "development"
 
 
-class ProdConfig(BaseConfig):
+class TestingConfig(Config):
+    """CI / Unit Testing Settings"""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    MAIL_SUPPRESS_SEND = True
+    RATELIMIT_ENABLED = False
+    ENABLE_ANALYTICS = False
+    ENV_NAME = "testing"
+
+
+class ProductionConfig(Config):
+    """Production Settings"""
     DEBUG = False
-    FLASK_ENV = "production"
+    TESTING = False
+    RATELIMIT_ENABLED = True
+    SESSION_COOKIE_SECURE = True
+    ENV_NAME = "production"
+
+    # Optimize SQLAlchemy
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_size": 10,
+        "max_overflow": 15,
+        "pool_timeout": 30,
+        "pool_pre_ping": True,
+    }
+
+    # Enforce HTTPS
+    PREFERRED_URL_SCHEME = "https"
+
+    # Background job scheduler frequency
+    JOBS_REFRESH_INTERVAL = 300
+
+    # Error reporting
+    ERROR_REPORTING_ENABLED = True
 
 
-# ------------------------------------------------------------
-#  Helper Functions
-# ------------------------------------------------------------
-def select_config():
-    env = os.getenv("FLASK_ENV", "production")
-    print(f"[config] Selecting configuration for environment: {env}")
-    if env == "development":
-        return DevConfig
-    return ProdConfig
+# ---------------------------------------------------------------------
+# Utility: resolve active config class
+# ---------------------------------------------------------------------
+
+def get_config_class() -> str:
+    """Return the full import path of the active config class."""
+    env = os.getenv("FLASK_ENV", "production").lower()
+    if env in ("dev", "development"):
+        return "config.DevelopmentConfig"
+    elif env in ("test", "testing"):
+        return "config.TestingConfig"
+    else:
+        return "config.ProductionConfig"
 
 
-def attach_nonce(response):
-    """Attach a CSP nonce to support inline scripts in templates."""
-    nonce = os.urandom(16).hex()
-    response.headers["Content-Security-Policy"] = (
-        response.headers.get("Content-Security-Policy", "")
-        + f" 'nonce-{nonce}'"
+# ---------------------------------------------------------------------
+# Optional: Global logging config (executed early in app factory)
+# ---------------------------------------------------------------------
+def setup_logging():
+    """Apply unified log formatting across the app."""
+    logging.basicConfig(
+        level=Config.LOG_LEVEL,
+        format=Config.LOG_FORMAT,
     )
-    return response
-
-
-def boot_sentry(app):
-    """Initialize Sentry error tracking (if DSN provided)."""
-    dsn = os.getenv("SENTRY_DSN")
-    if not dsn:
-        print("[config] No Sentry DSN found — skipping error tracking.")
-        return
-    sentry_sdk.init(
-        dsn=dsn,
-        integrations=[FlaskIntegration()],
-        traces_sample_rate=1.0,
-        send_default_pii=True,
-        environment=app.config.get("FLASK_ENV"),
-    )
-    print("[config] Sentry initialized successfully.")
-
-
-# ------------------------------------------------------------
-#  Redis Session Helper
-# ------------------------------------------------------------
-def bind_redis_session(app):
-    """Bind a real Redis client to Flask-Session to prevent 'str.setex' errors."""
-    if app.config.get("SESSION_TYPE") == "redis":
-        redis_url = app.config.get("REDIS_URL")
-        try:
-            redis_client = redis.from_url(redis_url)
-            app.config["SESSION_REDIS"] = redis_client
-            print(f"[config] Redis session bound → {redis_url}")
-        except Exception as e:
-            print(f"[config] Failed to bind Redis session: {e}")
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+    logging.info("✅ PSU Config logging initialized successfully")
