@@ -1,201 +1,464 @@
-# =============================================================
-# FILE: worker.py
-# PittState-Connect — Advanced Background Task Worker
-# -------------------------------------------------------------
-# Handles background jobs for:
-#   - AI essay scoring (Smart Match / Essay Helper)
-#   - Scholarship reminders
-#   - Donor sync + analytics refresh
-#   - Mentor digest summaries
-#   - Financial dashboards
-# Optional: integrates with Sentry, Prometheus, and retry logic.
-# =============================================================
+#!/usr/bin/env python3
+"""
+PittState-Connect Background Worker
+- Mail queue processor (Redis)
+- OpenAI/AI task runner (Redis)
+- Cache warmers (departments, scholarships, careers)
+- Heartbeat + metrics (Redis)
+- Graceful shutdown on SIGINT/SIGTERM
+- Structured logging via loguru, colorized in dev
+"""
 
 import os
-import logging
+import sys
 import time
-import random
-from datetime import datetime
-from threading import Thread
-from queue import Queue, Empty
-from typing import Callable, Any, Tuple, Dict
+import json
+import signal
+import argparse
+from datetime import datetime, timezone, timedelta
+from contextlib import contextmanager
 
-from app_pro import create_app
-from utils.mail_util import send_email  # Ensure this exists
-from models import db
+from loguru import logger
 
-# -------------------------------------------------------------
-# Optional integrations (safe imports)
-# -------------------------------------------------------------
+# --- Flask app & extensions ---------------------------------------------------
 try:
-    import openai
-except ImportError:
-    openai = None
+    # Prefer app factory if you have one; fallback to `app` object.
+    # from app_pro import create_app
+    # app = create_app()
+    from app_pro import app  # existing pattern in your project
+except Exception as e:
+    print(f"[worker] FATAL: could not import app_pro.app: {e}", file=sys.stderr)
+    raise
 
+# Extensions live behind your central `extensions.py`
 try:
-    import sentry_sdk
-    from sentry_sdk.integrations.flask import FlaskIntegration
-    SENTRY_ENABLED = True
-except ImportError:
-    SENTRY_ENABLED = False
+    from extensions import db, cache, mail, scheduler  # login_manager not needed here
+except Exception as e:
+    logger.warning("extensions import failed (db/cache/mail/scheduler may be None): {}", e)
+    db = cache = mail = scheduler = None  # continue with fallbacks
 
-# -------------------------------------------------------------
-# CONFIGURATION & INITIALIZATION
-# -------------------------------------------------------------
-app = create_app()
-app.app_context().push()
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-log = logging.getLogger("pittstate-worker")
-
-# Optional: Sentry setup for error monitoring
-SENTRY_DSN = os.getenv("SENTRY_DSN")
-if SENTRY_ENABLED and SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[FlaskIntegration()],
-        traces_sample_rate=0.1,
-        environment=os.getenv("FLASK_ENV", "production"),
-    )
-    log.info("🧩 Sentry monitoring enabled.")
-else:
-    log.info("Sentry disabled (missing DSN or library).")
-
-# Optional: configure OpenAI
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AI_ENABLED = False
-if openai and OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
-    AI_ENABLED = True
-    log.info("🧠 AI features enabled (OpenAI API key found).")
-else:
-    log.warning("🧠 AI helper disabled (no OPENAI_API_KEY or library missing).")
-
-# In-memory task queue (can later swap with Redis, Celery, or RQ)
-task_queue: "Queue[Tuple[str, Tuple[Any, ...], Dict[str, Any]]]" = Queue()
-
-
-# -------------------------------------------------------------
-# TASK DEFINITIONS
-# -------------------------------------------------------------
-def ai_scholarship_scorer(user_id: int, essay_text: str):
-    """Analyze scholarship essay using OpenAI."""
-    if not AI_ENABLED:
-        log.warning("AI scoring skipped — OpenAI not configured.")
-        return None
-
-    prompt = f"""
-    Score this scholarship essay (0–100) with strengths and weaknesses.
-    Return your response in this format:
-    Score: <number>
-    Strengths: ...
-    Weaknesses: ...
-    Essay:
-    {essay_text}
-    """
+# --- Third-party clients ------------------------------------------------------
+# Redis (for queues, heartbeats, metrics)
+REDIS_URL = os.getenv("REDIS_URL") or os.getenv("REDIS_TLS_URL")
+redis_client = None
+if REDIS_URL:
     try:
-        result = openai.ChatCompletion.create(
-            model=os.getenv("AI_MODEL", "gpt-4o-mini"),
-            messages=[{"role": "user", "content": prompt.strip()}],
-            temperature=float(os.getenv("AI_TEMPERATURE", 0.4)),
-            max_tokens=int(os.getenv("AI_MAX_TOKENS", 1200)),
+        import redis
+        redis_client = redis.from_url(REDIS_URL, decode_responses=True, retry_on_timeout=True)
+    except Exception as e:
+        logger.error("Failed to initialize Redis client: {}", e)
+
+# SendGrid (primary) + Flask-Mail (fallback)
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
+sendgrid_client = None
+if SENDGRID_API_KEY:
+    try:
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail as SGMail, From, To, Subject, HtmlContent
+        sendgrid_client = SendGridAPIClient(SENDGRID_API_KEY)
+    except Exception as e:
+        logger.error("Failed to initialize SendGrid client: {}", e)
+        sendgrid_client = None
+
+# OpenAI (optional AI helper)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+openai = None
+if OPENAI_API_KEY:
+    try:
+        from openai import OpenAI
+        openai = OpenAI(api_key=OPENAI_API_KEY)
+    except Exception as e:
+        logger.error("Failed to initialize OpenAI client: {}", e)
+        openai = None
+
+# --- Queues & Keys ------------------------------------------------------------
+MAIL_QUEUE_KEY = os.getenv("MAIL_QUEUE_KEY", "queue:mail")
+AI_QUEUE_KEY = os.getenv("AI_QUEUE_KEY", "queue:ai")
+HEARTBEAT_KEY = os.getenv("WORKER_HEARTBEAT_KEY", "worker:heartbeat")
+METRICS_KEY = os.getenv("WORKER_METRICS_KEY", "worker:metrics")
+
+# --- Logging config -----------------------------------------------------------
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logger.remove()
+logger.add(sys.stdout, level=LOG_LEVEL, backtrace=False, diagnose=False, enqueue=True)
+
+# --- Control flags ------------------------------------------------------------
+RUNNING = True
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    v = os.getenv(name)
+    if v is None:
+        return default
+    return str(v).lower() in {"1", "true", "yes", "on"}
+
+
+def _in_app_context():
+    """Ensure we always have an application context around work units."""
+    if app is None:
+        raise RuntimeError("Flask app not available")
+    return app.app_context()
+
+
+@contextmanager
+def app_context():
+    with _in_app_context():
+        yield
+
+
+# --- Heartbeat & Metrics ------------------------------------------------------
+def heartbeat():
+    if not redis_client:
+        return
+    try:
+        redis_client.hset(
+            HEARTBEAT_KEY,
+            mapping={
+                "ts": _utc_now().isoformat(),
+                "pid": os.getpid(),
+                "queues": json.dumps({"mail": MAIL_QUEUE_KEY, "ai": AI_QUEUE_KEY}),
+                "log_level": LOG_LEVEL,
+                "ver": "1.0.0",
+            },
         )
-        response = result["choices"][0]["message"]["content"]
-        log.info("✅ AI essay scored successfully for user %s", user_id)
-        return response
+        redis_client.expire(HEARTBEAT_KEY, 180)  # 3 minutes TTL
     except Exception as e:
-        log.exception("❌ AI scoring failed for user %s: %s", user_id, e)
-        return None
+        logger.warning("Heartbeat failed: {}", e)
 
 
-def send_scholarship_reminder(user_email: str, scholarship_name: str, deadline: str):
-    """Send reminder emails for upcoming deadlines."""
-    subject = f"Reminder: {scholarship_name} deadline approaching"
-    body = (
-        f"Don't forget to submit your application for '{scholarship_name}' by {deadline}!\n\n"
-        f"Visit your PittState-Connect dashboard to apply now."
-    )
+def incr_metric(name: str, by: int = 1):
+    if not redis_client:
+        return
     try:
-        send_email(subject, [user_email], body)
-        log.info("📧 Reminder sent to %s for '%s'", user_email, scholarship_name)
+        redis_client.hincrby(METRICS_KEY, name, by)
+        redis_client.expire(METRICS_KEY, 86400)  # 1 day
     except Exception as e:
-        log.error("❌ Reminder send failed for %s: %s", user_email, e)
+        logger.debug("Metric {} update failed: {}", name, e)
 
 
-def sync_donor_analytics():
-    """Simulate donor analytics data refresh."""
-    log.info("🔁 Syncing donor analytics...")
-    time.sleep(random.uniform(2, 4))
-    log.info("✅ Donor analytics sync complete.")
+# --- Email sending ------------------------------------------------------------
+def send_email_via_sendgrid(to_email: str, subject: str, html: str, sender: str) -> bool:
+    if not sendgrid_client:
+        return False
+    try:
+        msg = SGMail(from_email=From(sender), to_emails=To(to_email),
+                     subject=Subject(subject), html_content=HtmlContent(html))
+        resp = sendgrid_client.send(msg)
+        ok = 200 <= int(resp.status_code) < 300
+        if not ok:
+            logger.warning("SendGrid non-2xx: {}", resp.status_code)
+        return ok
+    except Exception as e:
+        logger.error("SendGrid send failed: {}", e)
+        return False
 
 
-def generate_weekly_mentor_digest():
-    """Email mentors with engagement summaries."""
-    log.info("📬 Generating mentor digest...")
-    time.sleep(random.uniform(1, 3))
-    log.info("✅ Mentor digest dispatched.")
+def send_email_via_flask_mail(to_email: str, subject: str, html: str, sender: str) -> bool:
+    if not mail:
+        return False
+    try:
+        from flask_mail import Message
+        with app_context():
+            msg = Message(subject=subject, recipients=[to_email], html=html, sender=sender)
+            mail.send(msg)
+            return True
+    except Exception as e:
+        logger.error("Flask-Mail send failed: {}", e)
+        return False
 
 
-def refresh_financial_aid_dashboard():
-    """Refresh cost-to-completion and funding progress metrics."""
-    log.info("📊 Refreshing financial aid dashboard...")
-    time.sleep(random.uniform(1.5, 3))
-    log.info("✅ Financial dashboards refreshed successfully.")
+def process_mail_payload(payload: dict) -> None:
+    """payload: {to, subject, html, sender?}"""
+    to_email = payload.get("to")
+    subject = payload.get("subject") or "PittState Connect"
+    html = payload.get("html") or "<p>Hello from PittState Connect</p>"
+    sender = payload.get("sender") or os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
+
+    if not to_email:
+        logger.warning("mail payload missing 'to': {}", payload)
+        return
+
+    # Try SendGrid first
+    if sendgrid_client:
+        if send_email_via_sendgrid(to_email, subject, html, sender):
+            incr_metric("mail.sent")
+            logger.info("Sent email via SendGrid -> {}", to_email)
+            return
+
+    # Fallback to Flask-Mail
+    if send_email_via_flask_mail(to_email, subject, html, sender):
+        incr_metric("mail.sent")
+        logger.info("Sent email via Flask-Mail -> {}", to_email)
+        return
+
+    incr_metric("mail.failed")
+    logger.error("All email transports failed -> {}", to_email)
 
 
-# -------------------------------------------------------------
-# TASK REGISTRY
-# -------------------------------------------------------------
-TASK_MAP: Dict[str, Callable[..., Any]] = {
-    "ai_scholarship_scorer": ai_scholarship_scorer,
-    "send_scholarship_reminder": send_scholarship_reminder,
-    "sync_donor_analytics": sync_donor_analytics,
-    "generate_weekly_mentor_digest": generate_weekly_mentor_digest,
-    "refresh_financial_aid_dashboard": refresh_financial_aid_dashboard,
-}
+# --- AI tasks ----------------------------------------------------------------
+def process_ai_payload(payload: dict) -> None:
+    """
+    payload example:
+    {
+      "type": "essay_feedback",
+      "student_id": 123,
+      "text": "my essay...",
+      "model": "gpt-4o-mini"
+    }
+    or:
+    {
+      "type": "smart_match_train",
+      "dataset": "s3://.../training.csv"
+    }
+    """
+    if not openai:
+        logger.warning("AI payload received but OPENAI_API_KEY not configured")
+        return
 
+    task_type = payload.get("type")
+    model = payload.get("model", "gpt-4o-mini")
 
-# -------------------------------------------------------------
-# WORKER LOOP (RESILIENT)
-# -------------------------------------------------------------
-def worker_loop():
-    """Main task consumer loop."""
-    log.info("🚀 Worker online — awaiting jobs...")
-    while True:
+    if task_type == "essay_feedback":
+        text = payload.get("text", "")
+        if not text.strip():
+            logger.warning("AI essay_feedback missing text")
+            return
         try:
-            task_name, args, kwargs = task_queue.get(timeout=5)
-            func = TASK_MAP.get(task_name)
-            if not func:
-                log.warning("Unknown task: %s", task_name)
+            # Lightweight completion-style API
+            rsp = openai.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "You are a helpful scholarship essay mentor."},
+                    {"role": "user", "content": f"Give concise, constructive feedback:\n\n{text}"},
+                ],
+                temperature=0.2,
+            )
+            feedback = rsp.choices[0].message.content.strip()
+            logger.info("AI feedback generated (len={}): {}", len(feedback), feedback[:140] + "…")
+            incr_metric("ai.essay_feedback")
+            # TODO: persist feedback to DB or send email back to student
+        except Exception as e:
+            incr_metric("ai.failed")
+            logger.error("AI essay feedback failed: {}", e)
+
+    elif task_type == "smart_match_train":
+        # Placeholder: orchestrate training job or call fine-tuned embeddings
+        try:
+            # Example no-op with a log
+            logger.info("Smart-match training kicked off with payload: {}", payload)
+            incr_metric("ai.smart_match_train")
+        except Exception as e:
+            incr_metric("ai.failed")
+            logger.error("AI smart-match training failed: {}", e)
+
+    else:
+        logger.warning("Unknown AI task type: {}", task_type)
+
+
+# --- Cache warmers ------------------------------------------------------------
+def warm_cache_departments():
+    try:
+        from blueprints.departments.routes import get_departments  # your helper if available
+    except Exception:
+        get_departments = None
+
+    try:
+        with app_context():
+            if cache and get_departments:
+                _ = get_departments()
+                incr_metric("cache.departments.warm")
+                logger.info("Departments cache warmed")
+    except Exception as e:
+        logger.debug("Departments cache warm skipped: {}", e)
+
+
+def warm_cache_scholarships():
+    try:
+        from blueprints.scholarships.routes import fetch_scholarships  # if you exposed it
+    except Exception:
+        fetch_scholarships = None
+
+    try:
+        with app_context():
+            if cache and fetch_scholarships:
+                _ = fetch_scholarships(limit=25)
+                incr_metric("cache.scholarships.warm")
+                logger.info("Scholarships cache warmed")
+    except Exception as e:
+        logger.debug("Scholarships cache warm skipped: {}", e)
+
+
+def warm_cache_careers():
+    try:
+        from blueprints.careers.routes import fetch_jobs  # if you exposed it
+    except Exception:
+        fetch_jobs = None
+
+    try:
+        with app_context():
+            if cache and fetch_jobs:
+                _ = fetch_jobs(limit=25)
+                incr_metric("cache.careers.warm")
+                logger.info("Careers cache warmed")
+    except Exception as e:
+        logger.debug("Careers cache warm skipped: {}", e)
+
+
+def run_cache_warmers():
+    warm_cache_departments()
+    warm_cache_scholarships()
+    warm_cache_careers()
+
+
+# --- Queue loops --------------------------------------------------------------
+def brpop_loop(queue_key: str, handler, stop_flag, label: str):
+    """Generic BRPOP loop with heartbeat + exponential backoff on connection errors."""
+    backoff = 1
+    max_backoff = 30
+
+    logger.info("Starting {} loop on Redis key: {}", label, queue_key)
+    while stop_flag() and RUNNING:
+        heartbeat()
+        if not redis_client:
+            logger.warning("Redis unavailable; sleeping {}s", backoff)
+            time.sleep(backoff)
+            backoff = min(max_backoff, backoff * 2)
+            continue
+
+        try:
+            # BRPOP returns (key, value) or None on timeout
+            item = redis_client.brpop(queue_key, timeout=5)
+            if item is None:
+                # Idle tick
+                backoff = 1
                 continue
 
-            log.info("▶️ Executing task: %s", task_name)
-            func(*args, **kwargs)
-        except Empty:
-            continue
+            _, raw = item
+            try:
+                data = json.loads(raw)
+            except Exception:
+                data = {"raw": raw}
+
+            with app_context():
+                handler(data)
+
+            backoff = 1
+
         except Exception as e:
-            log.exception("Task execution error: %s", e)
-        finally:
-            time.sleep(0.5)  # prevent CPU spike
+            logger.error("{} loop error: {}", label, e)
+            time.sleep(backoff)
+            backoff = min(max_backoff, backoff * 2)
+
+    logger.info("{} loop exiting", label)
 
 
-# -------------------------------------------------------------
-# ENTRYPOINT (RESTART-SAFE)
-# -------------------------------------------------------------
-if __name__ == "__main__":
-    log.info("💡 PittState-Connect Worker Booting (%s)", datetime.utcnow())
-    thread = Thread(target=worker_loop, daemon=True)
-    thread.start()
+def mail_loop(stop_flag):
+    return brpop_loop(MAIL_QUEUE_KEY, process_mail_payload, stop_flag, "MAIL")
 
-    # Keep-alive loop for Render / Docker runtime
+
+def ai_loop(stop_flag):
+    return brpop_loop(AI_QUEUE_KEY, process_ai_payload, stop_flag, "AI")
+
+
+# --- Signal handling ----------------------------------------------------------
+def _install_signal_handlers():
+    def _graceful(signum, frame):
+        global RUNNING
+        logger.warning("Signal {} received; shutting down gracefully…", signum)
+        RUNNING = False
+
+    signal.signal(signal.SIGINT, _graceful)
+    signal.signal(signal.SIGTERM, _graceful)
+
+
+# --- CLI ----------------------------------------------------------------------
+def parse_args():
+    p = argparse.ArgumentParser(description="PittState-Connect background worker")
+    p.add_argument("--with-mail", action="store_true", help="Enable mail queue processor")
+    p.add_argument("--with-ai", action="store_true", help="Enable AI queue processor")
+    p.add_argument("--with-cache", action="store_true", help="Run cache warmers on boot and every 30m")
+    p.add_argument("--once", action="store_true", help="Process one item per enabled queue then exit")
+    p.add_argument("--idle-exit-seconds", type=int, default=0, help="Exit if idle for N seconds (0=never)")
+    return p.parse_args()
+
+
+def main():
+    _install_signal_handlers()
+    args = parse_args()
+
+    logger.info("Worker starting with flags: mail={}, ai={}, cache={}, once={}, idle_exit={}",
+                args.with_mail, args.with_ai, args.with_cache, args.once, args.idle_exit_seconds)
+
+    # Optional cache warmers at boot
+    if args.with_cache:
+        run_cache_warmers()
+
+    last_activity = time.time()
+
+    def stop_flag():
+        if not RUNNING:
+            return False
+        if args.idle_exit_seconds > 0 and (time.time() - last_activity) > args.idle_exit_seconds:
+            logger.info("Idle exit after {}s with no work", args.idle_exit_seconds)
+            return False
+        return True
+
+    # ONE-SHOT mode (for cron-like usage on Render)
+    if args.once:
+        if args.with_mail and redis_client:
+            item = redis_client.rpop(MAIL_QUEUE_KEY)
+            if item:
+                last_activity = time.time()
+                process_mail_payload(json.loads(item))
+        if args.with_ai and redis_client:
+            item = redis_client.rpop(AI_QUEUE_KEY)
+            if item:
+                last_activity = time.time()
+                process_ai_payload(json.loads(item))
+        if args.with_cache:
+            run_cache_warmers()
+        logger.info("One-shot mode complete")
+        return 0
+
+    # CONTINUOUS mode
+    # Simple single-threaded multiplexing to keep the file minimal; add threads if desired.
     try:
-        while True:
-            time.sleep(10)
-    except KeyboardInterrupt:
-        log.info("🛑 Worker shutdown requested (%s)", datetime.utcnow())
+        while stop_flag():
+            did_work = False
+
+            if args.with_mail and redis_client:
+                item = redis_client.rpop(MAIL_QUEUE_KEY)
+                if item:
+                    did_work = True
+                    last_activity = time.time()
+                    process_mail_payload(json.loads(item))
+
+            if args.with_ai and redis_client:
+                item = redis_client.rpop(AI_QUEUE_KEY)
+                if item:
+                    did_work = True
+                    last_activity = time.time()
+                    process_ai_payload(json.loads(item))
+
+            if args.with_cache and int(time.time()) % (30 * 60) == 0:  # every ~30 minutes
+                run_cache_warmers()
+
+            heartbeat()
+
+            if not did_work:
+                time.sleep(1)
+
     except Exception as e:
-        log.exception("Unexpected worker crash: %s", e)
+        logger.exception("Worker crashed unexpectedly: {}", e)
+        return 1
+
+    logger.info("Worker stopped")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
