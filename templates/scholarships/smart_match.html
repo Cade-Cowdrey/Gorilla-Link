@@ -1,26 +1,86 @@
-<!-- =========================================================
-FILE: src/templates/scholarships/smart_match.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Smart-Match · PittState-Connect{% endblock %}
+{% block title %}Smart Match | PittState-Connect{% endblock %}
 {% block content %}
-<section class="section max-w-5xl mx-auto px-6 fade-in">
-  <h1 class="text-3xl font-bold mb-4">Smart-Match Scholarships</h1>
-  <p class="text-gray mb-6">
-    These results are generated using a placeholder scoring algorithm. Once your AI API key is linked, this page will use live Smart Match data.
-  </p>
-
-  <div class="space-y-4">
-    {% for m in matches %}
-    <div class="card p-5 hover:shadow-lg transition">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-semibold">{{ m.title }}</h3>
-        <span class="text-sm font-semibold text-gold">Score: {{ m.match_score }}%</span>
+<section class="bg-white min-h-screen py-10 px-4 sm:px-8 lg:px-16">
+  <div class="container mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+      <div class="max-w-xl">
+        <h1 class="text-4xl font-bold text-crimson mb-3">🤖 Smart Match Recommender</h1>
+        <p class="text-gray-700 mb-6">
+          Using your <strong>major</strong>, <strong>GPA</strong>, and <strong>interests</strong>, our Smart Match engine finds the best scholarships for you.  
+          Improve your results by completing your profile and letting the AI assist with essay suggestions.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="{{ safe_url_for('scholarships_bp.browse') }}"
+             class="btn btn-crimson text-white px-6 py-2 rounded-full hover:bg-gold hover:text-crimson transition">
+            🎓 Browse All Scholarships
+          </a>
+          <a href="{{ safe_url_for('scholarships_bp.my_scholarships') }}"
+             class="btn btn-outline-gold border-2 border-gold text-gold px-6 py-2 rounded-full hover:bg-gold hover:text-white transition">
+            📚 My Scholarships
+          </a>
+        </div>
       </div>
-      <p class="text-gray text-sm mt-1">Tags: {{ m.tags|join(', ') }}</p>
-      <button class="btn btn-crimson mt-3">Apply Now</button>
+      <div class="mt-8 md:mt-0">
+        <img src="{{ url_for('static', filename='img/smart-match-banner.png') }}"
+             alt="Smart Match Banner"
+             class="rounded-2xl shadow-lg w-full md:w-96 object-cover">
+      </div>
     </div>
-    {% endfor %}
+
+    <hr class="border-t-2 border-gray-200 my-10" />
+
+    <h2 class="text-2xl font-semibold text-crimson mb-6">✨ Your Top Matches</h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for rec in recs %}
+      <div class="bg-light rounded-2xl shadow-lg p-6 hover:shadow-xl transition group">
+        <div class="flex justify-between items-start">
+          <h3 class="text-xl font-semibold text-crimson group-hover:text-gold transition">
+            {{ rec.name }}
+          </h3>
+          <span class="text-gold font-bold text-lg">${{ rec.amount }}</span>
+        </div>
+        <p class="text-gray-600 text-sm mt-2">
+          Deadline: <span class="font-medium text-gray-800">{{ rec.deadline }}</span>
+        </p>
+        <div class="mt-4 flex justify-between items-center">
+          <a href="{{ safe_url_for('scholarships_bp.apply', scholarship_id=rec.id) }}"
+             class="text-sm text-crimson hover:text-gold font-medium transition">
+             Apply Now →
+          </a>
+          <a href="{{ safe_url_for('scholarships_bp.save_scholarship', scholarship_id=rec.id) }}"
+             class="text-sm text-gray-600 hover:text-gold transition">💾 Save</a>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-gray-600 col-span-full">No personalized recommendations yet. Try updating your profile or GPA.</p>
+      {% endfor %}
+    </div>
+
+    <div class="mt-16 bg-gradient-to-r from-gold to-crimson text-white rounded-2xl p-8 shadow-lg">
+      <h2 class="text-2xl font-bold mb-3">📈 Scholarship Success Tracker</h2>
+      <p class="text-white/90 mb-4">
+        Track your progress and see how Smart Match improves your chances over time.
+      </p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm font-medium">
+        <div class="bg-white/10 p-3 rounded-xl">📝 Profile Complete</div>
+        <div class="bg-white/10 p-3 rounded-xl">🔍 Matches Found</div>
+        <div class="bg-white/10 p-3 rounded-xl">✍️ Essays Submitted</div>
+        <div class="bg-white/10 p-3 rounded-xl">🎉 Awards Won</div>
+      </div>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="{{ safe_url_for('scholarships_bp.essay_library') }}"
+         class="btn btn-outline-crimson border-2 border-crimson text-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+         ✍️ Visit Essay Library
+      </a>
+      <a href="{{ safe_url_for('analytics_bp.index') }}"
+         class="btn btn-outline-gold border-2 border-gold text-gold px-6 py-2 rounded-full ml-3 hover:bg-gold hover:text-white transition">
+         📊 View Analytics
+      </a>
+    </div>
   </div>
 </section>
 {% endblock %}
