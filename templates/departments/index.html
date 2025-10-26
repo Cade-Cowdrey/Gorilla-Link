@@ -1,37 +1,36 @@
-<!-- =========================================================
-FILE: src/templates/departments/index.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Departments · PittState-Connect{% endblock %}
+{% block title %}Departments | PittState-Connect{% endblock %}
 {% block content %}
-<section class="section max-w-7xl mx-auto px-6 fade-in">
-  <h1 class="text-4xl font-bold mb-8">Departments</h1>
-  <p class="text-gray mb-10">
-    Explore departmental insights, faculty mentors, and scholarship opportunities.
-  </p>
+<section class="bg-gray-50 min-h-screen py-10 px-4 sm:px-8 lg:px-16">
+  <div class="container mx-auto">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-crimson mb-3">🏫 Academic Departments</h1>
+      <p class="text-gray-700 max-w-2xl mx-auto">
+        Explore Pitt State’s academic programs, faculty, and student communities.
+        Each department includes scholarship stats, career analytics, and upcoming events.
+      </p>
+    </div>
 
-  <div class="grid md:grid-cols-3 gap-6">
-    <div class="card p-6 hover:shadow-lg transition">
-      <h3 class="text-xl font-semibold mb-2">College of Technology</h3>
-      <p class="text-gray mb-3">Industry partnerships, project-based learning, and innovation.</p>
-      <a href="{{ url_for('analytics_bp.dashboard') }}" class="text-crimson hover:text-gold text-sm">View Analytics →</a>
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {% for dept in departments %}
+      <div class="bg-white rounded-2xl shadow hover:shadow-xl p-6 transition group">
+        <h2 class="text-xl font-semibold text-crimson group-hover:text-gold transition">
+          {{ dept.name }}
+        </h2>
+        <p class="text-gray-600 text-sm mt-2">{{ dept.description or 'No description available.' }}</p>
+        <div class="flex justify-between items-center mt-4">
+          <a href="{{ safe_url_for('departments_bp.detail', dept_id=dept.id) }}"
+             class="text-crimson hover:text-gold text-sm font-medium transition">
+             Explore →
+          </a>
+          <a href="{{ safe_url_for('analytics_bp.index') }}"
+             class="text-gold text-sm hover:underline">📊 Analytics</a>
+        </div>
+      </div>
+      {% else %}
+      <p class="col-span-full text-gray-600 text-center">No departments found.</p>
+      {% endfor %}
     </div>
-    <div class="card p-6 hover:shadow-lg transition">
-      <h3 class="text-xl font-semibold mb-2">Kelce College of Business</h3>
-      <p class="text-gray mb-3">Entrepreneurship, accounting, and marketing excellence.</p>
-      <a href="{{ url_for('careers_bp.dashboard') }}" class="text-crimson hover:text-gold text-sm">Career Outcomes →</a>
-    </div>
-    <div class="card p-6 hover:shadow-lg transition">
-      <h3 class="text-xl font-semibold mb-2">College of Education</h3>
-      <p class="text-gray mb-3">Preparing tomorrow’s teachers and leaders.</p>
-      <a href="{{ url_for('mentors_bp.hub') }}" class="text-crimson hover:text-gold text-sm">Mentor Connections →</a>
-    </div>
-  </div>
-
-  <div class="mt-12 card p-6 bg-gray-50 dark:bg-gray-800">
-    <h3 class="text-2xl font-semibold mb-2">Departmental Scholarship Opportunities</h3>
-    <p class="text-gray text-sm mb-3">Search scholarships by department for focused funding.</p>
-    <a href="{{ url_for('scholarships_bp.index') }}" class="btn btn-gold">Open Scholarship Hub</a>
   </div>
 </section>
 {% endblock %}
