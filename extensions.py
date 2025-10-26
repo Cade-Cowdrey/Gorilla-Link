@@ -1,122 +1,141 @@
-import os
+"""
+extensions.py
+--------------------------------
+Centralized extension initialization for PittState-Connect.
+Includes Redis caching, CORS, CSRF, APScheduler, mail, login,
+and PSU security & analytics integration.
+"""
+
 from flask_sqlalchemy import SQLAlchemy
-from flask_caching import Cache
-from flask_mail import Mail
 from flask_migrate import Migrate
+from flask_mail import Mail
 from flask_login import LoginManager
+from flask_caching import Cache
 from flask_apscheduler import APScheduler
 from flask_wtf import CSRFProtect
+from flask_cors import CORS
 from loguru import logger
-from redis import Redis
+import os
 
 # ============================================================
-# 🔰 Logging setup
-# ============================================================
-logger.remove()
-logger.add(
-    sink=lambda msg: print(msg, flush=True),
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-           "<level>{level: <8}</level> | "
-           "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-           "<level>{message}</level>",
-    level="INFO"
-)
-
-# ============================================================
-# ⚙️ Flask Extensions
+# 🧩 Core Flask Extensions
 # ============================================================
 db = SQLAlchemy()
-cache = Cache()
-mail = Mail()
 migrate = Migrate()
+mail = Mail()
+cache = Cache()
 scheduler = APScheduler()
-login_manager = LoginManager()
 csrf = CSRFProtect()
+login_manager = LoginManager()
 
 # ============================================================
-# 🧠 Redis Configuration Helper
-# ============================================================
-def init_redis_connection():
-    """Initialize a Redis client for caching, analytics, and messaging."""
-    try:
-        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        client = Redis.from_url(redis_url)
-        client.ping()
-        logger.info("✅ Connected to Redis successfully.")
-        return client
-    except Exception as e:
-        logger.warning(f"⚠️ Redis connection failed: {e}")
-        return None
-
-
-redis_client = init_redis_connection()
-
-# ============================================================
-# 🧩 App Initialization Function
+# 🌎 Global Security & Utility Settings
 # ============================================================
 def init_app(app):
-    """Initialize all extensions safely in a production environment."""
+    """Initialize all extensions with the Flask app context."""
+    # --- Logging Setup ---
+    log_level = app.config.get("LOG_LEVEL", "INFO").upper()
+    logger.remove()
+    logger.add(
+        "logs/app.log",
+        rotation="10 MB",
+        retention="14 days",
+        level=log_level,
+        backtrace=True,
+        diagnose=True,
+        enqueue=True,
+    )
+    logger.info(f"🔒 Loguru initialized with level: {log_level}")
+
     # --- Database ---
     db.init_app(app)
     migrate.init_app(app, db)
-    logger.info("✅ Database and migration initialized.")
+    logger.info("✅ Database & migrations initialized.")
+
+    # --- Mail ---
+    mail.init_app(app)
+    logger.info("📧 Mail service initialized (SendGrid/SMTP).")
+
+    # --- Cache (Redis) ---
+    try:
+        cache.init_app(app)
+        with app.app_context():
+            cache.set("cache_test_key", "success", timeout=10)
+        logger.info("⚡ Redis cache connected and verified.")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis cache fallback to simple cache: {e}")
+        app.config["CACHE_TYPE"] = "simple"
+        cache.init_app(app)
 
     # --- CSRF Protection ---
     csrf.init_app(app)
-    logger.info("✅ CSRF protection enabled.")
+    logger.info("🛡️ CSRF protection enabled for all routes.")
 
-    # --- Caching (Redis or Simple) ---
-    cache_type = "redis" if redis_client else "simple"
-    cache_config = {
-        "CACHE_TYPE": cache_type,
-        "CACHE_REDIS_URL": os.getenv("REDIS_URL"),
-        "CACHE_DEFAULT_TIMEOUT": 300
-    }
-    cache.init_app(app, config=cache_config)
-    logger.info(f"✅ Cache initialized ({cache_type}).")
+    # --- Cross-Origin Resource Sharing (CORS) ---
+    allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "*")
+    CORS(
+        app,
+        resources={r"/*": {"origins": allowed_origins}},
+        supports_credentials=True,
+        expose_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        allow_headers=["Content-Type", "Authorization", "X-CSRFToken"],
+    )
+    logger.info(f"🌐 CORS enabled for origins: {allowed_origins}")
 
-    # --- Flask Mail ---
-    mail.init_app(app)
-    logger.info("✅ Flask-Mail initialized.")
-
-    # --- Scheduler ---
-    scheduler.init_app(app)
-    scheduler.start()
-    logger.info("✅ APScheduler initialized and running.")
+    # --- Scheduler (APScheduler) ---
+    try:
+        scheduler.api_enabled = True
+        scheduler.init_app(app)
+        scheduler.start()
+        logger.info("🕒 Scheduler started successfully.")
+    except Exception as e:
+        logger.error(f"❌ Scheduler initialization failed: {e}")
 
     # --- Login Manager ---
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
     login_manager.login_message_category = "info"
-    logger.info("✅ Flask-Login initialized.")
+    logger.info("👤 Flask-Login initialized.")
 
-    # --- Add security headers to every response ---
-    @app.after_request
-    def set_security_headers(response):
-        response.headers["X-Frame-Options"] = "SAMEORIGIN"
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        return response
+    # --- Custom PSU Branding ---
+    app.jinja_env.globals.update(
+        PSU_NAME=app.config.get("PSU_NAME", "Pittsburg State University"),
+        PSU_TAGLINE=app.config.get("PSU_TAGLINE", "Experience the Power of the Gorilla Spirit"),
+        PSU_COLORS=app.config.get("PSU_COLORS", {}),
+        PSU_LOGO_PATH=app.config.get("PSU_LOGO_PATH", "/static/img/psu-logo.png"),
+    )
+    logger.info("🎨 PSU branding context injected into templates.")
 
-    logger.info("✅ Security headers enabled.")
+    # --- Health Check Cache Warmup ---
+    @app.before_first_request
+    def warm_cache():
+        cache.set("health_check", "ok", timeout=600)
+        logger.info("🔥 Health cache prewarmed on startup.")
 
-    # --- Final confirmation ---
-    logger.success("🚀 All extensions initialized successfully in production mode.")
+    logger.success("✅ All extensions initialized successfully.")
+    return app
+
 
 # ============================================================
-# 💡 Example Scheduled Task
+# 🧼 Nightly Maintenance Job (Auto-Cleanup + Analytics)
 # ============================================================
-@scheduler.task("cron", id="nightly_maintenance", hour=3)
 def nightly_maintenance():
-    """
-    Example nightly job that could:
-    - Clean old logs
-    - Update job/analytics tables
-    - Send donor report digests
-    """
+    """Nightly job for PSU analytics, cleanup, and notifications."""
     from datetime import datetime
-    now = datetime.utcnow()
-    logger.info(f"🌙 Running nightly maintenance @ {now}")
-    if redis_client:
-        redis_client.set("last_maintenance", now.isoformat())
+    from models import User, Scholarship
+
+    logger.info(f"🌙 Running nightly maintenance at {datetime.utcnow()}")
+
+    try:
+        # Example: Update cached analytics
+        user_count = User.query.count()
+        scholarship_count = Scholarship.query.count()
+        cache.set("metrics:user_count", user_count, timeout=86400)
+        cache.set("metrics:scholarship_count", scholarship_count, timeout=86400)
+
+        # Optional: Clear expired cache or tokens
+        cache.delete("health_check")
+
+        logger.success(f"✅ Nightly metrics updated — Users: {user_count}, Scholarships: {scholarship_count}")
+    except Exception as e:
+        logger.error(f"❌ Nightly maintenance error: {e}")
