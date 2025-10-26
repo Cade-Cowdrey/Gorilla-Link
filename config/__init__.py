@@ -1,211 +1,166 @@
-# config/__init__.py
-# ---------------------------------------------------------------------
-# PittState-Connect Configuration Suite (Production Ready)
-# ---------------------------------------------------------------------
-# Provides:
-#  - Environment-aware configuration classes (Development, Testing, Production)
-#  - Secure defaults for Flask, SQLAlchemy, Mail, Redis, and CORS
-#  - Integrated Sentry monitoring (optional, auto-disabled if DSN missing)
-#  - PSU branding metadata and UI constants
-#  - Optional OpenAI / analytics / task scheduler support
-#  - Render-safe and local-friendly auto-detection
-# ---------------------------------------------------------------------
-
 import os
-import logging
 from datetime import timedelta
+from dotenv import load_dotenv
 
-# Optional: Sentry error monitoring
-try:
-    import sentry_sdk
-    from sentry_sdk.integrations.flask import FlaskIntegration
-    from sentry_sdk.integrations.redis import RedisIntegration
-    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+# ============================================================
+# 🧩 Load environment variables
+# ============================================================
+load_dotenv()
 
-    SENTRY_DSN = os.getenv("SENTRY_DSN", "")
-    if SENTRY_DSN:
-        sentry_sdk.init(
-            dsn=SENTRY_DSN,
-            integrations=[FlaskIntegration(), RedisIntegration(), SqlalchemyIntegration()],
-            traces_sample_rate=1.0,
-            send_default_pii=True,
-            environment=os.getenv("FLASK_ENV", "production").capitalize(),
-        )
-        logging.info("✅ Sentry monitoring initialized")
-    else:
-        logging.info("⚠️ Sentry DSN not provided — monitoring disabled")
-except ImportError:
-    logging.warning("⚠️ Sentry SDK not installed — skipping Sentry integration")
-except Exception as e:
-    logging.warning(f"⚠️ Sentry initialization error: {e}")
-
-
-# ---------------------------------------------------------------------
-# Core Configuration Base
-# ---------------------------------------------------------------------
+# ============================================================
+# 🌎 Base Config
+# ============================================================
 class Config:
-    """Base configuration for all environments."""
-
-    # General
-    APP_NAME = "PittState-Connect"
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
+    # --- Core ---
+    SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-psu-connect-key")
     FLASK_ENV = os.getenv("FLASK_ENV", "production")
-    DEBUG = False
-    TESTING = False
+    DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 
-    # Security
+    # ============================================================
+    # 🗄️ Database Configuration (PostgreSQL for Render)
+    # ============================================================
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg2://postgres:password@localhost:5432/pittstate_connect"
+    ).replace("postgres://", "postgresql://")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+        "pool_size": 10,
+        "max_overflow": 20,
+    }
+
+    # ============================================================
+    # 🧠 Redis & Caching
+    # ============================================================
+    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    CACHE_TYPE = "redis"
+    CACHE_REDIS_URL = REDIS_URL
+    CACHE_DEFAULT_TIMEOUT = 300
+
+    # ============================================================
+    # 📬 Flask-Mail / SendGrid Integration
+    # ============================================================
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    MAIL_USERNAME = os.getenv("SENDGRID_USERNAME", "apikey")
+    MAIL_PASSWORD = os.getenv("SENDGRID_API_KEY", "")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
+
+    # ============================================================
+    # 🔐 Security & Session
+    # ============================================================
+    REMEMBER_COOKIE_DURATION = timedelta(days=30)
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    REMEMBER_COOKIE_DURATION = timedelta(days=14)
-    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
+    WTF_CSRF_TIME_LIMIT = 3600  # 1 hour
 
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "sqlite:///pittstate_connect.db"
-    ).replace("postgres://", "postgresql://")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
-
-    # Redis / Cache
-    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-    # Mail
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.sendgrid.net")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() in ("true", "1", "yes")
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "apikey")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.edu")
-    MAIL_SUPPRESS_SEND = False
-
-    # Scheduler / Jobs
-    SCHEDULER_API_ENABLED = True
-    JOBS_REFRESH_INTERVAL = 60  # seconds
-
-    # OpenAI / Smart Assistant
+    # ============================================================
+    # 🤖 OpenAI / Smart Match Enhancements
+    # ============================================================
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-    AI_ASSISTANT_ENABLED = bool(OPENAI_API_KEY)
+    AI_SMART_MATCH_ENABLED = os.getenv("AI_SMART_MATCH_ENABLED", "True").lower() in ("true", "1")
+    AI_MODEL = os.getenv("AI_MODEL", "gpt-4o-mini")
+    AI_MAX_TOKENS = 1500
+    AI_TEMPERATURE = 0.7
 
-    # Analytics & Telemetry
-    ENABLE_ANALYTICS = True
-    ANALYTICS_STORAGE_BACKEND = os.getenv("ANALYTICS_BACKEND", "redis")
-    ANALYTICS_CACHE_TTL = 300  # seconds
+    # ============================================================
+    # 📊 Analytics, Insights, and Logging
+    # ============================================================
+    ENABLE_ANALYTICS_DASHBOARD = True
+    ANALYTICS_REFRESH_INTERVAL = int(os.getenv("ANALYTICS_REFRESH_INTERVAL", "900"))  # 15 minutes
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-    # PSU Branding
-    PSU_PRIMARY_COLOR = "#DAAA00"  # PSU Gold
-    PSU_SECONDARY_COLOR = "#861F41"  # PSU Crimson
-    PSU_TAGLINE = "PittState-Connect: Linking Students, Alumni, and Opportunity."
-    PSU_LOGO_PATH = "/static/img/psu_logo.svg"
+    # ============================================================
+    # 📅 APScheduler (Background Jobs)
+    # ============================================================
+    SCHEDULER_API_ENABLED = True
+    SCHEDULER_TIMEZONE = "America/Chicago"
+    JOBS = [
+        {
+            "id": "nightly_cleanup",
+            "func": "extensions:nightly_maintenance",
+            "trigger": "cron",
+            "hour": 3,
+        },
+        {
+            "id": "analytics_refresh",
+            "func": "blueprints.analytics.tasks:refresh_insight_cache",
+            "trigger": "interval",
+            "minutes": 15,
+        },
+    ]
 
-    # Rate Limiting (via Flask-Limiter)
-    RATELIMIT_DEFAULT = "100 per minute"
-    RATELIMIT_STORAGE_URL = REDIS_URL
-
-    # Security Headers
-    CSP = {
-        "default-src": "'self'",
-        "script-src": ["'self'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
-        "style-src": ["'self'", "fonts.googleapis.com", "cdn.jsdelivr.net"],
-        "font-src": ["'self'", "fonts.gstatic.com"],
-        "img-src": ["'self'", "data:", "cdn.pittstateconnect.edu"],
-        "connect-src": ["'self'", "api.openai.com"],
+    # ============================================================
+    # 🧾 PSU Branding Defaults (used in emails and UI)
+    # ============================================================
+    PSU_NAME = "Pittsburg State University"
+    PSU_TAGLINE = "Experience the Power of the Gorilla Spirit"
+    PSU_LOGO_PATH = "/static/img/psu-logo.png"
+    PSU_COLORS = {
+        "primary": "#DA291C",  # Gorilla Crimson
+        "secondary": "#FFC72C",  # PSU Gold
+        "accent": "#000000",
     }
 
-    # Logging
-    LOG_LEVEL = logging.INFO
-    LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    # ============================================================
+    # 🧰 File Uploads / Cloud Buckets
+    # ============================================================
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads/")
+    ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "docx"}
+    USE_CLOUD_STORAGE = os.getenv("USE_CLOUD_STORAGE", "False").lower() in ("true", "1")
+    CLOUD_BUCKET_NAME = os.getenv("CLOUD_BUCKET_NAME", "psu-connect-bucket")
 
-    # Audit / Retention
-    AUDIT_RETENTION_DAYS = int(os.getenv("AUDIT_RETENTION_DAYS", 30))
+    # ============================================================
+    # 🔔 Notifications & Email Digests
+    # ============================================================
+    ENABLE_EMAIL_DIGESTS = True
+    DAILY_DIGEST_HOUR = 8  # 8 AM
+    DIGEST_TEMPLATE = "emails/digests/daily_digest.html"
 
-    # Feature Flags
-    ENABLE_SCHOLARSHIP_HUB = True
-    ENABLE_JOB_MATCHING = True
-    ENABLE_DONOR_PORTAL = True
-    ENABLE_DEPARTMENT_ANALYTICS = True
-    ENABLE_AI_RECOMMENDER = True
-    ENABLE_PEER_MENTORS = True
+    # ============================================================
+    # 🧩 Accessibility & Compliance
+    # ============================================================
+    ACCESSIBILITY_MODE = True
+    COLOR_CONTRAST_MIN_RATIO = 4.5
+    ENABLE_KEYBOARD_NAVIGATION = True
+    GDPR_COMPLIANT = True
 
 
-# ---------------------------------------------------------------------
-# Environment-specific Configs
-# ---------------------------------------------------------------------
-
+# ============================================================
+# 🔰 Environment-Specific Configs
+# ============================================================
 class DevelopmentConfig(Config):
-    """Local Development Settings"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///pittstate_connect_dev.db"
-    )
-    SESSION_COOKIE_SECURE = False
-    MAIL_SUPPRESS_SEND = True
-    RATELIMIT_ENABLED = False
-    ENABLE_ANALYTICS = True
-    ENV_NAME = "development"
-
-
-class TestingConfig(Config):
-    """CI / Unit Testing Settings"""
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    MAIL_SUPPRESS_SEND = True
-    RATELIMIT_ENABLED = False
-    ENABLE_ANALYTICS = False
-    ENV_NAME = "testing"
+    SQLALCHEMY_ECHO = False
+    CACHE_TYPE = "simple"
 
 
 class ProductionConfig(Config):
-    """Production Settings"""
     DEBUG = False
     TESTING = False
-    RATELIMIT_ENABLED = True
-    SESSION_COOKIE_SECURE = True
-    ENV_NAME = "production"
-
-    # Optimize SQLAlchemy
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_size": 10,
-        "max_overflow": 15,
-        "pool_timeout": 30,
-        "pool_pre_ping": True,
-    }
-
-    # Enforce HTTPS
-    PREFERRED_URL_SCHEME = "https"
-
-    # Background job scheduler frequency
-    JOBS_REFRESH_INTERVAL = 300
-
-    # Error reporting
-    ERROR_REPORTING_ENABLED = True
 
 
-# ---------------------------------------------------------------------
-# Utility: resolve active config class
-# ---------------------------------------------------------------------
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    CACHE_TYPE = "null"
 
-def get_config_class() -> str:
-    """Return the full import path of the active config class."""
+
+# ============================================================
+# 🔍 Configuration Loader
+# ============================================================
+def get_config():
+    """Return the correct config class depending on FLASK_ENV."""
     env = os.getenv("FLASK_ENV", "production").lower()
-    if env in ("dev", "development"):
-        return "config.DevelopmentConfig"
-    elif env in ("test", "testing"):
-        return "config.TestingConfig"
+    if env == "development":
+        return DevelopmentConfig
+    elif env == "testing":
+        return TestingConfig
     else:
-        return "config.ProductionConfig"
-
-
-# ---------------------------------------------------------------------
-# Optional: Global logging config (executed early in app factory)
-# ---------------------------------------------------------------------
-def setup_logging():
-    """Apply unified log formatting across the app."""
-    logging.basicConfig(
-        level=Config.LOG_LEVEL,
-        format=Config.LOG_FORMAT,
-    )
-    logging.getLogger("werkzeug").setLevel(logging.WARNING)
-    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
-    logging.info("✅ PSU Config logging initialized successfully")
+        return ProductionConfig
