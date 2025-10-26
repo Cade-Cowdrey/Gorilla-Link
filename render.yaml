@@ -1,95 +1,101 @@
-# ============================================================
-#  PittState-Connect — Render Configuration (Final v1.0)
-#  Optimized for Flask + Gunicorn + PostgreSQL + SendGrid
-#  ============================================================
+# render.yaml — PittState-Connect full deployment configuration
 
 services:
   - type: web
     name: pittstate-connect
     env: python
-    plan: free   # or starter/standard for production use
-    buildCommand: |
-      pip install --upgrade pip wheel setuptools
-      pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app
+    plan: starter
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app_pro:app --workers=3 --threads=2 --timeout=120 --preload"
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /healthz
     envVars:
-      # --- Core Environment ---
+      - key: CONFIG_CLASS
+        value: config.settings.ProductionConfig
       - key: FLASK_ENV
         value: production
-      - key: PYTHON_VERSION
-        value: 3.10.13
+      - key: APP_ENV
+        value: production
       - key: SECRET_KEY
         generateValue: true
-
-      # --- Database ---
+      - key: TZ
+        value: America/Chicago
       - key: DATABASE_URL
         fromDatabase:
-          name: pittstate-connect-db
+          name: pittstate-postgres
           property: connectionString
-
-      # --- Email / SendGrid ---
-      - key: SENDGRID_USERNAME
-        value: apikey
+      - key: REDIS_URL
+        fromService:
+          name: pittstate-redis
+          property: connectionString
       - key: SENDGRID_API_KEY
-        sync: false   # set securely in Render dashboard
-
-      # --- Optional AI Integration ---
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        value: noreply@pittstateconnect.com
       - key: OPENAI_API_KEY
-        sync: false   # secure variable, stored manually
-
-      # --- Security / Session ---
-      - key: SESSION_TYPE
-        value: filesystem
-
-      # --- Other Configs ---
-      - key: PORT
-        value: 10000
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://pittstate-connect.onrender.com
       - key: LOG_LEVEL
-        value: info
+        value: INFO
+      - key: PRINT_ROUTES_ON_BOOT
+        value: "0"
 
-    buildFilter:
-      paths:
-        include:
-          - app_pro.py
-          - blueprints/**
-          - models.py
-          - templates/**
-          - static/**
-          - migrations/**
-          - requirements.txt
-          - render.yaml
+  - type: worker
+    name: pittstate-worker
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python worker.py"
+    plan: starter
+    envVars:
+      - key: CONFIG_CLASS
+        value: config.settings.ProductionConfig
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pittstate-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: pittstate-redis
+          property: connectionString
+      - key: TZ
+        value: America/Chicago
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        sync: false
 
-    # --- Health Check ---
-    healthCheckPath: /health
-    autoDeploy: true
-    envSpecific:
-      - env: production
-        numInstances: 1
-        region: oregon
-
-    # --- Scaling ---
-    numInstances: 1
-    disk:
-      name: persistent-data
-      mountPath: /data
-      sizeGB: 1
-
-# ============================================================
-#  DATABASE CONFIGURATION
-# ============================================================
 databases:
-  - name: pittstate-connect-db
-    plan: free   # upgrade to standard for production
-    region: oregon
-    ipAllowList: []   # restrict later for security
+  - name: pittstate-postgres
+    plan: starter
 
-# ============================================================
-#  NOTES
-# ============================================================
-# ✅ This setup automatically:
-# - Installs dependencies from requirements.txt
-# - Uses Gunicorn + Flask for serving app_pro.py
-# - Provides persistent DB and caching between builds
-# - Integrates with SendGrid and OpenAI (via env vars)
-# - Registers /health endpoint for uptime checks
-# - Caches build layers for faster redeploys
+redis:
+  - name: pittstate-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+
+jobs:
+  - name: nightly-analytics-refresh
+    type: cron
+    schedule: "0 2 * * *"
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python -m blueprints.analytics.tasks refresh_insight_cache"
+    envVars:
+      - key: CONFIG_CLASS
+        value: config.settings.ProductionConfig
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pittstate-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: pittstate-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TZ
+        value: America/Chicago
