@@ -1,68 +1,80 @@
 {% extends "base.html" %}
-{% block title %}PittState-Connect | Careers{% endblock %}
+{% block title %}Career Hub | PittState-Connect{% endblock %}
 {% block content %}
-<div class="container-fluid py-5 fade-in">
-  <div class="text-center mb-5">
-    <h1 class="display-5 fw-bold text-crimson">PittState Careers Hub</h1>
-    <p class="lead text-secondary">Explore internships, full-time roles, and alumni-sponsored opportunities.</p>
+
+<section class="bg-gradient-to-r from-crimson to-gold py-10 text-center text-white">
+  <h1 class="text-4xl md:text-5xl font-bold mb-2">Career Hub</h1>
+  <p class="text-lg opacity-90">Discover jobs, internships, and employer connections through PittState-Connect</p>
+</section>
+
+<section class="container mx-auto px-4 py-8">
+  <!-- Search and Filters -->
+  <div class="bg-white shadow-md rounded-2xl p-4 mb-6">
+    <form id="career-search" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Keyword</label>
+        <input type="text" name="q" id="q" class="w-full rounded-lg border-gray-300" placeholder="Search job or company...">
+      </div>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Type</label>
+        <select id="type" class="w-full rounded-lg border-gray-300">
+          <option value="all" selected>All</option>
+          <option value="fulltime">Full-time</option>
+          <option value="parttime">Part-time</option>
+          <option value="internship">Internship</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Location</label>
+        <input type="text" id="location" class="w-full rounded-lg border-gray-300" placeholder="e.g. Kansas City">
+      </div>
+      <div>
+        <button type="submit"
+                class="w-full px-4 py-2 bg-crimson text-white rounded-lg shadow hover:bg-gold hover:text-crimson transition">
+          Search
+        </button>
+      </div>
+    </form>
   </div>
 
-  <div class="row g-4">
-    {% for job in jobs %}
-    <div class="col-md-4 col-lg-3">
-      <div class="card shadow-sm hover-rise h-100 border-0">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title text-gold fw-semibold">{{ job.title }}</h5>
-          <p class="text-muted mb-2 small">{{ job.company }}</p>
-          <p class="text-muted small mb-4">{{ job.department.name if job.department else "General" }}</p>
-          <p class="flex-grow-1">{{ job.description[:140] }}...</p>
-          <a href="{{ url_for('careers_bp.job_detail', job_id=job.id) }}" class="btn btn-crimson mt-auto">View Details</a>
-        </div>
+  <!-- Job Highlights -->
+  <h2 class="text-2xl font-bold text-crimson mb-4 text-center">Featured Opportunities</h2>
+  {% if featured_jobs %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    {% for job in featured_jobs %}
+    <div class="bg-white rounded-2xl shadow p-6 border-t-4 border-gold hover:shadow-lg transition">
+      <h3 class="text-xl font-semibold text-crimson mb-1">{{ job.title }}</h3>
+      <p class="text-gray-600 text-sm mb-1">{{ job.company }} • {{ job.location }}</p>
+      <p class="text-gray-700 text-sm mb-2">{{ job.description[:100] }}...</p>
+      <div class="flex justify-between items-center">
+        <a href="{{ job.url }}" target="_blank" class="text-gold hover:text-crimson font-semibold">View →</a>
+        <span class="text-xs text-gray-500">{{ job.posted.strftime('%b %d, %Y') if job.posted else 'Recently' }}</span>
       </div>
     </div>
     {% endfor %}
   </div>
-
-  <hr class="my-5" />
-
-  <div class="text-center mb-4">
-    <h2 class="fw-bold text-gold">Featured Departments</h2>
-  </div>
-
-  <div class="row g-4">
-    {% for dept in featured_depts %}
-    <div class="col-md-4 col-lg-2 text-center">
-      <div class="psu-glass p-3 rounded-4 hover-rise">
-        <h5 class="fw-bold text-crimson">{{ dept.name }}</h5>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  {% if ai_enabled %}
-  <section class="mt-5">
-    <div class="psu-glass p-4 rounded-4 shadow-sm">
-      <h3 class="text-crimson fw-bold mb-3">🎯 Smart Match Assistant (AI-Powered)</h3>
-      <p class="text-secondary">Get personalized recommendations based on your profile and career interests.</p>
-      <form id="ai-job-form" class="mt-3">
-        <div class="input-group">
-          <input type="text" id="career-query" class="form-control" placeholder="e.g. Marketing, Engineering, IT Support..." />
-          <button type="submit" class="btn btn-gold">Get Insights</button>
-        </div>
-      </form>
-      <div id="ai-result" class="mt-3 text-secondary small"></div>
-    </div>
-  </section>
+  {% else %}
+  <div class="text-center text-gray-500 py-10">No featured jobs available right now.</div>
   {% endif %}
-</div>
 
-<script>
-document.getElementById("ai-job-form")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const query = document.getElementById("career-query").value;
-  const res = await fetch("/api/ai-insight?query=" + encodeURIComponent(query));
-  const data = await res.json();
-  document.getElementById("ai-result").innerHTML = data.insight || "No insights available yet.";
-});
-</script>
+  <!-- Employer Partners -->
+  <h2 class="text-2xl font-bold text-crimson mb-4 text-center">Employer Partners</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+    {% for emp in employers %}
+    <div class="flex flex-col items-center bg-white rounded-xl shadow p-4 hover:bg-gold hover:text-crimson transition">
+      <img src="{{ emp.logo or url_for('static', filename='img/psu-logo.png') }}" alt="{{ emp.name }}" class="h-16 object-contain mb-2">
+      <p class="font-semibold text-center">{{ emp.name }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- CTA -->
+  <div class="text-center py-6">
+    <a href="{{ url_for('careers_bp.jobs') }}"
+       class="px-6 py-3 bg-crimson text-white font-semibold rounded-lg hover:bg-gold hover:text-crimson transition">
+       Browse All Jobs →
+    </a>
+  </div>
+</section>
+
 {% endblock %}
