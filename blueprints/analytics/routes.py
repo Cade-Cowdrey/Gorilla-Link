@@ -124,4 +124,4 @@ def page_summary():
 @cached(timeout=15, key_prefix="anx:health:")
 def health():
     # Quick health probe for analytics pipeline
-    return jsonify(ok=True, cache=bool(cache), limiter=bool(limiter), db=bool(db)))
+    return jsonify(ok=True, cache=bool(cache), limiter=bool(limiter), db=bool(db)
