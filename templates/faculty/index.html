@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Faculty Directory | PittState-Connect{% endblock %}
+{% block content %}
+
+<section class="container mx-auto px-4 py-10">
+  <!-- HEADER -->
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-crimson mb-2">Faculty Directory</h1>
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      Explore Pittsburg State University’s faculty across all departments. Use search or browse to learn more about their teaching, research, and achievements.
+    </p>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="flex justify-center mb-8">
+    <form action="{{ safe_url_for('faculty_bp.index') }}" method="get" class="w-full md:w-1/2 relative">
+      <input
+        type="text"
+        name="q"
+        placeholder="Search by name or department..."
+        value="{{ request.args.get('q','') }}"
+        class="w-full py-3 pl-4 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gold focus:border-crimson outline-none shadow-sm"
+      >
+      <button type="submit"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-crimson hover:text-gold transition">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- FACULTY GRID -->
+  {% if faculty %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for member in faculty %}
+    <div class="bg-white rounded-2xl shadow-md border-t-4 border-gold hover:shadow-lg transform hover:-translate-y-1 transition p-6 flex flex-col">
+      <div class="flex items-center mb-4">
+        <img src="{{ member.profile_image_url or url_for('static', filename='img/default-avatar.png') }}"
+             alt="{{ member.name }}"
+             class="w-16 h-16 rounded-full border border-gray-300 object-cover mr-4">
+        <div>
+          <h3 class="font-semibold text-crimson text-lg leading-tight">{{ member.name }}</h3>
+          <p class="text-gray-500 text-sm">{{ member.title }}</p>
+        </div>
+      </div>
+      <p class="text-gray-700 text-sm flex-1">
+        {{ member.department or "General Faculty" }}
+      </p>
+
+      <div class="mt-4 flex justify-between items-center">
+        <a href="{{ safe_url_for('faculty_bp.detail', slug=member.slug) }}"
+           class="text-gold hover:text-crimson font-semibold text-sm transition">
+          View Profile →
+        </a>
+        <span class="text-xs text-gray-400">Updated {{ member.updated }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-gray-500 mt-12">
+    <p>No faculty found matching your search.</p>
+    <a href="{{ safe_url_for('faculty_bp.index') }}" class="text-crimson hover:text-gold font-medium mt-2 inline-block">
+      ← Reset Search
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- FOOTER NAV -->
+  <div class="mt-16 text-center">
+    <a href="{{ safe_url_for('departments_bp.index') }}"
+       class="inline-block px-5 py-3 bg-crimson text-white rounded-xl shadow-md hover:bg-gold hover:text-crimson transition">
+      ← Back to Departments
+    </a>
+    <a href="{{ safe_url_for('analytics_bp.index') }}"
+       class="inline-block px-5 py-3 bg-gold text-crimson rounded-xl shadow-md hover:bg-crimson hover:text-gold transition ml-4">
+      View Analytics
+    </a>
+  </div>
+
+  <!-- TIMESTAMP -->
+  <div class="mt-10 text-center text-gray-500 text-sm">
+    Directory updated {{ now().strftime('%b %d, %Y %I:%M %p') }}
+  </div>
+</section>
+
+{% endblock %}
