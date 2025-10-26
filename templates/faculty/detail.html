@@ -21,21 +21,21 @@
     </div>
   </div>
 
-  <!-- PROFILE SECTION -->
+  <!-- PROFILE -->
   <div class="bg-white rounded-2xl shadow-md border-t-4 border-gold p-8 max-w-4xl mx-auto">
     <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
-      <img
-        src="{{ faculty.profile_image_url or url_for('static', filename='img/default-avatar.png') }}"
-        alt="{{ faculty.name }}"
-        class="w-40 h-40 rounded-full border border-gray-300 object-cover shadow-sm"
-      >
+      <img src="{{ faculty.profile_image_url or url_for('static', filename='img/default-avatar.png') }}"
+           alt="{{ faculty.name }}"
+           class="w-40 h-40 rounded-full border border-gray-300 object-cover shadow-sm">
       <div class="flex-1 text-left">
         <h2 class="text-2xl font-semibold text-crimson mb-2">{{ faculty.name }}</h2>
         <p class="text-gray-600 mb-4">{{ faculty.title or "Faculty Member" }}</p>
 
         <ul class="space-y-2 text-sm text-gray-700">
           {% if faculty.email %}
-          <li><strong>Email:</strong> <a href="mailto:{{ faculty.email }}" class="text-gold hover:text-crimson transition">{{ faculty.email }}</a></li>
+          <li><strong>Email:</strong>
+            <a href="mailto:{{ faculty.email }}" class="text-gold hover:text-crimson transition">{{ faculty.email }}</a>
+          </li>
           {% endif %}
           {% if faculty.phone %}
           <li><strong>Phone:</strong> {{ faculty.phone }}</li>
@@ -55,11 +55,11 @@
     <div class="mt-8 border-t border-gray-200 pt-6">
       <h3 class="text-xl font-semibold text-crimson mb-3">About {{ faculty.name.split(' ')[0] }}</h3>
       <p class="text-gray-700 leading-relaxed">
-        {{ faculty.bio or "This faculty member's biography is not yet available. Please check back soon for updates." }}
+        {{ faculty.bio or "This faculty member's biography is not yet available." }}
       </p>
     </div>
 
-    <!-- RESEARCH INTERESTS -->
+    <!-- RESEARCH -->
     {% if faculty.research_interests %}
     <div class="mt-8 border-t border-gray-200 pt-6">
       <h3 class="text-xl font-semibold text-crimson mb-3">Research Interests</h3>
@@ -71,7 +71,7 @@
     </div>
     {% endif %}
 
-    <!-- COURSES TAUGHT -->
+    <!-- COURSES -->
     {% if faculty.courses_taught %}
     <div class="mt-8 border-t border-gray-200 pt-6">
       <h3 class="text-xl font-semibold text-crimson mb-3">Courses Taught</h3>
@@ -84,26 +84,21 @@
     {% endif %}
 
     <!-- ANALYTICS CARD -->
-    <div class="mt-10 border-t border-gray-200 pt-6">
-      <h3 class="text-xl font-semibold text-crimson mb-3">Engagement & Analytics</h3>
-      <div class="bg-gray-50 rounded-xl p-4 shadow-inner flex flex-col md:flex-row justify-between items-center">
-        <div class="text-gray-700 text-sm">
-          <p>Profile views this month: <span class="font-semibold text-crimson">{{ faculty.views or 0 }}</span></p>
-          <p>Average time spent: <span class="font-semibold text-gold">{{ faculty.avg_time or "—" }}</span> sec</p>
-        </div>
-        <a href="{{ safe_url_for('analytics_bp.index') }}"
-           class="mt-4 md:mt-0 px-4 py-2 bg-gold text-crimson rounded-lg font-semibold hover:bg-crimson hover:text-gold transition shadow">
-          Open Full Analytics →
-        </a>
-      </div>
-    </div>
+    {% include "faculty/_analytics_card.html" %}
   </div>
 
-  <!-- FOOTER NAV -->
+  <!-- FOOTER -->
   <div class="mt-12 text-center text-gray-500 text-sm">
-    <p>Back to <a href="{{ safe_url_for('departments_bp.detail', slug=faculty.department.slug) }}" class="text-gold hover:text-crimson font-semibold">Department Page</a></p>
+    <p>Back to
+      <a href="{{ safe_url_for('departments_bp.detail', slug=faculty.department.slug) }}"
+         class="text-gold hover:text-crimson font-semibold">Department Page</a>
+    </p>
     <p class="mt-2">PittState-Connect © {{ now().year }}</p>
   </div>
 </section>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/faculty_analytics.js') }}"></script>
 
 {% endblock %}
