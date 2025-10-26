@@ -1,55 +1,43 @@
+# requirements.txt
 # --- Core Framework ---
 Flask==3.0.3
 Werkzeug==3.0.3
 Jinja2==3.1.4
 itsdangerous==2.2.0
 click==8.1.7
-sentry-sdk==2.19.0
 
-# --- Database + ORM ---
-Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.36
-Flask-Migrate==4.0.7
-psycopg2-binary==2.9.9
-
-# --- Auth + Sessions ---
-Flask-Login==0.6.3
-Flask-WTF==1.2.1
-WTForms==3.1.2
-itsdangerous==2.2.0
-
-# --- Mail + Communication ---
-Flask-Mail==0.9.1
-sendgrid==6.11.0
-email-validator==2.2.0
-
-# --- Security + Rate Limiting ---
-Flask-Limiter==3.9.2
-Flask-Cors==4.0.1
-
-# --- Caching + Redis ---
-redis==5.0.8
-
-# --- Scheduler + Async Jobs ---
-APScheduler==3.10.4
-
-# --- Analytics + AI + Visualization (optional enhancements) ---
-matplotlib==3.9.2
-pandas==2.2.3
-openai==1.52.0
-
-# --- Socket & Real-time Enhancements ---
-Flask-SocketIO==5.3.6
-python-engineio==4.8.2
-python-socketio==5.11.3
+# --- Server ---
+gunicorn==21.2.0
 eventlet==0.36.1
 
-# --- Deployment + Logging ---
-gunicorn==21.2.0
-python-dotenv==1.0.1
-colorlog==6.8.2
+# --- Database & Migrations ---
+SQLAlchemy==2.0.35
+alembic==1.13.2
+psycopg2-binary==2.9.9
 
-# --- PSU-Style Optional Add-ons ---
+# --- Auth / Login ---
+Flask-Login==0.6.3
+
+# --- Mail (SendGrid via SMTP) ---
+Flask-Mail==0.9.1
+
+# --- CORS / Cache / Rate Limit ---
+Flask-Cors==4.0.0
+Flask-Caching==2.1.0
+Flask-Limiter==3.7.0
+limits==3.13.0
+redis==5.0.1
+
+# --- Sockets ---
+Flask-SocketIO==5.3.6
+python-socketio==5.11.3
+python-engineio==4.9.1
+
+# --- Migrations helper (optional) ---
+Flask-Migrate==4.0.7
+
+# --- Logging & Utilities ---
+loguru==0.7.2
+python-dotenv==1.0.1
 requests==2.32.3
-beautifulsoup4==4.12.3
-Pillow==10.4.0
+tenacity==9.0.0
