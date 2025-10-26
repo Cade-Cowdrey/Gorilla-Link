@@ -1,191 +1,69 @@
 {% extends "base.html" %}
 {% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
-
 {% block content %}
-<div class="container-fluid py-5 px-4">
-
-  <!-- Header -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
-    <div>
-      <h1 class="fw-bold text-danger mb-1 animate-fade-up">Gorilla Analytics Dashboard</h1>
-      <p class="text-muted mb-0 animate-fade-up delay-1">Real-time insights across scholarships, employment, and student success at Pittsburg State University.</p>
-    </div>
-    <a href="{{ url_for('core_bp.home') }}" class="btn btn-outline-danger shadow-sm animate-fade-up delay-2">
-      <i class="bi bi-house-door me-2"></i>Back to Home
-    </a>
-  </div>
-
-  <!-- KPI Summary Cards -->
-  <div class="row g-4 mb-4">
-    <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm border-0 hover-raise animate-fade-up">
-        <div class="card-body text-center">
-          <i class="bi bi-award display-5 text-danger mb-2"></i>
-          <h6 class="fw-semibold text-uppercase small text-muted">Scholarships Awarded</h6>
-          <h3 class="fw-bold text-danger mb-0">312</h3>
-          <p class="text-success small mt-1">+8% this year</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-1">
-        <div class="card-body text-center">
-          <i class="bi bi-briefcase display-5 text-danger mb-2"></i>
-          <h6 class="fw-semibold text-uppercase small text-muted">Internship Placements</h6>
-          <h3 class="fw-bold text-danger mb-0">148</h3>
-          <p class="text-success small mt-1">+12% QoQ</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-2">
-        <div class="card-body text-center">
-          <i class="bi bi-people-fill display-5 text-danger mb-2"></i>
-          <h6 class="fw-semibold text-uppercase small text-muted">Active Alumni Mentors</h6>
-          <h3 class="fw-bold text-danger mb-0">96</h3>
-          <p class="text-success small mt-1">+5 new this month</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm border-0 hover-raise animate-fade-up delay-3">
-        <div class="card-body text-center">
-          <i class="bi bi-bar-chart-line display-5 text-danger mb-2"></i>
-          <h6 class="fw-semibold text-uppercase small text-muted">Funding Volume</h6>
-          <h3 class="fw-bold text-danger mb-0">$2.4M</h3>
-          <p class="text-success small mt-1">Up 11% YTD</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Chart Section -->
-  <div class="row g-4 mb-5">
-    <div class="col-lg-8 animate-fade-up">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h5 class="fw-bold text-danger mb-3"><i class="bi bi-graph-up me-2"></i>Scholarships Awarded (Last 5 Years)</h5>
-          <canvas id="scholarshipChart" height="150"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-4 animate-fade-up delay-1">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h5 class="fw-bold text-danger mb-3"><i class="bi bi-pie-chart me-2"></i>Funding Distribution</h5>
-          <canvas id="fundingChart" height="180"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SmartMatch & AI Insights -->
-  <div class="row g-4 mb-5">
-    <div class="col-lg-6 animate-fade-up">
-      <div class="smartmatch-card">
-        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-lightbulb me-2"></i>AI SmartMatch Summary</h5>
-        <p class="small text-muted mb-3">
-          Based on student data, SmartMatch AI found that <strong>78%</strong> of Pitt State students qualify for at least one scholarship and <strong>42%</strong> for multiple funding sources.
+<section class="bg-gray-50 min-h-screen py-10 px-4 sm:px-8 lg:px-16">
+  <div class="container mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+      <div>
+        <h1 class="text-4xl font-bold text-crimson mb-3">📊 Analytics Dashboard</h1>
+        <p class="text-gray-700 max-w-2xl">
+          Gain real-time insight into engagement across <strong>departments</strong>, <strong>careers</strong>, and <strong>scholarships</strong>.  
+          Track views, unique visitors, and average engagement time to measure student and alumni involvement.
         </p>
-        <a href="{{ url_for('scholarships_bp.hub') }}" class="btn btn-danger btn-sm">View Recommendations</a>
+      </div>
+      <div class="mt-6 md:mt-0">
+        <a href="{{ safe_url_for('departments_bp.index') }}"
+           class="btn btn-gold text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+          ← Back to Departments
+        </a>
       </div>
     </div>
-    <div class="col-lg-6 animate-fade-up delay-1">
-      <div class="smartmatch-card">
-        <h5 class="fw-bold text-danger mb-2"><i class="bi bi-cpu me-2"></i>AI-Powered Predictive Trends</h5>
-        <p class="small text-muted mb-3">
-          The AI model predicts a <strong>12%</strong> increase in scholarship awards and <strong>17%</strong> boost in internship offers over the next academic year.
-        </p>
-        <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger btn-sm">Explore Insights</a>
+
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {% for card in cards %}
+      <div class="bg-white rounded-2xl shadow hover:shadow-xl transition p-6">
+        <h3 class="text-xl font-semibold text-crimson mb-2">{{ card.title }}</h3>
+        <p class="text-gray-700 text-sm mb-4">Performance over the last {{ card.metrics.days or 7 }} days</p>
+        <div class="space-y-2 text-sm">
+          <p>👁️ <span class="font-semibold text-crimson">{{ card.metrics.views }}</span> total views</p>
+          <p>🧍‍♂️ <span class="font-semibold text-crimson">{{ card.metrics.unique_users }}</span> unique users</p>
+          <p>⏱️ <span class="font-semibold text-crimson">{{ card.metrics.avg_time_sec }}</span> sec avg time</p>
+        </div>
       </div>
+      {% else %}
+      <p class="text-gray-600 col-span-full">No analytics data available.</p>
+      {% endfor %}
+    </div>
+
+    <div class="mt-16 bg-gradient-to-r from-crimson to-gold text-white rounded-2xl p-8 shadow-lg">
+      <h2 class="text-2xl font-bold mb-3">📈 Insights & Trends</h2>
+      <p class="text-white/90 mb-6">
+        These analytics drive smarter outreach, funding, and student engagement strategies.  
+        Admin dashboards can visualize user retention, scholarship impact, and alumni interaction rates.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6 text-sm text-white/90">
+        <div class="bg-white/10 rounded-xl p-4 shadow">
+          <h3 class="font-semibold mb-1 text-white">Engagement Rate</h3>
+          <p>↑ {{ (home_stats.views or 0) | default(0, true) }}% growth week-over-week</p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-4 shadow">
+          <h3 class="font-semibold mb-1 text-white">Alumni Activity</h3>
+          <p>Strong activity from employer and donor accounts this month.</p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-4 shadow">
+          <h3 class="font-semibold mb-1 text-white">Scholarship Awareness</h3>
+          <p>Increased traffic on Scholarship Hub following Smart Match launch.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="{{ safe_url_for('analytics_bp.page_summary', path='/', days=7) }}"
+         class="btn btn-outline-crimson border-2 border-crimson text-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+         🔎 View Detailed Page Stats
+      </a>
     </div>
   </div>
-
-  <!-- Departmental Breakdown -->
-  <section class="border-top pt-5">
-    <div class="text-center mb-5">
-      <h3 class="fw-bold text-danger">Departmental Scholarship Impact</h3>
-      <p class="text-muted small">Top-performing departments in scholarship engagement and funding growth.</p>
-    </div>
-    <div class="row g-4">
-      <div class="col-md-4 animate-fade-up">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <h6 class="fw-semibold text-danger">Engineering & Technology</h6>
-            <p class="small text-muted">Average award per student: <strong>$4,200</strong></p>
-            <div class="progress" style="height: 6px;">
-              <div class="progress-bar bg-danger" style="width: 85%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 animate-fade-up delay-1">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <h6 class="fw-semibold text-danger">Business & Entrepreneurship</h6>
-            <p class="small text-muted">Average award per student: <strong>$3,700</strong></p>
-            <div class="progress" style="height: 6px;">
-              <div class="progress-bar bg-warning" style="width: 75%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 animate-fade-up delay-2">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <h6 class="fw-semibold text-danger">Education & Human Services</h6>
-            <p class="small text-muted">Average award per student: <strong>$3,100</strong></p>
-            <div class="progress" style="height: 6px;">
-              <div class="progress-bar bg-success" style="width: 68%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- Charts -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  // Scholarships Trend
-  const sCtx = document.getElementById('scholarshipChart');
-  if (sCtx) {
-    new Chart(sCtx, {
-      type: 'line',
-      data: {
-        labels: ["2019","2020","2021","2022","2023"],
-        datasets: [{
-          label: "Scholarships Awarded",
-          data: [150,180,210,250,310],
-          borderColor: "#740001",
-          backgroundColor: "rgba(238,178,17,0.2)",
-          tension: 0.4,
-          fill: true,
-          pointBackgroundColor: "#740001"
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { display: false } } }
-    });
-  }
-
-  // Funding Distribution
-  const fCtx = document.getElementById('fundingChart');
-  if (fCtx) {
-    new Chart(fCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ["Endowment", "Corporate", "Alumni", "Federal Aid"],
-        datasets: [{
-          data: [40, 25, 20, 15],
-          backgroundColor: ["#740001", "#eeb211", "#b00020", "#ffc107"],
-          borderWidth: 1
-        }]
-      },
-      options: { plugins: { legend: { position: "bottom" } } }
-    });
-  }
-});
-</script>
+</section>
 {% endblock %}
