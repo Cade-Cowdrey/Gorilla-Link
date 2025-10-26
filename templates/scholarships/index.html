@@ -1,57 +1,101 @@
-<!-- =========================================================
-FILE: src/templates/scholarships/index.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Scholarship Hub · PittState-Connect{% endblock %}
+{% block title %}Scholarship Hub | PittState-Connect{% endblock %}
 {% block content %}
-<section class="section max-w-7xl mx-auto px-6 fade-in">
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-    <div>
-      <h1 class="text-4xl font-bold">Scholarship Hub</h1>
-      <p class="text-gray mt-1">Track, apply, and manage your awards in one place.</p>
+<section class="bg-light min-h-screen py-8 px-4 sm:px-8 lg:px-16">
+  <div class="container mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+      <div class="max-w-xl">
+        <h1 class="text-3xl md:text-4xl font-bold text-crimson mb-3">
+          🎓 Scholarship Hub
+        </h1>
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Discover scholarships tailored to your major, GPA, and goals.
+          Use <strong>Smart Match</strong> to automatically find opportunities that fit <em>you</em>.
+        </p>
+        <div class="flex flex-wrap gap-3 mt-6">
+          <a href="{{ safe_url_for('scholarships_bp.smart_match') }}"
+             class="btn btn-crimson text-white px-5 py-2 rounded-full shadow hover:bg-gold hover:text-crimson transition">
+            🔍 Smart Match
+          </a>
+          <a href="{{ safe_url_for('scholarships_bp.browse') }}"
+             class="btn btn-outline-crimson border-2 border-crimson text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+            Browse All
+          </a>
+          <a href="{{ safe_url_for('scholarships_bp.my_scholarships') }}"
+             class="btn btn-outline-gold border-2 border-gold text-gold px-5 py-2 rounded-full hover:bg-gold hover:text-white transition">
+            My Scholarships
+          </a>
+          <a href="{{ safe_url_for('notifications_bp.settings') }}"
+             class="btn btn-gold text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+            ⏰ Reminders
+          </a>
+        </div>
+      </div>
+      <div class="mt-8 md:mt-0">
+        <img src="{{ url_for('static', filename='img/scholarship-banner.png') }}"
+             alt="Scholarship Banner"
+             class="rounded-2xl shadow-lg w-full md:w-96 object-cover">
+      </div>
     </div>
-    <a href="{{ url_for('notifications_bp.settings') }}" class="btn btn-gold mt-4 md:mt-0">Reminders</a>
-  </div>
 
-  <!-- Quick Stats -->
-  <div class="grid md:grid-cols-3 gap-6 mb-10">
-    <div class="card p-6 text-center">
-      <h3 class="text-lg font-semibold">Eligible Scholarships</h3>
-      <p class="text-3xl font-bold text-crimson mt-2">14</p>
+    <hr class="border-t-2 border-gray-200 my-10" />
+
+    <h2 class="text-2xl font-semibold text-crimson mb-6">
+      Featured Opportunities
+    </h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for sch in featured %}
+      <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition group">
+        <div class="flex justify-between items-start">
+          <h3 class="text-xl font-semibold text-crimson group-hover:text-gold transition">
+            {{ sch.name }}
+          </h3>
+          <span class="text-gold font-bold text-lg">${{ sch.amount }}</span>
+        </div>
+        <p class="text-gray-600 text-sm mt-2">
+          Deadline:
+          <span class="font-medium text-gray-800">{{ sch.deadline }}</span>
+        </p>
+        <div class="flex justify-between items-center mt-4">
+          <a href="{{ safe_url_for('scholarships_bp.apply', scholarship_id=sch.id) }}"
+             class="text-sm text-crimson hover:text-gold font-medium transition">
+             Apply Now →
+          </a>
+          <a href="{{ safe_url_for('scholarships_bp.save_scholarship', scholarship_id=sch.id) }}"
+             class="text-sm text-gray-600 hover:text-gold transition">💾 Save</a>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-gray-600 col-span-full">
+        No scholarships found. Check back soon!
+      </p>
+      {% endfor %}
     </div>
-    <div class="card p-6 text-center">
-      <h3 class="text-lg font-semibold">Applications Sent</h3>
-      <p class="text-3xl font-bold text-gold mt-2">5</p>
+
+    <div class="mt-12 text-center">
+      <a href="{{ safe_url_for('scholarships_bp.deadlines') }}"
+         class="btn btn-outline-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
+         📅 View All Deadlines
+      </a>
+      <a href="{{ safe_url_for('scholarships_bp.essay_library') }}"
+         class="btn btn-outline-gold px-6 py-2 rounded-full ml-3 hover:bg-gold hover:text-white transition">
+         ✍️ Essay Library
+      </a>
     </div>
-    <div class="card p-6 text-center">
-      <h3 class="text-lg font-semibold">Deadline Tracker</h3>
-      <p class="text-3xl font-bold text-gray mt-2">3 this week</p>
+
+    <div class="mt-20 bg-gradient-to-r from-crimson to-gold text-white rounded-2xl p-8 shadow-lg">
+      <h2 class="text-2xl font-bold mb-2">💡 Funding Journey Timeline</h2>
+      <p class="text-white/90 mb-4">
+        Track your progress from searching to funding success.
+      </p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm font-medium">
+        <div class="bg-white/10 p-3 rounded-xl">🔍 Search</div>
+        <div class="bg-white/10 p-3 rounded-xl">✍️ Apply</div>
+        <div class="bg-white/10 p-3 rounded-xl">📅 Interview/Review</div>
+        <div class="bg-white/10 p-3 rounded-xl">🎉 Awarded</div>
+      </div>
     </div>
-  </div>
-
-  <!-- Feature Cards -->
-  <div class="grid md:grid-cols-2 gap-6 mb-8">
-    <a href="{{ url_for('scholarships_bp.smart_match') }}" class="card p-6 block hover:shadow-lg transition">
-      <h3 class="text-xl font-semibold mb-2">Smart-Match Recommender</h3>
-      <p class="text-gray mb-3">Automatically suggests scholarships that best match your profile and major.</p>
-      <span class="text-crimson hover:text-gold text-sm">View Matches →</span>
-    </a>
-
-    <a href="{{ url_for('scholarships_bp.essay_helper') }}" class="card p-6 block hover:shadow-lg transition">
-      <h3 class="text-xl font-semibold mb-2">Essay Helper</h3>
-      <p class="text-gray mb-3">AI-ready assistant to polish your essays and personal statements.</p>
-      <span class="text-crimson hover:text-gold text-sm">Open Editor →</span>
-    </a>
-  </div>
-
-  <!-- Impact Stories -->
-  <div class="card p-6 bg-gray-50 dark:bg-gray-800 fade-in">
-    <h3 class="text-2xl font-semibold mb-2">Scholarship Impact Stories</h3>
-    <p class="text-gray mb-4">Real Gorillas who turned awards into success stories (stub feed).</p>
-    <ul class="list-disc ml-5 text-gray text-sm space-y-1">
-      <li>🏆 Engineering Leaders Award — supported Maria L. ’26</li>
-      <li>💡 First-Gen Scholars Fund — opened doors for James T. ’25</li>
-    </ul>
   </div>
 </section>
 {% endblock %}
