@@ -1,56 +1,47 @@
-# =============================================================
-# PittState-Connect — Procfile
-# Advanced Gunicorn + Flask (factory pattern)
-# Supports optional enhancements: AI helper, analytics, mentoring,
-# donor portal, and scholarship hub extensions.
-# =============================================================
+# ============================================================
+# 🦍 PittState-Connect — Production Procfile
+# ============================================================
 
-# ------------------------------
-# PRIMARY WEB SERVICE
-# ------------------------------
-web: gunicorn 'app_pro:create_app()' \
-      --workers ${GUNICORN_WORKERS:-3} \
-      --threads ${GUNICORN_THREADS:-2} \
-      --timeout ${GUNICORN_TIMEOUT:-120} \
-      --worker-class ${GUNICORN_WORKER_CLASS:-gthread} \
-      --access-logfile - \
-      --error-logfile - \
-      --log-level ${LOG_LEVEL:-info} \
-      --preload \
-      --bind 0.0.0.0:$PORT
+# ────────────────────────────────────────────────────────────
+# 🌐 Web Server (Main App)
+# Uses Gunicorn to serve the Flask app with preload for speed
+# ────────────────────────────────────────────────────────────
+web: gunicorn app_pro:app \
+    --workers=3 \
+    --threads=2 \
+    --timeout=120 \
+    --preload \
+    --log-level=info \
+    --access-logfile - \
+    --error-logfile -
 
-# ------------------------------
-# OPTIONAL BACKGROUND WORKER
-# Handles asynchronous jobs like:
-# - Smart scholarship matching
-# - Email reminders
-# - Donor analytics sync
-# - AI essay scoring queue
-# ------------------------------
-worker: python worker.py
+# ────────────────────────────────────────────────────────────
+# ⚙️ Worker (Background Jobs / Mail Queue / AI Tasks)
+# Handles async SendGrid email queue, Redis events, and OpenAI tasks
+# ────────────────────────────────────────────────────────────
+worker: python worker.py --with-mail --with-ai --with-cache
 
-# ------------------------------
-# OPTIONAL TASKS / CRON JOBS
-# These are lightweight scheduled jobs triggered by Render Cron.
-# Example: Auto-refresh analytics, send weekly mentor summaries.
-# ------------------------------
-cron: python manage_tasks.py
+# ────────────────────────────────────────────────────────────
+# 🕒 Scheduler (Nightly Analytics, Smart Match, Auto-Reminders)
+# Tied into APScheduler via extensions.scheduler
+# ────────────────────────────────────────────────────────────
+scheduler: python -m tools.run_scheduler
 
-# ------------------------------
-# HEALTH CHECK / DIAGNOSTICS
-# Optional script to validate blueprint registration and DB status.
-# ------------------------------
-diagnostic: python diagnostics/run_check.py
+# ────────────────────────────────────────────────────────────
+# 📊 Manual Analytics Refresh (fallback job if scheduler fails)
+# Can be triggered manually from Render shell:
+#   $ render exec python -m blueprints.analytics.tasks refresh_insight_cache
+# ────────────────────────────────────────────────────────────
+analytics-refresh: python -m blueprints.analytics.tasks refresh_insight_cache
 
-# ------------------------------
-# COMMENTED ADVANCED MODES
-# Uncomment to enable async worker or enhanced concurrency.
-# ------------------------------
-# web: gunicorn 'app_pro:create_app()' \
-#       --workers 4 \
-#       --worker-class gevent \
-#       --worker-connections 1000 \
-#       --timeout 90 \
-#       --access-logfile - \
-#       --error-logfile - \
-#       --preload
+# ────────────────────────────────────────────────────────────
+# 📬 Mail Queue Processor
+# Processes queued transactional + campaign emails via SendGrid
+# ────────────────────────────────────────────────────────────
+mail-queue: python -m utils.mail_util process_queue
+
+# ────────────────────────────────────────────────────────────
+# 🧠 OpenAI Helper (Essay feedback, Smart-Match training)
+# Uses OPENAI_API_KEY from environment
+# ────────────────────────────────────────────────────────────
+ai-helper: python -m tools.ai_helper run
