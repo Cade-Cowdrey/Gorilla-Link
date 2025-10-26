@@ -1,0 +1,21 @@
+"""Add FacultyDailyView table"""
+from alembic import op
+import sqlalchemy as sa
+
+# revision identifiers
+revision = "0033_add_faculty_daily_views"
+down_revision = "0032_add_contactmessage_is_read.py"
+branch_labels = None
+depends_on = None
+
+def upgrade():
+    op.create_table(
+        "faculty_daily_views",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("faculty_id", sa.Integer(), sa.ForeignKey("faculty.id", ondelete="CASCADE")),
+        sa.Column("date", sa.Date(), nullable=False),
+        sa.Column("views", sa.Integer(), default=0),
+    )
+
+def downgrade():
+    op.drop_table("faculty_daily_views")
