@@ -200,3 +200,11 @@ if __name__ == "__main__":
     app = create_app()
     port = int(os.getenv("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+# ---------------------------------------------------------------------
+# Entrypoint for Gunicorn / Render
+# ---------------------------------------------------------------------
+if __name__ == "__main__":
+    app = create_app()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+else:
+    app = create_app()  # ✅ expose app for gunicorn "app_pro:app"
