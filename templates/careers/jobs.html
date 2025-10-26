@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}PittState-Connect | Career Listings{% endblock %}
+{% block content %}
+
+<section class="container mx-auto px-4 py-10">
+  <h1 class="text-4xl font-bold text-crimson mb-6 text-center">Career Opportunities</h1>
+  <p class="text-center text-gray-600 mb-10">Explore job openings, internships, and employer partnerships.</p>
+
+  {% if jobs %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for job in jobs %}
+    <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-gold">
+      <h2 class="text-xl font-semibold text-crimson mb-1">{{ job.title }}</h2>
+      <p class="text-gray-600 text-sm mb-2">{{ job.company }} • {{ job.location }}</p>
+      <p class="text-gray-700 text-sm mb-3">{{ job.description[:120] }}...</p>
+      <div class="flex justify-between items-center">
+        <a href="{{ job.url }}" target="_blank" class="text-gold hover:text-crimson font-semibold transition">
+          View Details →
+        </a>
+        <span class="text-xs text-gray-500">{{ job.posted.strftime('%b %d, %Y') if job.posted else 'Recently posted' }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-gray-500 py-10">
+    <p>No active job postings found at the moment.</p>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}
