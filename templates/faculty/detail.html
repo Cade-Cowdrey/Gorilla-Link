@@ -1,63 +1,109 @@
 {% extends "base.html" %}
-{% block title %}{{ faculty.name }} · Faculty{% endblock %}
+{% block title %}{{ faculty.name }} | PittState-Connect{% endblock %}
 {% block content %}
 
-<section class="max-w-6xl mx-auto text-center px-6 mt-12 mb-12">
-  <h1 class="text-4xl md:text-5xl font-heading font-bold text-[#660000] dark:text-[#C7A008]">{{ faculty.name }}</h1>
-  <p class="text-lg text-gray-600 dark:text-gray-300">{{ faculty.title }}</p>
-  <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-    {{ faculty.department.name if faculty.department }} Department
-  </p>
-  <div class="text-sm text-gray-500 dark:text-gray-400">
-    {% if faculty.email %}
-      <a href="mailto:{{ faculty.email }}" class="text-[#C7A008] hover:underline">{{ faculty.email }}</a>
-    {% endif %}
+<section class="container mx-auto px-4 py-8">
+  <!-- HEADER -->
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-crimson mb-2">{{ faculty.name }}</h1>
+    <p class="text-gray-600 text-lg mb-4">
+      {{ faculty.title or "Faculty Member" }} – {{ faculty.department.name if faculty.department else "Pittsburg State University" }}
+    </p>
+    <div class="flex justify-center gap-4">
+      <a href="{{ safe_url_for('departments_bp.detail', slug=faculty.department.slug) }}"
+         class="px-4 py-2 bg-crimson text-white rounded-xl shadow-md hover:bg-gold hover:text-crimson transition">
+        ← Back to {{ faculty.department.name if faculty.department else "Department" }}
+      </a>
+      <a href="{{ safe_url_for('analytics_bp.index') }}"
+         class="px-4 py-2 bg-gold text-crimson rounded-xl shadow-md hover:bg-crimson hover:text-gold transition">
+        View Analytics
+      </a>
+    </div>
   </div>
-</section>
 
-<section class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-6 mb-20">
-  <div class="card lg:col-span-2">
-    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">Biography</h2>
-    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ faculty.bio or "No bio available." }}</p>
+  <!-- PROFILE SECTION -->
+  <div class="bg-white rounded-2xl shadow-md border-t-4 border-gold p-8 max-w-4xl mx-auto">
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+      <img
+        src="{{ faculty.profile_image_url or url_for('static', filename='img/default-avatar.png') }}"
+        alt="{{ faculty.name }}"
+        class="w-40 h-40 rounded-full border border-gray-300 object-cover shadow-sm"
+      >
+      <div class="flex-1 text-left">
+        <h2 class="text-2xl font-semibold text-crimson mb-2">{{ faculty.name }}</h2>
+        <p class="text-gray-600 mb-4">{{ faculty.title or "Faculty Member" }}</p>
 
+        <ul class="space-y-2 text-sm text-gray-700">
+          {% if faculty.email %}
+          <li><strong>Email:</strong> <a href="mailto:{{ faculty.email }}" class="text-gold hover:text-crimson transition">{{ faculty.email }}</a></li>
+          {% endif %}
+          {% if faculty.phone %}
+          <li><strong>Phone:</strong> {{ faculty.phone }}</li>
+          {% endif %}
+          {% if faculty.office_location %}
+          <li><strong>Office:</strong> {{ faculty.office_location }}</li>
+          {% endif %}
+          {% if faculty.office_hours %}
+          <li><strong>Office Hours:</strong> {{ faculty.office_hours }}</li>
+          {% endif %}
+          <li><strong>Last Updated:</strong> {{ faculty.updated_at.strftime('%b %d, %Y') if faculty.updated_at else "Recently" }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- BIO -->
+    <div class="mt-8 border-t border-gray-200 pt-6">
+      <h3 class="text-xl font-semibold text-crimson mb-3">About {{ faculty.name.split(' ')[0] }}</h3>
+      <p class="text-gray-700 leading-relaxed">
+        {{ faculty.bio or "This faculty member's biography is not yet available. Please check back soon for updates." }}
+      </p>
+    </div>
+
+    <!-- RESEARCH INTERESTS -->
     {% if faculty.research_interests %}
-      <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008] mt-6 mb-2">Research Interests</h3>
-      <p class="text-gray-700 dark:text-gray-300">{{ faculty.research_interests }}</p>
-    {% endif %}
-
-    {% if faculty.publications and faculty.publications|length %}
-      <h3 class="text-lg font-semibold text-[#660000] dark:text-[#C7A008] mt-6 mb-2">Publications</h3>
-      <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
-        {% for pub in faculty.publications %}
-          <li>{{ pub.title }} ({{ pub.year or "n.d." }})</li>
+    <div class="mt-8 border-t border-gray-200 pt-6">
+      <h3 class="text-xl font-semibold text-crimson mb-3">Research Interests</h3>
+      <ul class="list-disc pl-6 text-gray-700 space-y-1">
+        {% for topic in faculty.research_interests.split(',') %}
+        <li>{{ topic.strip() }}</li>
         {% endfor %}
       </ul>
+    </div>
     {% endif %}
-  </div>
 
-  <div class="card">
-    <h2 class="text-xl font-bold text-[#660000] dark:text-[#C7A008] mb-3">Courses</h2>
-    {% if faculty.courses and faculty.courses|length %}
-      <ul class="space-y-2 text-gray-700 dark:text-gray-300">
-        {% for c in faculty.courses %}
-          <li>{{ c.code }} — {{ c.name }} ({{ c.semester }})</li>
+    <!-- COURSES TAUGHT -->
+    {% if faculty.courses_taught %}
+    <div class="mt-8 border-t border-gray-200 pt-6">
+      <h3 class="text-xl font-semibold text-crimson mb-3">Courses Taught</h3>
+      <ul class="list-disc pl-6 text-gray-700 space-y-1">
+        {% for course in faculty.courses_taught.split(',') %}
+        <li>{{ course.strip() }}</li>
         {% endfor %}
       </ul>
-    {% else %}
-      <p class="text-gray-600 dark:text-gray-400">No courses listed.</p>
+    </div>
     {% endif %}
-  </div>
-</section>
 
-<!-- CTA -->
-<section class="text-center py-16 mt-20 bg-[#660000] dark:bg-[#111] text-white">
-  <h2 class="text-3xl font-bold mb-4">Connect with Alumni</h2>
-  <p class="max-w-2xl mx-auto text-gray-200 mb-8">
-    Discover alumni from {{ faculty.department.name if faculty.department else "this department" }}
-    who pursued related fields.
-  </p>
-  <a href="{{ url_for('alumni.dashboard', dept=faculty.department.slug if faculty.department else '') }}"
-     class="btn-secondary">View Related Alumni →</a>
+    <!-- ANALYTICS CARD -->
+    <div class="mt-10 border-t border-gray-200 pt-6">
+      <h3 class="text-xl font-semibold text-crimson mb-3">Engagement & Analytics</h3>
+      <div class="bg-gray-50 rounded-xl p-4 shadow-inner flex flex-col md:flex-row justify-between items-center">
+        <div class="text-gray-700 text-sm">
+          <p>Profile views this month: <span class="font-semibold text-crimson">{{ faculty.views or 0 }}</span></p>
+          <p>Average time spent: <span class="font-semibold text-gold">{{ faculty.avg_time or "—" }}</span> sec</p>
+        </div>
+        <a href="{{ safe_url_for('analytics_bp.index') }}"
+           class="mt-4 md:mt-0 px-4 py-2 bg-gold text-crimson rounded-lg font-semibold hover:bg-crimson hover:text-gold transition shadow">
+          Open Full Analytics →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER NAV -->
+  <div class="mt-12 text-center text-gray-500 text-sm">
+    <p>Back to <a href="{{ safe_url_for('departments_bp.detail', slug=faculty.department.slug) }}" class="text-gold hover:text-crimson font-semibold">Department Page</a></p>
+    <p class="mt-2">PittState-Connect © {{ now().year }}</p>
+  </div>
 </section>
 
 {% endblock %}
