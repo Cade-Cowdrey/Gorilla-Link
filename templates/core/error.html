@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} | PittState-Connect{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-crimson-700 to-yellow-500 text-white p-6 text-center">
+    <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-24 h-24 mb-4 animate-pulse drop-shadow-xl">
+    <h1 class="text-6xl font-extrabold mb-2">Error {{ code }}</h1>
+    <p class="text-xl mb-8">{{ message or "Something went wrong. Please try again later." }}</p>
+
+    <div class="flex gap-4">
+        <a href="{{ url_for('core_bp.home') }}" class="px-6 py-3 bg-white text-crimson-700 rounded-xl font-semibold shadow-lg hover:bg-yellow-200 transition-all">🏠 Return Home</a>
+        <button onclick="window.location.reload()" class="px-6 py-3 bg-yellow-400 text-black rounded-xl font-semibold shadow-lg hover:bg-yellow-500 transition-all">🔄 Try Again</button>
+    </div>
+
+    <footer class="mt-10 text-sm text-white/80">
+        PittState-Connect © {{ now().year if now else 2025 }} | Powered by Pittsburg State University
+    </footer>
+</section>
+{% endblock %}
