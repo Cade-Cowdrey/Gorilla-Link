@@ -1,105 +1,135 @@
-"""
-utils/mail_util.py
--------------------------------------------------------------
-PittState-Connect Mail Utility
--------------------------------------------------------------
-• Queue-first delivery (Redis)
-• Fallback to SendGrid direct-send if MAIL_SYNC_SEND=true
-• HTML auto-templating + Jinja fallback
-• Heartbeat metrics support
-• Safe for production & Render worker environment
-"""
-
 import os
-import json
-from typing import Optional, Dict
+from flask import current_app
+from flask_mail import Message
 from loguru import logger
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, Content
+from extensions import mail, redis_client
 
 
-def get_redis():
+# =========================================================
+# 🦍 PittState-Connect | Unified Mail Utility
+# =========================================================
+
+def send_email(subject, recipients, html_body=None, text_body=None, sender=None, attachments=None):
+    """
+    Sends an email via SendGrid if available, else Flask-Mail.
+    Supports both HTML + plaintext fallbacks.
+    """
+    sender = sender or os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
+    api_key = os.getenv("SENDGRID_API_KEY")
+
     try:
-        from extensions import redis_client as shared
-        if shared:
-            return shared
-    except Exception:
-        pass
-    url = os.getenv("REDIS_URL") or os.getenv("REDIS_TLS_URL")
-    if not url:
-        return None
-    try:
-        import redis
-        return redis.from_url(url, decode_responses=True, retry_on_timeout=True)
+        # ==========================================
+        # 🔹 Option A: SendGrid (preferred)
+        # ==========================================
+        if api_key:
+            sg = SendGridAPIClient(api_key)
+
+            # Construct email
+            message = Mail(
+                from_email=Email(sender, "PittState-Connect"),
+                to_emails=recipients,
+                subject=subject,
+                html_content=html_body or "",
+            )
+
+            # Add plaintext fallback
+            if text_body:
+                message.add_content(Content("text/plain", text_body))
+
+            # Optional attachments
+            if attachments:
+                for att in attachments:
+                    message.add_attachment(att)
+
+            response = sg.send(message)
+
+            logger.info(f"📧 SendGrid email sent → {recipients} | Status: {response.status_code}")
+            _log_email_event(subject, recipients, "sendgrid", response.status_code)
+            return True
+
+        # ==========================================
+        # 🔹 Option B: Flask-Mail Fallback
+        # ==========================================
+        else:
+            msg = Message(subject, recipients=recipients, sender=sender)
+            if html_body:
+                msg.html = html_body
+            if text_body:
+                msg.body = text_body
+
+            # Add attachments (tuple: (filename, mimetype, data))
+            if attachments:
+                for filename, mimetype, data in attachments:
+                    msg.attach(filename, mimetype, data)
+
+            mail.send(msg)
+            logger.info(f"📬 SMTP email sent → {recipients}")
+            _log_email_event(subject, recipients, "flask_mail", 200)
+            return True
+
     except Exception as e:
-        logger.error("Redis unavailable: {}", e)
-        return None
+        logger.error(f"❌ Email sending failed: {e}")
+        _log_email_event(subject, recipients, "error", 500)
+        return False
 
 
-redis_client = get_redis()
-MAIL_QUEUE_KEY = os.getenv("MAIL_QUEUE_KEY", "queue:mail")
-MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com")
-
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
-MAIL_SYNC_SEND = os.getenv("MAIL_SYNC_SEND", "").lower() in {"1", "true", "yes", "on"}
-
-sg_client = None
-if SENDGRID_API_KEY and MAIL_SYNC_SEND:
+# =========================================================
+# 🧠 Utility for Logging Email Events to Redis
+# =========================================================
+def _log_email_event(subject, recipients, provider, status):
+    """
+    Stores a short email log in Redis for analytics dashboard or later audit.
+    """
     try:
-        from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import From, To, Subject, HtmlContent, Mail
-        sg_client = SendGridAPIClient(SENDGRID_API_KEY)
+        if not redis_client:
+            logger.warning("⚠️ Redis unavailable, skipping email log.")
+            return
+
+        event = {
+            "subject": subject,
+            "recipients": recipients,
+            "provider": provider,
+            "status": status,
+        }
+        redis_client.lpush("email_logs", str(event))
+        redis_client.ltrim("email_logs", 0, 999)  # Keep only last 1000 entries
     except Exception as e:
-        logger.warning("SendGrid init failed: {}", e)
+        logger.warning(f"⚠️ Could not log email event: {e}")
 
 
-def render_html(subject, html_body):
-    return f"""<!DOCTYPE html>
-<html><head><meta charset='utf-8'><title>{subject}</title></head>
-<body style='font-family:Arial,sans-serif;color:#111'>
-{html_body}
-<hr><p style='font-size:12px;color:#555'>PittState-Connect • Automated Mail</p>
-</body></html>"""
-
-
-def send_direct(to_email, subject, html, sender):
-    if not sg_client:
-        return False
+# =========================================================
+# 🕒 Optional Scheduled Reports / Nightly Summary
+# =========================================================
+def send_nightly_summary():
+    """
+    Sends a nightly summary to admins showing number of emails sent via SendGrid/SMTP.
+    (Optional APScheduler job)
+    """
     try:
-        msg = Mail(from_email=From(sender), to_emails=To(to_email),
-                   subject=Subject(subject), html_content=HtmlContent(html))
-        resp = sg_client.send(msg)
-        ok = 200 <= int(resp.status_code) < 300
-        logger.info("Direct SendGrid sent -> {} [{}]", to_email, resp.status_code)
-        return ok
+        if not redis_client:
+            logger.warning("⚠️ Redis unavailable for nightly summary.")
+            return
+
+        logs = redis_client.lrange("email_logs", 0, -1)
+        total = len(logs)
+        sg_count = sum("sendgrid" in str(l) for l in logs)
+        smtp_count = sum("flask_mail" in str(l) for l in logs)
+
+        html = f"""
+        <h3 style="color:#9E1B32;">📊 PittState-Connect Email Summary</h3>
+        <p>Total sent: <strong>{total}</strong></p>
+        <p>SendGrid: {sg_count} | SMTP: {smtp_count}</p>
+        """
+
+        send_email(
+            subject="PittState-Connect Nightly Email Report",
+            recipients=[os.getenv("ADMIN_EMAIL", "admin@pittstateconnect.com")],
+            html_body=html,
+            text_body=f"Total sent: {total}\nSendGrid: {sg_count}\nSMTP: {smtp_count}",
+        )
+
+        logger.info("🌙 Nightly email summary sent successfully.")
     except Exception as e:
-        logger.error("Direct SendGrid failed: {}", e)
-        return False
-
-
-def enqueue_email(to_email: str, subject: str, html_body: str,
-                  sender: Optional[str] = None,
-                  headers: Optional[Dict[str, str]] = None) -> bool:
-    if not to_email or "@" not in to_email:
-        logger.warning("Invalid email: {}", to_email)
-        return False
-
-    sender = sender or MAIL_DEFAULT_SENDER
-    html = render_html(subject, html_body)
-
-    if MAIL_SYNC_SEND:
-        return send_direct(to_email, subject, html, sender)
-
-    if not redis_client:
-        logger.warning("Redis not configured; cannot enqueue mail -> {}", to_email)
-        return False
-
-    payload = {"to": to_email, "subject": subject, "html": html, "sender": sender}
-    if headers:
-        payload["headers"] = headers
-
-    try:
-        redis_client.lpush(MAIL_QUEUE_KEY, json.dumps(payload))
-        logger.info("Enqueued mail -> {}", to_email)
-        return True
-    except Exception as e:
-        logger.error("Failed to enqueue mail: {}", e)
-        return False
+        logger.error(f"❌ Failed nightly summary: {e}")
