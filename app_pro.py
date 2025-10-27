@@ -1,108 +1,153 @@
 """
-PittState-Connect | Production Application Entrypoint
-Fully PSU-branded, production-ready Flask app for Render.
-Includes caching, Redis, CSRF, limiter, scheduler, analytics, and error handlers.
+PittState-Connect | Production Entry Point
+This file bootstraps the Flask application for Render deployment.
+It auto-detects environment configuration, initializes all extensions,
+registers blueprints, sets up global error handling, and starts the app.
 """
 
 import os
 from loguru import logger
-from flask import Flask, render_template, redirect, url_for
-from extensions import (
-    db, migrate, login_manager, mail, cache,
-    limiter, scheduler, redis_client, csrf, init_extensions
-)
+from flask import Flask, render_template, redirect, url_for, jsonify
+from config import load_config
+from extensions import init_extensions, db, scheduler
+from datetime import datetime
 
 # ======================================================
-# 🧭 Config Selection
-# ======================================================
-from config.config_production import config_production
-
-# ======================================================
-# 🦍 App Factory
+# ⚙️ APP FACTORY
 # ======================================================
 def create_app():
-    app = Flask(__name__, static_folder="static", template_folder="templates")
+    """Create and configure the Flask application instance."""
+    app = Flask(__name__, template_folder="templates", static_folder="static")
 
-    # Load configuration
-    app.config.from_object(config_production)
+    # Load configuration dynamically (production/dev/test)
+    load_config(app)
 
-    # Initialize all Flask extensions
+    # Initialize all extensions (db, redis, limiter, csrf, etc.)
     init_extensions(app)
 
-    # ==================================================
-    # 🧱 Blueprints Auto-Registration
-    # ==================================================
-    from blueprints import register_blueprints
+    # Register blueprints automatically
     register_blueprints(app)
 
-    # ==================================================
-    # ⚙️ Error Handlers
-    # ==================================================
-    @app.errorhandler(401)
-    def error_401(_):
-        return render_template("errors/401.html"), 401
+    # Register error handlers
+    register_error_handlers(app)
 
-    @app.errorhandler(403)
-    def error_403(_):
-        return render_template("errors/403.html"), 403
-
-    @app.errorhandler(404)
-    def error_404(_):
-        return render_template("errors/404.html"), 404
-
-    @app.errorhandler(429)
-    def error_429(_):
-        return render_template("errors/429.html"), 429
-
-    @app.errorhandler(500)
-    def error_500(_):
-        return render_template("errors/500.html"), 500
-
-    # ==================================================
-    # 🧰 Maintenance Mode
-    # ==================================================
-    @app.before_request
-    def check_maintenance_mode():
-        if app.config.get("MAINTENANCE_MODE"):
+    # Maintenance mode check
+    if app.config.get("MAINTENANCE_MODE", False):
+        logger.warning("🚧 App running in maintenance mode.")
+        @app.before_request
+        def maintenance_check():
             return render_template("errors/maintenance.html"), 503
 
-    # ==================================================
-    # 🚧 Coming Soon Placeholder
-    # ==================================================
-    @app.route("/coming-soon")
-    def coming_soon():
-        return render_template("errors/coming_soon.html")
-
+    logger.info("🦍 PittState-Connect Flask app created successfully.")
     return app
 
 
 # ======================================================
-# 🧠 App Instance
+# 📦 BLUEPRINT AUTO-LOADER
+# ======================================================
+def register_blueprints(app):
+    """Auto-detect and register all blueprints from the blueprints folder."""
+    import importlib
+    import pkgutil
+
+    blueprint_dir = "blueprints"
+    for _, module_name, _ in pkgutil.iter_modules([blueprint_dir]):
+        try:
+            module = importlib.import_module(f"{blueprint_dir}.{module_name}.routes")
+            if hasattr(module, "bp"):
+                app.register_blueprint(module.bp)
+                logger.info(f"🧩 Registered blueprint: {module_name}")
+        except Exception as e:
+            logger.error(f"❌ Failed to register blueprint {module_name}: {e}")
+
+
+# ======================================================
+# ❌ GLOBAL ERROR HANDLERS
+# ======================================================
+def register_error_handlers(app):
+    """Attach PSU-branded error templates for common HTTP errors."""
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        logger.warning(f"⚠️ 404 Not Found: {error}")
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        logger.warning(f"🚫 403 Forbidden: {error}")
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(401)
+    def unauthorized_error(error):
+        logger.warning(f"🔐 401 Unauthorized: {error}")
+        return render_template("errors/401.html"), 401
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"💥 500 Internal Server Error: {error}")
+        db.session.rollback()
+        return render_template("errors/500.html"), 500
+
+    @app.errorhandler(429)
+    def rate_limit_error(error):
+        logger.warning(f"⏳ 429 Too Many Requests: {error}")
+        return render_template("errors/429.html"), 429
+
+    logger.info("✅ PSU error handlers registered successfully.")
+
+
+# ======================================================
+# 🧠 HEALTH CHECK + AI ROUTES (optional enhancements)
+# ======================================================
+def register_health_routes(app):
+    """Simple internal API routes for diagnostics and AI endpoint."""
+
+    @app.route("/health")
+    def health_check():
+        return jsonify({
+            "status": "healthy",
+            "time": datetime.utcnow().isoformat(),
+            "analytics_enabled": app.config.get("ENABLE_ANALYTICS"),
+            "ai_assistant_enabled": app.config.get("ENABLE_AI_ASSISTANT"),
+        }), 200
+
+    if app.config.get("ENABLE_AI_ASSISTANT"):
+        from openai import OpenAI
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+        
+        @app.route("/ai/ask", methods=["POST"])
+        def ai_assistant():
+            from flask import request
+            query = request.json.get("query", "")
+            if not query:
+                return jsonify({"error": "Missing query"}), 400
+            try:
+                completion = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": query}],
+                )
+                answer = completion.choices[0].message.content
+                return jsonify({"response": answer})
+            except Exception as e:
+                logger.error(f"🤖 AI Assistant error: {e}")
+                return jsonify({"error": str(e)}), 500
+
+
+# ======================================================
+# 🚀 APP INITIALIZATION
 # ======================================================
 app = create_app()
+register_health_routes(app)
+
+logger.info(f"🚀 PittState-Connect launching in {app.config.get('ENV', 'production').title()} mode.")
+logger.info(f"🗄️  Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
+logger.info(f"🕒 Scheduler active: {scheduler.running}")
+logger.info("✅ Application startup complete.")
 
 # ======================================================
-# 🧾 Logging Setup
-# ======================================================
-log_level = app.config.get("LOG_LEVEL", "INFO").upper()
-logger.remove()
-logger.add(
-    sink=lambda msg: print(msg, end=""),
-    level=log_level,
-    colorize=True,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <cyan>{message}</cyan>"
-)
-
-# Use safe fallback for environment name
-env_name = getattr(app, "env", "production").title()
-
-logger.info(f"🚀 PittState-Connect launching in {env_name} mode.")
-logger.info(f"📦 Database: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
-logger.info(f"🔗 Redis: {app.config.get('REDIS_URL')}")
-logger.info(f"📬 Mail: {app.config.get('MAIL_SERVER')}")
-
-# ======================================================
-# ✅ WSGI Entry Point
+# 🔥 WSGI Entry Point
 # ======================================================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+    port = int(os.getenv("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
