@@ -1,96 +1,76 @@
-# extensions.py
-# Shared extensions for PittState-Connect (production-ready)
+"""
+extensions.py
+--------------------------------------------------
+Centralized Flask extension initialization for
+PittState-Connect production environment.
+--------------------------------------------------
+"""
 
-from __future__ import annotations
-import os, redis
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
 from flask_mail import Mail
 from flask_login import LoginManager
 from flask_apscheduler import APScheduler
-from flask_wtf import CSRFProtect
+from redis import Redis
 from flask_cors import CORS
 from loguru import logger
 
-
-# --------------------------------------------------------------------
-# 🧩 Database
-# --------------------------------------------------------------------
+# Flask extensions
 db = SQLAlchemy()
 migrate = Migrate()
-
-
-# --------------------------------------------------------------------
-# 🧠 Caching + Redis Client
-# --------------------------------------------------------------------
-# Flask-Caching wrapper for Redis; redis_client is direct low-level access
-
-cache = Cache(config={
-    "CACHE_TYPE": os.getenv("CACHE_TYPE", "RedisCache"),
-    "CACHE_DEFAULT_TIMEOUT": 300,
-    "CACHE_KEY_PREFIX": "psu_",
-    "CACHE_REDIS_URL": os.getenv("REDIS_URL", os.getenv("REDIS_TLS_URL", "redis://localhost:6379/0")),
-})
-
-redis_client = None
-try:
-    redis_url = os.getenv("REDIS_URL") or os.getenv("REDIS_TLS_URL")
-    if redis_url:
-        redis_client = redis.StrictRedis.from_url(redis_url, decode_responses=True)
-        redis_client.ping()
-        logger.info("✅ Connected to Redis successfully.")
-    else:
-        logger.warning("⚠️ No REDIS_URL configured; redis_client=None")
-except Exception as e:
-    logger.warning(f"⚠️ Redis connection failed: {e}")
-    redis_client = None
-
-
-# --------------------------------------------------------------------
-# 📬 Email (SendGrid or SMTP)
-# --------------------------------------------------------------------
+cache = Cache()
 mail = Mail()
-mail_settings = {
-    "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.sendgrid.net"),
-    "MAIL_PORT": int(os.getenv("MAIL_PORT", 587)),
-    "MAIL_USE_TLS": True,
-    "MAIL_USERNAME": os.getenv("SENDGRID_USERNAME", "apikey"),
-    "MAIL_PASSWORD": os.getenv("SENDGRID_API_KEY"),
-    "MAIL_DEFAULT_SENDER": os.getenv("MAIL_DEFAULT_SENDER", "noreply@pittstateconnect.com"),
-}
-mail_configured = all(mail_settings.values())
-if not mail_configured:
-    logger.warning("⚠️ Incomplete mail configuration. Check SENDGRID_API_KEY or MAIL_* vars.")
-
-
-# --------------------------------------------------------------------
-# 🔒 Security, Auth, and CORS
-# --------------------------------------------------------------------
-csrf = CSRFProtect()
-login_manager = LoginManager()
-login_manager.login_view = "auth_bp.login"
-login_manager.login_message_category = "info"
-CORS = CORS  # exported for app_pro
-
-
-# --------------------------------------------------------------------
-# 🕒 APScheduler
-# --------------------------------------------------------------------
 scheduler = APScheduler()
-scheduler.api_enabled = False
+login_manager = LoginManager()
+redis_client = None
 
 
-# --------------------------------------------------------------------
-# 🔧 Initialization helper (optional)
-# --------------------------------------------------------------------
 def init_extensions(app):
-    """Initialize all extensions within app context."""
+    """Initialize all Flask extensions with proper config."""
+    global redis_client
+
+    # --- Database ---
     db.init_app(app)
     migrate.init_app(app, db)
-    cache.init_app(app)
+    logger.info("✅ Database & Migrations initialized.")
+
+    # --- Cache / Redis ---
+    try:
+        redis_client = Redis.from_url(app.config.get("CACHE_REDIS_URL"))
+        redis_client.ping()
+        cache.init_app(app)
+        logger.info("✅ Connected to Redis successfully.")
+    except Exception as e:
+        redis_client = None
+        logger.warning(f"⚠️ Redis connection failed: {e}")
+
+    # --- Mail ---
     mail.init_app(app)
-    csrf.init_app(app)
-    login_manager.init_app(app)
+    logger.info("📧 Mail service configured (SendGrid/Flask-Mail).")
+
+    # --- Scheduler ---
     scheduler.init_app(app)
-    logger.info("✅ All extensions initialized for PittState-Connect.")
+    scheduler.start()
+    logger.info("🕒 APScheduler started successfully.")
+
+    # --- CORS ---
+    CORS(app, resources={r"/*": {"origins": "*"}})
+    logger.info("🌐 CORS enabled for all routes.")
+
+    # --- Login ---
+    login_manager.init_app(app)
+    login_manager.login_view = "auth_bp.login"
+    login_manager.session_protection = "strong"
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from models import User
+        return User.query.get(int(user_id))
+
+    logger.info("🔐 Login manager initialized.")
+
+
+def get_redis_client():
+    """Expose redis_client safely."""
+    return redis_client
