@@ -1,169 +1,82 @@
+# =========================================================
+# PittState-Connect | Render Deployment Blueprint
+# PSU-branded production configuration with optional enhancements.
+# =========================================================
+
 services:
-  # ===========================================================
-  # 🦍 PittState-Connect — Web Service
-  # ===========================================================
+  # =========================================================
+  # 🦍 MAIN FLASK WEB SERVICE
+  # =========================================================
   - type: web
-    name: pittstate-connect-web
+    name: pittstate-connect
     env: python
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: gunicorn app_pro:app
     plan: starter
-    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_pro:app --workers=4 --threads=2 --timeout=120 --log-level=info
+    autoDeploy: true
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.13
       - key: FLASK_ENV
         value: production
-      - key: FLASK_APP
-        value: app_pro.py
-      - key: LOG_LEVEL
-        value: INFO
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.10.13
       - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
         sync: false
       - key: SECRET_KEY
         sync: false
-      - key: SENDGRID_API_KEY
+      - key: MAIL_USERNAME
         sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_SERVER
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USE_SSL
+        value: false
+      - key: MAIL_DEFAULT_SENDER
+        value: "PittState Connect <noreply@pittstate.edu>"
       - key: OPENAI_API_KEY
         sync: false
-      - key: MAIL_DEFAULT_SENDER
-        value: noreply@pittstateconnect.com
-      - key: CACHE_TYPE
-        value: redis
-      - key: SESSION_TYPE
-        value: redis
-      - key: MAIL_QUEUE_KEY
-        value: queue:mail
-      - key: AI_QUEUE_KEY
-        value: queue:ai
-      - key: REDIS_TLS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-    autoDeploy: true
-    healthCheckPath: /
-    healthCheckTimeout: 30
-    scaling:
-      minInstances: 1
-      maxInstances: 2
-
-  # ===========================================================
-  # ⚙️ Background Worker — Queue Processor
-  # ===========================================================
-  - type: worker
-    name: pittstate-connect-worker
-    env: python
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: python worker.py --with-mail --with-ai --with-cache
-    plan: starter
-    region: oregon
-    autoDeploy: true
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.13
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_NAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
       - key: LOG_LEVEL
-        value: INFO
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-      - key: REDIS_TLS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-      - key: MAIL_QUEUE_KEY
-        value: queue:mail
-      - key: AI_QUEUE_KEY
-        value: queue:ai
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: MAIL_DEFAULT_SENDER
-        value: noreply@pittstateconnect.com
-      - key: WORKER_HEARTBEAT_KEY
-        value: worker:heartbeat
-      - key: WORKER_METRICS_KEY
-        value: worker:metrics
-    disk:
-      name: worker-cache
-      mountPath: /data
-      sizeGB: 1
+        value: info
+      - key: PORT
+        value: 10000
+      - key: ENABLE_ANALYTICS
+        value: true
+      - key: ENABLE_AI_ASSISTANT
+        value: true
+      - key: MAINTENANCE_MODE
+        value: false
 
-  # ===========================================================
-  # ⏰ APScheduler Runner — Timed Jobs
-  # ===========================================================
-  - type: worker
-    name: pittstate-connect-scheduler
-    env: python
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: python tools/run_scheduler.py
-    plan: starter
-    region: oregon
-    autoDeploy: true
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.13
-      - key: LOG_LEVEL
-        value: INFO
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-      - key: REDIS_TLS_URL
-        fromService:
-          type: redis
-          name: pittstate-connect-redis
-          property: connectionString
-      - key: MAIL_QUEUE_KEY
-        value: queue:mail
-      - key: AI_QUEUE_KEY
-        value: queue:ai
-      - key: SCHED_HEARTBEAT_KEY
-        value: scheduler:heartbeat
-      - key: SCHED_METRICS_KEY
-        value: scheduler:metrics
-      - key: MAIL_DEFAULT_SENDER
-        value: noreply@pittstateconnect.com
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: CRON_CACHE_WARM
-        value: "*/30 * * * *"
-      - key: CRON_SMARTMATCH
-        value: "0 * * * *"
-      - key: CRON_DAILY_DIGEST
-        value: "0 7 * * *"
-      - key: CRON_SCHOLARSHIP_REMINDERS
-        value: "15 12 * * *"
-      - key: CRON_ANALYTICS_REFRESH
-        value: "*/20 * * * *"
-    disk:
-      name: scheduler-logs
-      mountPath: /logs
-      sizeGB: 1
-
-  # ===========================================================
-  # 🧱 Redis Instance
-  # ===========================================================
+  # =========================================================
+  # ⚙️ REDIS SERVICE (used for caching, limiter, scheduler)
+  # =========================================================
   - type: redis
-    name: pittstate-connect-redis
-    ipAllowList: []
-    maxmemoryPolicy: allkeys-lru
-    plan: free
+    name: pittstate-redis
+    ipAllowList: []  # empty = internal access only (secure)
+    maxmemoryPolicy: noeviction
+
+  # =========================================================
+  # 🗄️ POSTGRES DATABASE SERVICE
+  # =========================================================
+  - type: pserv
+    name: pittstate-postgres
+    env: docker
+    disk:
+      name: data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
+    plan: starter
+    autoDeploy: false
