@@ -1,123 +1,96 @@
-"""
-app_pro.py
---------------------------------------------------
-PittState-Connect | Production Application Entrypoint
-Full Render deployment build with PSU branding,
-secure extensions, blueprint auto-loader, and
-nightly maintenance jobs.
---------------------------------------------------
-"""
-
 import os
-from flask import Flask, render_template, jsonify
 from loguru import logger
-from config import get_config
-from extensions import db, migrate, cache, mail, scheduler, login_manager, init_extensions
-from utils.mail_util import send_nightly_summary
+from flask import Flask, render_template, url_for, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import NotFound, InternalServerError
 
+from extensions import (
+    db, migrate, mail, cache, scheduler, login_manager, csrf, init_extensions, redis_client
+)
 
-# ==================================================
-# 🔧 Factory
-# ==================================================
-def create_app():
-    app = Flask(__name__, static_folder="static", template_folder="templates")
-    app.config.from_object(get_config())
-    init_extensions(app)
-    register_blueprints(app)
-    register_error_handlers(app)
-    register_scheduler_jobs(app)
-    return app
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
+config_name = os.getenv("FLASK_CONFIG", "config.config_production")
+app.config.from_object(config_name)
+logger.info(f"🚀 PittState-Connect launching in {config_name}")
 
-# ==================================================
-# 🧩 Blueprints Loader (with safe stubbing)
-# ==================================================
-def register_blueprints(app):
-    from importlib import import_module
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
-    blueprints = [
-        ("blueprints.core.routes", "core_bp"),
-        ("blueprints.auth.routes", "auth_bp"),
-        ("blueprints.profile.routes", "profile_bp"),
-        ("blueprints.departments.routes", "departments_bp"),
-        ("blueprints.faculty.routes", "faculty_bp"),
-        ("blueprints.scholarships.routes", "scholarships_bp"),
-        ("blueprints.analytics.routes", "analytics_bp"),
-    ]
+init_extensions(app)
 
-    for module_path, bp_name in blueprints:
-        try:
-            mod = import_module(module_path)
-            bp = getattr(mod, bp_name)
-            app.register_blueprint(bp)
-            logger.info(f"✅ Registered {bp_name} ({module_path})")
-        except Exception as e:
-            from flask import Blueprint
-            stub = Blueprint(bp_name, __name__, url_prefix=f"/{bp_name.replace('_bp','')}")
-            logger.warning(f"⚠️ Using STUB blueprint for {bp_name} ({module_path}). Reason: {e}")
-            app.register_blueprint(stub)
-
-
-# ==================================================
-# 🚨 Error Handlers
-# ==================================================
-def register_error_handlers(app):
-    @app.errorhandler(404)
-    def not_found(e):
-        logger.warning(f"404 Error: {e}")
-        return render_template("errors/404.html"), 404
-
-    @app.errorhandler(500)
-    def internal_error(e):
-        logger.error(f"500 Error: {e}")
-        return render_template("errors/500.html"), 500
-
-    @app.errorhandler(Exception)
-    def unhandled(e):
-        logger.exception(f"Unhandled Exception: {e}")
-        return jsonify({"error": "Internal Server Error"}), 500
-
-
-# ==================================================
-# 🌙 Nightly Jobs
-# ==================================================
-def register_scheduler_jobs(app):
+def safe_url_for(endpoint_name, **values):
     try:
-        scheduler.add_job(
-            id="nightly_email_summary",
-            func=send_nightly_summary,
-            trigger="cron",
-            hour=2,
-            minute=0,
-        )
-        logger.info("🌙 Nightly email summary job registered.")
+        return url_for(endpoint_name, **values)
+    except Exception:
+        return "#"
+
+app.jinja_env.globals["safe_url_for"] = safe_url_for
+
+def register_blueprint_safely(import_path, bp_name, url_prefix=None):
+    try:
+        module = __import__(import_path, fromlist=[bp_name])
+        bp = getattr(module, bp_name)
+        app.register_blueprint(bp, url_prefix=url_prefix)
+        logger.info(f"✅ Loaded blueprint: {bp_name} ({url_prefix or '/'})")
     except Exception as e:
-        logger.warning(f"⚠️ Could not schedule nightly jobs: {e}")
+        from flask import Blueprint
+        stub = Blueprint(bp_name, __name__)
 
+        @stub.route("/")
+        def stub_index():
+            return jsonify({"stub": True, "blueprint": bp_name, "reason": str(e)}), 501
 
-# ==================================================
-# 🧠 AI / Analytics Placeholder (Optional Phase 3+)
-# ==================================================
-@app_pro_error = None
+        app.register_blueprint(stub, url_prefix=url_prefix)
+        logger.warning(f"⚠️ Using STUB blueprint for {bp_name} ({url_prefix}): {e}")
+
+register_blueprint_safely("blueprints.core.routes", "core_bp", "/")
+register_blueprint_safely("blueprints.auth.routes", "auth_bp", "/auth")
+register_blueprint_safely("blueprints.careers.routes", "careers_bp", "/careers")
+register_blueprint_safely("blueprints.departments.routes", "departments_bp", "/departments")
+register_blueprint_safely("blueprints.scholarships.routes", "scholarships_bp", "/scholarships")
+register_blueprint_safely("blueprints.faculty.routes", "faculty_bp", "/faculty")
+register_blueprint_safely("blueprints.analytics.routes", "analytics_bp", "/analytics")
+register_blueprint_safely("blueprints.alumni.routes", "alumni_bp", "/alumni")
+register_blueprint_safely("blueprints.donor.routes", "donor_bp", "/donor")
+register_blueprint_safely("blueprints.notifications.routes", "notifications_bp", "/notifications")
+
 try:
-    from utils.analytics_util import preload_analytics_cache
-    preload_analytics_cache()
+    scheduler.add_job(
+        id="nightly_analytics_refresh",
+        func="blueprints.analytics.tasks:refresh_insight_cache",
+        trigger="cron",
+        hour=3,
+    )
+    scheduler.add_job(
+        id="faculty_reindex",
+        func="blueprints.faculty.tasks:rebuild_search_index",
+        trigger="cron",
+        hour=4,
+    )
 except Exception as e:
-    app_pro_error = e
-    logger.warning(f"⚠️ Analytics preload skipped: {e}")
+    logger.warning(f"⚠️ Skipped scheduler job registration: {e}")
 
+@app.errorhandler(NotFound)
+def error_404(e):
+    logger.error("404 Error: Page not found")
+    return render_template("errors/404.html"), 404
 
-# ==================================================
-# 🦍 App Instance
-# ==================================================
-app = create_app()
+@app.errorhandler(InternalServerError)
+def error_500(e):
+    logger.exception("500 Error: Internal Server Error")
+    return render_template("errors/500.html"), 500
 
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok", "app": "PittState-Connect"})
+@app.route("/maintenance")
+def maintenance_page():
+    return render_template("errors/maintenance.html"), 503
 
+@app.route("/coming-soon")
+def coming_soon_page():
+    return render_template("errors/coming_soon.html"), 200
+
+@app.route("/healthz")
+def healthz():
+    return jsonify({"status": "ok", "redis": bool(redis_client)}), 200
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))
-    logger.info(f"🚀 Starting PittState-Connect on port {port}")
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)), debug=False)
