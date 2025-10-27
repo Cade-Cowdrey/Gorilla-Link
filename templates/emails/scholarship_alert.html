@@ -1,0 +1,18 @@
+{% extends "emails/base_email.html" %}
+{% block title %}New Scholarship Match!{% endblock %}
+{% block content %}
+  <h2 style="color:#9E1B32;">🎓 Great News, {{ user.name }}!</h2>
+  <p>We found a scholarship that perfectly matches your profile:</p>
+
+  <div style="background-color:#FFF8E1; border-left:6px solid #FFCC33; padding:15px; margin:20px 0;">
+    <h3 style="margin:0;">{{ scholarship.name }}</h3>
+    <p style="margin:5px 0 0;">Deadline: <strong>{{ scholarship.deadline }}</strong></p>
+    <p style="margin:5px 0;">Amount: <strong>${{ scholarship.amount }}</strong></p>
+  </div>
+
+  <p style="text-align:center; margin:25px 0;">
+    <a href="{{ scholarship_url }}" style="background-color:#FFCC33; color:#9E1B32; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold;">Apply Now</a>
+  </p>
+
+  <p>You can view all your scholarship matches anytime on the PittState-Connect platform.</p>
+{% endblock %}
