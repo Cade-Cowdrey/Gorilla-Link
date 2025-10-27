@@ -1,0 +1,128 @@
+/* ============================================================
+   🦍 PittState-Connect | PSU Branded Tailwind Theme Layer
+   Version: Production-2025.10
+   Author: Cade Cowdrey | PSU Connect Dev
+   ============================================================ */
+
+/* Tailwind Preflight Base */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================
+   GLOBAL VARIABLES & FONTS
+   =========================== */
+:root {
+  --psu-crimson: #9E1B32;
+  --psu-gold: #FFCC33;
+  --psu-black: #1C1C1C;
+  --psu-gray: #F4F4F4;
+  --psu-dark-gray: #2C2C2C;
+  --psu-gold-gradient: linear-gradient(90deg, #FFCC33 0%, #FFD84D 50%, #FFEA70 100%);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--psu-gray);
+    color: var(--psu-black);
+    @apply transition-colors duration-300;
+  }
+  .dark body {
+    background-color: var(--psu-black);
+    color: white;
+  }
+}
+
+/* ===========================
+   PSU BRAND UTILITIES
+   =========================== */
+@layer components {
+  /* 💛 PSU Gold Button */
+  .btn-gold {
+    @apply px-4 py-2 rounded-md font-semibold shadow-md bg-[var(--psu-gold)] text-[var(--psu-crimson)] hover:bg-yellow-400 transition-all;
+  }
+
+  /* ❤️ PSU Crimson Button */
+  .btn-crimson {
+    @apply px-4 py-2 rounded-md font-semibold shadow-md bg-[var(--psu-crimson)] text-white hover:bg-[#B52E44] transition-all;
+  }
+
+  /* 🖤 PSU Outline Button */
+  .btn-outline {
+    @apply px-4 py-2 rounded-md border font-semibold text-[var(--psu-crimson)] border-[var(--psu-crimson)] hover:bg-[var(--psu-crimson)] hover:text-white transition-all;
+  }
+
+  /* 🎓 PSU Gradient Header */
+  .hero-gradient {
+    background: linear-gradient(135deg, var(--psu-crimson) 0%, var(--psu-gold) 90%);
+    @apply text-white text-center py-12 md:py-16 rounded-2xl shadow-xl;
+  }
+
+  /* 🧠 PSU Card Style */
+  .card {
+    @apply bg-white dark:bg-[var(--psu-dark-gray)] rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all;
+  }
+
+  /* 🦍 PSU Navbar Link */
+  .nav-link {
+    @apply text-sm font-medium hover:text-[var(--psu-gold)] transition-all;
+  }
+
+  /* ⚡ PSU Section Titles */
+  .section-title {
+    @apply text-3xl md:text-4xl font-extrabold text-[var(--psu-crimson)] dark:text-[var(--psu-gold)] mb-6;
+  }
+
+  /* 🟡 PSU Gradient Divider */
+  .divider {
+    height: 4px;
+    width: 120px;
+    background: var(--psu-gold-gradient);
+    margin: 0 auto 2rem;
+    border-radius: 9999px;
+  }
+
+  /* 🌙 Dark Mode Background */
+  .dark-section {
+    @apply bg-[var(--psu-dark-gray)] text-white;
+  }
+}
+
+/* ===========================
+   ANIMATIONS
+   =========================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Smooth hover scale for buttons/cards */
+.hover-scale {
+  transition: transform 0.3s ease-in-out;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* ===========================
+   RESPONSIVE HELPERS
+   =========================== */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-select {
+    user-select: none;
+  }
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+}
