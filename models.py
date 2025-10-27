@@ -1,15 +1,16 @@
 """
-PittState-Connect | Models
-Unified database schema for all user, post, event, scholarship, and analytics entities.
+PittState-Connect | Unified Database Models
+Defines all schema entities for users, departments, posts, events, groups,
+scholarships, analytics logging, and more.
 """
 
 from datetime import datetime
-from extensions import db
 from flask_login import UserMixin
+from extensions import db
 
 
 # ======================================================
-# 👤 USER MODEL
+# 👤 USER
 # ======================================================
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,11 +26,11 @@ class User(db.Model, UserMixin):
     events = db.relationship("Event", backref="organizer", lazy=True)
 
     def full_name(self):
-        return f"{self.first_name} {self.last_name}".strip()
+        return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
 
 # ======================================================
-# 🏫 DEPARTMENTS & FACULTY
+# 🏫 DEPARTMENT & FACULTY
 # ======================================================
 class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,6 +38,7 @@ class Department(db.Model):
     description = db.Column(db.Text)
     faculty = db.relationship("Faculty", backref="department", lazy=True)
     users = db.relationship("User", backref="department", lazy=True)
+    scholarships = db.relationship("Scholarship", backref="department", lazy=True)
 
 
 class Faculty(db.Model):
@@ -61,7 +63,7 @@ class Event(db.Model):
 
 
 # ======================================================
-# 💬 POSTS (FEED)
+# 💬 POSTS & LIKES
 # ======================================================
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,7 +81,7 @@ class Like(db.Model):
 
 
 # ======================================================
-# 🫱 CONNECTIONS (NETWORK)
+# 🫱 CONNECTIONS
 # ======================================================
 class Connection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -90,7 +92,17 @@ class Connection(db.Model):
 
 
 # ======================================================
-# 🧑‍🎓 SCHOLARSHIPS
+# 👥 GROUPS
+# ======================================================
+class Group(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150))
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ======================================================
+# 🎓 SCHOLARSHIPS
 # ======================================================
 class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -103,7 +115,7 @@ class Scholarship(db.Model):
 
 
 # ======================================================
-# 🏆 STORIES / SUCCESS POSTS
+# 🏆 STORIES
 # ======================================================
 class Story(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -114,7 +126,7 @@ class Story(db.Model):
 
 
 # ======================================================
-# 📊 ANALYTICS LOGGING
+# 📊 ANALYTICS
 # ======================================================
 class PageView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
