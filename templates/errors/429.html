@@ -1,8 +1,6 @@
-{% extends "base.html" %}
-{% block title %}Slow down · PittState-Connect{% endblock %}
-{% block content %}
-<div class="alert alert-warning shadow-sm">
-  <h4 class="alert-heading">Too many requests</h4>
-  <p>Please wait a moment and try again.</p>
-</div>
-{% endblock %}
+{% extends "errors/base_error.html" %}
+{% set title = "429 Too Many Requests | PittState-Connect" %}
+{% set code = 429 %}
+{% set heading = "Too Many Requests" %}
+{% set message = "You’re doing that too fast — please slow down and try again in a moment." %}
+{% set icon = "gauge" %}
