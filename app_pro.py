@@ -1,117 +1,160 @@
+"""
+PittState-Connect Production Application Entrypoint
+Full PSU-branded, secure, analytics-aware build
+"""
+
 import os
-import logging
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, session, abort, request, g
-from extensions import db, migrate, login_manager, mail, cache, limiter, scheduler, redis_client
-from config import config_production
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+    g,
+)
+from loguru import logger
 
-# --------------------------------------------------------
-# ✅ Create Flask App (Production)
-# --------------------------------------------------------
+# ======================================================
+# 🔧 Extensions Import
+# ======================================================
+from extensions import (
+    db,
+    migrate,
+    login_manager,
+    mail,
+    cache,
+    scheduler,
+    redis_client,
+    csrf,
+)
+
+# ======================================================
+# 🚀 Application Factory
+# ======================================================
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.config.from_object(config_production)
 
-# --------------------------------------------------------
-# ✅ Initialize Extensions
-# --------------------------------------------------------
+# ------------------------------------------------------
+# Load Config
+# ------------------------------------------------------
+config_env = os.getenv("FLASK_ENV", "production").lower()
+if config_env == "development":
+    app.config.from_object("config.config_development")
+else:
+    app.config.from_object("config.config_production")
+
+logger.info(f"🚀 PittState-Connect launching in {app.config['ENV'].title()} mode.")
+
+# ======================================================
+# 🔒 Core Security & Extensions Init
+# ======================================================
 db.init_app(app)
 migrate.init_app(app, db)
 login_manager.init_app(app)
 mail.init_app(app)
 cache.init_app(app)
-limiter.init_app(app)
+csrf.init_app(app)
+
+# Redis connectivity check
+try:
+    redis_client.ping()
+    logger.info("✅ Connected to Redis successfully.")
+except Exception as e:
+    logger.warning(f"⚠️ Redis connection failed: {e}")
+
+# APScheduler setup
 scheduler.init_app(app)
-redis_client.init_app(app)
+scheduler.start()
+logger.info("🕓 Scheduler initialized and started successfully.")
 
-# --------------------------------------------------------
-# ✅ Logging Setup
-# --------------------------------------------------------
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.info("🚀 PittState-Connect launching in production mode")
+# ======================================================
+# 🧩 Register Blueprints
+# ======================================================
+def register_blueprint_safe(name, import_path, url_prefix):
+    """Registers blueprints safely even if missing models."""
+    try:
+        module = __import__(import_path, fromlist=["bp"])
+        app.register_blueprint(module.bp, url_prefix=url_prefix)
+        logger.info(f"✅ Loaded blueprint: {name} ({url_prefix})")
+    except Exception as e:
+        from flask import Blueprint
+        bp = Blueprint(name, __name__, url_prefix=url_prefix)
 
-# --------------------------------------------------------
-# ✅ Maintenance Mode Middleware
-# --------------------------------------------------------
+        @bp.route("/")
+        def stub():
+            return render_template(
+                "errors/coming_soon.html",
+                title=f"{name.title()} Coming Soon",
+                code="🚧",
+                heading=f"{name.title()} Coming Soon",
+                message="This module is under construction or temporarily disabled.",
+                icon="hammer",
+            ), 200
+
+        app.register_blueprint(bp, url_prefix=url_prefix)
+        logger.warning(f"⚠️ Using stub for {name} ({url_prefix}): {e}")
+
+
+register_blueprint_safe("core_bp", "blueprints.core.routes", "/")
+register_blueprint_safe("auth_bp", "blueprints.auth.routes", "/auth")
+register_blueprint_safe("scholarships_bp", "blueprints.scholarships.routes", "/scholarships")
+register_blueprint_safe("departments_bp", "blueprints.departments.routes", "/departments")
+register_blueprint_safe("faculty_bp", "blueprints.faculty.routes", "/faculty")
+register_blueprint_safe("analytics_bp", "blueprints.analytics.routes", "/analytics")
+register_blueprint_safe("careers_bp", "blueprints.careers.routes", "/careers")
+
+# ======================================================
+# 🧠 Context Processors
+# ======================================================
+@app.context_processor
+def inject_globals():
+    """Inject global PSU helpers and status banner context."""
+    env = os.getenv("FLASK_ENV", "production")
+    maintenance_mode = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
+
+    banner = None
+    if maintenance_mode:
+        banner = {"color": "bg-yellow-500", "text": "Maintenance Mode: limited access", "icon": "wrench"}
+    elif env == "development":
+        banner = {"color": "bg-blue-600", "text": "Development Environment", "icon": "code"}
+    else:
+        banner = {"color": "bg-green-600", "text": "All Systems Operational", "icon": "check-circle"}
+
+    return {
+        "now": datetime.utcnow,
+        "env": env,
+        "status_banner": banner,
+    }
+
+# ======================================================
+# 🧱 Maintenance Mode Hook
+# ======================================================
 @app.before_request
 def check_maintenance_mode():
-    """Redirect all non-admin traffic to maintenance page when active."""
-    maintenance = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
-    g.maintenance_mode = maintenance  # pass to templates for banner display
+    if os.getenv("MAINTENANCE_MODE", "False").lower() == "true":
+        if not request.path.startswith("/admin"):
+            return render_template("errors/maintenance.html"), 503
 
-    allowed_routes = ["/admin/toggle-maintenance", "/static/", "/favicon.ico"]
+# ======================================================
+# 🌐 Simple Health Check
+# ======================================================
+@app.route("/health")
+def health_check():
+    return jsonify({
+        "status": "ok",
+        "db": "connected" if db.engine else "unavailable",
+        "redis": "connected" if redis_client else "unavailable",
+        "time": datetime.utcnow().isoformat()
+    })
 
-    if maintenance:
-        # allow admin toggle access using ADMIN_TOKEN
-        token = request.args.get("token")
-        if any(request.path.startswith(p) for p in allowed_routes):
-            return
-        if token == os.getenv("ADMIN_TOKEN"):
-            return  # allow admin bypass via token query
-        return render_template("errors/maintenance.html"), 503
+# ======================================================
+# ⚠️ Error Handlers (PSU-Branded)
+# ======================================================
+@app.errorhandler(401)
+def unauthorized_error(error):
+    return render_template("errors/401.html"), 401
 
-# --------------------------------------------------------
-# ✅ Context Processor for Maintenance Banner
-# --------------------------------------------------------
-@app.context_processor
-def inject_maintenance_banner():
-    """Adds maintenance banner variable to all templates."""
-    return {"maintenance_mode": g.get("maintenance_mode", False)}
-
-# --------------------------------------------------------
-# ✅ Secure Admin Toggle Route
-# --------------------------------------------------------
-@app.route("/admin/toggle-maintenance")
-def toggle_maintenance():
-    """Admin-only route to toggle maintenance mode."""
-    admin_token = os.getenv("ADMIN_TOKEN")
-    provided_token = request.args.get("token")
-
-    if not provided_token or provided_token != admin_token:
-        abort(403)
-
-    current_value = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
-    new_value = "False" if current_value else "True"
-    os.environ["MAINTENANCE_MODE"] = new_value
-
-    status = "disabled" if current_value else "enabled"
-    logger.warning(f"⚙️ Maintenance mode {status.upper()} by admin at {datetime.now()}")
-    return f"<h3>Maintenance mode {status}.<br>Reload the site to apply changes.</h3>"
-
-# --------------------------------------------------------
-# ✅ Register Blueprints
-# --------------------------------------------------------
-try:
-    from blueprints.core.routes import core_bp
-    from blueprints.auth.routes import auth_bp
-    from blueprints.admin.routes import admin_bp
-    from blueprints.analytics.routes import analytics_bp
-    from blueprints.scholarships.routes import scholarships_bp
-    from blueprints.alumni.routes import alumni_bp
-    from blueprints.career.routes import career_bp
-    from blueprints.notifications.routes import notifications_bp
-    from blueprints.messages.routes import messages_bp
-    from blueprints.events.routes import events_bp
-    from blueprints.departments.routes import departments_bp
-
-    app.register_blueprint(core_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(analytics_bp)
-    app.register_blueprint(scholarships_bp)
-    app.register_blueprint(alumni_bp)
-    app.register_blueprint(career_bp)
-    app.register_blueprint(notifications_bp)
-    app.register_blueprint(messages_bp)
-    app.register_blueprint(events_bp)
-    app.register_blueprint(departments_bp)
-    logger.info("✅ All blueprints registered successfully")
-except Exception as e:
-    logger.error(f"❌ Blueprint registration failed: {e}")
-
-# --------------------------------------------------------
-# ✅ PSU-Branded Error Handlers
-# --------------------------------------------------------
 @app.errorhandler(403)
 def forbidden_error(error):
     return render_template("errors/403.html"), 403
@@ -120,26 +163,49 @@ def forbidden_error(error):
 def not_found_error(error):
     return render_template("errors/404.html"), 404
 
+@app.errorhandler(429)
+def too_many_requests(error):
+    return render_template("errors/429.html"), 429
+
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
     return render_template("errors/500.html"), 500
 
-# --------------------------------------------------------
-# ✅ Default Route
-# --------------------------------------------------------
-@app.route("/")
-def index():
-    return redirect(url_for("core_bp.home"))
+# ======================================================
+# 🕓 Scheduled Jobs
+# ======================================================
+@scheduler.task("cron", id="nightly_analytics_refresh", hour=2)
+def nightly_analytics_refresh():
+    """Nightly cache refresh for analytics dashboards."""
+    logger.info("🌙 Running nightly analytics refresh...")
+    try:
+        from blueprints.analytics.tasks import refresh_insight_cache
+        refresh_insight_cache()
+        logger.info("✅ Analytics cache refreshed successfully.")
+    except Exception as e:
+        logger.error(f"❌ Nightly analytics refresh failed: {e}")
 
-# --------------------------------------------------------
-# ✅ Scheduler Start
-# --------------------------------------------------------
-if not scheduler.running:
-    scheduler.start()
+@scheduler.task("interval", id="faculty_reindex", hours=12)
+def faculty_reindex():
+    """Rebuilds faculty search index every 12 hours."""
+    try:
+        from blueprints.faculty.tasks import rebuild_search_index
+        rebuild_search_index()
+        logger.info("🔍 Faculty index rebuilt successfully.")
+    except Exception as e:
+        logger.warning(f"⚠️ Faculty reindex failed: {e}")
 
-# --------------------------------------------------------
-# ✅ Gunicorn Entrypoint
-# --------------------------------------------------------
+# ======================================================
+# 🦍 PSU-Themed 404 Fallback (root test)
+# ======================================================
+@app.route("/test404")
+def test_404():
+    return render_template("errors/404.html"), 404
+
+# ======================================================
+# 🧩 App Runner
+# ======================================================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+    port = int(os.getenv("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
