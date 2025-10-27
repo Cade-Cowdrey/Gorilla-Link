@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Scheduled Maintenance | PittState-Connect{% endblock %}
+{% block content %}
+
+<section class="flex flex-col items-center justify-center min-h-[70vh] text-center py-16">
+  <div class="bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-10 max-w-xl border-t-4 border-[#9E1B32]">
+    <h1 class="text-5xl font-extrabold text-[#9E1B32] mb-4">🛠 Scheduled Maintenance</h1>
+    <p class="text-gray-700 dark:text-gray-200 mb-6 leading-relaxed">
+      PittState-Connect is currently undergoing improvements to make your experience even better.  
+      We’ll be back shortly — hang tight, Gorillas!
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="{{ url_for('core_bp.home') }}"
+         class="px-6 py-3 bg-[#9E1B32] hover:bg-[#B51C38] text-white rounded-xl font-medium transition">
+         🦍 Return Home
+      </a>
+      <a href="mailto:support@pittstateconnect.com"
+         class="px-6 py-3 bg-[#FFC82E] text-gray-900 rounded-xl font-medium hover:bg-[#FFD84E] transition">
+         Notify Me When Back
+      </a>
+    </div>
+  </div>
+
+  <p class="mt-6 text-sm text-gray-400">
+    © {{ current_year or 2025 }} Pittsburg State University · PittState-Connect
+  </p>
+</section>
+
+{% endblock %}
