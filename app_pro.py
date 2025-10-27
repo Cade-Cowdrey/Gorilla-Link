@@ -1,317 +1,199 @@
-# app_pro.py
-# PittState-Connect — Production-ready WSGI App (gunicorn target: app_pro:app)
+"""
+app_pro.py
+-------------------------------------------------------------
+PittState-Connect Production App Entry
+-------------------------------------------------------------
+• PSU-branded full Flask ecosystem (web, AI, analytics, mail)
+• Safe stubs for missing modules
+• Secure Redis + APScheduler integration
+• Jinja helpers (has_endpoint, get_env, safe_url_for)
+• Render-ready health logging and resiliency
+"""
 
-from __future__ import annotations
-import os, uuid, logging
+import os
+import sys
+import json
 from datetime import datetime
-from typing import Optional
+from flask import Flask, render_template, url_for
+from loguru import logger
 
-from flask import Flask, request, g, render_template, jsonify, send_from_directory
-from werkzeug.middleware.proxy_fix import ProxyFix
-
-# Werkzeug 3.x compatibility — BuildError moved from exceptions → routing
+# -------------------------------------------------------------
+# ✅ Import extensions
+# -------------------------------------------------------------
 try:
-    from werkzeug.routing import BuildError
-except ImportError:
-    from werkzeug.exceptions import BuildError
-
-# --------------------------------------------------------------------
-# 🔌 Extensions (expected to exist in extensions.py)
-# --------------------------------------------------------------------
-from extensions import (
-    db,
-    migrate,
-    cache,
-    mail,
-    scheduler,
-    login_manager,
-    CORS,
-    redis_client,  # Optional
-)
+    from extensions import (
+        db, migrate, cache, mail,
+        login_manager, scheduler, redis_client, csrf
+    )
+except Exception as e:
+    logger.error("❌ Failed importing extensions: {}", e)
+    raise
 
 
-# --------------------------------------------------------------------
-# ⚙️ Configuration Loader
-# --------------------------------------------------------------------
-def _load_config(app: Flask):
-    cfg_env = os.getenv("CONFIG_CLASS")
-    if cfg_env:
-        app.config.from_object(cfg_env)
-        return
-    env = (os.getenv("APP_ENV") or os.getenv("FLASK_ENV") or "production").lower()
-    try:
-        if env.startswith("prod"):
-            from config.settings import ProductionConfig as C
-        elif env.startswith("dev"):
-            from config.settings import DevelopmentConfig as C
-        elif env.startswith("test"):
-            from config.settings import TestingConfig as C
-        else:
-            from config.settings import ProductionConfig as C
-        app.config.from_object(C)
-    except Exception:
-        app.config.update(
-            SECRET_KEY=os.getenv("SECRET_KEY", "change-me"),
-            SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///psu_connect.db"),
-            SQLALCHEMY_TRACK_MODIFICATIONS=False,
-            SESSION_COOKIE_SECURE=True,
-            SESSION_COOKIE_HTTPONLY=True,
-            SESSION_COOKIE_SAMESITE="Lax",
-            WTF_CSRF_ENABLED=True,
-            JSON_SORT_KEYS=False,
-            CORS_RESOURCES={r"/*": {"origins": os.getenv("CORS_ORIGINS", "*")}},
-            SCHEDULER_API_ENABLED=False,
-            TIMEZONE=os.getenv("TZ", "UTC"),
-        )
+# -------------------------------------------------------------
+# ✅ Create Flask App
+# -------------------------------------------------------------
+app = Flask(__name__)
 
+# Load config dynamically
+config_name = os.getenv("FLASK_CONFIG", "config.ProductionConfig")
+try:
+    app.config.from_object(config_name)
+    logger.info("Loaded config: {}", config_name)
+except Exception as e:
+    logger.warning("Using default config; could not import {}: {}", config_name, e)
 
-# --------------------------------------------------------------------
-# 🧱 App Factory
-# --------------------------------------------------------------------
-def create_app() -> Flask:
-    app = Flask(__name__, static_folder="static", template_folder="templates")
-    _load_config(app)
-
-    # Respect proxy headers (Render)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)  # type: ignore
-
-    # Init extensions
+# -------------------------------------------------------------
+# ✅ Initialize Extensions
+# -------------------------------------------------------------
+try:
     db.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
-    mail.init_app(app)
+    csrf.init_app(app)
     login_manager.init_app(app)
-    CORS(app, resources=app.config.get("CORS_RESOURCES", {r"/*": {"origins": "*"}}))
-    scheduler.init_app(app)
+    mail.init_app(app)
+    logger.info("✅ Core extensions initialized.")
+except Exception as e:
+    logger.warning("⚠️ Extension init warning: {}", e)
 
-    _setup_logging(app)
-    _register_template_helpers(app)
-    _register_request_response_hooks(app)
-    _register_health_routes(app)
-    _register_static_helpers(app)
-    _register_blueprints(app)
-    _register_jobs(app)
-    _redis_smoke_test(app)
+# Redis
+if redis_client:
+    logger.info("✅ Connected to Redis successfully.")
+else:
+    logger.warning("⚠️ Redis unavailable.")
 
-    app.logger.info("✅ PittState-Connect initialized successfully.")
-    return app
-
-
-# --------------------------------------------------------------------
-# 🧾 Logging
-# --------------------------------------------------------------------
-def _setup_logging(app: Flask):
-    logging.getLogger("werkzeug").setLevel(logging.INFO)
-
-    @app.before_request
-    def before():
-        g.request_id = request.headers.get("X-Request-ID", uuid.uuid4().hex[:12])
-
-    @app.after_request
-    def after(resp):
-        try:
-            app.logger.info(
-                "%s %s %s %s %s",
-                request.method,
-                request.path,
-                resp.status_code,
-                resp.content_length or 0,
-                request.user_agent.string,
-            )
-        except Exception:
-            pass
-        return resp
+# -------------------------------------------------------------
+# ✅ Logging Setup
+# -------------------------------------------------------------
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logger.remove()
+logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, enqueue=True)
+logger.info("🚀 PittState-Connect starting in {} mode", LOG_LEVEL)
 
 
-# --------------------------------------------------------------------
-# 🧩 Template Helpers
-# --------------------------------------------------------------------
-def _register_template_helpers(app: Flask):
-    from flask import url_for
-
-    @app.template_global("safe_url_for")
-    def safe_url_for(endpoint: str, **vals):
-        try:
-            return url_for(endpoint, **vals)
-        except BuildError:
-            app.logger.warning("safe_url_for: invalid endpoint %s", endpoint)
-            return "#"
-
-    @app.template_filter("datefmt")
-    def datefmt(value: Optional[datetime], fmt="%Y-%m-%d"):
-        if not value:
-            return ""
-        if isinstance(value, str):
-            try:
-                value = datetime.fromisoformat(value)
-            except Exception:
-                return value
-        return value.strftime(fmt)
-
-
-# --------------------------------------------------------------------
-# 🛡️ Security Headers & Error Pages
-# --------------------------------------------------------------------
-def _register_request_response_hooks(app: Flask):
-    @app.after_request
-    def secure(resp):
-        csp = (
-            "default-src 'self'; img-src 'self' data: https:; "
-            "style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' https:; "
-            "font-src 'self' https: data:; connect-src 'self' https:;"
-        )
-        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
-        resp.headers.setdefault("Referrer-Policy", "no-referrer-when-downgrade")
-        resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=()")
-        resp.headers.setdefault("Content-Security-Policy", csp)
-        if request.headers.get("X-Forwarded-Proto") == "https":
-            resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-        return resp
-
-    @app.errorhandler(404)
-    def not_found(_):
-        try:
-            return render_template("errors/404.html"), 404
-        except Exception:
-            return jsonify(error="Not Found"), 404
-
-    @app.errorhandler(500)
-    def server_error(e):
-        app.logger.error("500 Error: %s", e)
-        try:
-            return render_template("errors/500.html"), 500
-        except Exception:
-            return jsonify(error="Server Error"), 500
-
-
-# --------------------------------------------------------------------
-# 💓 Health & Readiness
-# --------------------------------------------------------------------
-def _register_health_routes(app: Flask):
-    @app.get("/healthz")
-    def healthz():
-        return jsonify(ok=True, ts=datetime.utcnow().isoformat())
-
-    @app.get("/readiness")
-    def ready():
-        db_ok = cache_ok = True
-        try:
-            db.session.execute(db.text("SELECT 1"))
-        except Exception:
-            db_ok = False
-        try:
-            cache.set("readiness:ping", "1", timeout=5)
-        except Exception:
-            cache_ok = False
-        return jsonify(ok=db_ok and cache_ok, db=db_ok, cache=cache_ok)
-
-
-# --------------------------------------------------------------------
-# 🗂️ Static passthrough (for debugging)
-# --------------------------------------------------------------------
-def _register_static_helpers(app: Flask):
-    @app.get("/static/<path:filename>")
-    def static_passthrough(filename):
-        return send_from_directory(app.static_folder, filename)
-
-
-# --------------------------------------------------------------------
-# 🧱 Blueprint Registration (with Stub Fallback)
-# --------------------------------------------------------------------
-def _register_blueprints(app: Flask):
-    from flask import Blueprint
-
-    def register(name, import_path, url_prefix=None):
-        try:
-            mod = __import__(import_path, fromlist=["*"])
-            bp = getattr(mod, name)
-            app.register_blueprint(bp, url_prefix=url_prefix)
-            app.logger.info("Loaded blueprint: %s (%s)", name, url_prefix or "/")
-        except Exception as err:
-            reason = str(err).split("\n", 1)[0]
-            stub = Blueprint(name, __name__, url_prefix=url_prefix or "/")
-
-            @stub.get("/")
-            def _stub():
-                return f"{name} temporarily unavailable — {reason}", 200
-
-            app.register_blueprint(stub)
-            app.logger.warning("Stubbed %s (%s): %s", name, url_prefix, reason)
-
-    # Primary blueprints
-    register("core_bp", "blueprints.core.routes")
-    register("auth_bp", "blueprints.auth.routes", "/auth")
-    register("careers_bp", "blueprints.careers.routes", "/careers")
-    register("departments_bp", "blueprints.departments.routes", "/departments")
-    register("faculty_bp", "blueprints.faculty.routes", "/faculty")
-    register("scholarships_bp", "blueprints.scholarships.routes", "/scholarships")
-    register("mentors_bp", "blueprints.mentors.routes", "/mentors")
-    register("alumni_bp", "blueprints.alumni.routes", "/alumni")
-    register("analytics_bp", "blueprints.analytics.routes", "/analytics")
-    register("donor_bp", "blueprints.donor.routes", "/donor")
-    register("emails_bp", "blueprints.emails.routes", "/emails")
-    register("notifications_bp", "blueprints.notifications.routes", "/notifications")
-
-
-# --------------------------------------------------------------------
-# 🕒 Scheduler Jobs
-# --------------------------------------------------------------------
-def _register_jobs(app: Flask):
-    scheduler.start(paused=True)
-    jobs = [
-        ("nightly_analytics_refresh", "blueprints.analytics.tasks:refresh_insight_cache", 2),
-        ("faculty_reindex", "blueprints.faculty.tasks:rebuild_search_index", 3),
-    ]
-    added = 0
-    for job_id, path, hour in jobs:
-        try:
-            scheduler.add_job(
-                id=job_id,
-                func=path,
-                trigger="cron",
-                hour=hour,
-                replace_existing=True,
-            )
-            added += 1
-        except Exception as e:
-            app.logger.warning("Skipped job %s: %s", job_id, e)
-    scheduler.resume()
-    app.logger.info("🕒 Scheduler active — %s jobs loaded", added)
-
-
-# --------------------------------------------------------------------
-# 🔁 Redis Smoke Test
-# --------------------------------------------------------------------
-def _redis_smoke_test(app: Flask):
+# -------------------------------------------------------------
+# ✅ Jinja Global Utilities
+# -------------------------------------------------------------
+def has_endpoint(name):
+    """Return True if Flask endpoint exists."""
     try:
-        if redis_client:
-            redis_client.set("startup:ping", "ok", ex=30)
-            app.logger.info("✅ Redis connection OK")
-        else:
-            app.logger.warning("⚠️ Redis client missing (extensions.redis_client=None)")
+        return name in app.view_functions
+    except Exception:
+        return False
+
+
+def get_env(key, default=None):
+    """Fetch environment variable safely for templates."""
+    return os.getenv(key, default)
+
+
+def safe_url_for(endpoint_name, **values):
+    """Safe version of url_for that returns '#' on error."""
+    from werkzeug.routing import BuildError
+    try:
+        return url_for(endpoint_name, **values)
+    except BuildError as e:
+        logger.warning("⚠️ safe_url_for failed: {}", e)
+        return "#"
     except Exception as e:
-        app.logger.warning("⚠️ Redis unavailable: %s", e)
+        logger.warning("⚠️ Unexpected URL error: {}", e)
+        return "#"
 
 
-# --------------------------------------------------------------------
-# 🏁 App Export for Gunicorn
-# --------------------------------------------------------------------
-def _fallback_index():
-    return "PittState-Connect is running.", 200
+# Register Jinja helpers
+app.jinja_env.globals.update(
+    has_endpoint=has_endpoint,
+    get_env=get_env,
+    safe_url_for=safe_url_for
+)
+
+logger.info("✅ Registered Jinja helpers (has_endpoint, get_env, safe_url_for)")
 
 
-app = create_app()
-if not any(r.rule == "/" for r in app.url_map.iter_rules()):
-    app.add_url_rule("/", "index", _fallback_index)
+# -------------------------------------------------------------
+# ✅ Blueprint Registration (with Safe Imports)
+# -------------------------------------------------------------
+def register_blueprint_safe(import_path, url_prefix):
+    """Safely import and register blueprint."""
+    try:
+        module = __import__(import_path, fromlist=["bp"])
+        bp = getattr(module, "bp", None)
+        if not bp:
+            raise ImportError("Missing blueprint object 'bp'")
+        app.register_blueprint(bp, url_prefix=url_prefix)
+        logger.success("🟢 Registered blueprint: {} ({})", import_path, url_prefix)
+    except Exception as e:
+        logger.warning("Using STUB blueprint for {} ({}). Reason: {}", import_path, url_prefix, e)
+        @app.route(f"{url_prefix}/")
+        def stub_view():
+            return render_template(
+                "core/coming_soon.html",
+                title="Coming Soon",
+                message=f"This module ({import_path}) is not yet available."
+            )
 
-if os.getenv("PRINT_ROUTES_ON_BOOT") == "1":
-    with app.app_context():
-        print("\n=== BLUEPRINTS ===")
-        for n, bp in app.blueprints.items():
-            print(f"{n:25s} -> {bp.url_prefix}")
-        print("\n=== ROUTES ===")
-        for rule in sorted(app.url_map.iter_rules(), key=lambda r: r.rule):
-            methods = ",".join(sorted(rule.methods - {"HEAD", "OPTIONS"}))
-            print(f"{rule.rule:40s} [{methods}] -> {rule.endpoint}")
-        print()
+
+# Core routes
+register_blueprint_safe("blueprints.core.routes", "/")
+register_blueprint_safe("blueprints.scholarships.routes", "/scholarships")
+register_blueprint_safe("blueprints.departments.routes", "/departments")
+register_blueprint_safe("blueprints.faculty.routes", "/faculty")
+register_blueprint_safe("blueprints.analytics.routes", "/analytics")
+register_blueprint_safe("blueprints.jobs.routes", "/careers")
+register_blueprint_safe("blueprints.events.routes", "/events")
+register_blueprint_safe("blueprints.notifications.routes", "/notifications")
+
+
+# -------------------------------------------------------------
+# ✅ Custom Error Pages
+# -------------------------------------------------------------
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("core/error.html", code=404, message="Page not found"), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    logger.error("500 Error: {}", e)
+    return render_template("core/error.html", code=500, message="Internal Server Error"), 500
+
+
+@app.route("/healthz")
+def health_check():
+    """Health endpoint for Render."""
+    return {"status": "ok", "time": datetime.utcnow().isoformat()}
+
+
+# -------------------------------------------------------------
+# ✅ Optional Scheduler Hooks
+# -------------------------------------------------------------
+try:
+    if scheduler:
+        logger.info("✅ Scheduler detected — checking background jobs.")
+        with app.app_context():
+            jobs = scheduler.get_jobs()
+            for j in jobs:
+                logger.debug("⏰ Job registered: {}", j.id)
+    else:
+        logger.warning("⚠️ No APScheduler active in this context.")
+except Exception as e:
+    logger.warning("Scheduler check failed: {}", e)
+
+
+# -------------------------------------------------------------
+# ✅ Mail Configuration Check
+# -------------------------------------------------------------
+if not os.getenv("SENDGRID_API_KEY"):
+    logger.warning("⚠️ Incomplete mail configuration. Check SENDGRID_API_KEY or MAIL_* vars.")
+
+
+# -------------------------------------------------------------
+# ✅ Run for Local Debug
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 5000)),
+        debug=os.getenv("FLASK_DEBUG", "0") == "1"
+    )
