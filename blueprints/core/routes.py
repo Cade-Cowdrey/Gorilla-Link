@@ -1,21 +1,22 @@
-# blueprints/core/routes.py
 from flask import Blueprint, render_template
-from loguru import logger
+from extensions import limiter
+from flask_login import current_user
+from utils.analytics_util import track_page_view
 
-core_bp = Blueprint("core_bp", __name__)
+bp = Blueprint("core", __name__)
 
-@core_bp.route("/", methods=["GET"])
+@bp.route("/")
+@limiter.limit("30/minute")
 def home():
-    hero = {
-        "title": "Welcome to PittState-Connect",
-        "subtitle": "Your hub for scholarships, careers, mentors, and alumni connections.",
-        "cta_text": "Explore Opportunities",
-        "cta_href": "/scholarships/",
-    }
-    panels = [
-        {"title": "Scholarship Hub", "desc": "Discover funding and apply with ease.", "icon": "bi-award"},
-        {"title": "Career Center", "desc": "Internships, jobs, and skill-building.", "icon": "bi-briefcase"},
-        {"title": "Mentors & Alumni", "desc": "Get guidance and grow your network.", "icon": "bi-people-fill"},
-    ]
-    logger.info("✅ Core home route rendered successfully.")
-    return render_template("core/home.html", hero=hero, panels=panels)
+    track_page_view("home", current_user.id if current_user.is_authenticated else None)
+    return render_template("core/home.html", title="Home | PittState-Connect")
+
+@bp.route("/team")
+def team():
+    track_page_view("team")
+    return render_template("core/team.html", title="Meet the Team | PittState-Connect")
+
+@bp.route("/careers")
+def careers():
+    track_page_view("careers")
+    return render_template("core/careers.html", title="Careers | PittState-Connect")
