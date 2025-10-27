@@ -1,0 +1,14 @@
+PittState-Connect — Thank You for Your Support
+
+Dear {{ donor.name }},
+
+Thank you for your generous donation of ${{ donor.amount }} to PittState-Connect.
+
+Your contribution helps fund scholarships, mentorship programs, and student success initiatives across the PSU community.
+
+You can view your donor impact here:
+{{ donor_portal_url }}
+
+We’re grateful for your continued support and commitment to the Gorilla family.
+
+— PittState-Connect Advancement Team
