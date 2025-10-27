@@ -1,0 +1,11 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Thank You for Supporting PittState-Connect{% endblock %}
+{% block content %}
+  <h2 style="color:#9E1B32;">Dear {{ donor.name }},</h2>
+  <p>Thank you for your generous contribution to <strong>PittState-Connect</strong>. Your support directly impacts our students’ academic and professional growth.</p>
+  <p style="margin:20px 0;">Your donation of <strong>${{ donor.amount }}</strong> helps fund scholarships, mentorship programs, and student success initiatives across the PSU community.</p>
+  <p style="text-align:center; margin:25px 0;">
+    <a href="{{ donor_portal_url }}" style="background-color:#FFCC33; color:#9E1B32; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold;">View Donor Impact</a>
+  </p>
+  <p>We are grateful for your ongoing partnership and commitment to the Gorilla family.</p>
+{% endblock %}
