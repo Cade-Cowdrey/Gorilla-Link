@@ -1,12 +1,12 @@
 import os
 import logging
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, session, abort
+from flask import Flask, render_template, redirect, url_for, session, abort, request, g
 from extensions import db, migrate, login_manager, mail, cache, limiter, scheduler, redis_client
 from config import config_production
 
 # --------------------------------------------------------
-# ✅ Create App Factory
+# ✅ Create Flask App (Production)
 # --------------------------------------------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config.from_object(config_production)
@@ -24,32 +24,46 @@ scheduler.init_app(app)
 redis_client.init_app(app)
 
 # --------------------------------------------------------
-# ✅ Logging
+# ✅ Logging Setup
 # --------------------------------------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.info("🚀 PittState-Connect launching in production mode")
 
 # --------------------------------------------------------
-# ✅ Maintenance Mode Check (uses env variable)
+# ✅ Maintenance Mode Middleware
 # --------------------------------------------------------
 @app.before_request
 def check_maintenance_mode():
-    """Intercept all requests if MAINTENANCE_MODE=True"""
-    if os.getenv("MAINTENANCE_MODE", "False").lower() == "true":
-        from flask import request
-        # allow admin toggle route & static assets during maintenance
-        allowed_routes = ["/admin/toggle-maintenance", "/static/", "/favicon.ico"]
-        if not any(request.path.startswith(p) for p in allowed_routes):
-            return render_template("errors/maintenance.html"), 503
+    """Redirect all non-admin traffic to maintenance page when active."""
+    maintenance = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
+    g.maintenance_mode = maintenance  # pass to templates for banner display
+
+    allowed_routes = ["/admin/toggle-maintenance", "/static/", "/favicon.ico"]
+
+    if maintenance:
+        # allow admin toggle access using ADMIN_TOKEN
+        token = request.args.get("token")
+        if any(request.path.startswith(p) for p in allowed_routes):
+            return
+        if token == os.getenv("ADMIN_TOKEN"):
+            return  # allow admin bypass via token query
+        return render_template("errors/maintenance.html"), 503
 
 # --------------------------------------------------------
-# ✅ Secure Maintenance Toggle (admin-only)
+# ✅ Context Processor for Maintenance Banner
+# --------------------------------------------------------
+@app.context_processor
+def inject_maintenance_banner():
+    """Adds maintenance banner variable to all templates."""
+    return {"maintenance_mode": g.get("maintenance_mode", False)}
+
+# --------------------------------------------------------
+# ✅ Secure Admin Toggle Route
 # --------------------------------------------------------
 @app.route("/admin/toggle-maintenance")
 def toggle_maintenance():
-    """Toggles maintenance mode on/off via environment file"""
-    from flask import request
+    """Admin-only route to toggle maintenance mode."""
     admin_token = os.getenv("ADMIN_TOKEN")
     provided_token = request.args.get("token")
 
@@ -92,12 +106,11 @@ try:
     app.register_blueprint(events_bp)
     app.register_blueprint(departments_bp)
     logger.info("✅ All blueprints registered successfully")
-
 except Exception as e:
     logger.error(f"❌ Blueprint registration failed: {e}")
 
 # --------------------------------------------------------
-# ✅ Error Handlers (PSU-Branded)
+# ✅ PSU-Branded Error Handlers
 # --------------------------------------------------------
 @app.errorhandler(403)
 def forbidden_error(error):
