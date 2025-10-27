@@ -43,11 +43,14 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
     def __repr__(self):
         return f"<User {self.email}>"
 
@@ -194,6 +197,22 @@ class AnalyticsSummary(db.Model):
 
     def __repr__(self):
         return f"<AnalyticsSummary {self.date}>"
+
+class ApiUsage(db.Model):
+    __tablename__ = "api_usage"
+    id = db.Column(db.Integer, primary_key=True)
+    endpoint = db.Column(db.String(255), nullable=False)
+    method = db.Column(db.String(10))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    timestamp = db.Column(db.DateTime, default=func.now())
+    response_time_ms = db.Column(db.Float)
+    status_code = db.Column(db.Integer)
+    tokens_used = db.Column(db.Integer, default=0)  # for AI/OpenAI tracking
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(255))
+
+    def __repr__(self):
+        return f"<ApiUsage {self.endpoint} ({self.status_code})>"
 
 # ---------------------------
 # HELPER METHODS
