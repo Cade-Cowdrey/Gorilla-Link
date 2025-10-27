@@ -1,140 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PittState-Connect{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        crimson: '#9E1B32',
-                        gold: '#FFCC33',
-                        psuBlack: '#2A2A2A',
-                        psuGray: '#F4F4F4'
-                    }
-                }
-            }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}" />
+
+  <!-- ✅ Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            crimson: '#9E1B32',
+            gold: '#FFCC33',
+            psuBlack: '#1C1C1C',
+            psuGray: '#F4F4F4',
+            psuDarkGray: '#2C2C2C',
+          }
         }
-    </script>
-    <style>
-        html { scroll-behavior: smooth; }
-        .nav-active { color: #FFCC33; font-weight: 600; }
-        .transition-all { transition: all 0.3s ease-in-out; }
-        .fade-in { animation: fadeIn 0.6s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+      }
+    };
+  </script>
+
+  <style>
+    .fade-in { animation: fadeIn 0.6s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .transition-all { transition: all 0.3s ease-in-out; }
+    .nav-active { color: #FFCC33; font-weight: 600; }
+  </style>
 </head>
-<body class="bg-psuGray text-psuBlack flex flex-col min-h-screen">
+<body class="bg-psuGray text-psuBlack dark:bg-psuBlack dark:text-white flex flex-col min-h-screen transition-all">
 
-    <!-- 🔝 Sticky PSU Navbar -->
-    <header class="sticky top-0 z-50 bg-crimson text-white shadow-lg">
-        <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-            <div class="flex items-center gap-3">
-                <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10 rounded-md">
-                <a href="{{ safe_url_for('core_bp.home') }}" class="text-2xl font-bold hover:text-gold transition-all">
-                    PittState-Connect
-                </a>
-            </div>
+  <!-- 🔝 Sticky PSU Navbar -->
+  <header class="sticky top-0 z-50 bg-crimson text-white dark:bg-psuDarkGray shadow-md transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <div class="flex items-center gap-3">
+        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-10 h-10 rounded-md" />
+        <a href="{{ safe_url_for('core_bp.home') }}" class="text-2xl font-bold hover:text-gold transition-all">
+          PittState-Connect
+        </a>
+      </div>
 
-            <!-- 🌐 Nav Links -->
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                {% if has_endpoint('core_bp.home') %}
-                <a href="{{ safe_url_for('core_bp.home') }}" class="hover:text-gold transition-all">Home</a>
-                {% endif %}
+      <!-- 🌐 Nav Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        {% if has_endpoint('core_bp.home') %}
+        <a href="{{ safe_url_for('core_bp.home') }}" class="hover:text-gold transition-all">Home</a>
+        {% endif %}
+        {% if has_endpoint('scholarships_bp.index') %}
+        <a href="{{ safe_url_for('scholarships_bp.index') }}" class="hover:text-gold transition-all">Scholarships</a>
+        {% endif %}
+        {% if has_endpoint('careers_bp.index') %}
+        <a href="{{ safe_url_for('careers_bp.index') }}" class="hover:text-gold transition-all">Careers</a>
+        {% endif %}
+        {% if has_endpoint('analytics_bp.dashboard') %}
+        <a href="{{ safe_url_for('analytics_bp.dashboard') }}" class="hover:text-gold transition-all">Analytics</a>
+        {% endif %}
+        {% if has_endpoint('faculty_bp.index') %}
+        <a href="{{ safe_url_for('faculty_bp.index') }}" class="hover:text-gold transition-all">Faculty</a>
+        {% endif %}
+        {% if has_endpoint('alumni_bp.index') %}
+        <a href="{{ safe_url_for('alumni_bp.index') }}" class="hover:text-gold transition-all">Alumni</a>
+        {% endif %}
+        {% if has_endpoint('donor_bp.index') %}
+        <a href="{{ safe_url_for('donor_bp.index') }}" class="hover:text-gold transition-all">Donors</a>
+        {% endif %}
+      </nav>
 
-                {% if has_endpoint('scholarships_bp.index') %}
-                <a href="{{ safe_url_for('scholarships_bp.index') }}" class="hover:text-gold transition-all">Scholarships</a>
-                {% endif %}
+      <!-- 🌙 Theme + Auth Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="themeToggle"
+          class="p-2 bg-white/10 rounded-md hover:bg-white/20 transition-all dark:bg-white/20 dark:hover:bg-white/30"
+          title="Toggle Dark Mode">🌙</button>
 
-                {% if has_endpoint('careers_bp.index') %}
-                <a href="{{ safe_url_for('careers_bp.index') }}" class="hover:text-gold transition-all">Careers</a>
-                {% endif %}
-
-                {% if has_endpoint('analytics_bp.dashboard') %}
-                <a href="{{ safe_url_for('analytics_bp.dashboard') }}" class="hover:text-gold transition-all">Analytics</a>
-                {% endif %}
-
-                {% if has_endpoint('faculty_bp.index') %}
-                <a href="{{ safe_url_for('faculty_bp.index') }}" class="hover:text-gold transition-all">Faculty</a>
-                {% endif %}
-
-                {% if has_endpoint('alumni_bp.index') %}
-                <a href="{{ safe_url_for('alumni_bp.index') }}" class="hover:text-gold transition-all">Alumni</a>
-                {% endif %}
-
-                {% if has_endpoint('donor_bp.index') %}
-                <a href="{{ safe_url_for('donor_bp.index') }}" class="hover:text-gold transition-all">Donors</a>
-                {% endif %}
-            </nav>
-
-            <!-- 🌙 Theme + User -->
-            <div class="flex items-center gap-4">
-                <button id="themeToggle" class="p-2 bg-white/10 rounded-md hover:bg-white/20 transition-all" title="Toggle Dark Mode">
-                    🌙
-                </button>
-                {% if current_user.is_authenticated %}
-                    <a href="{{ safe_url_for('auth_bp.logout') }}" class="text-sm bg-gold text-crimson font-semibold px-3 py-1 rounded-md hover:bg-yellow-400 transition-all">
-                        Logout
-                    </a>
-                {% else %}
-                    <a href="{{ safe_url_for('auth_bp.login') }}" class="text-sm bg-gold text-crimson font-semibold px-3 py-1 rounded-md hover:bg-yellow-400 transition-all">
-                        Login
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </header>
-
-    <!-- ⚡ Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="max-w-4xl mx-auto mt-4 space-y-2 fade-in">
-        {% for category, message in messages %}
-        <div class="p-3 rounded-md shadow-md text-white
-            {% if category == 'success' %} bg-green-600
-            {% elif category == 'error' %} bg-red-600
-            {% elif category == 'warning' %} bg-yellow-500 text-black
-            {% else %} bg-blue-600 {% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
+        {% if current_user.is_authenticated %}
+        <a href="{{ safe_url_for('auth_bp.logout') }}"
+          class="text-sm bg-gold text-crimson font-semibold px-3 py-1 rounded-md hover:bg-yellow-400 transition-all">
+          Logout
+        </a>
+        {% else %}
+        <a href="{{ safe_url_for('auth_bp.login') }}"
+          class="text-sm bg-gold text-crimson font-semibold px-3 py-1 rounded-md hover:bg-yellow-400 transition-all">
+          Login
+        </a>
+        {% endif %}
+      </div>
     </div>
-    {% endif %}
-    {% endwith %}
+  </header>
 
-    <!-- 📄 Page Content -->
-    <main class="flex-1 fade-in">
-        {% block content %}{% endblock %}
-    </main>
+  <!-- ⚡ Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="max-w-4xl mx-auto mt-4 space-y-2 fade-in">
+    {% for category, message in messages %}
+    <div class="p-3 rounded-md shadow-md text-white
+      {% if category == 'success' %} bg-green-600
+      {% elif category == 'error' %} bg-red-600
+      {% elif category == 'warning' %} bg-yellow-500 text-black
+      {% else %} bg-blue-600 {% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
 
-    <!-- 🦶 PSU Footer -->
-    <footer class="bg-psuBlack text-white mt-12 py-6 text-center">
-        <p class="text-sm mb-1">
-            © {{ now().year if now else 2025 }} Pittsburg State University | PittState-Connect
-        </p>
-        <p class="text-xs opacity-80">
-            Empowering Students • Connecting Alumni • Driving Careers
-        </p>
-        <div class="mt-2 flex justify-center gap-4 text-yellow-400">
-            <a href="https://www.pittstate.edu" target="_blank" class="hover:text-white transition-all">PSU Official Site</a>
-            <a href="mailto:support@pittstateconnect.com" class="hover:text-white transition-all">Contact Support</a>
-        </div>
-    </footer>
+  <!-- 📄 Page Content -->
+  <main class="flex-1 fade-in px-6 py-4 md:px-10 lg:px-16">
+    {% block content %}{% endblock %}
+  </main>
 
-    <!-- 🧠 Scripts -->
-    <script>
-        // 🌓 Theme Toggle
-        const themeToggle = document.getElementById("themeToggle");
-        themeToggle.addEventListener("click", () => {
-            document.body.classList.toggle("bg-psuBlack");
-            document.body.classList.toggle("text-white");
-            themeToggle.textContent = themeToggle.textContent === "🌙" ? "☀️" : "🌙";
-        });
-    </script>
+  <!-- 🦶 Footer -->
+  <footer class="bg-psuBlack text-white dark:bg-psuDarkGray mt-8 py-6 text-center transition-all">
+    <p class="text-sm mb-1">© {{ now().year if now else 2025 }} Pittsburg State University | PittState-Connect</p>
+    <p class="text-xs opacity-80">Empowering Students • Connecting Alumni • Driving Careers</p>
+    <div class="mt-2 flex justify-center gap-4 text-yellow-400">
+      <a href="https://www.pittstate.edu" target="_blank" class="hover:text-white transition-all">PSU Official Site</a>
+      <a href="mailto:support@pittstateconnect.com" class="hover:text-white transition-all">Contact Support</a>
+    </div>
+  </footer>
+
+  <!-- 🧠 Theme Script -->
+  <script>
+    const toggleBtn = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      html.classList.add('dark');
+      toggleBtn.textContent = '☀️';
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  </script>
 
 </body>
 </html>
