@@ -1,169 +1,104 @@
-from flask import Blueprint, render_template, jsonify, request, current_app
+"""
+PittState-Connect | Analytics Blueprint
+Provides system-wide insights: user engagement, API usage, and page trends.
+"""
+
+from flask import Blueprint, render_template, jsonify, request
+from flask_login import login_required, current_user
 from datetime import datetime, timedelta
-from extensions import db, cache
-from utils.analytics_util import (
-    get_page_stats,
-    get_user_metrics,
-    get_engagement_over_time,
-)
-from utils.security_util import login_required_safe
-from utils.helpers import safe_url_for
-import random
+from loguru import logger
+from extensions import db, redis_client
+from utils.analytics_util import get_page_stats, record_api_usage
+from models import User, PageView, ApiUsage, Department
 
-analytics_bp = Blueprint("analytics_bp", __name__, url_prefix="/analytics")
+bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
 
-# ============================================================
-# ✅ PRODUCTION-READY ANALYTICS DASHBOARD (PSU-BRANDED)
-# ============================================================
-@analytics_bp.route("/", methods=["GET"])
-@login_required_safe
-@cache.cached(timeout=60)
-def index():
-    """Main analytics dashboard with department-wide and global metrics."""
+# ======================================================
+# 🧠 DASHBOARD VIEW (Admin Only)
+# ======================================================
+@bp.route("/")
+@login_required
+def analytics_dashboard():
+    """Displays a live PSU analytics overview dashboard."""
+    if current_user.role not in ("admin", "faculty", "staff"):
+        return render_template("errors/403.html"), 403
+
     try:
-        days = int(request.args.get("days", 7))
-        now = datetime.utcnow()
+        # Page stats (cached)
+        page_stats = get_page_stats(days=7)
 
-        # Pull data from utility functions — safe fallback if missing
-        engagement_data = get_engagement_over_time(days=days) or []
-        user_metrics = get_user_metrics(days=days) or {"students": 0, "alumni": 0, "employers": 0}
+        # Basic user counts
+        total_users = User.query.count()
+        total_departments = Department.query.count()
+        total_views = db.session.query(PageView).count()
+        total_api_calls = db.session.query(ApiUsage).count()
 
-        # PSU-branded card data for front-end
-        cards = [
-            {
-                "title": "Career Engagement",
-                "metrics": {
-                    "views": random.randint(1200, 4000),
-                    "unique_users": random.randint(150, 600),
-                    "avg_time_sec": random.randint(30, 120),
-                    "days": days,
-                },
-            },
-            {
-                "title": "Scholarship Hub Activity",
-                "metrics": {
-                    "views": random.randint(800, 3000),
-                    "unique_users": random.randint(100, 500),
-                    "avg_time_sec": random.randint(20, 90),
-                    "days": days,
-                },
-            },
-            {
-                "title": "Department Traffic",
-                "metrics": {
-                    "views": random.randint(600, 2000),
-                    "unique_users": random.randint(50, 300),
-                    "avg_time_sec": random.randint(10, 60),
-                    "days": days,
-                },
-            },
-        ]
-
-        stats_summary = {
-            "total_views": sum(c["metrics"]["views"] for c in cards),
-            "total_users": sum(c["metrics"]["unique_users"] for c in cards),
-            "avg_time": round(
-                sum(c["metrics"]["avg_time_sec"] for c in cards) / len(cards), 2
-            ),
-            "user_metrics": user_metrics,
-        }
-
-        current_app.logger.info(f"[Analytics] Dashboard loaded successfully ({days}-day window)")
+        # Most popular pages (top 5)
+        popular_pages = sorted(page_stats.items(), key=lambda x: x[1], reverse=True)[:5]
 
         return render_template(
             "analytics/dashboard.html",
-            cards=cards,
-            home_stats=stats_summary,
-            engagement_data=engagement_data,
-            safe_url_for=safe_url_for,
+            total_users=total_users,
+            total_departments=total_departments,
+            total_views=total_views,
+            total_api_calls=total_api_calls,
+            popular_pages=popular_pages,
+            page_stats=page_stats,
         )
 
     except Exception as e:
-        current_app.logger.error(f"[Analytics] Dashboard error: {e}")
+        logger.error(f"❌ Analytics dashboard load failed: {e}")
         return render_template("errors/500.html"), 500
 
 
-# ============================================================
-# ✅ PAGE-LEVEL STATS VIEW
-# ============================================================
-@analytics_bp.route("/page-summary", methods=["GET"])
-@login_required_safe
-def page_summary():
-    """Summarize analytics for a given page path."""
+# ======================================================
+# 📊 JSON ENDPOINT (API)
+# ======================================================
+@bp.route("/api/summary")
+@login_required
+def analytics_summary():
+    """Returns analytics metrics for admin dashboards in JSON."""
     try:
-        path = request.args.get("path", "/")
-        days = int(request.args.get("days", 7))
-        data = get_page_stats(path, days)
+        record_api_usage("/analytics/api/summary", "GET", user_id=current_user.id)
 
-        if not data:
-            data = {
-                "views": random.randint(100, 500),
-                "unique": random.randint(10, 200),
-                "avg_time": random.randint(10, 60),
-            }
+        cutoff = datetime.utcnow() - timedelta(days=7)
 
-        current_app.logger.info(f"[Analytics] Page summary generated for {path}")
+        # Query summaries
+        page_views = PageView.query.filter(PageView.timestamp >= cutoff).count()
+        api_calls = ApiUsage.query.filter(ApiUsage.timestamp >= cutoff).count()
+        new_users = User.query.filter(User.created_at >= cutoff).count()
 
-        return render_template(
-            "analytics/page_summary.html",
-            path=path,
-            data=data,
-            days=days,
-            safe_url_for=safe_url_for,
-        )
+        data = {
+            "period": "last_7_days",
+            "page_views": page_views,
+            "api_calls": api_calls,
+            "new_users": new_users,
+            "cached_page_stats": get_page_stats(7),
+        }
+
+        return jsonify(data), 200
     except Exception as e:
-        current_app.logger.error(f"[Analytics] Page summary error: {e}")
-        return render_template("errors/500.html"), 500
+        logger.error(f"❌ Analytics summary endpoint failed: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
-# ============================================================
-# ✅ JSON ENDPOINT: CHART DATA
-# ============================================================
-@analytics_bp.route("/api/engagement", methods=["GET"])
-@cache.cached(timeout=60)
-def api_engagement():
-    """Returns engagement stats in JSON for charts."""
+# ======================================================
+# 🧹 CACHE CLEAR ENDPOINT
+# ======================================================
+@bp.route("/api/cache/clear", methods=["POST"])
+@login_required
+def clear_cache():
+    """Clears Redis analytics cache."""
+    if current_user.role != "admin":
+        return jsonify({"error": "Forbidden"}), 403
+
     try:
-        days = int(request.args.get("days", 7))
-        data = get_engagement_over_time(days=days) or []
-        if not data:
-            # fallback mock data
-            now = datetime.utcnow()
-            data = [
-                {"date": (now - timedelta(days=i)).strftime("%Y-%m-%d"), "views": random.randint(50, 300)}
-                for i in range(days)
-            ]
-            data.reverse()
-
-        return jsonify({"status": "success", "data": data})
+        keys = redis_client.keys("page_stats:*")
+        for k in keys:
+            redis_client.delete(k)
+        logger.info("🧹 Cleared analytics cache.")
+        return jsonify({"status": "cache_cleared", "deleted_keys": len(keys)}), 200
     except Exception as e:
-        current_app.logger.error(f"[Analytics] API engagement error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-# ============================================================
-# ✅ JSON ENDPOINT: USER METRICS
-# ============================================================
-@analytics_bp.route("/api/users", methods=["GET"])
-@cache.cached(timeout=60)
-def api_users():
-    """Returns breakdown of user engagement by role."""
-    try:
-        data = get_user_metrics(days=7)
-        if not data:
-            data = {"students": 320, "alumni": 180, "employers": 90}
-
-        return jsonify({"status": "success", "data": data})
-    except Exception as e:
-        current_app.logger.error(f"[Analytics] API user metrics error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-# ============================================================
-# ✅ FALLBACK STUB (if imported before init)
-# ============================================================
-@analytics_bp.route("/analytics_stub", methods=["GET"])
-def analytics_stub():
-    """Stub endpoint if analytics blueprint partially loads."""
-    return jsonify({"status": "stub", "message": "Analytics blueprint loaded in fallback mode."})
+        logger.error(f"❌ Failed to clear cache: {e}")
+        return jsonify({"error": str(e)}), 500
