@@ -1,81 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Email Verification | PittState-Connect</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f7f7f7;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      background: #fff;
-      margin: 40px auto;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-    }
-    .header {
-      background-color: #73000A;
-      padding: 24px;
-      text-align: center;
-      color: #fff;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    .content {
-      padding: 30px;
-    }
-    .content p {
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-    .btn {
-      display: inline-block;
-      background-color: #FFD700;
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
-      margin-top: 15px;
-    }
-    .btn:hover {
-      background-color: #e6c200;
-    }
-    .footer {
-      background: #f2f2f2;
-      color: #555;
-      text-align: center;
-      padding: 16px;
-      font-size: 13px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Verify Your PittState-Connect Account</h1>
-    </div>
-    <div class="content">
-      <p>Hello Gorilla,</p>
-      <p>Thank you for joining <strong>PittState-Connect</strong> — the official networking hub for PSU students and alumni.</p>
-      <p>Before you start exploring, please confirm your email address by clicking the button below:</p>
-      <p style="text-align:center;">
-        <a href="{{ confirm_url }}" class="btn">Verify My Email</a>
-      </p>
-      <p>If you didn’t sign up for this account, you can safely ignore this message.</p>
-      <p>Welcome to the Gorilla Network,<br><strong>The PittState-Connect Team</strong></p>
-    </div>
-    <div class="footer">
-      © {{ now().year }} Pittsburg State University · All Rights Reserved
-    </div>
-  </div>
-</body>
-</html>
+{% extends "emails/base_email.html" %}
+{% block title %}Confirm Your PittState-Connect Account{% endblock %}
+{% block content %}
+  <h2 style="color:#9E1B32;">Welcome, {{ user.name }}!</h2>
+  <p>Thank you for joining <strong>PittState-Connect</strong>. Please confirm your email address to activate your account and access the full platform.</p>
+  <p style="text-align:center; margin:30px 0;">
+    <a href="{{ verify_url }}" style="background-color:#FFCC33; color:#9E1B32; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold;">Confirm My Email</a>
+  </p>
+  <p>If you did not create this account, please disregard this message.</p>
+{% endblock %}
