@@ -1,141 +1,132 @@
-"""
-app_pro.py
-Production entry point for PittState-Connect.
-Includes logging, extension registration, blueprint autoloading,
-error handling, Redis and database health checks, and optional enhancements.
-"""
-
 import os
-import sys
 import logging
-from loguru import logger
-from flask import Flask, render_template, jsonify
-from config import create_app, db, mail, cache, scheduler, csrf, login_manager
+from datetime import datetime
+from flask import Flask, render_template, redirect, url_for, session, abort
+from extensions import db, migrate, login_manager, mail, cache, limiter, scheduler, redis_client
+from config import config_production
 
+# --------------------------------------------------------
+# ✅ Create App Factory
+# --------------------------------------------------------
+app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config.from_object(config_production)
 
-# ============================================================
-# Logging Setup with Loguru
-# ============================================================
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+# --------------------------------------------------------
+# ✅ Initialize Extensions
+# --------------------------------------------------------
+db.init_app(app)
+migrate.init_app(app, db)
+login_manager.init_app(app)
+mail.init_app(app)
+cache.init_app(app)
+limiter.init_app(app)
+scheduler.init_app(app)
+redis_client.init_app(app)
 
-logger.remove()
-logger.add(sys.stdout, colorize=True, level=LOG_LEVEL)
-logger.add("pittstate_connect.log", rotation="5 MB", retention="10 days", level=LOG_LEVEL)
-logger.info("🚀 PittState-Connect initializing in production mode...")
+# --------------------------------------------------------
+# ✅ Logging
+# --------------------------------------------------------
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.info("🚀 PittState-Connect launching in production mode")
 
+# --------------------------------------------------------
+# ✅ Maintenance Mode Check (uses env variable)
+# --------------------------------------------------------
+@app.before_request
+def check_maintenance_mode():
+    """Intercept all requests if MAINTENANCE_MODE=True"""
+    if os.getenv("MAINTENANCE_MODE", "False").lower() == "true":
+        from flask import request
+        # allow admin toggle route & static assets during maintenance
+        allowed_routes = ["/admin/toggle-maintenance", "/static/", "/favicon.ico"]
+        if not any(request.path.startswith(p) for p in allowed_routes):
+            return render_template("errors/maintenance.html"), 503
 
-# ============================================================
-# Flask App Factory Initialization
-# ============================================================
+# --------------------------------------------------------
+# ✅ Secure Maintenance Toggle (admin-only)
+# --------------------------------------------------------
+@app.route("/admin/toggle-maintenance")
+def toggle_maintenance():
+    """Toggles maintenance mode on/off via environment file"""
+    from flask import request
+    admin_token = os.getenv("ADMIN_TOKEN")
+    provided_token = request.args.get("token")
+
+    if not provided_token or provided_token != admin_token:
+        abort(403)
+
+    current_value = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
+    new_value = "False" if current_value else "True"
+    os.environ["MAINTENANCE_MODE"] = new_value
+
+    status = "disabled" if current_value else "enabled"
+    logger.warning(f"⚙️ Maintenance mode {status.upper()} by admin at {datetime.now()}")
+    return f"<h3>Maintenance mode {status}.<br>Reload the site to apply changes.</h3>"
+
+# --------------------------------------------------------
+# ✅ Register Blueprints
+# --------------------------------------------------------
 try:
-    app = create_app()
-except Exception as e:
-    logger.exception(f"❌ Failed to create Flask app: {e}")
-    raise
+    from blueprints.core.routes import core_bp
+    from blueprints.auth.routes import auth_bp
+    from blueprints.admin.routes import admin_bp
+    from blueprints.analytics.routes import analytics_bp
+    from blueprints.scholarships.routes import scholarships_bp
+    from blueprints.alumni.routes import alumni_bp
+    from blueprints.career.routes import career_bp
+    from blueprints.notifications.routes import notifications_bp
+    from blueprints.messages.routes import messages_bp
+    from blueprints.events.routes import events_bp
+    from blueprints.departments.routes import departments_bp
 
+    app.register_blueprint(core_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(analytics_bp)
+    app.register_blueprint(scholarships_bp)
+    app.register_blueprint(alumni_bp)
+    app.register_blueprint(career_bp)
+    app.register_blueprint(notifications_bp)
+    app.register_blueprint(messages_bp)
+    app.register_blueprint(events_bp)
+    app.register_blueprint(departments_bp)
+    logger.info("✅ All blueprints registered successfully")
 
-# ============================================================
-# Blueprint Auto-Loader
-# ============================================================
-def register_blueprints(app):
-    """
-    Dynamically registers all blueprints in /blueprints directory.
-    Each blueprint must expose 'bp' variable.
-    """
-    import importlib
-    import pkgutil
-
-    blueprints_dir = os.path.join(app.root_path, "blueprints")
-    if not os.path.isdir(blueprints_dir):
-        logger.warning("⚠️ No blueprints directory found — skipping auto-registration.")
-        return
-
-    for finder, name, ispkg in pkgutil.iter_modules([blueprints_dir]):
-        try:
-            module_path = f"blueprints.{name}.routes"
-            module = importlib.import_module(module_path)
-            if hasattr(module, "bp"):
-                app.register_blueprint(module.bp)
-                logger.info(f"✅ Registered blueprint: {name}_bp")
-            else:
-                logger.warning(f"⚠️ No blueprint object found in {module_path}")
-        except Exception as e:
-            logger.warning(f"⚠️ Skipped blueprint {name}_bp: {e}")
-
-
-try:
-    register_blueprints(app)
 except Exception as e:
     logger.error(f"❌ Blueprint registration failed: {e}")
 
-
-# ============================================================
-# Error Handling
-# ============================================================
+# --------------------------------------------------------
+# ✅ Error Handlers (PSU-Branded)
+# --------------------------------------------------------
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template("errors/403.html"), 403
 
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template("errors/404.html"), 404
-
 
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
     return render_template("errors/500.html"), 500
 
+# --------------------------------------------------------
+# ✅ Default Route
+# --------------------------------------------------------
+@app.route("/")
+def index():
+    return redirect(url_for("core_bp.home"))
 
-@app.errorhandler(Exception)
-def handle_global_exception(error):
-    logger.exception(f"⚠️ Global exception: {error}")
-    return jsonify(error=str(error)), 500
+# --------------------------------------------------------
+# ✅ Scheduler Start
+# --------------------------------------------------------
+if not scheduler.running:
+    scheduler.start()
 
-
-# ============================================================
-# CLI and Admin Utilities
-# ============================================================
-
-@app.cli.command("create-admin")
-def create_admin():
-    """Create or update the default admin user"""
-    from models import User
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    admin_name = os.getenv("ADMIN_NAME", "Admin")
-
-    if not all([admin_email, admin_password]):
-        logger.error("❌ Missing ADMIN_EMAIL or ADMIN_PASSWORD in environment.")
-        return
-
-    with app.app_context():
-        admin = User.query.filter_by(email=admin_email).first()
-        if admin:
-            admin.set_password(admin_password)
-            logger.info("🔑 Updated existing admin credentials.")
-        else:
-            admin = User(name=admin_name, email=admin_email, role="admin")
-            admin.set_password(admin_password)
-            db.session.add(admin)
-            logger.info("👑 Created new admin account.")
-        db.session.commit()
-        logger.success("✅ Admin setup complete.")
-
-
-# ============================================================
-# Application Launch Summary
-# ============================================================
-
-logger.info(f"✅ App initialized with Redis: {os.getenv('REDIS_URL')}")
-logger.info(f"✅ Database: {os.getenv('DATABASE_URL')}")
-logger.info(f"✅ Mail sender: {os.getenv('MAIL_DEFAULT_SENDER')}")
-logger.info(f"🌐 Environment: {os.getenv('FLASK_ENV', 'production')}")
-
-# Final success log
-logger.success("🔥 PittState-Connect fully initialized and ready for launch!")
-
-
-# ============================================================
-# Run App (Gunicorn handles this on Render)
-# ============================================================
-
+# --------------------------------------------------------
+# ✅ Gunicorn Entrypoint
+# --------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
