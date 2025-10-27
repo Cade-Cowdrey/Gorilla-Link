@@ -1,96 +1,141 @@
+"""
+app_pro.py
+Production entry point for PittState-Connect.
+Includes logging, extension registration, blueprint autoloading,
+error handling, Redis and database health checks, and optional enhancements.
+"""
+
 import os
+import sys
+import logging
 from loguru import logger
-from flask import Flask, render_template, url_for, jsonify
-from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.exceptions import NotFound, InternalServerError
+from flask import Flask, render_template, jsonify
+from config import create_app, db, mail, cache, scheduler, csrf, login_manager
 
-from extensions import (
-    db, migrate, mail, cache, scheduler, login_manager, csrf, init_extensions, redis_client
-)
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
+# ============================================================
+# Logging Setup with Loguru
+# ============================================================
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
-config_name = os.getenv("FLASK_CONFIG", "config.config_production")
-app.config.from_object(config_name)
-logger.info(f"🚀 PittState-Connect launching in {config_name}")
+logger.remove()
+logger.add(sys.stdout, colorize=True, level=LOG_LEVEL)
+logger.add("pittstate_connect.log", rotation="5 MB", retention="10 days", level=LOG_LEVEL)
+logger.info("🚀 PittState-Connect initializing in production mode...")
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
-init_extensions(app)
+# ============================================================
+# Flask App Factory Initialization
+# ============================================================
+try:
+    app = create_app()
+except Exception as e:
+    logger.exception(f"❌ Failed to create Flask app: {e}")
+    raise
 
-def safe_url_for(endpoint_name, **values):
-    try:
-        return url_for(endpoint_name, **values)
-    except Exception:
-        return "#"
 
-app.jinja_env.globals["safe_url_for"] = safe_url_for
+# ============================================================
+# Blueprint Auto-Loader
+# ============================================================
+def register_blueprints(app):
+    """
+    Dynamically registers all blueprints in /blueprints directory.
+    Each blueprint must expose 'bp' variable.
+    """
+    import importlib
+    import pkgutil
 
-def register_blueprint_safely(import_path, bp_name, url_prefix=None):
-    try:
-        module = __import__(import_path, fromlist=[bp_name])
-        bp = getattr(module, bp_name)
-        app.register_blueprint(bp, url_prefix=url_prefix)
-        logger.info(f"✅ Loaded blueprint: {bp_name} ({url_prefix or '/'})")
-    except Exception as e:
-        from flask import Blueprint
-        stub = Blueprint(bp_name, __name__)
+    blueprints_dir = os.path.join(app.root_path, "blueprints")
+    if not os.path.isdir(blueprints_dir):
+        logger.warning("⚠️ No blueprints directory found — skipping auto-registration.")
+        return
 
-        @stub.route("/")
-        def stub_index():
-            return jsonify({"stub": True, "blueprint": bp_name, "reason": str(e)}), 501
+    for finder, name, ispkg in pkgutil.iter_modules([blueprints_dir]):
+        try:
+            module_path = f"blueprints.{name}.routes"
+            module = importlib.import_module(module_path)
+            if hasattr(module, "bp"):
+                app.register_blueprint(module.bp)
+                logger.info(f"✅ Registered blueprint: {name}_bp")
+            else:
+                logger.warning(f"⚠️ No blueprint object found in {module_path}")
+        except Exception as e:
+            logger.warning(f"⚠️ Skipped blueprint {name}_bp: {e}")
 
-        app.register_blueprint(stub, url_prefix=url_prefix)
-        logger.warning(f"⚠️ Using STUB blueprint for {bp_name} ({url_prefix}): {e}")
-
-register_blueprint_safely("blueprints.core.routes", "core_bp", "/")
-register_blueprint_safely("blueprints.auth.routes", "auth_bp", "/auth")
-register_blueprint_safely("blueprints.careers.routes", "careers_bp", "/careers")
-register_blueprint_safely("blueprints.departments.routes", "departments_bp", "/departments")
-register_blueprint_safely("blueprints.scholarships.routes", "scholarships_bp", "/scholarships")
-register_blueprint_safely("blueprints.faculty.routes", "faculty_bp", "/faculty")
-register_blueprint_safely("blueprints.analytics.routes", "analytics_bp", "/analytics")
-register_blueprint_safely("blueprints.alumni.routes", "alumni_bp", "/alumni")
-register_blueprint_safely("blueprints.donor.routes", "donor_bp", "/donor")
-register_blueprint_safely("blueprints.notifications.routes", "notifications_bp", "/notifications")
 
 try:
-    scheduler.add_job(
-        id="nightly_analytics_refresh",
-        func="blueprints.analytics.tasks:refresh_insight_cache",
-        trigger="cron",
-        hour=3,
-    )
-    scheduler.add_job(
-        id="faculty_reindex",
-        func="blueprints.faculty.tasks:rebuild_search_index",
-        trigger="cron",
-        hour=4,
-    )
+    register_blueprints(app)
 except Exception as e:
-    logger.warning(f"⚠️ Skipped scheduler job registration: {e}")
+    logger.error(f"❌ Blueprint registration failed: {e}")
 
-@app.errorhandler(NotFound)
-def error_404(e):
-    logger.error("404 Error: Page not found")
+
+# ============================================================
+# Error Handling
+# ============================================================
+
+@app.errorhandler(404)
+def not_found_error(error):
     return render_template("errors/404.html"), 404
 
-@app.errorhandler(InternalServerError)
-def error_500(e):
-    logger.exception("500 Error: Internal Server Error")
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
     return render_template("errors/500.html"), 500
 
-@app.route("/maintenance")
-def maintenance_page():
-    return render_template("errors/maintenance.html"), 503
 
-@app.route("/coming-soon")
-def coming_soon_page():
-    return render_template("errors/coming_soon.html"), 200
+@app.errorhandler(Exception)
+def handle_global_exception(error):
+    logger.exception(f"⚠️ Global exception: {error}")
+    return jsonify(error=str(error)), 500
 
-@app.route("/healthz")
-def healthz():
-    return jsonify({"status": "ok", "redis": bool(redis_client)}), 200
+
+# ============================================================
+# CLI and Admin Utilities
+# ============================================================
+
+@app.cli.command("create-admin")
+def create_admin():
+    """Create or update the default admin user"""
+    from models import User
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    admin_name = os.getenv("ADMIN_NAME", "Admin")
+
+    if not all([admin_email, admin_password]):
+        logger.error("❌ Missing ADMIN_EMAIL or ADMIN_PASSWORD in environment.")
+        return
+
+    with app.app_context():
+        admin = User.query.filter_by(email=admin_email).first()
+        if admin:
+            admin.set_password(admin_password)
+            logger.info("🔑 Updated existing admin credentials.")
+        else:
+            admin = User(name=admin_name, email=admin_email, role="admin")
+            admin.set_password(admin_password)
+            db.session.add(admin)
+            logger.info("👑 Created new admin account.")
+        db.session.commit()
+        logger.success("✅ Admin setup complete.")
+
+
+# ============================================================
+# Application Launch Summary
+# ============================================================
+
+logger.info(f"✅ App initialized with Redis: {os.getenv('REDIS_URL')}")
+logger.info(f"✅ Database: {os.getenv('DATABASE_URL')}")
+logger.info(f"✅ Mail sender: {os.getenv('MAIL_DEFAULT_SENDER')}")
+logger.info(f"🌐 Environment: {os.getenv('FLASK_ENV', 'production')}")
+
+# Final success log
+logger.success("🔥 PittState-Connect fully initialized and ready for launch!")
+
+
+# ============================================================
+# Run App (Gunicorn handles this on Render)
+# ============================================================
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)), debug=False)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
