@@ -1,23 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Access Denied | PittState-Connect{% endblock %}
+{% block title %}403 Forbidden | PittState-Connect{% endblock %}
 {% block content %}
-<div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center p-8">
-    <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="Pitt State" class="w-24 mb-6">
-    <h1 class="text-6xl font-bold text-red-700 mb-4">403</h1>
-    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Access Denied</h2>
-    <p class="text-gray-600 max-w-md mb-6">
-        You don’t have permission to view this page.  
-        This area is restricted to authorized users only.
+<section class="min-h-screen flex flex-col justify-center items-center bg-gray-50 text-center">
+  <div class="max-w-lg p-6">
+    <h1 class="text-6xl font-extrabold text-crimson mb-4">403</h1>
+    <p class="text-xl text-gray-700 mb-6">
+      You don’t have permission to access this page.
     </p>
-    {% if current_user.is_authenticated %}
-        <a href="{{ url_for('core_bp.home') }}" class="px-6 py-3 bg-red-700 hover:bg-red-800 text-white rounded-lg shadow-md transition">
-            Back to Dashboard
-        </a>
-    {% else %}
-        <a href="{{ url_for('core_bp.login') }}" class="px-6 py-3 bg-red-700 hover:bg-red-800 text-white rounded-lg shadow-md transition">
-            Log In to Continue
-        </a>
-    {% endif %}
-    <p class="mt-6 text-sm text-gray-400">PittState-Connect © 2025 | All Rights Reserved</p>
-</div>
+    <a href="{{ url_for('core_bp.home') }}"
+       class="px-6 py-3 bg-crimson text-white font-semibold rounded-xl shadow hover:bg-red-700 transition">
+       Go Home
+    </a>
+  </div>
+</section>
 {% endblock %}
