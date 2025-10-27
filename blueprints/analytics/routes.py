@@ -11,7 +11,11 @@ bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 def dashboard():
     record_api_usage("/analytics", "GET", current_user.id)
     stats = get_page_stats(7)
-    return render_template("analytics/dashboard.html", stats=stats, title="Analytics | PittState-Connect")
+    return render_template(
+        "analytics/dashboard.html",
+        stats=stats,
+        title="Analytics | PittState-Connect"
+    )
 
 @bp.route("/api/summary")
 @login_required
