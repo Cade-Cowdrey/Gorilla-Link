@@ -1,0 +1,16 @@
+🎓 PittState-Connect — New Scholarship Match
+
+Great news, {{ user.name }}!
+
+We found a scholarship that matches your profile:
+
+{{ scholarship.name }}
+Deadline: {{ scholarship.deadline }}
+Amount: ${{ scholarship.amount }}
+
+Apply now:
+{{ scholarship_url }}
+
+You can view all your scholarship matches anytime on your PittState-Connect dashboard.
+
+— PittState-Connect Scholarships Team
