@@ -1,49 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" style="margin: 0; padding: 0;">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}PittState-Connect Notification{% endblock %}</title>
-    {% include 'emails/partials/email_styles.html' %}
-  </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}PittState-Connect{% endblock %}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f7f7f7; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#333;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center" style="padding:30px 0;">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden;">
+          <tr>
+            <td style="background-color:#9E1B32; color:#ffffff; text-align:center; padding:20px;">
+              <img src="https://upload.wikimedia.org/wikipedia/en/5/5a/Pittsburg_State_University_logo.svg" width="80" alt="PSU Logo" />
+              <h1 style="margin:10px 0 0; font-size:24px;">PittState-Connect</h1>
+              <p style="font-size:13px; opacity:0.8;">Empowering Students • Connecting Alumni • Driving Careers</p>
+            </td>
+          </tr>
 
-  <body style="margin: 0; padding: 0; background-color: #f9f9f9;">
-    <!-- PSU Header -->
-    {% include 'emails/partials/email_header.html' %}
+          <tr>
+            <td style="padding:30px;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
 
-    <!-- Email Body Wrapper -->
-    <table
-      role="presentation"
-      cellpadding="0"
-      cellspacing="0"
-      width="100%"
-      style="max-width: 640px; margin: 0 auto; background-color: #ffffff;"
-    >
-      <tr>
-        <td align="center" style="padding: 40px 30px;">
-          <div class="content-box">
-            {% block content %}
-            <!-- Default content (if not overridden) -->
-            <h1 class="psu-red">Hello from PittState-Connect</h1>
-            <p>
-              This is a default placeholder. Replace this content by overriding
-              the <code>{% raw %}{% block content %}{% endblock %}{% endraw %}</code>
-              section in your extended email template.
-            </p>
-            {% endblock %}
-          </div>
-        </td>
-      </tr>
-    </table>
-
-    <!-- PSU Footer -->
-    {% include 'emails/partials/email_footer.html' %}
-
-    <!-- Plaintext fallback -->
-    <noscript>
-      {% block text_fallback %}
-      This is a plain-text fallback version of the PittState-Connect email.
-      {% endblock %}
-    </noscript>
-  </body>
+          <tr>
+            <td style="background-color:#1C1C1C; color:#FFCC33; text-align:center; padding:20px; font-size:13px;">
+              © {{ now().year if now else 2025 }} Pittsburg State University<br/>
+              <a href="https://www.pittstate.edu" style="color:#FFCC33; text-decoration:none;">pittstate.edu</a> | 
+              <a href="mailto:support@pittstateconnect.com" style="color:#FFCC33; text-decoration:none;">Contact Support</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
 </html>
