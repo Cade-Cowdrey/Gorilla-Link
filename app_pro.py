@@ -1,199 +1,123 @@
 """
 app_pro.py
--------------------------------------------------------------
-PittState-Connect Production App Entry
--------------------------------------------------------------
-• PSU-branded full Flask ecosystem (web, AI, analytics, mail)
-• Safe stubs for missing modules
-• Secure Redis + APScheduler integration
-• Jinja helpers (has_endpoint, get_env, safe_url_for)
-• Render-ready health logging and resiliency
+--------------------------------------------------
+PittState-Connect | Production Application Entrypoint
+Full Render deployment build with PSU branding,
+secure extensions, blueprint auto-loader, and
+nightly maintenance jobs.
+--------------------------------------------------
 """
 
 import os
-import sys
-import json
-from datetime import datetime
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, jsonify
 from loguru import logger
-
-# -------------------------------------------------------------
-# ✅ Import extensions
-# -------------------------------------------------------------
-try:
-    from extensions import (
-        db, migrate, cache, mail,
-        login_manager, scheduler, redis_client, csrf
-    )
-except Exception as e:
-    logger.error("❌ Failed importing extensions: {}", e)
-    raise
+from config import get_config
+from extensions import db, migrate, cache, mail, scheduler, login_manager, init_extensions
+from utils.mail_util import send_nightly_summary
 
 
-# -------------------------------------------------------------
-# ✅ Create Flask App
-# -------------------------------------------------------------
-app = Flask(__name__)
-
-# Load config dynamically
-config_name = os.getenv("FLASK_CONFIG", "config.ProductionConfig")
-try:
-    app.config.from_object(config_name)
-    logger.info("Loaded config: {}", config_name)
-except Exception as e:
-    logger.warning("Using default config; could not import {}: {}", config_name, e)
-
-# -------------------------------------------------------------
-# ✅ Initialize Extensions
-# -------------------------------------------------------------
-try:
-    db.init_app(app)
-    migrate.init_app(app, db)
-    cache.init_app(app)
-    csrf.init_app(app)
-    login_manager.init_app(app)
-    mail.init_app(app)
-    logger.info("✅ Core extensions initialized.")
-except Exception as e:
-    logger.warning("⚠️ Extension init warning: {}", e)
-
-# Redis
-if redis_client:
-    logger.info("✅ Connected to Redis successfully.")
-else:
-    logger.warning("⚠️ Redis unavailable.")
-
-# -------------------------------------------------------------
-# ✅ Logging Setup
-# -------------------------------------------------------------
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-logger.remove()
-logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, enqueue=True)
-logger.info("🚀 PittState-Connect starting in {} mode", LOG_LEVEL)
+# ==================================================
+# 🔧 Factory
+# ==================================================
+def create_app():
+    app = Flask(__name__, static_folder="static", template_folder="templates")
+    app.config.from_object(get_config())
+    init_extensions(app)
+    register_blueprints(app)
+    register_error_handlers(app)
+    register_scheduler_jobs(app)
+    return app
 
 
-# -------------------------------------------------------------
-# ✅ Jinja Global Utilities
-# -------------------------------------------------------------
-def has_endpoint(name):
-    """Return True if Flask endpoint exists."""
+# ==================================================
+# 🧩 Blueprints Loader (with safe stubbing)
+# ==================================================
+def register_blueprints(app):
+    from importlib import import_module
+
+    blueprints = [
+        ("blueprints.core.routes", "core_bp"),
+        ("blueprints.auth.routes", "auth_bp"),
+        ("blueprints.profile.routes", "profile_bp"),
+        ("blueprints.departments.routes", "departments_bp"),
+        ("blueprints.faculty.routes", "faculty_bp"),
+        ("blueprints.scholarships.routes", "scholarships_bp"),
+        ("blueprints.analytics.routes", "analytics_bp"),
+    ]
+
+    for module_path, bp_name in blueprints:
+        try:
+            mod = import_module(module_path)
+            bp = getattr(mod, bp_name)
+            app.register_blueprint(bp)
+            logger.info(f"✅ Registered {bp_name} ({module_path})")
+        except Exception as e:
+            from flask import Blueprint
+            stub = Blueprint(bp_name, __name__, url_prefix=f"/{bp_name.replace('_bp','')}")
+            logger.warning(f"⚠️ Using STUB blueprint for {bp_name} ({module_path}). Reason: {e}")
+            app.register_blueprint(stub)
+
+
+# ==================================================
+# 🚨 Error Handlers
+# ==================================================
+def register_error_handlers(app):
+    @app.errorhandler(404)
+    def not_found(e):
+        logger.warning(f"404 Error: {e}")
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        logger.error(f"500 Error: {e}")
+        return render_template("errors/500.html"), 500
+
+    @app.errorhandler(Exception)
+    def unhandled(e):
+        logger.exception(f"Unhandled Exception: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
+
+
+# ==================================================
+# 🌙 Nightly Jobs
+# ==================================================
+def register_scheduler_jobs(app):
     try:
-        return name in app.view_functions
-    except Exception:
-        return False
-
-
-def get_env(key, default=None):
-    """Fetch environment variable safely for templates."""
-    return os.getenv(key, default)
-
-
-def safe_url_for(endpoint_name, **values):
-    """Safe version of url_for that returns '#' on error."""
-    from werkzeug.routing import BuildError
-    try:
-        return url_for(endpoint_name, **values)
-    except BuildError as e:
-        logger.warning("⚠️ safe_url_for failed: {}", e)
-        return "#"
+        scheduler.add_job(
+            id="nightly_email_summary",
+            func=send_nightly_summary,
+            trigger="cron",
+            hour=2,
+            minute=0,
+        )
+        logger.info("🌙 Nightly email summary job registered.")
     except Exception as e:
-        logger.warning("⚠️ Unexpected URL error: {}", e)
-        return "#"
+        logger.warning(f"⚠️ Could not schedule nightly jobs: {e}")
 
 
-# Register Jinja helpers
-app.jinja_env.globals.update(
-    has_endpoint=has_endpoint,
-    get_env=get_env,
-    safe_url_for=safe_url_for
-)
-
-logger.info("✅ Registered Jinja helpers (has_endpoint, get_env, safe_url_for)")
-
-
-# -------------------------------------------------------------
-# ✅ Blueprint Registration (with Safe Imports)
-# -------------------------------------------------------------
-def register_blueprint_safe(import_path, url_prefix):
-    """Safely import and register blueprint."""
-    try:
-        module = __import__(import_path, fromlist=["bp"])
-        bp = getattr(module, "bp", None)
-        if not bp:
-            raise ImportError("Missing blueprint object 'bp'")
-        app.register_blueprint(bp, url_prefix=url_prefix)
-        logger.success("🟢 Registered blueprint: {} ({})", import_path, url_prefix)
-    except Exception as e:
-        logger.warning("Using STUB blueprint for {} ({}). Reason: {}", import_path, url_prefix, e)
-        @app.route(f"{url_prefix}/")
-        def stub_view():
-            return render_template(
-                "core/coming_soon.html",
-                title="Coming Soon",
-                message=f"This module ({import_path}) is not yet available."
-            )
-
-
-# Core routes
-register_blueprint_safe("blueprints.core.routes", "/")
-register_blueprint_safe("blueprints.scholarships.routes", "/scholarships")
-register_blueprint_safe("blueprints.departments.routes", "/departments")
-register_blueprint_safe("blueprints.faculty.routes", "/faculty")
-register_blueprint_safe("blueprints.analytics.routes", "/analytics")
-register_blueprint_safe("blueprints.jobs.routes", "/careers")
-register_blueprint_safe("blueprints.events.routes", "/events")
-register_blueprint_safe("blueprints.notifications.routes", "/notifications")
-
-
-# -------------------------------------------------------------
-# ✅ Custom Error Pages
-# -------------------------------------------------------------
-@app.errorhandler(404)
-def not_found(e):
-    return render_template("core/error.html", code=404, message="Page not found"), 404
-
-
-@app.errorhandler(500)
-def server_error(e):
-    logger.error("500 Error: {}", e)
-    return render_template("core/error.html", code=500, message="Internal Server Error"), 500
-
-
-@app.route("/healthz")
-def health_check():
-    """Health endpoint for Render."""
-    return {"status": "ok", "time": datetime.utcnow().isoformat()}
-
-
-# -------------------------------------------------------------
-# ✅ Optional Scheduler Hooks
-# -------------------------------------------------------------
+# ==================================================
+# 🧠 AI / Analytics Placeholder (Optional Phase 3+)
+# ==================================================
+@app_pro_error = None
 try:
-    if scheduler:
-        logger.info("✅ Scheduler detected — checking background jobs.")
-        with app.app_context():
-            jobs = scheduler.get_jobs()
-            for j in jobs:
-                logger.debug("⏰ Job registered: {}", j.id)
-    else:
-        logger.warning("⚠️ No APScheduler active in this context.")
+    from utils.analytics_util import preload_analytics_cache
+    preload_analytics_cache()
 except Exception as e:
-    logger.warning("Scheduler check failed: {}", e)
+    app_pro_error = e
+    logger.warning(f"⚠️ Analytics preload skipped: {e}")
 
 
-# -------------------------------------------------------------
-# ✅ Mail Configuration Check
-# -------------------------------------------------------------
-if not os.getenv("SENDGRID_API_KEY"):
-    logger.warning("⚠️ Incomplete mail configuration. Check SENDGRID_API_KEY or MAIL_* vars.")
+# ==================================================
+# 🦍 App Instance
+# ==================================================
+app = create_app()
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "app": "PittState-Connect"})
 
 
-# -------------------------------------------------------------
-# ✅ Run for Local Debug
-# -------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 5000)),
-        debug=os.getenv("FLASK_DEBUG", "0") == "1"
-    )
+    port = int(os.getenv("PORT", 10000))
+    logger.info(f"🚀 Starting PittState-Connect on port {port}")
+    app.run(host="0.0.0.0", port=port)
