@@ -1,14 +1,6 @@
-{% extends "base.html" %}
-{% block title %}Maintenance Mode | PittState-Connect{% endblock %}
-{% block content %}
-<section class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-crimson to-gold text-white text-center">
-  <div class="max-w-xl p-8 rounded-2xl bg-black/30 backdrop-blur">
-    <img src="/static/images/psu_logo.png" alt="PSU Logo" class="w-24 mx-auto mb-4" />
-    <h1 class="text-4xl font-extrabold mb-2">We’re Improving PittState-Connect</h1>
-    <p class="text-lg opacity-90 mb-6">
-      Our site is temporarily down for maintenance. We’ll be back online shortly with exciting updates!
-    </p>
-    <div class="text-sm opacity-80">Thank you for your patience, Gorillas 🦍</div>
-  </div>
-</section>
-{% endblock %}
+{% extends "errors/base_error.html" %}
+{% set title = "Maintenance Mode | PittState-Connect" %}
+{% set code = "🛠" %}
+{% set heading = "We’re Improving PittState-Connect" %}
+{% set message = "Our site is temporarily down for scheduled maintenance. We’ll be back online shortly — thank you for your patience, Gorillas!" %}
+{% set icon = "wrench" %}
