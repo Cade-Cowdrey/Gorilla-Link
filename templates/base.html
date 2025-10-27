@@ -117,5 +117,13 @@
        🧠 SCRIPTS
        ========================= -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% if status_banner %}
+<div class="fixed bottom-0 left-0 right-0 z-50 {{ status_banner.color }} text-white text-sm py-2 shadow-lg">
+  <div class="flex justify-center items-center space-x-2">
+    <i data-lucide="{{ status_banner.icon }}" class="w-4 h-4"></i>
+    <span>{{ status_banner.text }}</span>
+  </div>
+</div>
+{% endif %}
 </body>
 </html>
