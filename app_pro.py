@@ -1,153 +1,127 @@
 """
 PittState-Connect | Production Entry Point
-This file bootstraps the Flask application for Render deployment.
-It auto-detects environment configuration, initializes all extensions,
-registers blueprints, sets up global error handling, and starts the app.
+Main application factory for Render deployment.
+Initializes all blueprints, logging, analytics, and PSU modules.
 """
 
 import os
 from loguru import logger
-from flask import Flask, render_template, redirect, url_for, jsonify
+from flask import Flask, jsonify
+from extensions import (
+    db,
+    mail,
+    migrate,
+    login_manager,
+    cache,
+    limiter,
+    scheduler,
+    redis_client,
+    init_extensions,
+)
 from config import load_config
-from extensions import init_extensions, db, scheduler
-from datetime import datetime
+from openai import OpenAI
 
 # ======================================================
-# ⚙️ APP FACTORY
+# 🧩 APP FACTORY
 # ======================================================
 def create_app():
-    """Create and configure the Flask application instance."""
-    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app = Flask(__name__)
 
-    # Load configuration dynamically (production/dev/test)
+    # Load Production Config
     load_config(app)
-
-    # Initialize all extensions (db, redis, limiter, csrf, etc.)
     init_extensions(app)
 
-    # Register blueprints automatically
+    logger.info("🦍 PittState-Connect configuration applied successfully.")
+
+    # Register blueprints safely
     register_blueprints(app)
-
-    # Register error handlers
     register_error_handlers(app)
+    register_health_routes(app)
 
-    # Maintenance mode check
-    if app.config.get("MAINTENANCE_MODE", False):
-        logger.warning("🚧 App running in maintenance mode.")
-        @app.before_request
-        def maintenance_check():
-            return render_template("errors/maintenance.html"), 503
-
-    logger.info("🦍 PittState-Connect Flask app created successfully.")
     return app
 
 
 # ======================================================
-# 📦 BLUEPRINT AUTO-LOADER
+# 🧩 BLUEPRINT REGISTRATION
 # ======================================================
 def register_blueprints(app):
-    """Auto-detect and register all blueprints from the blueprints folder."""
-    import importlib
-    import pkgutil
+    from importlib import import_module
 
-    blueprint_dir = "blueprints"
-    for _, module_name, _ in pkgutil.iter_modules([blueprint_dir]):
+    blueprints = [
+        "blueprints.admin.routes",
+        "blueprints.auth.routes",
+        "blueprints.core.routes",
+        "blueprints.analytics.routes",
+        "blueprints.api.routes",
+        "blueprints.connections.routes",
+        "blueprints.departments.routes",
+        "blueprints.events.routes",
+        "blueprints.faculty.routes",
+        "blueprints.feed.routes",
+        "blueprints.groups.routes",
+        "blueprints.notifications.routes",
+        "blueprints.profile.routes",
+        "blueprints.scholarships.routes",
+        "blueprints.stories.routes",
+    ]
+
+    for bp in blueprints:
         try:
-            module = importlib.import_module(f"{blueprint_dir}.{module_name}.routes")
-            if hasattr(module, "bp"):
-                app.register_blueprint(module.bp)
-                logger.info(f"🧩 Registered blueprint: {module_name}")
+            mod = import_module(bp)
+            app.register_blueprint(mod.bp)
+            logger.info(f"✅ Registered blueprint: {bp}")
         except Exception as e:
-            logger.error(f"❌ Failed to register blueprint {module_name}: {e}")
+            logger.error(f"❌ Failed to register blueprint {bp}: {e}")
 
 
 # ======================================================
-# ❌ GLOBAL ERROR HANDLERS
+# ❤️ HEALTH & AI CHECKS
+# ======================================================
+def register_health_routes(app):
+    @app.route("/health")
+    def health():
+        return jsonify(status="ok", env=app.config.get("ENV", "production"))
+
+    @app.route("/ai/ping")
+    def ai_ping():
+        try:
+            api_key = os.getenv("OPENAI_API_KEY", "")
+            if not api_key:
+                return jsonify(ai_status="missing_key"), 400
+
+            client = OpenAI(api_key=api_key)
+            response = client.responses.create(model="gpt-4o-mini", input="ping")
+            return jsonify(ai_status="ok", output=response.output_text)
+        except Exception as e:
+            return jsonify(ai_status="error", message=str(e)), 500
+
+
+# ======================================================
+# 🧱 ERROR HANDLERS
 # ======================================================
 def register_error_handlers(app):
-    """Attach PSU-branded error templates for common HTTP errors."""
-
     @app.errorhandler(404)
-    def not_found_error(error):
-        logger.warning(f"⚠️ 404 Not Found: {error}")
-        return render_template("errors/404.html"), 404
-
-    @app.errorhandler(403)
-    def forbidden_error(error):
-        logger.warning(f"🚫 403 Forbidden: {error}")
-        return render_template("errors/403.html"), 403
-
-    @app.errorhandler(401)
-    def unauthorized_error(error):
-        logger.warning(f"🔐 401 Unauthorized: {error}")
-        return render_template("errors/401.html"), 401
+    def not_found(e):
+        return (
+            jsonify(error="Page not found", status=404),
+            404,
+        )
 
     @app.errorhandler(500)
-    def internal_error(error):
-        logger.error(f"💥 500 Internal Server Error: {error}")
-        db.session.rollback()
-        return render_template("errors/500.html"), 500
-
-    @app.errorhandler(429)
-    def rate_limit_error(error):
-        logger.warning(f"⏳ 429 Too Many Requests: {error}")
-        return render_template("errors/429.html"), 429
+    def server_error(e):
+        return (
+            jsonify(error="Internal server error", status=500),
+            500,
+        )
 
     logger.info("✅ PSU error handlers registered successfully.")
 
 
 # ======================================================
-# 🧠 HEALTH CHECK + AI ROUTES (optional enhancements)
-# ======================================================
-def register_health_routes(app):
-    """Simple internal API routes for diagnostics and AI endpoint."""
-
-    @app.route("/health")
-    def health_check():
-        return jsonify({
-            "status": "healthy",
-            "time": datetime.utcnow().isoformat(),
-            "analytics_enabled": app.config.get("ENABLE_ANALYTICS"),
-            "ai_assistant_enabled": app.config.get("ENABLE_AI_ASSISTANT"),
-        }), 200
-
-    if app.config.get("ENABLE_AI_ASSISTANT"):
-        from openai import OpenAI
-
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
-        
-        @app.route("/ai/ask", methods=["POST"])
-        def ai_assistant():
-            from flask import request
-            query = request.json.get("query", "")
-            if not query:
-                return jsonify({"error": "Missing query"}), 400
-            try:
-                completion = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": query}],
-                )
-                answer = completion.choices[0].message.content
-                return jsonify({"response": answer})
-            except Exception as e:
-                logger.error(f"🤖 AI Assistant error: {e}")
-                return jsonify({"error": str(e)}), 500
-
-
-# ======================================================
-# 🚀 APP INITIALIZATION
+# 🚀 APP ENTRY
 # ======================================================
 app = create_app()
-register_health_routes(app)
+logger.info("🦍 PittState-Connect Flask app created successfully.")
 
-logger.info(f"🚀 PittState-Connect launching in {app.config.get('ENV', 'production').title()} mode.")
-logger.info(f"🗄️  Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
-logger.info(f"🕒 Scheduler active: {scheduler.running}")
-logger.info("✅ Application startup complete.")
-
-# ======================================================
-# 🔥 WSGI Entry Point
-# ======================================================
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
