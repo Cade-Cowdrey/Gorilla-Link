@@ -1,22 +1,20 @@
-# ---------------------------------------------
-#  utils/security_util.py
-# ---------------------------------------------
-from functools import wraps
-from flask import abort
-from flask_login import current_user
+"""
+PittState-Connect | Security Utilities
+Includes login safety wrapper and role-based protections.
+"""
 
-def require_roles(*roles):
-    """
-    Usage:
-      @require_roles('admin') or @require_roles('admin', 'staff')
-    """
-    def decorator(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            if not current_user.is_authenticated:
-                abort(401)
-            if roles and (current_user.role not in roles):
-                abort(403)
-            return fn(*args, **kwargs)
-        return wrapper
-    return decorator
+from flask_login import login_required
+from functools import wraps
+from flask import redirect, url_for, flash
+
+
+def login_required_safe(f):
+    """Safely apply login_required without crashing if user isn't logged in."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return login_required(f)(*args, **kwargs)
+        except Exception:
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for("auth.login"))
+    return decorated_function
