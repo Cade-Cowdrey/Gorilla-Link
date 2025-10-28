@@ -1,6 +1,6 @@
 import os
 from flask import Flask, url_for
-from jinja2 import Markup
+from markupsafe import Markup
 from config.config_production import ConfigProduction
 from extensions import init_extensions, scheduler
 from blueprints import register_blueprints
