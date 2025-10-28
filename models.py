@@ -38,7 +38,12 @@ class User(UserMixin, db.Model):
     # Relationships
     role = db.relationship("Role", back_populates="users", lazy=True)
     posts = db.relationship("Post", back_populates="author", lazy=True)
-    connections = db.relationship("Connection", back_populates="user", lazy=True)
+    connections = db.relationship(
+        "Connection",
+        foreign_keys="Connection.user_id",
+        back_populates="user",
+        lazy=True,
+    )
     notifications = db.relationship("Notification", back_populates="recipient", lazy=True)
 
     def set_password(self, password):
@@ -53,6 +58,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
+
 
 # ---------------------------
 # CONTENT MODELS
@@ -102,6 +108,7 @@ class Event(db.Model):
     def __repr__(self):
         return f"<Event {self.title}>"
 
+
 # ---------------------------
 # NETWORK & COMMUNICATION
 # ---------------------------
@@ -114,7 +121,17 @@ class Connection(db.Model):
     status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, default=func.now())
 
-    user = db.relationship("User", foreign_keys=[user_id], back_populates="connections")
+    user = db.relationship(
+        "User",
+        foreign_keys=[user_id],
+        back_populates="connections",
+        lazy=True,
+    )
+    connected_user = db.relationship(
+        "User",
+        foreign_keys=[connected_user_id],
+        lazy=True,
+    )
 
     def __repr__(self):
         return f"<Connection {self.user_id} → {self.connected_user_id} ({self.status})>"
@@ -134,6 +151,7 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"<Notification to {self.recipient_id}: {self.message[:20]}>"
+
 
 # ---------------------------
 # SCHOLARSHIP & CAREER MODELS
@@ -155,6 +173,7 @@ class Scholarship(db.Model):
     def __repr__(self):
         return f"<Scholarship {self.title}>"
 
+
 class Job(db.Model):
     __tablename__ = "jobs"
     id = db.Column(db.Integer, primary_key=True)
@@ -167,6 +186,7 @@ class Job(db.Model):
 
     def __repr__(self):
         return f"<Job {self.title} at {self.company}>"
+
 
 # ---------------------------
 # ANALYTICS & TRACKING
@@ -198,6 +218,7 @@ class AnalyticsSummary(db.Model):
     def __repr__(self):
         return f"<AnalyticsSummary {self.date}>"
 
+
 class ApiUsage(db.Model):
     __tablename__ = "api_usage"
     id = db.Column(db.Integer, primary_key=True)
@@ -207,12 +228,13 @@ class ApiUsage(db.Model):
     timestamp = db.Column(db.DateTime, default=func.now())
     response_time_ms = db.Column(db.Float)
     status_code = db.Column(db.Integer)
-    tokens_used = db.Column(db.Integer, default=0)  # for AI/OpenAI tracking
+    tokens_used = db.Column(db.Integer, default=0)
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.String(255))
 
     def __repr__(self):
         return f"<ApiUsage {self.endpoint} ({self.status_code})>"
+
 
 # ---------------------------
 # HELPER METHODS
