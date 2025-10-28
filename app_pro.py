@@ -1,44 +1,57 @@
 import os
-import logging
-from flask import Flask, jsonify
+from flask import Flask, url_for, Markup
 from config.config_production import ConfigProduction
 from extensions import init_extensions, scheduler
+from blueprints import register_blueprints
 from utils.analytics_util import track_page_view
-from openai import OpenAI
+from loguru import logger
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(ConfigProduction)
+# ----------------------------
+# APP FACTORY
+# ----------------------------
 
-    # Initialize all extensions
-    init_extensions(app)
+app = Flask(__name__)
+app.config.from_object(ConfigProduction)
 
-    # Logging
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
-    logging.info("🦍 PittState-Connect configuration applied successfully.")
+# Initialize all extensions
+init_extensions(app)
+register_blueprints(app)
 
-    # Register blueprints dynamically
-    from blueprints import register_blueprints
-    register_blueprints(app)
+# Add safe_url_for globally for Jinja templates
+def safe_url_for(endpoint, **values):
+    """Return a safe URL or '#' if route doesn't exist."""
+    try:
+        return url_for(endpoint, **values)
+    except Exception:
+        return "#"
 
-    # Health route
-    @app.route("/health")
-    def health_check():
-        return jsonify({"status": "healthy", "env": "production"}), 200
+app.jinja_env.globals["safe_url_for"] = safe_url_for
 
-    # OpenAI test route (optional)
-    @app.route("/ai/test")
-    def ai_test():
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
-        return jsonify({"ok": True, "message": "AI assistant operational"})
+# ----------------------------
+# ERROR HANDLERS
+# ----------------------------
 
-    # Background job example
-    @scheduler.task("cron", id="nightly_job", hour=2)
-    def nightly_job():
-        logging.info("🌙 Running nightly scheduled job...")
+@app.errorhandler(404)
+def not_found(e):
+    return Markup("<h3>404 - Page Not Found</h3>"), 404
 
-    return app
+@app.errorhandler(500)
+def server_error(e):
+    logger.exception("Server error: {}", e)
+    return Markup("<h3>500 - Internal Server Error</h3>"), 500
 
+# ----------------------------
+# ROOT ROUTE
+# ----------------------------
 
-# Gunicorn entrypoint
-app = create_app()
+@app.route("/")
+def index():
+    return "🦍 PittState-Connect Production is Live!"
+
+# ----------------------------
+# MAIN ENTRY POINT
+# ----------------------------
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
