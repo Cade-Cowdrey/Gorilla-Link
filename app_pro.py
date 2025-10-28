@@ -4,7 +4,6 @@ from markupsafe import Markup
 from config.config_production import ConfigProduction
 from extensions import init_extensions, scheduler
 from blueprints import register_blueprints
-from utils.analytics_util import track_page_view
 from loguru import logger
 
 # ----------------------------
@@ -14,9 +13,8 @@ from loguru import logger
 app = Flask(__name__)
 app.config.from_object(ConfigProduction)
 
-# Initialize all extensions
+# Initialize extensions first
 init_extensions(app)
-register_blueprints(app)
 
 # ----------------------------
 # GLOBAL JINJA HELPERS
@@ -29,7 +27,23 @@ def safe_url_for(endpoint, **values):
     except Exception:
         return "#"
 
+def has_endpoint(endpoint):
+    """Check if a Flask endpoint exists (used in templates)."""
+    return endpoint in app.view_functions
+
+# Register both helpers globally before templates load
 app.jinja_env.globals["safe_url_for"] = safe_url_for
+app.jinja_env.globals["has_endpoint"] = has_endpoint
+
+# ----------------------------
+# BLUEPRINTS & ROUTES
+# ----------------------------
+
+register_blueprints(app)
+
+@app.route("/")
+def index():
+    return "🦍 PittState-Connect Production is Live!"
 
 # ----------------------------
 # ERROR HANDLERS
@@ -43,14 +57,6 @@ def not_found(e):
 def server_error(e):
     logger.exception("Server error: {}", e)
     return Markup("<h3>500 - Internal Server Error</h3>"), 500
-
-# ----------------------------
-# ROOT ROUTE
-# ----------------------------
-
-@app.route("/")
-def index():
-    return "🦍 PittState-Connect Production is Live!"
 
 # ----------------------------
 # MAIN ENTRY POINT
