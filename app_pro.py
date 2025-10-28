@@ -1,5 +1,6 @@
 import os
-from flask import Flask, url_for, Markup
+from flask import Flask, url_for
+from jinja2 import Markup
 from config.config_production import ConfigProduction
 from extensions import init_extensions, scheduler
 from blueprints import register_blueprints
@@ -17,7 +18,10 @@ app.config.from_object(ConfigProduction)
 init_extensions(app)
 register_blueprints(app)
 
-# Add safe_url_for globally for Jinja templates
+# ----------------------------
+# GLOBAL JINJA HELPERS
+# ----------------------------
+
 def safe_url_for(endpoint, **values):
     """Return a safe URL or '#' if route doesn't exist."""
     try:
