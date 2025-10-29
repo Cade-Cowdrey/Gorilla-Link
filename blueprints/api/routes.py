@@ -7,14 +7,11 @@ from datetime import datetime
 api_bp = Blueprint("api_bp", __name__, url_prefix="/api")
 
 # ==========================================================
-# 🧠 GENERIC API USAGE TRACKER
+# 🧠 API USAGE LOGGING
 # ==========================================================
 
 @api_bp.after_request
 def log_api_usage(response):
-    """
-    Automatically logs API endpoint hits for analytics.
-    """
     try:
         record_api_usage(
             endpoint=request.path,
@@ -28,14 +25,11 @@ def log_api_usage(response):
 
 
 # ==========================================================
-# 🔹 EXAMPLE PUBLIC ENDPOINTS
+# 🔹 PUBLIC ENDPOINTS
 # ==========================================================
 
 @api_bp.route("/status")
 def api_status():
-    """
-    Basic heartbeat for public API access.
-    """
     return jsonify({
         "status": "ok",
         "service": "PittState-Connect API",
@@ -45,32 +39,28 @@ def api_status():
 
 @api_bp.route("/info")
 def api_info():
-    """
-    Basic system info endpoint.
-    """
-    info = {
+    return jsonify({
         "app": "PittState-Connect",
         "version": "1.0.0",
-        "description": "PSU network and analytics ecosystem.",
-        "docs": "https://pittstate-connect.onrender.com/docs",
-    }
-    return jsonify(info)
+        "description": "PSU network & analytics ecosystem",
+        "docs": "/docs"
+    })
 
 
 # ==========================================================
-# 🔒 AUTHENTICATED API EXAMPLE (optional enhancement)
+# 🔒 AUTHENTICATED ENDPOINT
 # ==========================================================
 
 @api_bp.route("/user/profile")
 def user_profile_api():
-    """
-    Returns minimal user info if logged in.
-    """
     if current_user.is_authenticated:
         return jsonify({
             "id": current_user.id,
             "name": getattr(current_user, "full_name", None),
             "email": getattr(current_user, "email", None),
-            "role": getattr(current_user, "role", "student")
+            "role": getattr(current_user, "role", "student"),
         })
     return jsonify({"error": "Unauthorized"}), 401
+
+# 👇 Required for auto-registration
+bp = api_bp
