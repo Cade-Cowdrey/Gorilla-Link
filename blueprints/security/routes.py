@@ -1,23 +1,23 @@
-# blueprints/security/routes.py
-from __future__ import annotations
-from flask import Blueprint, request, jsonify, render_template
+# File: blueprints/security/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-security_bp = Blueprint("security_bp", __name__, url_prefix="/admin")
+bp = Blueprint("security", __name__, url_prefix="/security")
 
-_flagged_store: list[dict] = []  # replace with DB
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="security")
 
-@security_bp.route("/audit")
-def audit_page():
-    return render_template("admin/audit.html", items=_flagged_store)
-
-@security_bp.route("/moderate", methods=["POST"])
-def moderate_text():
-    data = request.get_json(silent=True) or {}
-    text = data.get("text","")
-    threshold = float(data.get("threshold", 0.8))
-    bad_words = ["hate","stupid","idiot","kill","dumb","trash","screw you"]
-    score = min(1.0, sum(text.lower().count(w) for w in bad_words) * 0.25)
-    flagged = score >= threshold
-    item = {"text": text, "score": round(score,2), "flagged": flagged}
-    if flagged: _flagged_store.append(item)
-    return jsonify(ok=True, data=item)
+@bp.get("/")
+def index():
+    track_page_view("security")
+    return render_template_string("""
+    {% extends "base.html" %}
+    {% block title %}Security & Privacy | PittState-Connect{% endblock %}
+    {% block content %}
+      <div class="container py-4">
+        <h1 class="h3">Security & Privacy</h1>
+        <p class="text-muted">Account protections, login alerts, and data requests.</p>
+      </div>
+    {% endblock %}
+    """)
