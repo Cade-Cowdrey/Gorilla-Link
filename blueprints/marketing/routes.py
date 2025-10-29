@@ -1,18 +1,23 @@
-from flask import Blueprint, jsonify, render_template_string
-marketing_bp = Blueprint("marketing", __name__, url_prefix="/marketing")
+# File: blueprints/marketing/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@marketing_bp.route("/", methods=["GET"])
+bp = Blueprint("marketing", __name__, url_prefix="/marketing")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="marketing")
+
+@bp.get("/")
 def index():
-    html = """
+    track_page_view("marketing")
+    return render_template_string("""
     {% extends "base.html" %}
-    {% block title %}Marketing · PittState{% endblock %}
+    {% block title %}Marketing | PittState-Connect{% endblock %}
     {% block content %}
-      <h1 class="text-2xl font-bold text-[#73000A]">Marketing</h1>
-      <p class="mt-2 text-gray-600">Campaigns and outreach.</p>
+      <div class="container py-4">
+        <h1 class="h3">Marketing</h1>
+        <p class="text-muted">Landing pages, funnels, and sponsor assets.</p>
+      </div>
     {% endblock %}
-    """
-    return render_template_string(html)
-
-@marketing_bp.route("/api", methods=["GET"])
-def api():
-    return jsonify({"module": "marketing", "ok": True})
+    """)
