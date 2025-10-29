@@ -1,78 +1,122 @@
+<!-- File: templates/analytics/index.html -->
 {% extends "base.html" %}
-
-{% block title %}Analytics · PittState-Connect{% endblock %}
-
-{% block head %}
-  <meta name="description" content="PSU Analytics Dashboard — Real-time engagement, scholarships, and donor performance insights for PittState-Connect." />
-  <meta name="robots" content="index,follow" />
-  <meta property="og:title" content="PittState-Connect Analytics" />
-  <meta property="og:description" content="Live analytics for PSU: engagement, scholarships, alumni, and donor trends." />
-  <meta property="og:image" content="{{ url_for('static', filename='img/psu_analytics_preview.png') }}" />
-  <meta property="og:type" content="website" />
-  <meta name="theme-color" content="#990000" />
-
-  <style>
-    /* Page-specific intro animation */
-    .fade-in-up {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp .6s ease forwards;
-    }
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Decorative PSU divider line */
-    .psu-divider {
-      border: none;
-      height: 3px;
-      background: linear-gradient(90deg, #990000, #ffcc00);
-      width: 120px;
-      border-radius: 6px;
-      margin: 1.5rem 0;
-    }
-
-    /* Loading shimmer fallback */
-    .placeholder-glow .placeholder {
-      animation-duration: 1.2s !important;
-      animation-iteration-count: infinite;
-    }
-  </style>
-{% endblock %}
+{% block title %}Analytics | PittState-Connect{% endblock %}
 
 {% block content %}
-<section class="fade-in-up">
-  <div class="text-center mb-4">
-    <h1 class="fw-bold text-uppercase text-danger">University Analytics Dashboard</h1>
-    <p class="lead text-muted mb-1">Real-time insights on PittState-Connect engagement, scholarships, and donor trends.</p>
-    <hr class="psu-divider mx-auto" />
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <img src="{{ url_for('static', filename='img/psu_gorilla_mark.png') }}" alt="PSU"
+         style="height:48px;width:auto;margin-right:12px;">
+    <div>
+      <h1 class="h3 m-0">PittState-Connect Analytics</h1>
+      <div class="text-muted">Real-time usage insights • PSU-branded</div>
+    </div>
   </div>
 
-  <!-- Dashboard Core -->
-  {% include "analytics/analytics_cards.html" %}
-</section>
+  <!-- Summary cards -->
+  <div class="row g-3" id="summary-cards">
+    <div class="col-6 col-md-3"><div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="text-uppercase small text-muted">Page Views (7d)</div>
+        <div class="fs-3 fw-bold" id="pv7">–</div>
+      </div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="text-uppercase small text-muted">Unique Users (7d)</div>
+        <div class="fs-3 fw-bold" id="uu7">–</div>
+      </div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="text-uppercase small text-muted">Avg /day (30d)</div>
+        <div class="fs-3 fw-bold" id="avg30">–</div>
+      </div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="text-uppercase small text-muted">Endpoints Tracked</div>
+        <div class="fs-3 fw-bold" id="endpoints">–</div>
+      </div>
+    </div></div>
+  </div>
 
-<!-- Optional PSU data policy footer note -->
-<div class="text-center small mt-4 text-muted">
-  <p>
-    Analytics data is anonymized and aggregated according to <a href="{{ url_for('core_bp.index') }}#privacy" class="text-decoration-none text-danger">PSU data privacy standards</a>.
-  </p>
+  <!-- Charts -->
+  <div class="row g-3 mt-1">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 m-0">30-Day Traffic</h2>
+            <select id="days" class="form-select form-select-sm" style="width:auto">
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <div id="timeseries" style="height:340px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h2 class="h5 mb-2">Top Pages</h2>
+          <div id="topPages" style="height:340px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department filter mock (future expansion) -->
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="text-muted small text-uppercase">Filters:</span>
+        <select class="form-select form-select-sm" style="width:auto" disabled title="Coming soon">
+          <option>All Departments</option>
+        </select>
+        <select class="form-select form-select-sm" style="width:auto" disabled title="Coming soon">
+          <option>All Roles</option>
+        </select>
+        <span class="badge bg-warning text-dark">PSU-Branded • Ready for data wiring</span>
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- Plotly (bundled) -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Lazy fade-in for large components
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('fade-in-up');
-        observer.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('section, .card').forEach(el => observer.observe(el));
+document.addEventListener('DOMContentLoaded', async () => {
+  // Summary
+  const s = await fetch('{{ url_for("analytics.api_summary") }}').then(r=>r.json());
+  document.getElementById('pv7').textContent   = s.page_views_7d ?? '0';
+  document.getElementById('uu7').textContent   = s.unique_users_7d ?? '0';
+  document.getElementById('avg30').textContent = s.avg_per_day_30d ?? '0';
+  document.getElementById('endpoints').textContent = s.endpoints ?? '0';
+
+  // Timeseries
+  async function drawSeries(days) {
+    const ts = await fetch(`{{ url_for("analytics.api_timeseries") }}?days=${days}`).then(r=>r.json());
+    const x = ts.series.map(p=>p.date), y = ts.series.map(p=>p.count);
+    Plotly.newPlot('timeseries', [{x, y, mode:'lines+markers', name:'Page Views'}], {
+      margin:{t:10,r:10,b:30,l:40},
+      xaxis:{title:'Date'},
+      yaxis:{title:'Views'},
+    }, {displayModeBar:false});
+  }
+  drawSeries(30);
+  document.getElementById('days').addEventListener('change', e => drawSeries(e.target.value));
+
+  // Top Pages
+  const top = await fetch('{{ url_for("analytics.api_top_pages") }}?limit=10').then(r=>r.json());
+  const labels = top.items.map(i=>i.page), values = top.items.map(i=>i.count);
+  Plotly.newPlot('topPages', [{type:'bar', x:values, y:labels, orientation:'h'}], {
+    margin:{t:10,r:10,b:20,l:100},
+    xaxis:{title:'Views'},
+  }, {displayModeBar:false});
 });
 </script>
 {% endblock %}
