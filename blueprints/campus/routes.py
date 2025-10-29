@@ -1,18 +1,23 @@
-from flask import Blueprint, jsonify, render_template_string
-campus_bp = Blueprint("campus", __name__, url_prefix="/campus")
+# File: blueprints/campus/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@campus_bp.route("/", methods=["GET"])
+bp = Blueprint("campus", __name__, url_prefix="/campus")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="campus")
+
+@bp.get("/")
 def index():
-    html = """
+    track_page_view("campus")
+    return render_template_string("""
     {% extends "base.html" %}
-    {% block title %}Campus · PittState{% endblock %}
+    {% block title %}Campus | PittState-Connect{% endblock %}
     {% block content %}
-      <h1 class="text-2xl font-bold text-[#73000A]">Campus</h1>
-      <p class="mt-2 text-gray-600">Campus resources and news.</p>
+      <div class="container py-4">
+        <h1 class="h3">Campus Hub</h1>
+        <p class="text-muted">Maps, services, hours, and quick links.</p>
+      </div>
     {% endblock %}
-    """
-    return render_template_string(html)
-
-@campus_bp.route("/api", methods=["GET"])
-def api():
-    return jsonify({"module": "campus", "ok": True})
+    """)
