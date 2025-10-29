@@ -1,63 +1,48 @@
+# File: blueprints/analytics/routes.py
+from __future__ import annotations
 from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required, current_user
-from utils.analytics_util import get_page_stats, get_api_stats
-from loguru import logger
+from utils.analytics_util import (
+    track_page_view,
+    get_page_stats,
+    get_top_pages,
+    get_timeseries,
+)
 
-analytics_bp = Blueprint("analytics_bp", __name__, url_prefix="/analytics")
+bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
-# ==========================================================
-# 📊 ANALYTICS DASHBOARD
-# ==========================================================
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="analytics")
 
-@analytics_bp.route("/")
+@bp.get("/")
 @login_required
-def dashboard():
-    """Main analytics dashboard."""
-    try:
-        page_stats = get_page_stats(limit=20)
-        api_stats = get_api_stats(limit=20)
-        return render_template(
-            "analytics/dashboard.html",
-            title="Analytics Dashboard | PittState-Connect",
-            page_stats=page_stats,
-            api_stats=api_stats,
-        )
-    except Exception as e:
-        logger.error(f"❌ Analytics dashboard failed: {e}")
-        return render_template("errors/500.html", title="Server Error"), 500
+def index():
+    track_page_view("analytics_dashboard")
+    return render_template(
+        "analytics/index.html",
+        title="Analytics | PittState-Connect",
+        user=current_user,
+    )
 
-
-# ==========================================================
-# 🔍 JSON ENDPOINTS (for live charts)
-# ==========================================================
-
-@analytics_bp.route("/page-stats")
+# --- JSON APIs feeding the dashboard ----
+@bp.get("/api/summary")
 @login_required
-def page_stats_api():
-    try:
-        return jsonify({"status": "success", "data": get_page_stats(limit=50)})
-    except Exception as e:
-        logger.error(f"page_stats_api failed: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+def api_summary():
+    track_page_view("analytics_api_summary")
+    stats = get_page_stats()
+    return jsonify(stats)
 
-
-@analytics_bp.route("/api-stats")
+@bp.get("/api/top-pages")
 @login_required
-def api_stats_api():
-    try:
-        return jsonify({"status": "success", "data": get_api_stats(limit=50)})
-    except Exception as e:
-        logger.error(f"api_stats_api failed: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+def api_top_pages():
+    limit = int(request.args.get("limit", 10))
+    data = get_top_pages(limit=limit)
+    return jsonify({"limit": limit, "items": data})
 
-
-# ==========================================================
-# ❤️ HEALTH CHECK
-# ==========================================================
-
-@analytics_bp.route("/ping")
-def ping():
-    return {"status": "ok", "module": "analytics"}
-
-# 👇 Required for auto-registration
-bp = analytics_bp
+@bp.get("/api/timeseries")
+@login_required
+def api_timeseries():
+    days = int(request.args.get("days", 30))
+    series = get_timeseries(days=days)
+    return jsonify({"days": days, "series": series})
