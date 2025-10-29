@@ -1,18 +1,23 @@
-from flask import Blueprint, jsonify, render_template_string
-portfolio_bp = Blueprint("portfolio", __name__, url_prefix="/portfolio")
+# File: blueprints/portfolio/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@portfolio_bp.route("/", methods=["GET"])
+bp = Blueprint("portfolio", __name__, url_prefix="/portfolio")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="portfolio")
+
+@bp.get("/")
 def index():
-    html = """
+    track_page_view("portfolio")
+    return render_template_string("""
     {% extends "base.html" %}
-    {% block title %}Portfolio · PittState{% endblock %}
+    {% block title %}Portfolios | PittState-Connect{% endblock %}
     {% block content %}
-      <h1 class="text-2xl font-bold text-[#73000A]">Portfolio</h1>
-      <p class="mt-2 text-gray-600">Showcase your work and achievements.</p>
+      <div class="container py-4">
+        <h1 class="h3">Student Portfolios</h1>
+        <p class="text-muted">PSU-branded templates and showcases.</p>
+      </div>
     {% endblock %}
-    """
-    return render_template_string(html)
-
-@portfolio_bp.route("/api", methods=["GET"])
-def api():
-    return jsonify({"module": "portfolio", "ok": True})
+    """)
