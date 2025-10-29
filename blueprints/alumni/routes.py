@@ -1,14 +1,23 @@
-# ============================================================
-# FILE: blueprints/alumni/routes.py
-# ============================================================
-from flask import render_template, request
-from . import alumni_bp
+# File: blueprints/alumni/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@alumni_bp.route("/directory", methods=["GET"])
-def directory():
-    q = request.args.get("q", "")
-    alumni = [
-        {"name": "Taylor R.", "class_year": 2018, "title": "Data Analyst"},
-        {"name": "Sam K.", "class_year": 2016, "title": "Project Engineer"},
-    ]
-    return render_template("alumni/directory.html", q=q, alumni=alumni)
+bp = Blueprint("alumni", __name__, url_prefix="/alumni")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="alumni")
+
+@bp.get("/")
+def index():
+    track_page_view("alumni")
+    return render_template_string("""
+    {% extends "base.html" %}
+    {% block title %}Alumni Network | PittState-Connect{% endblock %}
+    {% block content %}
+      <div class="container py-4">
+        <h1 class="h3">Alumni Network</h1>
+        <p class="text-muted">Mentorships, job referrals, and donor engagement.</p>
+      </div>
+    {% endblock %}
+    """)
