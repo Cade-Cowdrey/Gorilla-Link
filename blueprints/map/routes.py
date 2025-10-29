@@ -1,18 +1,23 @@
-from flask import Blueprint, jsonify, render_template_string
-map_bp = Blueprint("map", __name__, url_prefix="/map")
+# File: blueprints/map/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@map_bp.route("/", methods=["GET"])
+bp = Blueprint("map", __name__, url_prefix="/map")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="map")
+
+@bp.get("/")
 def index():
-    html = """
+    track_page_view("map")
+    return render_template_string("""
     {% extends "base.html" %}
-    {% block title %}Map · PittState{% endblock %}
+    {% block title %}Campus Map | PittState-Connect{% endblock %}
     {% block content %}
-      <h1 class="text-2xl font-bold text-[#73000A]">Campus Map</h1>
-      <p class="mt-2 text-gray-600">Interactive campus map coming soon.</p>
+      <div class="container py-4">
+        <h1 class="h3">Campus Map</h1>
+        <p class="text-muted">Interactive locations and routes (coming online).</p>
+      </div>
     {% endblock %}
-    """
-    return render_template_string(html)
-
-@map_bp.route("/api", methods=["GET"])
-def api():
-    return jsonify({"module": "map", "ok": True})
+    """)
