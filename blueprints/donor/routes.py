@@ -1,18 +1,23 @@
-# blueprints/donor/routes.py
-from __future__ import annotations
-from flask import Blueprint, render_template, jsonify
+# File: blueprints/donor/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-donor_bp = Blueprint("donor_bp", __name__, url_prefix="/donor")
+bp = Blueprint("donor", __name__, url_prefix="/donor")
 
-@donor_bp.route("/")
-def donor_home():
-    # Replace with real DB reads
-    model = {
-        "funds": 12, "donations_this_term": 384, "avg_gift": 142.75,
-        "impact": ["12 engineering internships", "8 first-gen scholarships", "3 lab upgrades"]
-    }
-    return render_template("donor/overview.html", model=model)
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="donor")
 
-@donor_bp.route("/stats.json")
-def donor_stats_json():
-    return jsonify(ok=True, data={"funds":12, "donations":384, "avg":142.75})
+@bp.get("/")
+def index():
+    track_page_view("donor")
+    return render_template_string("""
+    {% extends "base.html" %}
+    {% block title %}Donor Portal | PittState-Connect{% endblock %}
+    {% block content %}
+      <div class="container py-4">
+        <h1 class="h3">Donor Portal</h1>
+        <p class="text-muted">Sponsor programs, scholarships, and impact reports.</p>
+      </div>
+    {% endblock %}
+    """)
