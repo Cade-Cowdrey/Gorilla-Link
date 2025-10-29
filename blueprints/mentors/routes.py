@@ -1,15 +1,23 @@
-# ============================================================
-# FILE: blueprints/mentors/routes.py
-# ============================================================
-from flask import render_template, request
-from . import mentors_bp
+# File: blueprints/mentors/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@mentors_bp.route("/", methods=["GET"])
-def hub():
-    q = request.args.get("q", "")
-    mentors = [
-        {"name": "Jordan A.", "dept": "Technology", "sessions": 12},
-        {"name": "Maria L.", "dept": "Business", "sessions": 9},
-        {"name": "Chris M.", "dept": "Education", "sessions": 8},
-    ]
-    return render_template("mentors/hub.html", mentors=mentors, q=q)
+bp = Blueprint("mentors", __name__, url_prefix="/mentors")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="mentors")
+
+@bp.get("/")
+def index():
+    track_page_view("mentors")
+    return render_template_string("""
+    {% extends "base.html" %}
+    {% block title %}Mentors | PittState-Connect{% endblock %}
+    {% block content %}
+      <div class="container py-4">
+        <h1 class="h3">Mentors</h1>
+        <p class="text-muted">Alumni & peer mentorship matchmaking.</p>
+      </div>
+    {% endblock %}
+    """)
