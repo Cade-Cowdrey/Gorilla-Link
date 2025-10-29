@@ -1,18 +1,23 @@
-from flask import Blueprint, jsonify, render_template_string
-engagement_bp = Blueprint("engagement", __name__, url_prefix="/engagement")
+# File: blueprints/engagement/routes.py
+from flask import Blueprint, render_template_string, jsonify
+from utils.analytics_util import track_page_view
 
-@engagement_bp.route("/", methods=["GET"])
+bp = Blueprint("engagement", __name__, url_prefix="/engagement")
+
+@bp.get("/health")
+def health():
+    return jsonify(status="ok", section="engagement")
+
+@bp.get("/")
 def index():
-    html = """
+    track_page_view("engagement")
+    return render_template_string("""
     {% extends "base.html" %}
-    {% block title %}Engagement · PittState{% endblock %}
+    {% block title %}Engagement | PittState-Connect{% endblock %}
     {% block content %}
-      <h1 class="text-2xl font-bold text-[#73000A]">Engagement</h1>
-      <p class="mt-2 text-gray-600">Likes, comments, and participation metrics.</p>
+      <div class="container py-4">
+        <h1 class="h3">Engagement</h1>
+        <p class="text-muted">Campaigns, A/B tests, and conversion tracking.</p>
+      </div>
     {% endblock %}
-    """
-    return render_template_string(html)
-
-@engagement_bp.route("/api", methods=["GET"])
-def api():
-    return jsonify({"module": "engagement", "ok": True})
+    """)
