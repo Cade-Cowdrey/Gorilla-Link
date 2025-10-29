@@ -1,69 +1,96 @@
 {% extends "base.html" %}
 {% block title %}Analytics Dashboard | PittState-Connect{% endblock %}
+
 {% block content %}
-<section class="bg-gray-50 min-h-screen py-10 px-4 sm:px-8 lg:px-16">
-  <div class="container mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
-      <div>
-        <h1 class="text-4xl font-bold text-crimson mb-3">📊 Analytics Dashboard</h1>
-        <p class="text-gray-700 max-w-2xl">
-          Gain real-time insight into engagement across <strong>departments</strong>, <strong>careers</strong>, and <strong>scholarships</strong>.  
-          Track views, unique visitors, and average engagement time to measure student and alumni involvement.
-        </p>
-      </div>
-      <div class="mt-6 md:mt-0">
-        <a href="{{ safe_url_for('departments_bp.index') }}"
-           class="btn btn-gold text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
-          ← Back to Departments
-        </a>
-      </div>
-    </div>
+<div class="container py-5">
+  <h1 class="fw-bold mb-4 text-psu-crimson">Analytics Dashboard</h1>
+  <p class="text-muted mb-5">Real-time insights into PittState-Connect traffic, usage, and API performance.</p>
 
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {% for card in cards %}
-      <div class="bg-white rounded-2xl shadow hover:shadow-xl transition p-6">
-        <h3 class="text-xl font-semibold text-crimson mb-2">{{ card.title }}</h3>
-        <p class="text-gray-700 text-sm mb-4">Performance over the last {{ card.metrics.days or 7 }} days</p>
-        <div class="space-y-2 text-sm">
-          <p>👁️ <span class="font-semibold text-crimson">{{ card.metrics.views }}</span> total views</p>
-          <p>🧍‍♂️ <span class="font-semibold text-crimson">{{ card.metrics.unique_users }}</span> unique users</p>
-          <p>⏱️ <span class="font-semibold text-crimson">{{ card.metrics.avg_time_sec }}</span> sec avg time</p>
-        </div>
-      </div>
-      {% else %}
-      <p class="text-gray-600 col-span-full">No analytics data available.</p>
-      {% endfor %}
-    </div>
-
-    <div class="mt-16 bg-gradient-to-r from-crimson to-gold text-white rounded-2xl p-8 shadow-lg">
-      <h2 class="text-2xl font-bold mb-3">📈 Insights & Trends</h2>
-      <p class="text-white/90 mb-6">
-        These analytics drive smarter outreach, funding, and student engagement strategies.  
-        Admin dashboards can visualize user retention, scholarship impact, and alumni interaction rates.
-      </p>
-
-      <div class="grid md:grid-cols-3 gap-6 text-sm text-white/90">
-        <div class="bg-white/10 rounded-xl p-4 shadow">
-          <h3 class="font-semibold mb-1 text-white">Engagement Rate</h3>
-          <p>↑ {{ (home_stats.views or 0) | default(0, true) }}% growth week-over-week</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-4 shadow">
-          <h3 class="font-semibold mb-1 text-white">Alumni Activity</h3>
-          <p>Strong activity from employer and donor accounts this month.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-4 shadow">
-          <h3 class="font-semibold mb-1 text-white">Scholarship Awareness</h3>
-          <p>Increased traffic on Scholarship Hub following Smart Match launch.</p>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+          <h5 class="card-title fw-semibold">Top Pages</h5>
+          <canvas id="pageViewsChart" height="220"></canvas>
         </div>
       </div>
     </div>
-
-    <div class="mt-12 text-center">
-      <a href="{{ safe_url_for('analytics_bp.page_summary', path='/', days=7) }}"
-         class="btn btn-outline-crimson border-2 border-crimson text-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
-         🔎 View Detailed Page Stats
-      </a>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+          <h5 class="card-title fw-semibold">API Usage</h5>
+          <canvas id="apiUsageChart" height="220"></canvas>
+        </div>
+      </div>
     </div>
   </div>
-</section>
+
+  <div class="card mt-5 border-0 shadow-sm rounded-4">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-3">Detailed API Activity</h5>
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Endpoint</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>User</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in api_stats %}
+          <tr>
+            <td>{{ stat.endpoint }}</td>
+            <td>{{ stat.method }}</td>
+            <td><span class="badge bg-success">{{ stat.status_code }}</span></td>
+            <td>{{ stat.user_id or 'Guest' }}</td>
+            <td>{{ stat.timestamp.strftime('%Y-%m-%d %H:%M:%S') if stat.timestamp else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const [pageRes, apiRes] = await Promise.all([
+    fetch("/analytics/page-stats"),
+    fetch("/analytics/api-stats")
+  ]);
+  const pageData = (await pageRes.json()).data || [];
+  const apiData = (await apiRes.json()).data || [];
+
+  const ctx1 = document.getElementById("pageViewsChart").getContext("2d");
+  const ctx2 = document.getElementById("apiUsageChart").getContext("2d");
+
+  new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels: pageData.map(d => d.page_name),
+      datasets: [{
+        label: "Views",
+        data: pageData.map(d => d.view_count),
+        backgroundColor: "#C8102E"
+      }]
+    }
+  });
+
+  new Chart(ctx2, {
+    type: "line",
+    data: {
+      labels: apiData.map(d => d.endpoint),
+      datasets: [{
+        label: "API Calls",
+        data: apiData.map(d => d.call_count),
+        borderColor: "#FFD100",
+        backgroundColor: "rgba(255,209,0,0.3)"
+      }]
+    }
+  });
+});
+</script>
 {% endblock %}
