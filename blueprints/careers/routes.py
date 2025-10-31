@@ -1,8 +1,8 @@
 # File: blueprints/careers/routes.py
 from flask import Blueprint, render_template_string, jsonify
-from utils.analytics_util import track_page_view
+from utils.analytics_util import record_page_view
 
-bp = Blueprint("careers", __name__, url_prefix="/careers")
+bp = Blueprint("careers_bp", __name__, url_prefix="/careers")
 
 @bp.get("/health")
 def health():
@@ -10,7 +10,7 @@ def health():
 
 @bp.get("/")
 def index():
-    track_page_view("careers")
+    record_page_view("careers")
     return render_template_string("""
     {% extends "base.html" %}
     {% block title %}Careers | PittState-Connect{% endblock %}
