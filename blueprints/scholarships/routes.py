@@ -2,12 +2,17 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_login import login_required, current_user
 from extensions import limiter
 from utils.analytics_util import record_page_view
+from services.scholarship_aggregator import ScholarshipAggregator, ScholarshipMatcher
 import openai
 import os
 import logging
 import bleach
 
 logger = logging.getLogger(__name__)
+
+# Initialize scholarship services
+scholarship_aggregator = ScholarshipAggregator()
+scholarship_matcher = ScholarshipMatcher()
 
 # Allowed HTML tags for essay text (very restricted for security)
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'u']
@@ -43,14 +48,104 @@ def index():
 
 @bp.route("/browse")
 def browse():
-    """List available scholarships with basic details."""
+    """Browse all available scholarships from trusted sources with AI matching."""
     record_page_view("scholarships_browse", current_user.id if current_user.is_authenticated else None)
-    scholarships = [
-        {"id": 1, "name": "Full Ride Scholarship", "deadline": "2025-05-01", "amount": 10000},
-        {"id": 2, "name": "STEM Excellence Award", "deadline": "2025-03-15", "amount": 5000},
-        {"id": 3, "name": "Leadership Grant", "deadline": "2025-04-30", "amount": 2500},
-    ]
-    return render_template("scholarships/browse.html", scholarships=scholarships, title="Browse Scholarships | PittState-Connect")
+    
+    # Get filter parameters from query string
+    filters = {
+        'major': request.args.get('major', ''),
+        'gpa': float(request.args.get('gpa', 0.0)) if request.args.get('gpa') else 0.0,
+        'state': request.args.get('state', 'Kansas'),
+        'gender': request.args.get('gender', ''),
+        'ethnicity': request.args.get('ethnicity', ''),
+        'financial_need': request.args.get('financial_need') == 'true',
+        'first_generation': request.args.get('first_generation') == 'true',
+        'military_affiliation': request.args.get('military_affiliation') == 'true'
+    }
+    
+    # Get all scholarships from aggregator
+    all_scholarships = scholarship_aggregator.search_all_sources(filters)
+    
+    # If user is authenticated and has profile, use AI matching
+    if current_user.is_authenticated:
+        try:
+            student_profile = {
+                'gpa': getattr(current_user, 'gpa', 0.0),
+                'major': getattr(current_user, 'major', ''),
+                'state': getattr(current_user, 'state', 'Kansas'),
+                'gender': getattr(current_user, 'gender', ''),
+                'ethnicity': getattr(current_user, 'ethnicity', ''),
+                'financial_need': filters.get('financial_need', False),
+                'first_generation': filters.get('first_generation', False),
+                'military_affiliation': filters.get('military_affiliation', False)
+            }
+            
+            # Get matched scholarships with scores
+            scholarships = scholarship_matcher.match_scholarships(student_profile, all_scholarships)
+        except Exception as e:
+            logger.error(f"Error matching scholarships: {e}")
+            scholarships = all_scholarships
+    else:
+        scholarships = all_scholarships
+    
+    return render_template(
+        "scholarships/browse.html", 
+        scholarships=scholarships, 
+        filters=filters,
+        total_count=len(scholarships),
+        title="Browse Scholarships | PittState-Connect"
+    )
+
+
+@bp.route("/personal")
+def personal_circumstances():
+    """Browse scholarships for specific personal circumstances (sensitive categories)"""
+    record_page_view("scholarships_personal", current_user.id if current_user.is_authenticated else None)
+    
+    # Get personal circumstance scholarships
+    scholarships = scholarship_aggregator.get_personal_circumstance_scholarships()
+    
+    # Group by category
+    categories = {}
+    for scholarship in scholarships:
+        category = scholarship.get('category', 'Other')
+        if category not in categories:
+            categories[category] = []
+        categories[category].append(scholarship)
+    
+    return render_template(
+        "scholarships/personal.html",
+        categories=categories,
+        total_count=len(scholarships),
+        title="Personal Circumstance Scholarships | PittState-Connect"
+    )
+
+
+@bp.route("/api/search")
+def api_search():
+    """API endpoint for dynamic scholarship search"""
+    query = request.args.get('q', '')
+    filters = {
+        'major': request.args.get('major', ''),
+        'gpa': float(request.args.get('gpa', 0.0)) if request.args.get('gpa') else 0.0,
+        'state': request.args.get('state', 'Kansas'),
+    }
+    
+    scholarships = scholarship_aggregator.search_all_sources(filters)
+    
+    # Filter by search query if provided
+    if query:
+        query_lower = query.lower()
+        scholarships = [
+            s for s in scholarships 
+            if query_lower in s.get('title', '').lower() or 
+               query_lower in s.get('description', '').lower()
+        ]
+    
+    return jsonify({
+        'scholarships': scholarships[:50],  # Limit to 50 results
+        'total': len(scholarships)
+    })
 
 @bp.route("/my")
 @login_required

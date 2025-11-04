@@ -8,84 +8,260 @@
       🔍 Browse Scholarships
     </h1>
     <p class="text-lg text-center opacity-90 max-w-2xl mx-auto">
-      Explore all available scholarship opportunities at Pittsburg State University.
+      Explore <strong>{{ total_count }}</strong> scholarship opportunities from trusted sources nationwide
     </p>
   </div>
 </div>
 
 <section class="max-w-7xl mx-auto px-6 py-12">
-  <!-- Search and Filter -->
-  <div class="mb-8 bg-white rounded-xl shadow-md p-6">
-    <div class="flex flex-wrap gap-4">
-      <input type="text" 
-             placeholder="Search scholarships..." 
-             class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-crimson">
-      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-crimson">
-        <option value="">All Categories</option>
-        <option value="merit">Merit-Based</option>
-        <option value="need">Need-Based</option>
-        <option value="stem">STEM</option>
-        <option value="arts">Arts & Humanities</option>
-        <option value="athletics">Athletics</option>
-      </select>
-      <button class="bg-crimson text-white px-6 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
-        Search
-      </button>
+  <!-- AI Matching Notice -->
+  {% if current_user.is_authenticated %}
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg p-6 mb-8 reveal">
+    <div class="flex items-start gap-4">
+      <div class="text-4xl">🤖</div>
+      <div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">AI-Powered Matching Active</h3>
+        <p class="text-gray-700 mb-3">
+          Scholarships are ranked by how well they match your profile. Your match percentage is shown on each card.
+        </p>
+        <div class="flex flex-wrap gap-2 text-sm">
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">✓ GPA: {{ current_user.gpa if current_user.gpa else 'Not set' }}</span>
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">✓ Major: {{ current_user.major if current_user.major else 'Not set' }}</span>
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">✓ State: {{ current_user.state if current_user.state else 'Kansas' }}</span>
+        </div>
+      </div>
     </div>
+  </div>
+  {% endif %}
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 reveal border border-gray-100">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+      <span>🎯</span> Find Your Perfect Scholarship
+    </h3>
+    
+    <form method="GET" action="{{ url_for('scholarships_bp.browse') }}" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Major -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Major/Field of Study</label>
+          <input type="text" name="major" value="{{ filters.major }}"
+                 placeholder="e.g., Computer Science, Engineering"
+                 class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-crimson focus:border-crimson transition">
+        </div>
+
+        <!-- GPA -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Minimum GPA</label>
+          <input type="number" name="gpa" value="{{ filters.gpa if filters.gpa > 0 }}" 
+                 step="0.1" min="0" max="4.0"
+                 placeholder="e.g., 3.5"
+                 class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-crimson focus:border-crimson transition">
+        </div>
+
+        <!-- State -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Home State</label>
+          <select name="state" class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-crimson focus:border-crimson transition">
+            <option value="Kansas" {% if filters.state == 'Kansas' %}selected{% endif %}>Kansas</option>
+            <option value="Missouri" {% if filters.state == 'Missouri' %}selected{% endif %}>Missouri</option>
+            <option value="Other" {% if filters.state == 'Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Additional Filters -->
+      <div class="border-t border-gray-200 pt-4">
+        <p class="text-sm font-bold text-gray-700 mb-3">Additional Qualifications (Check all that apply)</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="financial_need" value="true" 
+                   {% if filters.financial_need %}checked{% endif %}
+                   class="w-5 h-5 text-crimson rounded focus:ring-crimson">
+            <span class="text-sm text-gray-700">Financial Need</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="first_generation" value="true"
+                   {% if filters.first_generation %}checked{% endif %}
+                   class="w-5 h-5 text-crimson rounded focus:ring-crimson">
+            <span class="text-sm text-gray-700">First Generation</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="military_affiliation" value="true"
+                   {% if filters.military_affiliation %}checked{% endif %}
+                   class="w-5 h-5 text-crimson rounded focus:ring-crimson">
+            <span class="text-sm text-gray-700">Military Family</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="flex gap-3">
+        <button type="submit"
+                class="flex-1 bg-gradient-to-r from-crimson to-[#660000] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-2xl transition-all transform hover:scale-105">
+          🔍 Search Scholarships
+        </button>
+        <a href="{{ url_for('scholarships_bp.browse') }}"
+           class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">
+          Clear Filters
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Personal Circumstances Link -->
+  <div class="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-lg p-6 mb-8 reveal">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start gap-4">
+        <div class="text-4xl">🤝</div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Personal Circumstance Scholarships</h3>
+          <p class="text-gray-700 mb-3">
+            Looking for scholarships based on specific life experiences? We have a dedicated section for sensitive categories like foster care, divorced parents, abuse survivors, and more.
+          </p>
+        </div>
+      </div>
+      <a href="{{ url_for('scholarships_bp.personal_circumstances') }}"
+         class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition whitespace-nowrap">
+        View Personal →
+      </a>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+      {% if current_user.is_authenticated %}
+        Top Matches for You
+      {% else %}
+        All Scholarships
+      {% endif %}
+      <span class="text-crimson">({{ scholarships|length }})</span>
+    </h2>
+    
+    {% if not current_user.is_authenticated %}
+    <div class="text-sm text-gray-600">
+      <a href="{{ url_for('auth.login') }}" class="text-crimson hover:text-gold font-semibold">
+        Login for personalized matching →
+      </a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Scholarships Grid -->
   {% if scholarships and scholarships|length > 0 %}
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
     {% for scholarship in scholarships %}
-    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-crimson hover:shadow-xl transition">
-      <div class="flex justify-between items-start mb-3">
-        <h3 class="text-xl font-semibold text-gray-800">
-          {{ scholarship.name }}
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 card-hover reveal relative">
+      <!-- Match Badge (if authenticated) -->
+      {% if current_user.is_authenticated and scholarship.match_percentage %}
+      <div class="absolute top-4 right-4 z-10">
+        <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+          {{ scholarship.match_percentage }}% Match
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Card Header -->
+      <div class="bg-gradient-to-r from-crimson to-gold p-6 text-white">
+        <h3 class="text-xl font-bold mb-2 pr-20">
+          {{ scholarship.title }}
         </h3>
-        <span class="text-gold font-bold text-lg">${{ scholarship.amount }}</span>
+        <div class="flex items-center gap-2 text-sm opacity-90">
+          <span>{{ scholarship.source }}</span>
+        </div>
       </div>
-      
-      {% if scholarship.deadline %}
-      <p class="text-gray-600 text-sm mb-3">
-        <span class="font-medium">Deadline:</span> {{ scholarship.deadline }}
-      </p>
-      {% endif %}
-      
-      <p class="text-gray-600 text-sm mb-4">
-        {{ scholarship.description }}
-      </p>
-      
-      {% if scholarship.requirements %}
-      <div class="mb-4">
-        <p class="text-sm font-medium text-gray-700 mb-2">Requirements:</p>
-        <ul class="text-sm text-gray-600 space-y-1">
-          {% for req in scholarship.requirements %}
-          <li class="flex items-start">
-            <span class="text-crimson mr-2">•</span>
-            <span>{{ req }}</span>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
-      
-      <div class="flex gap-2 mt-4">
-        {% if current_user.is_authenticated %}
-        <a href="{{ url_for('scholarships_bp.apply', scholarship_id=scholarship.id) }}"
-           class="flex-1 bg-crimson text-white text-center px-4 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
-          Apply Now
-        </a>
-        {% else %}
-        <a href="{{ url_for('auth.login') }}"
-           class="flex-1 bg-crimson text-white text-center px-4 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
-          Login to Apply
-        </a>
+
+      <!-- Card Body -->
+      <div class="p-6">
+        <!-- Amount -->
+        <div class="flex items-center gap-3 mb-4">
+          {% if scholarship.amount is string %}
+          <span class="bg-gradient-to-r from-gold to-yellow-500 text-black font-bold text-xl px-4 py-2 rounded-lg shadow">
+            {{ scholarship.amount }}
+          </span>
+          {% else %}
+          <span class="bg-gradient-to-r from-gold to-yellow-500 text-black font-bold text-xl px-4 py-2 rounded-lg shadow">
+            ${{ "{:,}".format(scholarship.amount) }}
+          </span>
+          {% endif %}
+          
+          {% if scholarship.renewable %}
+          <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">
+            ♻️ Renewable
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Deadline -->
+        <div class="bg-red-50 border-l-4 border-crimson rounded p-3 mb-4">
+          <p class="text-crimson text-sm font-bold">
+            ⏰ Deadline: {{ scholarship.deadline }}
+          </p>
+        </div>
+
+        <!-- Description -->
+        <p class="text-gray-700 text-sm mb-4 leading-relaxed">
+          {{ scholarship.description }}
+        </p>
+
+        <!-- Match Reasons (if authenticated) -->
+        {% if scholarship.match_reasons %}
+        <div class="bg-blue-50 rounded-lg p-3 mb-4">
+          <p class="text-xs font-bold text-blue-800 mb-2">Why you're a match:</p>
+          <ul class="text-xs text-blue-700 space-y-1">
+            {% for reason in scholarship.match_reasons[:3] %}
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500">✓</span>
+              <span>{{ reason }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
         {% endif %}
-        <button class="px-4 py-2 border border-crimson text-crimson rounded-lg hover:bg-crimson hover:text-white transition"
-                title="Save for later">
-          ⭐
-        </button>
+
+        <!-- Requirements -->
+        {% if scholarship.requirements %}
+        <div class="mb-4">
+          <p class="text-xs font-bold text-gray-700 mb-2">Requirements:</p>
+          <ul class="text-xs text-gray-600 space-y-1">
+            {% for req in scholarship.requirements[:3] %}
+            <li class="flex items-start gap-2">
+              <span class="text-crimson">•</span>
+              <span>{{ req }}</span>
+            </li>
+            {% endfor %}
+            {% if scholarship.requirements|length > 3 %}
+            <li class="text-gray-500 italic">+{{ scholarship.requirements|length - 3 }} more...</li>
+            {% endif %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Tags -->
+        {% if scholarship.tags %}
+        <div class="flex flex-wrap gap-2 mb-4">
+          {% for tag in scholarship.tags[:4] %}
+          <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+            {{ tag }}
+          </span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="flex gap-2">
+          <a href="{{ scholarship.url }}" target="_blank"
+             class="flex-1 bg-gradient-to-r from-crimson to-[#660000] text-white text-center py-3 rounded-lg font-bold hover:shadow-xl transition-all transform hover:scale-105">
+            Apply Now →
+          </a>
+          <button class="px-4 py-3 border-2 border-crimson text-crimson rounded-lg hover:bg-crimson hover:text-white transition font-bold"
+                  title="Save for later">
+            ⭐
+          </button>
+        </div>
       </div>
     </div>
     {% endfor %}
@@ -96,11 +272,11 @@
     <div class="text-6xl mb-4">🔍</div>
     <h3 class="text-2xl font-bold text-gray-800 mb-2">No Scholarships Found</h3>
     <p class="text-gray-600 mb-6">
-      Check back soon for new scholarship opportunities, or adjust your search filters.
+      Try adjusting your filters to see more opportunities.
     </p>
-    <a href="{{ url_for('scholarships_bp.index') }}"
+    <a href="{{ url_for('scholarships_bp.browse') }}"
        class="inline-block bg-crimson text-white px-6 py-3 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
-      Back to Scholarship Hub
+      Clear Filters
     </a>
   </div>
   {% endif %}
