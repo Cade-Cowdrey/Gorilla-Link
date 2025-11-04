@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 from utils.analytics_util import record_page_view
-from utils.audit import audit
+from utils.audit_util import audit
 
 bp = Blueprint("announcements_bp", __name__, url_prefix="/announcements")
 
