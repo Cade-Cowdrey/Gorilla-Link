@@ -1,154 +1,306 @@
-{% extends "base.html" %}{% extends "base.html" %}
-
-{% block title %}Alumni Directory | PittState-Connect{% endblock %}{% block title %}Alumni Directory | PittState-Connect{% endblock %}
-
-{% block content %}{% block content %}
+{% extends "base.html" %}{% extends "base.html" %}{% extends "base.html" %}
 
 
 
-<!-- Hero Section with Animation --><!-- Hero Section with Animation -->
-
-<div class="relative bg-gradient-to-r from-crimson via-[#660000] to-gold py-20 text-white overflow-hidden animate-gradient"><div class="relative bg-gradient-to-r from-crimson via-[#660000] to-gold py-20 text-white overflow-hidden animate-gradient">
-
-  <!-- Floating decorative elements -->  <!-- Floating decorative elements -->
-
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-
-    <div class="absolute top-10 right-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>    <div class="absolute top-10 right-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>
-
-    <div class="absolute bottom-10 left-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl animate-bounce-slow"></div>    <div class="absolute bottom-10 left-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl animate-bounce-slow"></div>
-
-  </div>  </div>
+{% block title %}Alumni Network | PittState-Connect{% endblock %}{% block title %}Alumni Directory | PittState-Connect{% endblock %}{% block title %}Alumni Directory | PittState-Connect{% endblock %}
 
 
 
-  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
-
-    <div class="animate-fade-in">    <div class="animate-fade-in">
-
-      <div class="text-6xl md:text-7xl mb-4 animate-bounce-slow">🎓</div>      <div class="text-6xl md:text-7xl mb-4 animate-bounce-slow">🎓</div>
-
-      <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-2xl">Alumni Network</h1>      <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-2xl">Alumni Network</h1>
-
-      <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">      <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
-
-        Connect with <span class="text-gold font-semibold">15,000+</span> Pitt State graduates making a difference around the world        Connect with <span class="text-gold font-semibold">15,000+</span> Pitt State graduates making a difference around the world
-
-      </p>      </p>
+{% block content %}{% block content %}{% block content %}
 
 
 
-      <!-- Quick Stats -->      <!-- Quick Stats -->
+<!-- Professional Hero Section -->
 
-      <div class="flex justify-center gap-8 mt-10 flex-wrap">      <div class="flex justify-center gap-8 mt-10 flex-wrap">
+<div class="bg-crimson text-white py-16">
 
-        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">
+  <div class="max-w-7xl mx-auto px-6"><!-- Hero Section with Animation --><!-- Hero Section with Animation -->
 
-          <div class="text-3xl font-bold">15,000+</div>          <div class="text-3xl font-bold">15,000+</div>
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">Alumni Network</h1>
 
-          <div class="text-sm opacity-75">Active Alumni</div>          <div class="text-sm opacity-75">Active Alumni</div>
+    <p class="text-xl text-gray-200 max-w-3xl"><div class="relative bg-gradient-to-r from-crimson via-[#660000] to-gold py-20 text-white overflow-hidden animate-gradient"><div class="relative bg-gradient-to-r from-crimson via-[#660000] to-gold py-20 text-white overflow-hidden animate-gradient">
 
-        </div>        </div>
+      Connecting Gorillas Worldwide — Building Careers, Fostering Mentorships, and Creating Opportunities
 
-        <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
+    </p>  <!-- Floating decorative elements -->  <!-- Floating decorative elements -->
 
-          <div class="text-3xl font-bold">500+</div>          <div class="text-3xl font-bold">500+</div>
+    
 
-          <div class="text-sm opacity-75">Mentors</div>          <div class="text-sm opacity-75">Mentors</div>
+    <!-- Stats Bar -->  <div class="absolute inset-0 overflow-hidden pointer-events-none">  <div class="absolute inset-0 overflow-hidden pointer-events-none">
 
-        </div>        </div>
+    <div class="grid grid-cols-3 gap-6 mt-10 max-w-3xl">
 
-        <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">
+      <div class="text-center">    <div class="absolute top-10 right-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>    <div class="absolute top-10 right-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>
 
-          <div class="text-3xl font-bold">50+</div>          <div class="text-3xl font-bold">50+</div>
+        <div class="text-3xl font-bold text-gold">15,000+</div>
 
-          <div class="text-sm opacity-75">Countries</div>          <div class="text-sm opacity-75">Countries</div>
+        <div class="text-sm text-gray-200">Active Alumni</div>    <div class="absolute bottom-10 left-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl animate-bounce-slow"></div>    <div class="absolute bottom-10 left-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl animate-bounce-slow"></div>
 
-        </div>        </div>
+      </div>
 
-      </div>      </div>
+      <div class="text-center">  </div>  </div>
 
-    </div>    </div>
+        <div class="text-3xl font-bold text-gold">500+</div>
 
-  </div>  </div>
+        <div class="text-sm text-gray-200">Mentors Available</div>
 
-</div></div>
+      </div>
 
+      <div class="text-center">  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
 
+        <div class="text-3xl font-bold text-gold">50+</div>
 
-<section class="max-w-7xl mx-auto px-6 py-16"><section class="max-w-7xl mx-auto px-6 py-16">
+        <div class="text-sm text-gray-200">Countries Worldwide</div>    <div class="animate-fade-in">    <div class="animate-fade-in">
 
+      </div>
 
-
-  <!-- Search Bar -->  <!-- Search Bar -->  <!-- Alumni Search -->
-
-  <div class="bg-white shadow-lg rounded-2xl p-6 mb-12">
-
-    <form class="flex gap-4">  <div class="bg-white shadow-lg rounded-2xl p-6 mb-12">  <form class="mb-8 flex gap-3">
-
-      <input type="text" name="q" 
-
-             placeholder="Search alumni by name, major, or class year..."    <form class="flex gap-4">    <input type="text" name="q" placeholder="Search alumni by name or major..."
-
-             class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-crimson focus:border-crimson">
-
-      <button type="submit"       <input type="text" name="q"            class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
-
-              class="px-8 py-3 bg-crimson text-white font-semibold rounded-lg hover:bg-gold hover:text-black transition">
-
-        Search             placeholder="Search alumni by name, major, or class year..."     <button type="submit" class="btn btn-crimson">Search</button>
-
-      </button>
-
-    </form>             class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-crimson focus:border-crimson">  </form>
+    </div>      <div class="text-6xl md:text-7xl mb-4 animate-bounce-slow">🎓</div>      <div class="text-6xl md:text-7xl mb-4 animate-bounce-slow">🎓</div>
 
   </div>
 
-      <button type="submit" 
+</div>      <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-2xl">Alumni Network</h1>      <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-2xl">Alumni Network</h1>
+
+
+
+<section class="max-w-7xl mx-auto px-6 py-12">      <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">      <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
+
+
+
+  <!-- Alumni Search -->        Connect with <span class="text-gold font-semibold">15,000+</span> Pitt State graduates making a difference around the world        Connect with <span class="text-gold font-semibold">15,000+</span> Pitt State graduates making a difference around the world
+
+  <div class="bg-white shadow-md rounded-lg p-6 mb-12 border border-gray-200">
+
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Find Alumni</h2>      </p>      </p>
+
+    <form class="flex gap-3">
+
+      <input type="text" 
+
+             name="q" 
+
+             placeholder="Search by name, major, or graduation year..."      <!-- Quick Stats -->      <!-- Quick Stats -->
+
+             class="flex-1 px-4 py-3 rounded border border-gray-300 focus:ring-2 focus:ring-crimson focus:border-crimson outline-none">
+
+      <button type="submit"       <div class="flex justify-center gap-8 mt-10 flex-wrap">      <div class="flex justify-center gap-8 mt-10 flex-wrap">
+
+              class="px-8 py-3 bg-crimson text-white font-semibold rounded hover:bg-gold hover:text-crimson transition-colors uppercase text-sm tracking-wide">
+
+        Search        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">
+
+      </button>
+
+    </form>          <div class="text-3xl font-bold">15,000+</div>          <div class="text-3xl font-bold">15,000+</div>
+
+  </div>
+
+          <div class="text-sm opacity-75">Active Alumni</div>          <div class="text-sm opacity-75">Active Alumni</div>
 
   <!-- Featured Alumni -->
 
-  <h2 class="text-3xl font-bold text-crimson mb-8 text-center">Featured Alumni</h2>              class="px-8 py-3 bg-crimson text-white font-semibold rounded-lg hover:bg-gold hover:text-black transition">  <!-- Alumni Cards -->
+  <h2 class="text-2xl font-bold text-crimson mb-6 uppercase tracking-wide">Featured Alumni</h2>        </div>        </div>
 
 
 
-  <div class="grid md:grid-cols-3 gap-8 mb-16">        Search  <div class="grid md:grid-cols-3 gap-6">
+  <div class="grid md:grid-cols-3 gap-6 mb-12">        <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
 
-    <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition">
+    <!-- Alumni Card 1 -->
 
-      <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-crimson to-gold rounded-full flex items-center justify-center text-white text-3xl font-bold">      </button>    <div class="card p-6 text-center fade-in">
+    <div class="bg-white border border-gray-200 rounded-lg p-6 text-center hover:shadow-lg transition-shadow">          <div class="text-3xl font-bold">500+</div>          <div class="text-3xl font-bold">500+</div>
 
-        JA
+      <div class="w-24 h-24 mx-auto mb-4 bg-crimson text-white rounded-full flex items-center justify-center text-2xl font-bold">
 
-      </div>    </form>      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+        JA          <div class="text-sm opacity-75">Mentors</div>          <div class="text-sm opacity-75">Mentors</div>
 
-      <h3 class="text-xl font-semibold text-gray-800 mb-1">Jordan Anderson</h3>
+      </div>
 
-      <p class="text-gray-600 text-sm mb-3">Software Engineer • Class of '22</p>  </div>           class="mx-auto h-24 w-24 rounded-full object-cover mb-3" alt="Alumnus" loading="lazy">
+      <h3 class="text-lg font-semibold text-gray-800">Jordan Anderson</h3>        </div>        </div>
 
-      <p class="text-gray-700 text-sm mb-4">Currently at Google, working on AI infrastructure</p>
+      <p class="text-sm text-gray-600 mb-2">Software Engineer</p>
 
-      <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">View Profile →</a>      <h3 class="text-lg font-semibold">Jordan A.</h3>
+      <p class="text-xs text-gray-500 mb-4">Class of 2022</p>        <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">        <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">
+
+      <p class="text-sm text-gray-700 mb-4">Currently at Google, working on AI infrastructure</p>
+
+      <a href="#" class="text-crimson hover:text-gold font-medium text-sm uppercase">View Profile →</a>          <div class="text-3xl font-bold">50+</div>          <div class="text-3xl font-bold">50+</div>
 
     </div>
 
-  <!-- Featured Alumni -->      <p class="text-gray text-sm mb-2">Software Engineer • Class of ’22</p>
+          <div class="text-sm opacity-75">Countries</div>          <div class="text-sm opacity-75">Countries</div>
 
-    <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition">
+    <!-- Alumni Card 2 -->
 
-      <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-crimson to-gold rounded-full flex items-center justify-center text-white text-3xl font-bold">  <h2 class="text-3xl font-bold text-crimson mb-8 text-center">Featured Alumni</h2>      <a href="#" class="text-crimson hover:text-gold text-sm">View Profile →</a>
+    <div class="bg-white border border-gray-200 rounded-lg p-6 text-center hover:shadow-lg transition-shadow">        </div>        </div>
 
-        TR
+      <div class="w-24 h-24 mx-auto mb-4 bg-crimson text-white rounded-full flex items-center justify-center text-2xl font-bold">
 
-      </div>      </div>
+        TR      </div>      </div>
 
-      <h3 class="text-xl font-semibold text-gray-800 mb-1">Taylor Rodriguez</h3>
+      </div>
 
-      <p class="text-gray-600 text-sm mb-3">Marketing Director • Class of '21</p>  <div class="grid md:grid-cols-3 gap-8 mb-16">    <div class="card p-6 text-center fade-in">
+      <h3 class="text-lg font-semibold text-gray-800">Taylor Rodriguez</h3>    </div>    </div>
+
+      <p class="text-sm text-gray-600 mb-2">Marketing Director</p>
+
+      <p class="text-xs text-gray-500 mb-4">Class of 2021</p>  </div>  </div>
+
+      <p class="text-sm text-gray-700 mb-4">Leading brand strategy at Fortune 500 company</p>
+
+      <a href="#" class="text-crimson hover:text-gold font-medium text-sm uppercase">View Profile →</a></div></div>
+
+    </div>
+
+
+
+    <!-- Alumni Card 3 -->
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6 text-center hover:shadow-lg transition-shadow"><section class="max-w-7xl mx-auto px-6 py-16"><section class="max-w-7xl mx-auto px-6 py-16">
+
+      <div class="w-24 h-24 mx-auto mb-4 bg-crimson text-white rounded-full flex items-center justify-center text-2xl font-bold">
+
+        CM
+
+      </div>
+
+      <h3 class="text-lg font-semibold text-gray-800">Chris Martinez</h3>  <!-- Search Bar -->  <!-- Search Bar -->  <!-- Alumni Search -->
+
+      <p class="text-sm text-gray-600 mb-2">Nurse Practitioner</p>
+
+      <p class="text-xs text-gray-500 mb-4">Class of 2020</p>  <div class="bg-white shadow-lg rounded-2xl p-6 mb-12">
+
+      <p class="text-sm text-gray-700 mb-4">Serving rural communities across Kansas</p>
+
+      <a href="#" class="text-crimson hover:text-gold font-medium text-sm uppercase">View Profile →</a>    <form class="flex gap-4">  <div class="bg-white shadow-lg rounded-2xl p-6 mb-12">  <form class="mb-8 flex gap-3">
+
+    </div>
+
+  </div>      <input type="text" name="q" 
+
+
+
+  <!-- Alumni Spotlight Section -->             placeholder="Search alumni by name, major, or class year..."    <form class="flex gap-4">    <input type="text" name="q" placeholder="Search alumni by name or major..."
+
+  <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 mb-12">
+
+    <h2 class="text-2xl font-bold text-crimson mb-6 uppercase tracking-wide">Alumni Success Spotlight</h2>             class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-crimson focus:border-crimson">
+
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+
+      <div class="bg-crimson/10 rounded-lg p-12 flex items-center justify-center">      <button type="submit"       <input type="text" name="q"            class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
+
+        <div class="text-center">
+
+          <div class="text-5xl font-bold text-crimson mb-2">Success Story</div>              class="px-8 py-3 bg-crimson text-white font-semibold rounded-lg hover:bg-gold hover:text-black transition">
+
+          <p class="text-gray-600">Featured Graduate</p>
+
+        </div>        Search             placeholder="Search alumni by name, major, or class year..."     <button type="submit" class="btn btn-crimson">Search</button>
+
+      </div>
+
+      <div>      </button>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">From Campus to Career</h3>
+
+        <p class="text-gray-700 mb-4 leading-relaxed">    </form>             class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-crimson focus:border-crimson">  </form>
+
+          "PittState-Connect gave me my first internship connection that led to a full-time position after graduation. 
+
+          The mentorship program was invaluable in helping me navigate my career path."  </div>
+
+        </p>
+
+        <p class="text-gray-600 text-sm mb-4">      <button type="submit" 
+
+          <strong class="text-crimson">— Jordan Rivera, Class of 2019</strong><br>
+
+          Software Developer at Microsoft  <!-- Featured Alumni -->
+
+        </p>
+
+        <div class="flex gap-3">  <h2 class="text-3xl font-bold text-crimson mb-8 text-center">Featured Alumni</h2>              class="px-8 py-3 bg-crimson text-white font-semibold rounded-lg hover:bg-gold hover:text-black transition">  <!-- Alumni Cards -->
+
+          <a href="{{ url_for('stories.index') }}" 
+
+             class="px-6 py-3 bg-crimson text-white font-semibold rounded hover:bg-gold hover:text-crimson transition-colors uppercase text-sm">
+
+            Read More Stories
+
+          </a>  <div class="grid md:grid-cols-3 gap-8 mb-16">        Search  <div class="grid md:grid-cols-3 gap-6">
+
+          <a href="{{ url_for('mentors.index') }}" 
+
+             class="px-6 py-3 border-2 border-crimson text-crimson rounded hover:bg-crimson hover:text-white transition-colors uppercase text-sm font-semibold">    <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition">
+
+            Find a Mentor
+
+          </a>      <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-crimson to-gold rounded-full flex items-center justify-center text-white text-3xl font-bold">      </button>    <div class="card p-6 text-center fade-in">
+
+        </div>
+
+      </div>        JA
+
+    </div>
+
+  </div>      </div>    </form>      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+
+
+
+  <!-- Call to Action -->      <h3 class="text-xl font-semibold text-gray-800 mb-1">Jordan Anderson</h3>
+
+  <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-4">Ready to Connect?</h2>      <p class="text-gray-600 text-sm mb-3">Software Engineer • Class of '22</p>  </div>           class="mx-auto h-24 w-24 rounded-full object-cover mb-3" alt="Alumnus" loading="lazy">
+
+    <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+
+      Join our thriving alumni community. Network with fellow Gorillas, find mentors, and give back to the next generation of Pitt State students.      <p class="text-gray-700 text-sm mb-4">Currently at Google, working on AI infrastructure</p>
+
+    </p>
+
+    <div class="flex justify-center gap-4">      <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">View Profile →</a>      <h3 class="text-lg font-semibold">Jordan A.</h3>
+
+      {% if current_user.is_authenticated %}
+
+      <a href="{{ url_for('profile.view_profile') }}"     </div>
+
+         class="px-8 py-3 bg-crimson text-white font-semibold rounded hover:bg-gold hover:text-crimson transition-colors uppercase text-sm tracking-wide">
+
+        Update Your Profile  <!-- Featured Alumni -->      <p class="text-gray text-sm mb-2">Software Engineer • Class of ’22</p>
+
+      </a>
+
+      {% else %}    <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition">
+
+      <a href="{{ url_for('auth.login') }}" 
+
+         class="px-8 py-3 bg-gold text-crimson font-semibold rounded hover:bg-crimson hover:text-white transition-colors uppercase text-sm tracking-wide">      <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-crimson to-gold rounded-full flex items-center justify-center text-white text-3xl font-bold">  <h2 class="text-3xl font-bold text-crimson mb-8 text-center">Featured Alumni</h2>      <a href="#" class="text-crimson hover:text-gold text-sm">View Profile →</a>
+
+        Get Started
+
+      </a>        TR
+
+      <a href="{{ url_for('core_bp.about') }}" 
+
+         class="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded hover:border-crimson hover:text-crimson transition-colors uppercase text-sm font-semibold">      </div>      </div>
+
+        Learn More
+
+      </a>      <h3 class="text-xl font-semibold text-gray-800 mb-1">Taylor Rodriguez</h3>
+
+      {% endif %}
+
+    </div>      <p class="text-gray-600 text-sm mb-3">Marketing Director • Class of '21</p>  <div class="grid md:grid-cols-3 gap-8 mb-16">    <div class="card p-6 text-center fade-in">
+
+  </div>
 
       <p class="text-gray-700 text-sm mb-4">Leading brand strategy at Fortune 500 company</p>
 
+</section>
+
       <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">View Profile →</a>    <div class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition">      <img src="{{ url_for('static', filename='img/alumni_placeholder.jpg') }}" 
+
+{% endblock %}
 
     </div>
 

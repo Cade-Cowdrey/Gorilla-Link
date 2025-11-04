@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-  <!-- =========================
-       META / SEO / BRANDING
-       ========================= -->
+  <!-- META / SEO / BRANDING -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}PittState-Connect | Pittsburg State University{% endblock %}</title>
-  <meta name="description" content="PittState-Connect — Pittsburg State University’s all-in-one student, alumni, and employer engagement platform." />
-  <meta name="theme-color" content="#9E1B32" />
+  <meta name="description" content="PittState-Connect — Pittsburg State University's all-in-one student, alumni, and employer engagement platform." />
+  <meta name="theme-color" content="#660000" />
   <meta property="og:title" content="PittState-Connect" />
   <meta property="og:description" content="Empowering Students • Connecting Alumni • Driving Careers" />
   <meta property="og:image" content="{{ url_for('static', filename='img/psu-logo.png') }}" />
@@ -16,216 +14,143 @@
 
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}" />
 
-  <!-- =========================
-       CSS + TAILWIND
-       ========================= -->
+  <!-- CSS + TAILWIND -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            crimson: '#9E1B32',
+            crimson: '#660000',
             gold: '#FFCC33',
             psuBlack: '#1C1C1C',
             psuGray: '#F4F4F4',
-            psuRed: '#9E1B32',
-            psuGold: '#FFCC33',
+            darkGray: '#4A4A4A',
           },
-          animation: {
-            'fade-in': 'fadeIn 0.6s ease-out',
-            'slide-up': 'slideUp 0.6s ease-out',
-            'slide-in': 'slideIn 0.6s ease-out',
-            'bounce-slow': 'bounce 3s infinite',
-            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            slideUp: {
-              '0%': { transform: 'translateY(30px)', opacity: '0' },
-              '100%': { transform: 'translateY(0)', opacity: '1' },
-            },
-            slideIn: {
-              '0%': { transform: 'translateX(-30px)', opacity: '0' },
-              '100%': { transform: 'translateX(0)', opacity: '1' },
-            },
+          fontFamily: {
+            sans: ['Open Sans', 'system-ui', 'sans-serif'],
           },
         },
       },
     };
   </script>
   <style>
-    /* Smooth Scroll */
     html { scroll-behavior: smooth; }
+    body { font-family: 'Open Sans', sans-serif; }
     
-    /* Glassmorphism effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Enhanced card hover */
-    .card-hover {
-      transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(158, 27, 50, 0.15);
+    /* Professional hover effects */
+    .nav-link:hover {
+      color: #FFCC33;
+      transition: color 0.2s ease;
     }
     
-    /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(135deg, #9E1B32 0%, #FFCC33 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    /* Animated background */
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-    
-    /* Scroll reveal animations */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.6s ease-out;
-    }
-    .reveal.active {
-      opacity: 1;
-      transform: translateY(0);
+    /* Clean dropdown */
+    .dropdown-menu {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
   </style>
 </head>
 
-<body class="bg-psuGray text-psuBlack flex flex-col min-h-screen">
-  <!-- =========================
-       🦍 PSU NAVBAR
-       ========================= -->
-  <header id="navbar" class="sticky top-0 z-50 bg-crimson text-white shadow-lg transition-all duration-300">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-      <div class="flex items-center gap-3 animate-slide-in">
-        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10 rounded-md transition-transform hover:scale-110">
-        <a href="{{ url_for('index') }}" class="text-2xl font-bold hover:text-gold transition-all">
+<body class="bg-white text-gray-900 flex flex-col min-h-screen">
+  <!-- PROFESSIONAL PSU NAVBAR -->
+  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <div class="flex items-center gap-3">
+        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-10 h-10">
+        <a href="{{ url_for('index') }}" class="text-xl font-bold tracking-tight hover:text-gold transition-colors">
           PittState-Connect
         </a>
       </div>
 
       <!-- Desktop Navigation -->
-      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium">
-        <a href="{{ url_for('index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          🏠 Home
-        </a>
-        
-        <a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          🎓 Scholarships
-        </a>
-        
-        <a href="{{ url_for('careers_bp.index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          💼 Careers
-        </a>
-        
-        <a href="{{ url_for('alumni_bp.index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          🤝 Alumni
-        </a>
+      <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold uppercase tracking-wide">
+        <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+        <a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a>
+        <a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a>
+        <a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni Network</a>
 
         <!-- Resources Dropdown -->
         <div class="relative group">
-          <button class="hover:text-gold transition-all hover:scale-110 inline-flex items-center gap-1">
-            📚 Resources
+          <button class="nav-link inline-flex items-center gap-1">
+            Resources
             <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-2 w-56 bg-white text-gray-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+          <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
-              <a href="{{ url_for('scholarships_bp.index') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                � Scholarships
+              <a href="{{ url_for('scholarships_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                Scholarships
               </a>
-              <a href="{{ url_for('careers_bp.index') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                🎯 Career Services
+              <a href="{{ url_for('careers_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                Career Services
               </a>
-              <a href="{{ url_for('mentors.index') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                💡 Mentorship Program
+              <a href="{{ url_for('mentors.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                Mentorship Program
               </a>
-              <a href="{{ url_for('profile.index') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                👤 My Profile
+              <a href="{{ url_for('profile.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                My Profile
               </a>
-              <a href="{{ url_for('analytics_bp.index') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                📊 Analytics Dashboard
+              <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                Analytics Dashboard
               </a>
             </div>
           </div>
         </div>
 
-        <!-- Events -->
-        <a href="{{ url_for('events.index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          📅 Events
-        </a>
-
-        <!-- News -->
-        <a href="{{ url_for('announcements_bp.index') }}" class="hover:text-gold transition-all hover:scale-110 inline-block">
-          📰 News
-        </a>
+        <a href="{{ url_for('events.index') }}" class="nav-link">Events</a>
+        <a href="{{ url_for('announcements_bp.index') }}" class="nav-link">News</a>
       </nav>
 
-      <!-- Mobile Menu Button & User Actions -->
+      <!-- User Actions -->
       <div class="flex items-center gap-3">
         {% if current_user.is_authenticated %}
         <!-- Notifications -->
-        <button class="relative hover:text-gold transition-all">
-          <span class="text-xl">🔔</span>
-          <span class="absolute -top-1 -right-1 bg-gold text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+        <button class="relative hover:text-gold transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+          <span class="absolute -top-1 -right-1 bg-gold text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">3</span>
         </button>
         
         <!-- Profile Dropdown -->
         <div class="relative group">
-          <button class="flex items-center gap-2 hover:text-gold transition-all">
-            <div class="w-8 h-8 bg-gold text-black rounded-full flex items-center justify-center font-bold">
+          <button class="flex items-center gap-2 hover:text-gold transition-colors">
+            <div class="w-8 h-8 bg-gold text-crimson rounded-full flex items-center justify-center font-bold text-sm">
               {{ current_user.first_name[0] if current_user.first_name else 'U' }}
             </div>
             <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+          <div class="absolute top-full right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
-              <a href="{{ url_for('profile.view_profile') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                👤 My Profile
+              <a href="{{ url_for('profile.view_profile') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
+                My Profile
               </a>
-              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                ⚙️ Settings
+              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
+                Settings
               </a>
-              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-all">
-                📋 My Applications
+              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
+                My Applications
               </a>
-              <div class="border-t border-gray-200"></div>
-              <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 hover:bg-red-600 hover:text-white transition-all">
-                🚪 Logout
+              <div class="border-t border-gray-200 my-1"></div>
+              <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 hover:bg-red-600 hover:text-white transition-colors text-sm">
+                Logout
               </a>
             </div>
           </div>
         </div>
         {% else %}
-        <a href="{{ url_for('auth.login') }}" class="bg-gold text-black font-semibold px-4 py-2 rounded-md hover:bg-yellow-400 transition-all text-sm hover:scale-105 transform shadow-lg">
+        <a href="{{ url_for('auth.login') }}" class="bg-gold text-crimson font-bold px-5 py-2 rounded hover:bg-yellow-400 transition-colors text-sm uppercase tracking-wide">
           Login
         </a>
         {% endif %}
 
         <!-- Mobile Menu Button -->
-        <button id="mobile-menu-btn" class="lg:hidden text-white hover:text-gold transition-all">
+        <button id="mobile-menu-btn" class="lg:hidden text-white hover:text-gold transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
@@ -236,153 +161,129 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden lg:hidden bg-crimson border-t border-white/10">
       <div class="max-w-7xl mx-auto px-6 py-4 space-y-2">
-        <a href="{{ url_for('index') }}" class="block py-2 hover:text-gold transition-all">
-          🏠 Home
-        </a>
-        <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 hover:text-gold transition-all">
-          🎓 Scholarships
-        </a>
-        <a href="{{ url_for('careers_bp.index') }}" class="block py-2 hover:text-gold transition-all">
-          💼 Careers
-        </a>
-        <a href="{{ url_for('alumni_bp.index') }}" class="block py-2 hover:text-gold transition-all">
-          🤝 Alumni
-        </a>
-        <a href="{{ url_for('events.index') }}" class="block py-2 hover:text-gold transition-all">
-          📅 Events
-        </a>
-        <a href="{{ url_for('announcements_bp.index') }}" class="block py-2 hover:text-gold transition-all">
-          📰 News
-        </a>
+        <a href="{{ url_for('index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Home</a>
+        <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Scholarships</a>
+        <a href="{{ url_for('careers_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Careers</a>
+        <a href="{{ url_for('alumni_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Alumni Network</a>
+        <a href="{{ url_for('events.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Events</a>
+        <a href="{{ url_for('announcements_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">News</a>
         <div class="border-t border-white/10 pt-2 mt-2">
-          <p class="text-xs text-gray-300 mb-2">Resources</p>
-          <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-all">� Scholarships</a>
-          <a href="{{ url_for('careers_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-all">🎯 Career Services</a>
-          <a href="{{ url_for('mentors.index') }}" class="block py-2 pl-4 hover:text-gold transition-all">💡 Mentorship</a>
-          <a href="{{ url_for('profile.index') }}" class="block py-2 pl-4 hover:text-gold transition-all">👤 My Profile</a>
+          <p class="text-xs text-gray-300 mb-2 uppercase font-semibold">Resources</p>
+          <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Scholarships</a>
+          <a href="{{ url_for('careers_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Career Services</a>
+          <a href="{{ url_for('mentors.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Mentorship</a>
+          <a href="{{ url_for('profile.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">My Profile</a>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- =========================
-       ⚡ FLASH MESSAGES
-       ========================= -->
+  <!-- FLASH MESSAGES -->
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <div class="max-w-4xl mx-auto mt-4 space-y-2 fade-in">
+  <div class="max-w-7xl mx-auto mt-4 px-6 space-y-2">
     {% for category, message in messages %}
-    <div class="p-3 rounded-md shadow-md text-white
-      {% if category == 'success' %} bg-green-600
-      {% elif category == 'error' %} bg-red-600
-      {% elif category == 'warning' %} bg-yellow-500 text-black
-      {% else %} bg-blue-600 {% endif %}">
-      {{ message }}
+    <div class="p-4 rounded border-l-4 {% if category == 'success' %}bg-green-50 border-green-600 text-green-800{% elif category == 'error' %}bg-red-50 border-red-600 text-red-800{% elif category == 'warning' %}bg-yellow-50 border-yellow-600 text-yellow-800{% else %}bg-blue-50 border-blue-600 text-blue-800{% endif %}">
+      <p class="font-medium">{{ message }}</p>
     </div>
     {% endfor %}
   </div>
   {% endif %}
   {% endwith %}
 
-  <!-- =========================
-       📄 MAIN CONTENT
-       ========================= -->
+  <!-- MAIN CONTENT -->
   <main class="flex-1">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- =========================
-       🦶 FOOTER
-       ========================= -->
+  <!-- PROFESSIONAL FOOTER -->
   <footer class="bg-psuBlack text-white mt-auto">
-    <!-- Main Footer Content -->
     <div class="max-w-7xl mx-auto px-6 py-12">
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         <!-- About Section -->
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10 rounded-md">
+            <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10">
             <h3 class="font-bold text-lg">PittState Connect</h3>
           </div>
           <p class="text-sm text-gray-400 leading-relaxed">
-            Empowering Pittsburg State students, alumni, and faculty to connect, mentor, and grow together.
+            Making Lives Better Through Education, Connection, and Opportunity
           </p>
         </div>
 
-        <!-- Quick Links -->
+        <!-- Students -->
         <div>
-          <h4 class="font-bold text-lg mb-4 text-psuGold">Quick Links</h4>
+          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Students</h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="{{ url_for('index') }}" class="text-gray-400 hover:text-psuGold transition">Home</a></li>
-            <li><a href="{{ url_for('scholarships_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Scholarships</a></li>
-            <li><a href="{{ url_for('careers_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Careers</a></li>
-            <li><a href="{{ url_for('alumni_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Alumni Network</a></li>
+            <li><a href="{{ url_for('scholarships_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Scholarships</a></li>
+            <li><a href="{{ url_for('careers_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Career Services</a></li>
+            <li><a href="{{ url_for('mentors.index') }}" class="text-gray-400 hover:text-gold transition-colors">Mentorship</a></li>
+            <li><a href="{{ url_for('events.index') }}" class="text-gray-400 hover:text-gold transition-colors">Campus Events</a></li>
           </ul>
         </div>
 
-        <!-- Resources -->
+        <!-- Alumni & Resources -->
         <div>
-          <h4 class="font-bold text-lg mb-4 text-psuGold">Resources</h4>
+          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Alumni & Resources</h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="{{ url_for('scholarships_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Scholarships</a></li>
-            <li><a href="{{ url_for('careers_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Career Services</a></li>
-            <li><a href="{{ url_for('mentors.index') }}" class="text-gray-400 hover:text-psuGold transition">Mentorship</a></li>
-            <li><a href="{{ url_for('events.index') }}" class="text-gray-400 hover:text-psuGold transition">Events</a></li>
+            <li><a href="{{ url_for('alumni_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Alumni Network</a></li>
+            <li><a href="{{ url_for('announcements_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">News & Updates</a></li>
+            <li><a href="{{ url_for('profile.index') }}" class="text-gray-400 hover:text-gold transition-colors">My Profile</a></li>
+            <li><a href="{{ url_for('analytics_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Analytics</a></li>
           </ul>
         </div>
 
-        <!-- Contact & Social -->
+        <!-- Contact -->
         <div>
-          <h4 class="font-bold text-lg mb-4 text-psuGold">Connect With Us</h4>
-          <ul class="space-y-2 text-sm mb-4">
-            <li class="text-gray-400">
-              <span class="inline-block w-5">📧</span>
-              <a href="mailto:support@pittstateconnect.com" class="hover:text-psuGold transition">support@pittstateconnect.com</a>
+          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Connect With Us</h4>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-start gap-2 text-gray-400">
+              <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              <a href="mailto:support@pittstateconnect.edu" class="hover:text-gold transition-colors">support@pittstateconnect.edu</a>
             </li>
-            <li class="text-gray-400">
-              <span class="inline-block w-5">📞</span>
+            <li class="flex items-start gap-2 text-gray-400">
+              <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+              </svg>
               <span>(620) 235-4011</span>
             </li>
           </ul>
-          <div class="flex gap-3">
-            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
-              📘
+          <div class="flex gap-3 mt-4">
+            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="https://twitter.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
-              🐦
+            <a href="https://twitter.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
             </a>
-            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
-              📷
+            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Divider -->
-      <div class="border-t border-gray-800 pt-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p class="text-sm text-gray-400">
-            © 2025 Pittsburg State University | PittState-Connect
-          </p>
-          <p class="text-xs text-gray-500">
-            Built with ❤️ by Gorilla-Link Team
-          </p>
-        </div>
+      <!-- Copyright -->
+      <div class="border-t border-gray-800 pt-6 text-center">
+        <p class="text-sm text-gray-400">
+          © 2025 Pittsburg State University | PittState-Connect
+        </p>
+        <p class="text-xs text-gray-500 mt-2">
+          All Rights Reserved | Privacy Policy | Terms of Service
+        </p>
       </div>
     </div>
   </footer>
 
   <!-- Back to Top Button -->
-  <button id="backToTop" 
-          class="fixed bottom-8 right-8 bg-gradient-to-r from-psuRed to-psuGold text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 z-40">
+  <button id="backToTop" class="fixed bottom-8 right-8 bg-crimson hover:bg-gold text-white hover:text-crimson w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 z-40">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
     </svg>
   </button>
 
-  <!-- =========================
-       🧠 SCRIPTS
-       ========================= -->
+  <!-- SCRIPTS -->
   <script>
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -393,35 +294,6 @@
         mobileMenu.classList.toggle('hidden');
       });
     }
-
-    // Scroll reveal animation
-    function reveal() {
-      const reveals = document.querySelectorAll('.reveal');
-      reveals.forEach(element => {
-        const windowHeight = window.innerHeight;
-        const elementTop = element.getBoundingClientRect().top;
-        const elementVisible = 150;
-        
-        if (elementTop < windowHeight - elementVisible) {
-          element.classList.add('active');
-        }
-      });
-    }
-    
-    window.addEventListener('scroll', reveal);
-    window.addEventListener('load', reveal);
-    
-    // Navbar blur effect on scroll
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.style.backdropFilter = 'blur(10px)';
-        navbar.style.backgroundColor = 'rgba(158, 27, 50, 0.95)';
-      } else {
-        navbar.style.backdropFilter = 'none';
-        navbar.style.backgroundColor = 'rgb(158, 27, 50)';
-      }
-    });
 
     // Back to top button
     const backToTopBtn = document.getElementById('backToTop');
@@ -442,20 +314,7 @@
         behavior: 'smooth'
       });
     });
-
-    // Add loading animation to page transitions
-    window.addEventListener('beforeunload', () => {
-      document.body.style.opacity = '0.7';
-    });
   </script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-{% if status_banner %}
-<div class="fixed bottom-0 left-0 right-0 z-50 {{ status_banner.color }} text-white text-sm py-2 shadow-lg">
-  <div class="flex justify-center items-center space-x-2">
-    <i data-lucide="{{ status_banner.icon }}" class="w-4 h-4"></i>
-    <span>{{ status_banner.text }}</span>
-  </div>
-</div>
-{% endif %}
 </body>
 </html>
