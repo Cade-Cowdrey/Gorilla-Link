@@ -117,7 +117,7 @@ statsd==4.0.1
 
 # GraphQL API
 graphene==3.3
-graphene-sqlalchemy==3.0.0
+graphene-sqlalchemy==3.0.0rc2
 flask-graphql==2.0.1
 
 # Payment & Billing
