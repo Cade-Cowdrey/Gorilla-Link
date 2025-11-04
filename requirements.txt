@@ -29,7 +29,7 @@ Flask-Cors==5.0.0
 Flask-Mail==0.9.1
 python-dotenv==1.0.1
 bleach==6.1.0
-psutil==6.1.0
+psutil==6.0.0  # Changed from 6.1.0 for safety package compatibility
 
 # Caching & Performance
 Flask-Caching==2.3.0
