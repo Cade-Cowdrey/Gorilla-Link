@@ -179,9 +179,9 @@ qrcode[pil]==7.4.2
 # apache-airflow==2.10.3
 # prefect==3.1.4
 
-# Feature Flags & A/B Testing
+# Feature Flags & A/B Testing (Optional - comment out if not needed)
 flagsmith==3.8.0
-split-evaluator==1.2.1
+# split-evaluator==1.2.1  # Not available for Python 3.10
 
 # Rate Limiting & Caching
 flask-limiter==3.8.0
