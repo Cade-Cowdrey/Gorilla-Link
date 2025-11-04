@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 from utils.analytics_util import record_page_view
-from utils.audit_util import audit
+from utils.audit_util import record_event as audit_record_event
 
 bp = Blueprint("announcements_bp", __name__, url_prefix="/announcements")
 
@@ -26,6 +26,6 @@ def create():
     body = request.form.get("body")
     audience = request.form.get("audience", "all")
     # TODO: persist to DB
-    audit("create", "announcement", meta={"title": title, "body": body, "audience": audience})
+    audit_record_event("announcement.create", message=f"Created announcement: {title}", props={"title": title, "body": body, "audience": audience})
     flash("Announcement published.", "success")
     return redirect(url_for("announcements_bp.index"))
