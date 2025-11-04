@@ -79,6 +79,7 @@ class UserStreak(db.Model):
     
     __table_args__ = (
         db.UniqueConstraint('user_id', 'streak_type', name='unique_user_streak'),
+        {'extend_existing': True}
     )
     
     def __repr__(self):
@@ -560,6 +561,7 @@ class MentorshipMatch(db.Model):
 class MentorshipSession(db.Model):
     """Individual mentorship meetings"""
     __tablename__ = "mentorship_sessions"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey('mentorship_matches.id'), nullable=False)

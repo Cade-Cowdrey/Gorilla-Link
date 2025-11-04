@@ -8,10 +8,10 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from loguru import logger
 from extensions import db
-from models import User, Event
+from models import User, Event, Company
 from models_extended import (
     Subscription, PaymentTransaction, SponsorshipTier,
-    EmployerProfile, EventSponsor
+    EmployerPortal, EventSponsor
 )
 
 # Stripe configuration (set in environment)
@@ -338,7 +338,7 @@ class MonetizationService:
             db.session.add(subscription)
             
             # Update employer profile tier
-            employer = EmployerProfile.query.filter_by(user_id=user_id).first()
+            employer = EmployerPortal.query.filter_by(user_id=user_id).first()
             if employer:
                 employer.sponsorship_tier = tier_name
             
@@ -405,7 +405,7 @@ class MonetizationService:
             subscription.amount = tier["annual_cost"]
             
             # Update employer profile
-            employer = EmployerProfile.query.filter_by(user_id=subscription.user_id).first()
+            employer = EmployerPortal.query.filter_by(user_id=subscription.user_id).first()
             if employer:
                 employer.sponsorship_tier = new_tier
             
@@ -436,7 +436,7 @@ class MonetizationService:
             subscription.status = "cancelled"
             
             # Downgrade employer to free tier
-            employer = EmployerProfile.query.filter_by(user_id=subscription.user_id).first()
+            employer = EmployerPortal.query.filter_by(user_id=subscription.user_id).first()
             if employer:
                 employer.sponsorship_tier = "free"
             
@@ -556,7 +556,7 @@ class MonetizationService:
         
         for sponsor in sponsors:
             user = User.query.get(sponsor.sponsor_user_id)
-            employer = EmployerProfile.query.filter_by(user_id=sponsor.sponsor_user_id).first()
+            employer = EmployerPortal.query.filter_by(user_id=sponsor.sponsor_user_id).first()
             
             result.append({
                 "id": sponsor.id,
