@@ -8,3 +8,6 @@ from flask import Blueprint
 resume_bp = Blueprint('resume', __name__, url_prefix='/resume')
 
 from . import routes
+
+# Export as 'bp' for auto-registration
+bp = resume_bp

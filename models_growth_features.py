@@ -133,6 +133,7 @@ class ProfileCompletionProgress(db.Model):
 class UserPoints(db.Model):
     """Tracks user points/reputation for gamification"""
     __tablename__ = "user_points"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -1123,6 +1124,7 @@ class AlumniDonation(db.Model):
 class EventSponsor(db.Model):
     """Corporate sponsors for career fairs and events"""
     __tablename__ = "event_sponsors"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('live_events.id'), nullable=False)
