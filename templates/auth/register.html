@@ -18,8 +18,9 @@ FILE: src/templates/auth/register.html
 
   <div class="text-center mt-6 text-gray text-sm">
     <p>Already have an account? 
-      <a href="{{ url_for('auth_bp.login') }}" class="text-crimson hover:text-gold underline">Login here</a>.
+      <a href="{{ url_for('auth.login') }}" class="text-crimson hover:text-gold underline">Login here</a>.
     </p>
   </div>
 </section>
 {% endblock %}
+

@@ -13,9 +13,8 @@ FILE: src/templates/auth/login.html
            class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
     <button type="submit" class="btn btn-crimson w-full">Login</button>
 
-    <div class="flex justify-between text-sm pt-2">
-      <a href="{{ url_for('auth_bp.forgot') }}" class="text-crimson hover:text-gold">Forgot password?</a>
-      <a href="{{ url_for('auth_bp.register') }}" class="text-crimson hover:text-gold">Create account</a>
+    <div class="text-center text-sm pt-2">
+      <a href="{{ url_for('auth.forgot_password') }}" class="text-crimson hover:text-gold">Forgot password?</a>
     </div>
   </form>
 

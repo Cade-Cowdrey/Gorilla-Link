@@ -100,13 +100,6 @@
 
           <tr>
             <td class="py-3 px-4 font-semibold text-psu-gold">Auth</td>
-            <td class="py-3 px-4">register.html</td>
-            <td class="py-3 px-4">Registration form for new users</td>
-            <td class="py-3 px-4"><a href="{{ url_for('auth.register') }}" class="text-psu-gold hover:underline">Preview</a></td>
-          </tr>
-
-          <tr>
-            <td class="py-3 px-4 font-semibold text-psu-gold">Auth</td>
             <td class="py-3 px-4">forgot_password.html</td>
             <td class="py-3 px-4">Form for requesting password reset link</td>
             <td class="py-3 px-4"><a href="{{ url_for('auth.forgot_password') }}" class="text-psu-gold hover:underline">Preview</a></td>
@@ -117,7 +110,7 @@
 
     <!-- RETURN -->
     <div class="text-center mt-10">
-      <a href="{{ url_for('core.home') }}" 
+      <a href="{{ url_for('core_bp.home') }}" 
          class="bg-psu-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-yellow-500 transition-all inline-block">
          Return to Dashboard
       </a>
