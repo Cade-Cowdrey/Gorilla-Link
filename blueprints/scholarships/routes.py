@@ -575,3 +575,36 @@ def essay_templates():
         'success': True,
         'templates': templates
     })
+
+
+# ========================================
+# ADMIN: Federal Grants Integration
+# ========================================
+
+@bp.route("/admin/add-federal-grants", methods=["POST"])
+@login_required
+def admin_add_federal_grants():
+    """
+    Admin route to add federal grants from Student Aid API
+    FREE government scholarships - No API key required!
+    """
+    # Check if user is admin
+    if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
+        flash("⛔ Unauthorized access", "danger")
+        return redirect(url_for("scholarships_bp.browse"))
+    
+    try:
+        from federal_aid_api import add_federal_grants
+        
+        count = add_federal_grants()
+        
+        if count > 0:
+            flash(f"✅ Successfully added {count} federal grants! (Pell, FSEOG, TEACH, etc.)", "success")
+        else:
+            flash("ℹ️ Federal grants already exist in database", "info")
+            
+    except Exception as e:
+        logger.error(f"Error adding federal grants: {e}")
+        flash(f"❌ Error adding federal grants: {str(e)}", "danger")
+    
+    return redirect(url_for("scholarships_bp.browse"))
