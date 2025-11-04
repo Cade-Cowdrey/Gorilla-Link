@@ -142,7 +142,7 @@ def ai_chat():
 @api_v1.route('/ai/resume/generate', methods=['POST'])
 @login_required
 @limiter.limit("5 per hour")
-def generate_resume():
+def ai_generate_resume():
     """AI-powered resume generation"""
     data = request.json
     

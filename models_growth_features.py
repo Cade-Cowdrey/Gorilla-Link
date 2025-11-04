@@ -89,6 +89,7 @@ class UserStreak(db.Model):
 class ProfileCompletionProgress(db.Model):
     """Tracks user profile completion percentage and tasks"""
     __tablename__ = "profile_completion_progress"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -764,6 +765,7 @@ class PushSubscription(db.Model):
 class ChatMessage(db.Model):
     """AI career coach chat messages"""
     __tablename__ = "chat_messages"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
