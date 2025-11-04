@@ -16,6 +16,7 @@ import datetime
 class Badge(db.Model):
     """Achievement badges that users can earn"""
     __tablename__ = "badges"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
@@ -410,6 +411,7 @@ class ForumTopic(db.Model):
 class ForumPost(db.Model):
     """Replies to forum topics"""
     __tablename__ = "forum_posts"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('forum_topics.id'), nullable=False)
@@ -661,7 +663,7 @@ class UserBehavior(db.Model):
     action_type = db.Column(db.String(50), nullable=False)  # view, click, apply, save, share
     item_type = db.Column(db.String(50), nullable=False)  # job, profile, course, event
     item_id = db.Column(db.Integer, nullable=False)
-    metadata = db.Column(JSONB)  # Additional context
+    meta_data = db.Column(JSONB)  # Additional context - Renamed from metadata
     timestamp = db.Column(db.DateTime, default=func.now())
     session_id = db.Column(db.String(255))
     
@@ -766,7 +768,7 @@ class ChatMessage(db.Model):
     role = db.Column(db.String(20), nullable=False)  # user or assistant
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
-    metadata = db.Column(JSONB)
+    meta_data = db.Column(JSONB)  # Renamed from metadata to avoid SQLAlchemy conflict
     
     # Relationships
     user = db.relationship('User', backref=db.backref('chat_messages', lazy='dynamic', order_by='ChatMessage.created_at'))

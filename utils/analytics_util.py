@@ -73,6 +73,14 @@ def get_page_stats(limit=20):
         return []
 
 
+def get_top_pages(limit=20):
+    """
+    Alias for get_page_stats - returns the most viewed pages.
+    Used by analytics blueprint.
+    """
+    return get_page_stats(limit)
+
+
 def record_api_usage(endpoint, method, status_code, user_id=None):
     """
     Log API usage and performance metrics.

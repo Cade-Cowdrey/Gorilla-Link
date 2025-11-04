@@ -1,1 +1,1 @@
-from .routes import api_bp
+from .routes import bp as api_bp

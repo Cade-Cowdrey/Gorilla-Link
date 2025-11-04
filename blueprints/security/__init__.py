@@ -1,1 +1,1 @@
-from .routes import security_bp
+from .routes import bp as security_bp

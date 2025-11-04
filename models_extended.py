@@ -18,6 +18,7 @@ import secrets
 class TwoFactorAuth(db.Model):
     """Two-Factor Authentication (TOTP)"""
     __tablename__ = "two_factor_auth"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
@@ -615,7 +616,7 @@ class PaymentTransaction(db.Model):
     payment_method = db.Column(db.String(32))  # stripe, paypal, etc.
     purpose = db.Column(db.String(128))  # donation, sponsorship, premium_subscription
     status = db.Column(db.String(32), default="pending")  # pending, completed, failed, refunded
-    metadata = db.Column(JSONB)
+    meta_data = db.Column(JSONB)  # Renamed from metadata to avoid SQLAlchemy conflict
     created_at = db.Column(db.DateTime, default=func.now())
     
     user = db.relationship("User", backref="transactions")
@@ -1053,7 +1054,7 @@ class ChatMessage(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     message = db.Column(db.Text, nullable=False)
     message_type = db.Column(db.String(32), default='text')  # text, image, file, system
-    metadata = db.Column(JSONB)  # For file URLs, image URLs, etc.
+    meta_data = db.Column(JSONB)  # For file URLs, image URLs, etc. - Renamed from metadata
     timestamp = db.Column(db.DateTime, default=func.now())
     edited_at = db.Column(db.DateTime)
     deleted_at = db.Column(db.DateTime)

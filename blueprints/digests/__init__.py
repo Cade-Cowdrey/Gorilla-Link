@@ -1,1 +1,1 @@
-from .routes import digests_bp
+from .routes import bp as digests_bp

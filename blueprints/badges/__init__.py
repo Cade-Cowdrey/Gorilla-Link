@@ -1,1 +1,1 @@
-from .routes import badges_bp
+from .routes import bp as badges_bp

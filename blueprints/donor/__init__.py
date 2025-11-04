@@ -1,1 +1,1 @@
-from .routes import donor_bp
+from .routes import bp as donor_bp

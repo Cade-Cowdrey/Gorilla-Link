@@ -9,5 +9,5 @@ bp = Blueprint("admin", __name__, url_prefix="/admin")
 @limiter.limit("20/minute")
 @login_required
 def dashboard():
-       record_page_view("admin_dashboard", current_user.id if current_user.is_authenticated else None)
+    record_page_view("admin_dashboard", current_user.id if current_user.is_authenticated else None)
     return render_template("admin/dashboard.html", title="Admin Dashboard | PittState-Connect")

@@ -1,1 +1,1 @@
-from .routes import employer_bp
+from .routes import bp as employer_bp
