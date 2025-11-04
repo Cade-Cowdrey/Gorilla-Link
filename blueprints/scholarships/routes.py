@@ -137,15 +137,7 @@ def api_search():
         'url': s.url
     } for s in scholarships]
     
-    return jsonify(results) 
-            if query_lower in s.get('title', '').lower() or 
-               query_lower in s.get('description', '').lower()
-        ]
-    
-    return jsonify({
-        'scholarships': scholarships[:50],  # Limit to 50 results
-        'total': len(scholarships)
-    })
+    return jsonify(results)
 
 @bp.route("/my")
 @login_required
