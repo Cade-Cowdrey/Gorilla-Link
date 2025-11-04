@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for
+from flask import Flask, url_for, render_template
 from markupsafe import Markup
 from config.config_production import ConfigProduction
 from extensions import init_extensions, scheduler
@@ -52,7 +52,7 @@ logger.info("✅ Resume & Career Features blueprint registered")
 
 @app.route("/")
 def index():
-    return "🦍 PittState-Connect Production is Live!"
+    return render_template("index.html")
 
 # ----------------------------
 # ERROR HANDLERS
