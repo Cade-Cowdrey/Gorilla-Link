@@ -1,26 +1,43 @@
-{% extends "base.html" %}<!-- =========================================================
-
-{% block title %}Alumni Directory | PittState-Connect{% endblock %}FILE: src/templates/alumni/directory.html
-
-{% block content %}========================================================= -->
-
 {% extends "base.html" %}
+{% block title %}Alumni Directory | PittState-Connect{% endblock %}
+{% block content %}
 
-<div class="bg-gradient-to-r from-crimson to-gold py-16 text-white">{% block title %}Alumni Directory · PittState-Connect{% endblock %}
-
-  <div class="max-w-7xl mx-auto px-6 text-center">{% block content %}
-
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">Alumni Network</h1><section class="section max-w-7xl mx-auto px-6 fade-in">
-
-    <p class="text-lg opacity-90">Connect with Pitt State graduates making a difference around the world</p>  <div class="flex items-center justify-between mb-8">
-
-  </div>    <h1 class="text-4xl font-bold">Alumni Directory</h1>
-
-</div>    <a href="{{ url_for('mentors_bp.hub') }}" class="btn btn-gold">Become a Mentor</a>
-
+<!-- Hero Section with Animation -->
+<div class="relative bg-gradient-to-r from-crimson via-[#660000] to-gold py-20 text-white overflow-hidden animate-gradient">
+  <!-- Floating decorative elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 right-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-10 left-20 w-40 h-40 bg-gold/20 rounded-full blur-3xl animate-bounce-slow"></div>
   </div>
 
-<section class="max-w-7xl mx-auto px-6 py-12">
+  <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
+    <div class="animate-fade-in">
+      <div class="text-6xl md:text-7xl mb-4 animate-bounce-slow">🎓</div>
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 drop-shadow-2xl">Alumni Network</h1>
+      <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
+        Connect with <span class="text-gold font-semibold">15,000+</span> Pitt State graduates making a difference around the world
+      </p>
+
+      <!-- Quick Stats -->
+      <div class="flex justify-center gap-8 mt-10 flex-wrap">
+        <div class="text-center animate-slide-up" style="animation-delay: 0.2s;">
+          <div class="text-3xl font-bold">15,000+</div>
+          <div class="text-sm opacity-75">Active Alumni</div>
+        </div>
+        <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
+          <div class="text-3xl font-bold">500+</div>
+          <div class="text-sm opacity-75">Mentors</div>
+        </div>
+        <div class="text-center animate-slide-up" style="animation-delay: 0.6s;">
+          <div class="text-3xl font-bold">50+</div>
+          <div class="text-sm opacity-75">Countries</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="max-w-7xl mx-auto px-6 py-16">
 
   <!-- Search Bar -->  <!-- Alumni Search -->
 

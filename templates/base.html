@@ -169,14 +169,91 @@
   <!-- =========================
        🦶 FOOTER
        ========================= -->
-  <footer class="bg-psuBlack text-white mt-8 py-6 text-center">
-    <p class="text-sm mb-1">© 2025 Pittsburg State University | PittState-Connect</p>
-    <p class="text-xs opacity-80">Empowering Students • Connecting Alumni • Driving Careers</p>
-    <div class="mt-2 flex justify-center gap-4 text-yellow-400">
-      <a href="https://www.pittstate.edu" target="_blank" class="hover:text-white transition-all">PSU Official Site</a>
-      <a href="mailto:support@pittstateconnect.com" class="hover:text-white transition-all">Contact Support</a>
+  <footer class="bg-psuBlack text-white mt-auto">
+    <!-- Main Footer Content -->
+    <div class="max-w-7xl mx-auto px-6 py-12">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <!-- About Section -->
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10 rounded-md">
+            <h3 class="font-bold text-lg">PittState Connect</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Empowering Pittsburg State students, alumni, and faculty to connect, mentor, and grow together.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="font-bold text-lg mb-4 text-psuGold">Quick Links</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="{{ url_for('index') }}" class="text-gray-400 hover:text-psuGold transition">Home</a></li>
+            <li><a href="{{ url_for('scholarships_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Scholarships</a></li>
+            <li><a href="{{ url_for('careers_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Careers</a></li>
+            <li><a href="{{ url_for('alumni_bp.index') }}" class="text-gray-400 hover:text-psuGold transition">Alumni Network</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div>
+          <h4 class="font-bold text-lg mb-4 text-psuGold">Resources</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="text-gray-400 hover:text-psuGold transition">Help Center</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-psuGold transition">Privacy Policy</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-psuGold transition">Terms of Service</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-psuGold transition">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact & Social -->
+        <div>
+          <h4 class="font-bold text-lg mb-4 text-psuGold">Connect With Us</h4>
+          <ul class="space-y-2 text-sm mb-4">
+            <li class="text-gray-400">
+              <span class="inline-block w-5">📧</span>
+              <a href="mailto:support@pittstateconnect.com" class="hover:text-psuGold transition">support@pittstateconnect.com</a>
+            </li>
+            <li class="text-gray-400">
+              <span class="inline-block w-5">📞</span>
+              <span>(620) 235-4011</span>
+            </li>
+          </ul>
+          <div class="flex gap-3">
+            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
+              📘
+            </a>
+            <a href="https://twitter.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
+              🐦
+            </a>
+            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-psuGold transition text-xl">
+              📷
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-gray-800 pt-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-gray-400">
+            © 2025 Pittsburg State University | PittState-Connect
+          </p>
+          <p class="text-xs text-gray-500">
+            Built with ❤️ by Gorilla-Link Team
+          </p>
+        </div>
+      </div>
     </div>
   </footer>
+
+  <!-- Back to Top Button -->
+  <button id="backToTop" 
+          class="fixed bottom-8 right-8 bg-gradient-to-r from-psuRed to-psuGold text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 z-40">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+    </svg>
+  </button>
 
   <!-- =========================
        🧠 SCRIPTS
@@ -209,6 +286,31 @@
         navbar.style.backdropFilter = 'none';
         navbar.style.backgroundColor = 'rgb(158, 27, 50)';
       }
+    });
+
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.style.opacity = '1';
+        backToTopBtn.style.pointerEvents = 'auto';
+      } else {
+        backToTopBtn.style.opacity = '0';
+        backToTopBtn.style.pointerEvents = 'none';
+      }
+    });
+    
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // Add loading animation to page transitions
+    window.addEventListener('beforeunload', () => {
+      document.body.style.opacity = '0.7';
     });
   </script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
