@@ -149,7 +149,7 @@ google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.1
 
 # Data Validation & ETL
-great-expectations==1.2.3
+# great-expectations==1.2.3  # Conflicts with pandas 2.2.3 (requires <2.2), not currently used
 marshmallow==3.23.1
 pydantic-settings==2.6.1
 
