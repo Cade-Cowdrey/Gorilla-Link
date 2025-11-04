@@ -183,6 +183,7 @@ class UserPoints(db.Model):
 class PointTransaction(db.Model):
     """Log of all point transactions"""
     __tablename__ = "point_transactions"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_points_id = db.Column(db.Integer, db.ForeignKey('user_points.id'), nullable=False)
@@ -205,6 +206,7 @@ class PointTransaction(db.Model):
 class SuccessStory(db.Model):
     """User success stories and achievements to share with community"""
     __tablename__ = "success_stories"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -247,6 +249,7 @@ class StoryReaction(db.Model):
     
     __table_args__ = (
         db.UniqueConstraint('story_id', 'user_id', name='unique_story_reaction'),
+        {'extend_existing': True}
     )
     
     def __repr__(self):
@@ -256,6 +259,7 @@ class StoryReaction(db.Model):
 class StoryComment(db.Model):
     """Comments on success stories"""
     __tablename__ = "story_comments"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     story_id = db.Column(db.Integer, db.ForeignKey('success_stories.id'), nullable=False)
@@ -440,6 +444,7 @@ class ForumPost(db.Model):
 class ForumVote(db.Model):
     """Upvotes/downvotes on forum posts"""
     __tablename__ = "forum_votes"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_posts.id'), nullable=False)
@@ -466,6 +471,7 @@ class ForumVote(db.Model):
 class MentorshipProgram(db.Model):
     """Structured mentorship programs"""
     __tablename__ = "mentorship_programs"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -591,6 +597,7 @@ class MentorshipSession(db.Model):
 class UserAnalytics(db.Model):
     """Aggregated user analytics and metrics"""
     __tablename__ = "user_analytics"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -745,6 +752,7 @@ class NotificationPreference(db.Model):
 class PushSubscription(db.Model):
     """Web push notification subscriptions"""
     __tablename__ = "push_subscriptions"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
