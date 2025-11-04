@@ -198,6 +198,12 @@ class Scholarship(db.Model):
     eligibility = db.Column(db.String(255))
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
     created_at = db.Column(db.DateTime, default=func.now())
+    
+    # New fields for real scholarships
+    provider = db.Column(db.String(255))  # Organization providing the scholarship
+    url = db.Column(db.String(500))  # Application URL
+    category = db.Column(db.String(100))  # STEM, Healthcare, Business, etc.
+    is_active = db.Column(db.Boolean, default=True)  # Whether scholarship is currently available
 
     department = db.relationship("Department", back_populates="scholarships", lazy=True)
 
