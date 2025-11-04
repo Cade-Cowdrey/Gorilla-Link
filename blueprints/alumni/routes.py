@@ -1,5 +1,5 @@
 # File: blueprints/alumni/routes.py
-from flask import Blueprint, render_template_string, jsonify
+from flask import Blueprint, render_template, jsonify
 from utils.analytics_util import record_page_view
 
 bp = Blueprint("alumni_bp", __name__, url_prefix="/alumni")
@@ -12,13 +12,6 @@ def health():
 def index():
     # Log page view
     record_page_view("alumni_home")
-    return render_template_string("""
-    {%- extends "base.html" -%}
-    {%- block title %} Alumni Network | PittState-Connect {%- endblock %}
-    {%- block content %}
-    <div class="container py-4">
-      <h1 class="h3">Alumni Network</h1>
-      <p class="text-muted">Mentorships, job referrals, and donor engagement.</p>
-    </div>
-    {%- endblock %}
-    """)
+    
+    # Render a proper landing page for alumni
+    return render_template("alumni/directory.html", alumni=[])

@@ -36,7 +36,6 @@ bp = Blueprint("scholarships_bp", __name__, url_prefix="/scholarships")
 
 @bp.route("/")
 @limiter.limit("20/minute")
-@login_required
 def index():
     """Scholarships home page showing hub overview."""
     record_page_view("scholarships_home", current_user.id if current_user.is_authenticated else None)

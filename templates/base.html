@@ -21,10 +21,8 @@
        ========================= -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -32,7 +30,8 @@
             gold: '#FFCC33',
             psuBlack: '#1C1C1C',
             psuGray: '#F4F4F4',
-            psuDarkGray: '#2C2C2C',
+            psuRed: '#9E1B32',
+            psuGold: '#FFCC33',
           },
         },
       },
@@ -40,41 +39,31 @@
   </script>
 </head>
 
-<body class="bg-psuGray text-psuBlack dark:bg-psuBlack dark:text-white flex flex-col min-h-screen transition-all">
+<body class="bg-psuGray text-psuBlack flex flex-col min-h-screen">
   <!-- =========================
        🦍 PSU NAVBAR
        ========================= -->
-  <header id="navbar" class="sticky top-0 z-50 bg-crimson text-white dark:bg-psuDarkGray shadow-lg transition-all duration-300">
+  <header id="navbar" class="sticky top-0 z-50 bg-crimson text-white shadow-lg transition-all duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
       <div class="flex items-center gap-3">
         <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10 rounded-md">
-        <a href="{{ safe_url_for('core_bp.home') }}" class="text-2xl font-bold hover:text-gold transition-all">
+        <a href="{{ url_for('index') }}" class="text-2xl font-bold hover:text-gold transition-all">
           PittState-Connect
         </a>
       </div>
 
       <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-        {% if has_endpoint('core_bp.home') %}<a href="{{ safe_url_for('core_bp.home') }}" class="nav-link">Home</a>{% endif %}
-        {% if has_endpoint('scholarships_bp.index') %}<a href="{{ safe_url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a>{% endif %}
-        {% if has_endpoint('careers_bp.index') %}<a href="{{ safe_url_for('careers_bp.index') }}" class="nav-link">Careers</a>{% endif %}
-        {% if has_endpoint('analytics_bp.dashboard') %}<a href="{{ safe_url_for('analytics_bp.dashboard') }}" class="nav-link">Analytics</a>{% endif %}
-        {% if has_endpoint('faculty_bp.index') %}<a href="{{ safe_url_for('faculty_bp.index') }}" class="nav-link">Faculty</a>{% endif %}
-        {% if has_endpoint('alumni_bp.index') %}<a href="{{ safe_url_for('alumni_bp.index') }}" class="nav-link">Alumni</a>{% endif %}
-        {% if has_endpoint('donor_bp.index') %}<a href="{{ safe_url_for('donor_bp.index') }}" class="nav-link">Donors</a>{% endif %}
+        <a href="{{ url_for('index') }}" class="hover:text-gold transition-all">Home</a>
+        <a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-gold transition-all">Scholarships</a>
+        <a href="{{ url_for('careers_bp.index') }}" class="hover:text-gold transition-all">Careers</a>
+        <a href="{{ url_for('alumni_bp.index') }}" class="hover:text-gold transition-all">Alumni</a>
       </nav>
 
       <div class="flex items-center gap-3">
-        <!-- Theme Toggle Button -->
-        <button id="theme-toggle"
-          class="theme-toggle p-2 bg-white/10 rounded-md hover:bg-white/20 dark:bg-white/20 dark:hover:bg-white/30 transition-all"
-          aria-label="Toggle Dark Mode"
-          title="Toggle Dark Mode (Ctrl+Shift+D)">
-          <span class="theme-toggle-icon">☀️</span>
-        </button>
         {% if current_user.is_authenticated %}
-        <a href="{{ safe_url_for('auth_bp.logout') }}" class="btn-gold text-sm">Logout</a>
+        <a href="{{ url_for('auth.logout') }}" class="bg-gold text-black font-semibold px-4 py-2 rounded-md hover:bg-yellow-400 transition-all text-sm">Logout</a>
         {% else %}
-        <a href="{{ safe_url_for('auth_bp.login') }}" class="btn-gold text-sm">Login</a>
+        <a href="{{ url_for('auth.login') }}" class="bg-gold text-black font-semibold px-4 py-2 rounded-md hover:bg-yellow-400 transition-all text-sm">Login</a>
         {% endif %}
       </div>
     </div>
@@ -109,8 +98,8 @@
   <!-- =========================
        🦶 FOOTER
        ========================= -->
-  <footer class="bg-psuBlack text-white dark:bg-psuDarkGray mt-8 py-6 text-center">
-    <p class="text-sm mb-1">© {{ now().year if now else 2025 }} Pittsburg State University | PittState-Connect</p>
+  <footer class="bg-psuBlack text-white mt-8 py-6 text-center">
+    <p class="text-sm mb-1">© 2025 Pittsburg State University | PittState-Connect</p>
     <p class="text-xs opacity-80">Empowering Students • Connecting Alumni • Driving Careers</p>
     <div class="mt-2 flex justify-center gap-4 text-yellow-400">
       <a href="https://www.pittstate.edu" target="_blank" class="hover:text-white transition-all">PSU Official Site</a>
@@ -121,7 +110,6 @@
   <!-- =========================
        🧠 SCRIPTS
        ========================= -->
-  <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% if status_banner %}
 <div class="fixed bottom-0 left-0 right-0 z-50 {{ status_banner.color }} text-white text-sm py-2 shadow-lg">
