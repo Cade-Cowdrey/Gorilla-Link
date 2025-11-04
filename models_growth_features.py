@@ -845,3 +845,344 @@ class EventMessage(db.Model):
     
     def __repr__(self):
         return f"<EventMessage event={self.event_id} user={self.user_id}>"
+
+
+# =======================
+# INSTITUTIONAL FEATURES
+# =======================
+
+class UniversityVerification(db.Model):
+    """Verify users are actual PSU students/alumni"""
+    __tablename__ = "university_verifications"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    verification_type = db.Column(db.String(50), nullable=False)  # student, alumni, faculty, staff
+    student_id = db.Column(db.String(50))  # Official PSU student ID
+    graduation_year = db.Column(db.Integer)
+    degree_program = db.Column(db.String(255))
+    verification_method = db.Column(db.String(50))  # email, id_upload, admin_manual
+    verified_at = db.Column(db.DateTime)
+    verified_by = db.Column(db.Integer, db.ForeignKey('users.id'))  # Admin who verified
+    verification_document = db.Column(db.String(512))  # S3 path to uploaded ID/diploma
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    rejection_reason = db.Column(db.Text)
+    expires_at = db.Column(db.DateTime)  # Students need to reverify each semester
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('verification', uselist=False))
+    verifier = db.relationship('User', foreign_keys=[verified_by])
+    
+    def __repr__(self):
+        return f"<UniversityVerification user={self.user_id} type={self.verification_type} verified={self.is_verified}>"
+
+
+class DepartmentAffiliation(db.Model):
+    """Link users to official PSU departments"""
+    __tablename__ = "department_affiliations"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+    affiliation_type = db.Column(db.String(50))  # major, minor, faculty, advisor
+    is_primary = db.Column(db.Boolean, default=False)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('department_affiliations', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<DepartmentAffiliation user={self.user_id} dept={self.department_id}>"
+
+
+class AcademicRecord(db.Model):
+    """Store basic academic information (FERPA compliant - no grades)"""
+    __tablename__ = "academic_records"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    enrollment_status = db.Column(db.String(50))  # full_time, part_time, graduated, withdrawn
+    class_year = db.Column(db.String(20))  # Freshman, Sophomore, Junior, Senior, Graduate
+    expected_graduation = db.Column(db.Date)
+    actual_graduation = db.Column(db.Date)
+    cumulative_credits = db.Column(db.Integer)
+    major_declared = db.Column(db.Boolean, default=False)
+    honors_program = db.Column(db.Boolean, default=False)
+    dean_list = db.Column(ARRAY(db.String))  # Semesters on dean's list
+    academic_standing = db.Column(db.String(50))  # good_standing, probation, etc.
+    last_updated = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('academic_record', uselist=False))
+    
+    def __repr__(self):
+        return f"<AcademicRecord user={self.user_id} status={self.enrollment_status}>"
+
+
+class EmployerPartnership(db.Model):
+    """Official PSU employer partnerships"""
+    __tablename__ = "employer_partnerships"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    company_name = db.Column(db.String(255), nullable=False)
+    partnership_type = db.Column(db.String(50))  # career_fair, exclusive_posting, internship_program
+    contact_name = db.Column(db.String(255))
+    contact_email = db.Column(db.String(255))
+    contact_phone = db.Column(db.String(50))
+    partnership_level = db.Column(db.String(20))  # platinum, gold, silver, bronze
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    annual_hires = db.Column(db.Integer)
+    exclusive_access = db.Column(db.Boolean, default=False)  # First access to PSU students
+    logo_url = db.Column(db.String(512))
+    website = db.Column(db.String(512))
+    industries = db.Column(ARRAY(db.String))
+    is_active = db.Column(db.Boolean, default=True)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    def __repr__(self):
+        return f"<EmployerPartnership {self.company_name} level={self.partnership_level}>"
+
+
+class CareerServiceAppointment(db.Model):
+    """Schedule appointments with career services advisors"""
+    __tablename__ = "career_service_appointments"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    advisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    appointment_type = db.Column(db.String(50))  # resume_review, career_counseling, interview_prep, general
+    scheduled_at = db.Column(db.DateTime, nullable=False)
+    duration_minutes = db.Column(db.Integer, default=30)
+    location = db.Column(db.String(255))  # Office room or Zoom link
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, completed, cancelled, no_show
+    student_notes = db.Column(db.Text)  # What student wants to discuss
+    advisor_notes = db.Column(db.Text)  # Private advisor notes
+    follow_up_required = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    student = db.relationship('User', foreign_keys=[student_id], backref=db.backref('career_appointments', lazy='dynamic'))
+    advisor = db.relationship('User', foreign_keys=[advisor_id], backref=db.backref('advisor_appointments', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<CareerServiceAppointment student={self.student_id} advisor={self.advisor_id}>"
+
+
+class InstitutionalAnnouncement(db.Model):
+    """Official university announcements and alerts"""
+    __tablename__ = "institutional_announcements"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    announcement_type = db.Column(db.String(50))  # urgent, maintenance, deadline, general, emergency
+    priority = db.Column(db.String(20), default='normal')  # low, normal, high, critical
+    target_audience = db.Column(ARRAY(db.String))  # all, students, alumni, faculty, specific_departments
+    department_ids = db.Column(ARRAY(db.Integer))  # Target specific departments
+    posted_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    show_as_banner = db.Column(db.Boolean, default=False)
+    banner_color = db.Column(db.String(20))  # red for urgent, blue for info
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    attachments = db.Column(JSONB)  # PDFs, forms, etc.
+    views_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    poster = db.relationship('User', backref=db.backref('posted_announcements', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<InstitutionalAnnouncement {self.title} type={self.announcement_type}>"
+
+
+class ComplianceLog(db.Model):
+    """Track compliance-related activities (FERPA, data access, etc.)"""
+    __tablename__ = "compliance_logs"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    admin_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    action_type = db.Column(db.String(50), nullable=False)  # data_access, export, deletion, verification
+    resource_type = db.Column(db.String(50))  # user_profile, academic_record, application
+    resource_id = db.Column(db.Integer)
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(512))
+    justification = db.Column(db.Text)  # Why was this data accessed
+    details = db.Column(JSONB)
+    timestamp = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('compliance_logs_user', lazy='dynamic'))
+    admin = db.relationship('User', foreign_keys=[admin_id], backref=db.backref('compliance_logs_admin', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<ComplianceLog action={self.action_type} user={self.user_id}>"
+
+
+class DataExportRequest(db.Model):
+    """GDPR/FERPA data export requests"""
+    __tablename__ = "data_export_requests"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    request_type = db.Column(db.String(50))  # full_export, specific_data, deletion_request
+    status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    file_path = db.Column(db.String(512))  # S3 path to generated export
+    expires_at = db.Column(db.DateTime)  # Export links expire after 7 days
+    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=func.now())
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('data_export_requests', lazy='dynamic'))
+    processor = db.relationship('User', foreign_keys=[processed_by])
+    
+    def __repr__(self):
+        return f"<DataExportRequest user={self.user_id} status={self.status}>"
+
+
+class SystemHealthMetric(db.Model):
+    """Track system health and performance"""
+    __tablename__ = "system_health_metrics"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    metric_type = db.Column(db.String(50), nullable=False)  # response_time, error_rate, active_users, db_connections
+    metric_value = db.Column(db.Float, nullable=False)
+    threshold_warning = db.Column(db.Float)
+    threshold_critical = db.Column(db.Float)
+    status = db.Column(db.String(20))  # healthy, warning, critical
+    details = db.Column(JSONB)
+    timestamp = db.Column(db.DateTime, default=func.now())
+    
+    def __repr__(self):
+        return f"<SystemHealthMetric {self.metric_type}={self.metric_value}>"
+
+
+class AdministratorRole(db.Model):
+    """Granular admin permissions for university staff"""
+    __tablename__ = "administrator_roles"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    role_name = db.Column(db.String(100), nullable=False)  # career_services, registrar, department_head, super_admin
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
+    
+    # Permissions
+    can_verify_students = db.Column(db.Boolean, default=False)
+    can_manage_jobs = db.Column(db.Boolean, default=False)
+    can_view_analytics = db.Column(db.Boolean, default=False)
+    can_manage_partnerships = db.Column(db.Boolean, default=False)
+    can_send_announcements = db.Column(db.Boolean, default=False)
+    can_access_reports = db.Column(db.Boolean, default=False)
+    can_manage_users = db.Column(db.Boolean, default=False)
+    can_export_data = db.Column(db.Boolean, default=False)
+    
+    assigned_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    assigned_at = db.Column(db.DateTime, default=func.now())
+    expires_at = db.Column(db.DateTime)  # Roles can expire (e.g., temporary admin)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('admin_roles', lazy='dynamic'))
+    assigner = db.relationship('User', foreign_keys=[assigned_by])
+    
+    def __repr__(self):
+        return f"<AdministratorRole user={self.user_id} role={self.role_name}>"
+
+
+class AlumniDonation(db.Model):
+    """Track alumni donations (for engagement scoring)"""
+    __tablename__ = "alumni_donations"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    alumni_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    campaign_name = db.Column(db.String(255))
+    donation_type = db.Column(db.String(50))  # one_time, recurring, scholarship, department
+    designated_fund = db.Column(db.String(255))  # Scholarship fund, department, athletics
+    is_anonymous = db.Column(db.Boolean, default=False)
+    payment_method = db.Column(db.String(50))
+    transaction_id = db.Column(db.String(255))
+    donated_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    alumni = db.relationship('User', backref=db.backref('donations', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AlumniDonation alumni={self.alumni_id} amount=${self.amount}>"
+
+
+class EventSponsor(db.Model):
+    """Corporate sponsors for career fairs and events"""
+    __tablename__ = "event_sponsors"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('live_events.id'), nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('employer_partnerships.id'))
+    company_name = db.Column(db.String(255), nullable=False)
+    sponsorship_level = db.Column(db.String(50))  # title, platinum, gold, silver, bronze
+    booth_number = db.Column(db.String(20))
+    representatives = db.Column(JSONB)  # List of company reps attending
+    logo_url = db.Column(db.String(512))
+    website = db.Column(db.String(512))
+    recruiting_positions = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    event = db.relationship('LiveEvent', backref=db.backref('sponsors', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<EventSponsor {self.company_name} event={self.event_id}>"
+
+
+# =======================
+# INSTITUTIONAL REPORTS
+# =======================
+
+class OutcomeReport(db.Model):
+    """Track graduate outcomes for institutional reporting"""
+    __tablename__ = "outcome_reports"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    graduation_year = db.Column(db.Integer, nullable=False)
+    outcome_type = db.Column(db.String(50))  # employed, continuing_education, military, seeking, other
+    
+    # Employment details
+    employer_name = db.Column(db.String(255))
+    job_title = db.Column(db.String(255))
+    salary_range = db.Column(db.String(50))
+    employment_type = db.Column(db.String(50))  # full_time, part_time, contract, internship
+    related_to_major = db.Column(db.Boolean)
+    located_in_kansas = db.Column(db.Boolean)
+    
+    # Continuing education
+    grad_school_name = db.Column(db.String(255))
+    degree_pursuing = db.Column(db.String(100))
+    
+    # Survey details
+    survey_completed_at = db.Column(db.DateTime)
+    months_to_employment = db.Column(db.Integer)  # Time from graduation to job
+    satisfaction_score = db.Column(db.Integer)  # 1-5: How well PSU prepared them
+    would_recommend = db.Column(db.Boolean)
+    
+    # Reporting
+    reported_to_ksde = db.Column(db.Boolean, default=False)  # Kansas State Dept of Ed
+    reported_at = db.Column(db.DateTime)
+    
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('outcome_report', uselist=False))
+    
+    def __repr__(self):
+        return f"<OutcomeReport user={self.user_id} year={self.graduation_year} outcome={self.outcome_type}>"

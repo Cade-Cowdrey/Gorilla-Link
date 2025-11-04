@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Institutional Admin Dashboard | PittState-Connect{% endblock %}
+
+{% block content %}
+
+<div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-crimson mb-2">Institutional Administration</h1>
+      <p class="text-gray-600">University-level management and oversight</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+      <!-- Pending Verifications -->
+      <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-crimson">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 uppercase">Pending Verifications</p>
+            <p class="text-3xl font-bold text-crimson mt-2">{{ pending_verifications }}</p>
+          </div>
+          <svg class="w-12 h-12 text-crimson/20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <a href="{{ url_for('institutional_admin.verification_queue') }}" class="text-sm text-crimson hover:text-gold mt-3 inline-block font-medium">
+          Review Queue →
+        </a>
+      </div>
+
+      <!-- Active Partnerships -->
+      <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-gold">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 uppercase">Active Partnerships</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ active_partnerships }}</p>
+          </div>
+          <svg class="w-12 h-12 text-gold/20" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+          </svg>
+        </div>
+        <a href="{{ url_for('institutional_admin.partnerships') }}" class="text-sm text-crimson hover:text-gold mt-3 inline-block font-medium">
+          Manage Partners →
+        </a>
+      </div>
+
+      <!-- Recent Outcomes -->
+      <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 uppercase">Recent Reports</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ recent_outcomes|length }}</p>
+          </div>
+          <svg class="w-12 h-12 text-green-500/20" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <a href="{{ url_for('institutional_admin.outcome_reports') }}" class="text-sm text-crimson hover:text-gold mt-3 inline-block font-medium">
+          View Reports →
+        </a>
+      </div>
+
+      <!-- System Health -->
+      <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 uppercase">System Status</p>
+            <p class="text-2xl font-bold text-green-600 mt-2">Healthy</p>
+          </div>
+          <svg class="w-12 h-12 text-blue-500/20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <a href="{{ url_for('institutional_admin.system_health') }}" class="text-sm text-crimson hover:text-gold mt-3 inline-block font-medium">
+          View Metrics →
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Admin Sections -->
+    <div class="grid md:grid-cols-2 gap-6">
+      
+      <!-- Verification Management -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-crimson" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          Student Verification
+        </h2>
+        <p class="text-gray-600 mb-4 text-sm">
+          Review and approve student/alumni verification requests. Ensure only PSU community members have access.
+        </p>
+        <div class="space-y-2">
+          <a href="{{ url_for('institutional_admin.verification_queue') }}" class="block px-4 py-2 bg-crimson text-white rounded hover:bg-gold hover:text-crimson transition-colors text-sm font-medium text-center">
+            Review Verification Queue ({{ pending_verifications }})
+          </a>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-crimson" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
+          </svg>
+          Institutional Announcements
+        </h2>
+        <p class="text-gray-600 mb-4 text-sm">
+          Send official university announcements to students, alumni, or specific departments.
+        </p>
+        <div class="space-y-2">
+          <a href="{{ url_for('institutional_admin.announcements') }}" class="block px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm font-medium text-center">
+            View All Announcements
+          </a>
+          <a href="{{ url_for('institutional_admin.create_announcement') }}" class="block px-4 py-2 bg-crimson text-white rounded hover:bg-gold hover:text-crimson transition-colors text-sm font-medium text-center">
+            Create New Announcement
+          </a>
+        </div>
+      </div>
+
+      <!-- Reports & Analytics -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-crimson" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+          </svg>
+          Outcome Reports & Analytics
+        </h2>
+        <p class="text-gray-600 mb-4 text-sm">
+          Track graduate outcomes, employment rates, and program effectiveness for accreditation.
+        </p>
+        <div class="space-y-2">
+          <a href="{{ url_for('institutional_admin.outcome_reports') }}" class="block px-4 py-2 bg-crimson text-white rounded hover:bg-gold hover:text-crimson transition-colors text-sm font-medium text-center">
+            View Outcome Reports
+          </a>
+        </div>
+      </div>
+
+      <!-- Compliance & Security -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-crimson" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+          </svg>
+          Compliance & Audit Log
+        </h2>
+        <p class="text-gray-600 mb-4 text-sm">
+          FERPA-compliant audit trail of all data access and administrative actions.
+        </p>
+        <div class="space-y-2">
+          <a href="{{ url_for('institutional_admin.audit_log') }}" class="block px-4 py-2 bg-crimson text-white rounded hover:bg-gold hover:text-crimson transition-colors text-sm font-medium text-center">
+            View Audit Log
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Outcome Reports</h2>
+      {% if recent_outcomes %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">User ID</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Graduation Year</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Outcome</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Employer</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for outcome in recent_outcomes %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-3 px-4 text-sm">#{{ outcome.user_id }}</td>
+              <td class="py-3 px-4 text-sm">{{ outcome.graduation_year }}</td>
+              <td class="py-3 px-4 text-sm">
+                <span class="px-2 py-1 rounded text-xs font-medium {% if outcome.outcome_type == 'employed' %}bg-green-100 text-green-800{% elif outcome.outcome_type == 'continuing_education' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                  {{ outcome.outcome_type.replace('_', ' ').title() }}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sm">{{ outcome.employer_name or 'N/A' }}</td>
+              <td class="py-3 px-4 text-sm text-gray-500">{{ outcome.created_at.strftime('%b %d, %Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-gray-500 text-center py-8">No recent outcome reports</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
