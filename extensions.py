@@ -6,6 +6,7 @@ from flask_mail import Mail
 from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_limiter.storage import RedisStorage
 from flask_apscheduler import APScheduler
 from flask_caching import Cache
 from flask_cors import CORS
@@ -18,7 +19,12 @@ db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
 login_manager = LoginManager()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+# Initialize limiter without storage - will be configured in init_extensions
+limiter = Limiter(
+    key_func=get_remote_address, 
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri=None  # Will be set dynamically
+)
 scheduler = APScheduler()
 cache = Cache()
 cors = CORS()
@@ -76,7 +82,12 @@ def init_extensions(app):
     # Authentication
     login_manager.init_app(app)
     
-    # Rate limiting
+    # Rate limiting with Redis if available
+    if app.config.get('REDIS_URL'):
+        limiter.storage_uri = app.config['REDIS_URL']
+        logging.info("✅ Limiter configured with Redis storage")
+    else:
+        logging.warning("⚠️ Limiter using in-memory storage (not recommended for production)")
     limiter.init_app(app)
     
     # Caching
