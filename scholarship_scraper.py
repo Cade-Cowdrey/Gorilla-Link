@@ -1,44 +1,160 @@
 """
 Scholarship Scraper - Fetch Real Scholarships from Trusted Sources
 Pulls legitimate scholarship opportunities from various trusted websites
+Automatically deactivates expired scholarships
+Supports API integrations for Scholarships.com, Fastweb, and more
 """
 
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
+import os
 from app_pro import create_app
 from models import Scholarship
 from extensions import db
 
 
 class ScholarshipScraper:
-    """Scrape real scholarships from trusted sources"""
+    """Scrape real scholarships from trusted sources with API support"""
     
     def __init__(self):
         self.scholarships = []
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
+        # API keys (set as environment variables)
+        self.scholarships_com_api_key = os.getenv('SCHOLARSHIPS_COM_API_KEY')
+        self.fastweb_api_key = os.getenv('FASTWEB_API_KEY')
+        self.going_merry_api_key = os.getenv('GOING_MERRY_API_KEY')
     
-    def fetch_scholarships_dot_com(self):
-        """Fetch from Scholarships.com"""
-        print("🔍 Fetching from Scholarships.com...")
-        # Note: This would require API access or proper scraping with permission
-        # Placeholder for demonstration
-        pass
+    def fetch_scholarships_com(self):
+        """Fetch from Scholarships.com API"""
+        if not self.scholarships_com_api_key:
+            print("⚠️  Scholarships.com API key not found. Skipping.")
+            return []
+        
+        print("🔍 Fetching from Scholarships.com API...")
+        scholarships = []
+        
+        try:
+            # API endpoint (example - adjust based on actual API)
+            url = "https://api.scholarships.com/v1/scholarships"
+            headers = {**self.headers, 'Authorization': f'Bearer {self.scholarships_com_api_key}'}
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                for item in data.get('scholarships', []):
+                    scholarships.append({
+                        'name': item.get('name'),
+                        'amount': item.get('award_amount'),
+                        'provider': item.get('provider', 'Scholarships.com'),
+                        'description': item.get('description'),
+                        'requirements': item.get('eligibility', 'See website for details'),
+                        'deadline': datetime.strptime(item.get('deadline'), '%Y-%m-%d').date() if item.get('deadline') else None,
+                        'url': item.get('application_url'),
+                        'category': item.get('category', 'General')
+                    })
+                print(f"✅ Fetched {len(scholarships)} scholarships from Scholarships.com")
+            else:
+                print(f"⚠️  Scholarships.com API returned status {response.status_code}")
+        except Exception as e:
+            print(f"❌ Error fetching from Scholarships.com: {e}")
+        
+        return scholarships
     
     def fetch_fastweb(self):
-        """Fetch from Fastweb.com"""
-        print("🔍 Fetching from Fastweb...")
-        # Requires API access
-        pass
+        """Fetch from Fastweb API"""
+        if not self.fastweb_api_key:
+            print("⚠️  Fastweb API key not found. Skipping.")
+            return []
+        
+        print("🔍 Fetching from Fastweb API...")
+        scholarships = []
+        
+        try:
+            url = "https://api.fastweb.com/scholarships"
+            headers = {**self.headers, 'X-API-Key': self.fastweb_api_key}
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                for item in data.get('results', []):
+                    scholarships.append({
+                        'name': item.get('title'),
+                        'amount': item.get('amount'),
+                        'provider': item.get('sponsor', 'Fastweb'),
+                        'description': item.get('description'),
+                        'requirements': item.get('requirements', 'See website for details'),
+                        'deadline': datetime.strptime(item.get('deadline'), '%Y-%m-%d').date() if item.get('deadline') else None,
+                        'url': item.get('url'),
+                        'category': item.get('category', 'General')
+                    })
+                print(f"✅ Fetched {len(scholarships)} scholarships from Fastweb")
+            else:
+                print(f"⚠️  Fastweb API returned status {response.status_code}")
+        except Exception as e:
+            print(f"❌ Error fetching from Fastweb: {e}")
+        
+        return scholarships
+    
+    def fetch_going_merry(self):
+        """Fetch from Going Merry API"""
+        if not self.going_merry_api_key:
+            print("⚠️  Going Merry API key not found. Skipping.")
+            return []
+        
+        print("🔍 Fetching from Going Merry API...")
+        scholarships = []
+        
+        try:
+            url = "https://api.goingmerry.com/v1/scholarships"
+            headers = {**self.headers, 'Authorization': f'Bearer {self.going_merry_api_key}'}
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                for item in data.get('scholarships', []):
+                    scholarships.append({
+                        'name': item.get('name'),
+                        'amount': item.get('max_award'),
+                        'provider': item.get('organization', 'Going Merry'),
+                        'description': item.get('description'),
+                        'requirements': item.get('eligibility_requirements', 'See website for details'),
+                        'deadline': datetime.strptime(item.get('deadline'), '%Y-%m-%d').date() if item.get('deadline') else None,
+                        'url': item.get('application_link'),
+                        'category': item.get('focus_area', 'General')
+                    })
+                print(f"✅ Fetched {len(scholarships)} scholarships from Going Merry")
+            else:
+                print(f"⚠️  Going Merry API returned status {response.status_code}")
+        except Exception as e:
+            print(f"❌ Error fetching from Going Merry: {e}")
+        
+        return scholarships
     
     def fetch_college_board(self):
         """Fetch from College Board Scholarship Search"""
-        print("🔍 Fetching from College Board...")
-        # Requires API access
-        pass
+        print("🔍 Attempting to fetch from College Board...")
+        scholarships = []
+        
+        try:
+            # College Board BigFuture Scholarship Search
+            # Note: This might require web scraping or API access
+            url = "https://bigfuture.collegeboard.org/scholarships"
+            
+            # This is a placeholder - actual implementation would require
+            # proper scraping with permission or API access
+            print("⚠️  College Board requires special access. Using manual curation instead.")
+            
+        except Exception as e:
+            print(f"❌ Error fetching from College Board: {e}")
+        
+        return scholarships
     
     def add_manual_trusted_scholarships(self):
         """Add manually curated scholarships from trusted organizations"""
@@ -287,6 +403,60 @@ class ScholarshipScraper:
         
         return trusted_scholarships
     
+    def deactivate_expired_scholarships(self):
+        """Automatically deactivate scholarships past their deadline"""
+        print("\n🔍 Checking for expired scholarships...")
+        
+        app = create_app()
+        with app.app_context():
+            today = date.today()
+            
+            # Find active scholarships with past deadlines
+            expired = Scholarship.query.filter(
+                Scholarship.is_active == True,
+                Scholarship.deadline < today
+            ).all()
+            
+            if expired:
+                print(f"⏰ Found {len(expired)} expired scholarships")
+                for scholarship in expired:
+                    scholarship.is_active = False
+                    print(f"   - Deactivated: {scholarship.title} (deadline was {scholarship.deadline})")
+                
+                db.session.commit()
+                print(f"✅ Deactivated {len(expired)} expired scholarships")
+            else:
+                print("✅ No expired scholarships found")
+    
+    def reactivate_rolling_scholarships(self):
+        """Reactivate scholarships with rolling deadlines or new deadlines"""
+        print("\n🔄 Checking for scholarships to reactivate...")
+        
+        app = create_app()
+        with app.app_context():
+            # List of scholarships with rolling/annual deadlines
+            rolling_scholarships = [
+                'Federal Pell Grant',
+                'Federal Supplemental Educational Opportunity Grant (FSEOG)',
+                'Kansas Comprehensive Grant',
+            ]
+            
+            reactivated = 0
+            for name in rolling_scholarships:
+                scholarship = Scholarship.query.filter_by(title=name, is_active=False).first()
+                if scholarship:
+                    # Update deadline to next cycle (e.g., 6 months out)
+                    scholarship.deadline = date.today() + timedelta(days=180)
+                    scholarship.is_active = True
+                    reactivated += 1
+                    print(f"   - Reactivated: {name} (new deadline: {scholarship.deadline})")
+            
+            if reactivated > 0:
+                db.session.commit()
+                print(f"✅ Reactivated {reactivated} rolling scholarships")
+            else:
+                print("✅ No scholarships needed reactivation")
+    
     def save_to_database(self, scholarships_data):
         """Save scholarships to database"""
         print(f"\n💾 Saving {len(scholarships_data)} scholarships to database...")
@@ -297,8 +467,16 @@ class ScholarshipScraper:
             updated_count = 0
             
             for schol_data in scholarships_data:
+                # Skip scholarships with missing critical data
+                if not schol_data.get('name') or not schol_data.get('deadline'):
+                    print(f"⚠️  Skipping scholarship with missing data: {schol_data.get('name', 'Unknown')}")
+                    continue
+                
                 # Check if scholarship already exists
                 existing = Scholarship.query.filter_by(title=schol_data['name']).first()
+                
+                # Check if deadline has passed
+                is_active = schol_data['deadline'] >= date.today()
                 
                 if existing:
                     # Update existing scholarship
@@ -309,8 +487,11 @@ class ScholarshipScraper:
                     existing.provider = schol_data.get('provider', 'N/A')
                     existing.url = schol_data.get('url', '')
                     existing.category = schol_data.get('category', 'General')
-                    existing.is_active = True
+                    existing.is_active = is_active
                     updated_count += 1
+                    
+                    if not is_active:
+                        print(f"   ⏰ Marked as expired: {schol_data['name']} (deadline: {schol_data['deadline']})")
                 else:
                     # Create new scholarship
                     scholarship = Scholarship(
@@ -322,29 +503,115 @@ class ScholarshipScraper:
                         provider=schol_data.get('provider', 'N/A'),
                         url=schol_data.get('url', ''),
                         category=schol_data.get('category', 'General'),
-                        is_active=True
+                        is_active=is_active
                     )
                     db.session.add(scholarship)
                     saved_count += 1
+                    
+                    if not is_active:
+                        print(f"   ⏰ Added as expired: {schol_data['name']} (deadline: {schol_data['deadline']})")
             
             db.session.commit()
             print(f"✅ Saved {saved_count} new scholarships, updated {updated_count} existing scholarships")
     
-    def run(self):
+    def run(self, skip_apis=False):
         """Main method to fetch and save all scholarships"""
         print("🎓 Starting Real Scholarship Collection...\n")
+        print("=" * 60)
         
-        # Get manually curated trusted scholarships
-        scholarships = self.add_manual_trusted_scholarships()
+        all_scholarships = []
         
-        # Save to database
-        self.save_to_database(scholarships)
+        # Step 1: Deactivate expired scholarships
+        self.deactivate_expired_scholarships()
         
-        print(f"\n✅ Complete! {len(scholarships)} real scholarships now available")
-        print("📝 Note: These are legitimate scholarships from trusted sources")
+        # Step 2: Reactivate rolling scholarships
+        self.reactivate_rolling_scholarships()
+        
+        # Step 3: Fetch from APIs (if not skipped and keys available)
+        if not skip_apis:
+            print("\n" + "=" * 60)
+            print("📡 FETCHING FROM APIs")
+            print("=" * 60)
+            
+            # Scholarships.com API
+            api_scholarships = self.fetch_scholarships_com()
+            if api_scholarships:
+                all_scholarships.extend(api_scholarships)
+            
+            # Fastweb API
+            api_scholarships = self.fetch_fastweb()
+            if api_scholarships:
+                all_scholarships.extend(api_scholarships)
+            
+            # Going Merry API
+            api_scholarships = self.fetch_going_merry()
+            if api_scholarships:
+                all_scholarships.extend(api_scholarships)
+            
+            # College Board
+            api_scholarships = self.fetch_college_board()
+            if api_scholarships:
+                all_scholarships.extend(api_scholarships)
+            
+            if all_scholarships:
+                print(f"\n✅ Fetched {len(all_scholarships)} scholarships from APIs")
+        
+        # Step 4: Get manually curated trusted scholarships
+        print("\n" + "=" * 60)
+        print("📝 ADDING MANUALLY CURATED SCHOLARSHIPS")
+        print("=" * 60)
+        
+        curated_scholarships = self.add_manual_trusted_scholarships()
+        all_scholarships.extend(curated_scholarships)
+        
+        # Step 5: Save to database
+        print("\n" + "=" * 60)
+        print("💾 SAVING TO DATABASE")
+        print("=" * 60)
+        
+        if all_scholarships:
+            self.save_to_database(all_scholarships)
+        
+        # Step 6: Summary
+        print("\n" + "=" * 60)
+        print("📊 SUMMARY")
+        print("=" * 60)
+        
+        app = create_app()
+        with app.app_context():
+            total = Scholarship.query.count()
+            active = Scholarship.query.filter_by(is_active=True).count()
+            expired = Scholarship.query.filter_by(is_active=False).count()
+            
+            print(f"Total Scholarships: {total}")
+            print(f"Active (available): {active}")
+            print(f"Expired (past deadline): {expired}")
+            
+            # Show categories
+            categories = db.session.query(Scholarship.category).distinct().all()
+            print(f"\nCategories: {', '.join([c[0] for c in categories if c[0]])}")
+            
+            # Show total value
+            total_value = db.session.query(db.func.sum(Scholarship.amount)).filter_by(is_active=True).scalar() or 0
+            print(f"Total Value (Active): ${total_value:,.0f}")
+        
+        print("\n" + "=" * 60)
+        print("✅ COMPLETE!")
+        print("=" * 60)
+        print("\n📝 Note: These are legitimate scholarships from trusted sources")
         print("🔗 Each includes application URL and detailed requirements")
+        print("⏰ Expired scholarships automatically hidden from students")
+        print("\n💡 Tip: Run this script monthly to keep scholarships updated")
 
 
 if __name__ == "__main__":
+    import sys
+    
+    # Check for command line arguments
+    skip_apis = '--no-apis' in sys.argv or '--manual-only' in sys.argv
+    
+    if skip_apis:
+        print("ℹ️  Running in manual-only mode (skipping APIs)\n")
+    
     scraper = ScholarshipScraper()
-    scraper.run()
+    scraper.run(skip_apis=skip_apis)
