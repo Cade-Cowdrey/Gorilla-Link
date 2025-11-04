@@ -12,44 +12,53 @@ python seed_complete_demo.py
 
 ## What Gets Created
 
-### 👥 **Users** (18 total)
-- **2 Admins**: admin, jdoe
-- **8 Students**: Various majors (CS, Engineering, Business, etc.)
-- **4 Alumni**: Graduated professionals
-- **2 Faculty**: Professors
-- **2 Employers**: Tech Corp & Innovation LLC
+### 👥 **Users** (40 total)
+- **2 Admins**: admin, admin2
+- **17 Students**: student, student2, student3... (various majors)
+- **8 Alumni**: alumni, alumni2, alumni3... (graduated professionals)
+- **4 Faculty**: faculty, faculty2, faculty3, faculty4
+- **4 Employers**: employer, employer2, employer3, employer4
 
 **All passwords**: `demo123`
 
-### 💼 **Jobs** (8 postings)
-- Software Engineer @ Tech Corp ($65k-$85k)
-- Data Analyst @ Innovation LLC ($55k-$70k)
-- Marketing Coordinator, Project Manager, UX Designer, etc.
-- Mix of remote and local positions
+### 💼 **Jobs** (60 postings)
+- **Tech/CS** (15): Software Engineer, DevOps, Web Dev, Cybersecurity, etc.
+- **Business** (12): Data Analyst, Marketing, Sales, Project Manager, etc.
+- **Engineering** (8): Mechanical, Electrical, Civil, Quality Engineer, etc.
+- **Healthcare** (6): RN, Nurse Practitioner, Physical Therapist, etc.
+- **Education** (4): Academic Advisor, Career Counselor, Training, etc.
+- **Creative** (5): Graphic Designer, Content Writer, Social Media, etc.
+- Various locations (Remote, Kansas City, Wichita, Pittsburg, Joplin)
+- Salary info and detailed descriptions
 
-### 📅 **Events** (8 upcoming)
-- Career Fair 2025
-- Tech Talk: AI in Industry
-- Alumni Networking Night
-- Resume Workshop
-- Hackathon 2025
-- And more!
+### 📅 **Events** (40 upcoming)
+- **Career Dev** (12): Career fairs, workshops, mock interviews, panels
+- **Networking** (8): Alumni nights, speed networking, industry mixers
+- **Tech/Innovation** (6): Hackathons, bootcamps, pitch competitions
+- **Campus Life** (8): Homecoming, concerts, cultural festivals
+- **Academic** (6): Research symposium, study skills, grad school prep
+- Events scheduled from 2 days to 60 days out
 
-### 🎓 **Scholarships** (5 opportunities)
-- Gorilla Excellence Scholarship ($5,000)
-- STEM Leadership Award ($3,000)
-- Community Service Grant ($2,000)
-- First Generation Scholarship ($4,000)
-- Athletics Scholarship ($6,000)
+### 🎓 **Scholarships** (31 opportunities)
+- **Academic Excellence** (5): Merit awards ($2,500-$8,000)
+- **STEM Fields** (6): CS, Engineering, Math, Biology
+- **Business/Social Sciences** (4): Business, Entrepreneurship, Psychology
+- **Healthcare** (3): Nursing and allied health
+- **Special Populations** (6): First-gen, veterans, transfer, international
+- **Community/Service** (4): Volunteer and campus involvement
+- **Athletics/Arts** (3): Sports, performing arts, visual arts
 
-### 🌟 **Success Stories** (4 featured)
-- From PSU to Silicon Valley
-- Starting My Own Business
-- Making a Difference in Healthcare
-- Career Change Success
+### 🌟 **Success Stories** (16 featured)
+- Tech careers (Google, startups, tech leads)
+- Business success (own companies, corporate leadership)
+- Healthcare journeys (nurses, nurse practitioners)
+- Engineering innovations (aerospace, PE licenses)
+- Career changes (non-traditional students)
+- Graduate school (PhD programs)
+- Community impact (nonprofits, service)
 
 ### 💬 **Forum Discussions**
-- 4 categories (General, Career Advice, Student Life, Technology)
+- 4 categories (Career Advice, Academic Help, Campus Life, Tech Discussion)
 - Multiple topics with replies
 - Active student engagement
 
@@ -78,21 +87,31 @@ Password: demo123
 
 ### Student Account
 ```
-Username: sarah.johnson
+Username: student
 Password: demo123
 ```
+(Also: student2, student3... through student15)
 
 ### Alumni Account
 ```
-Username: robert.smith
+Username: alumni
 Password: demo123
 ```
+(Also: alumni2, alumni3... through alumni8)
+
+### Faculty Account
+```
+Username: faculty
+Password: demo123
+```
+(Also: faculty2, faculty3, faculty4)
 
 ### Employer Account
 ```
-Username: hr.techcorp
+Username: employer
 Password: demo123
 ```
+(Also: employer2, employer3, employer4)
 
 ## Running on Production (Render)
 
