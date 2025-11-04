@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-crimson mb-2">📰 News & Announcements</h1>
+    <p class="text-gray-600">Stay updated with the latest from PittState Connect</p>
+  </div>
+
+  <!-- Announcements Grid -->
+  {% if items %}
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in items %}
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+      <div class="mb-4">
+        <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full 
+          {% if item.audience == 'students' %}bg-blue-100 text-blue-800
+          {% elif item.audience == 'alumni' %}bg-purple-100 text-purple-800
+          {% elif item.audience == 'employers' %}bg-green-100 text-green-800
+          {% else %}bg-gray-100 text-gray-800{% endif %}">
+          {{ item.audience|title }}
+        </span>
+      </div>
+      <h3 class="text-xl font-bold text-crimson mb-3">{{ item.title }}</h3>
+      <p class="text-gray-700">{{ item.body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-gray-50 rounded-lg p-12 text-center">
+    <i class="fas fa-newspaper text-6xl text-gray-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-600 mb-2">No Announcements Yet</h3>
+    <p class="text-gray-500">Check back soon for updates!</p>
+  </div>
+  {% endif %}
+
+  <!-- Quick Links -->
+  <div class="mt-12 grid md:grid-cols-3 gap-6">
+    <a href="{{ url_for('events.index') }}" class="block bg-crimson hover:bg-red-800 text-white rounded-lg p-6 transition-colors">
+      <i class="fas fa-calendar-alt text-3xl mb-3"></i>
+      <h3 class="font-bold text-lg mb-2">Upcoming Events</h3>
+      <p class="text-sm">See what's happening on campus</p>
+    </a>
+    
+    <a href="{{ url_for('scholarships.browse') }}" class="block bg-gold hover:bg-yellow-600 text-white rounded-lg p-6 transition-colors">
+      <i class="fas fa-graduation-cap text-3xl mb-3"></i>
+      <h3 class="font-bold text-lg mb-2">Scholarships</h3>
+      <p class="text-sm">Browse available funding opportunities</p>
+    </a>
+    
+    <a href="{{ url_for('careers.jobs') }}" class="block bg-green-600 hover:bg-green-700 text-white rounded-lg p-6 transition-colors">
+      <i class="fas fa-briefcase text-3xl mb-3"></i>
+      <h3 class="font-bold text-lg mb-2">Job Opportunities</h3>
+      <p class="text-sm">Explore career openings</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

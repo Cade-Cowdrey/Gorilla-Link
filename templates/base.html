@@ -8,29 +8,35 @@
   <meta name="description" content="PittState-Connect — Pittsburg State University's all-in-one student, alumni, and employer engagement platform." />
   <meta name="theme-color" content="#660000" />
   <meta property="og:title" content="PittState-Connect" />
-  <meta property="og:description" content="Empowering Students • Connecting Alumni • Driving Careers" />
+  <meta property="og:description" content="Making Lives Better Through EDUCATION" />
   <meta property="og:image" content="{{ url_for('static', filename='img/psu-logo.png') }}" />
   <meta property="og:type" content="website" />
 
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/psu-logo.png') }}" />
 
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <!-- CSS + TAILWIND -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
             crimson: '#660000',
+            crimsonDark: '#4d0000',
             gold: '#FFCC33',
+            goldDark: '#e6b82e',
             psuBlack: '#1C1C1C',
-            psuGray: '#F4F4F4',
+            psuGray: '#F5F5F5',
             darkGray: '#4A4A4A',
           },
           fontFamily: {
             sans: ['Open Sans', 'system-ui', 'sans-serif'],
+            serif: ['Merriweather', 'Georgia', 'serif'],
           },
         },
       },
@@ -38,7 +44,11 @@
   </script>
   <style>
     html { scroll-behavior: smooth; }
-    body { font-family: 'Open Sans', sans-serif; }
+    body { 
+      font-family: 'Open Sans', sans-serif;
+      color: #333;
+      background-color: #ffffff;
+    }
     
     /* Professional hover effects */
     .nav-link:hover {
@@ -81,9 +91,6 @@
           </button>
           <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
-              <a href="{{ url_for('scholarships_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                Scholarships
-              </a>
               <a href="{{ url_for('careers_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
                 Career Services
               </a>

@@ -2,17 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_login import login_required, current_user
 from extensions import limiter
 from utils.analytics_util import record_page_view
-from services.scholarship_aggregator import ScholarshipAggregator, ScholarshipMatcher
+from models import Scholarship
 import openai
 import os
 import logging
 import bleach
 
 logger = logging.getLogger(__name__)
-
-# Initialize scholarship services
-scholarship_aggregator = ScholarshipAggregator()
-scholarship_matcher = ScholarshipMatcher()
 
 # Allowed HTML tags for essay text (very restricted for security)
 ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'u']
@@ -48,50 +44,31 @@ def index():
 
 @bp.route("/browse")
 def browse():
-    """Browse all available scholarships from trusted sources with AI matching."""
+    """Browse all available scholarships from trusted sources."""
     record_page_view("scholarships_browse", current_user.id if current_user.is_authenticated else None)
     
-    # Get filter parameters from query string
-    filters = {
-        'major': request.args.get('major', ''),
-        'gpa': float(request.args.get('gpa', 0.0)) if request.args.get('gpa') else 0.0,
-        'state': request.args.get('state', 'Kansas'),
-        'gender': request.args.get('gender', ''),
-        'ethnicity': request.args.get('ethnicity', ''),
-        'financial_need': request.args.get('financial_need') == 'true',
-        'first_generation': request.args.get('first_generation') == 'true',
-        'military_affiliation': request.args.get('military_affiliation') == 'true'
-    }
+    # Get all active scholarships
+    query = Scholarship.query.filter_by(is_active=True)
     
-    # Get all scholarships from aggregator
-    all_scholarships = scholarship_aggregator.search_all_sources(filters)
+    # Apply filters if provided
+    category = request.args.get('category')
+    if category:
+        query = query.filter(Scholarship.category == category)
     
-    # If user is authenticated and has profile, use AI matching
-    if current_user.is_authenticated:
-        try:
-            student_profile = {
-                'gpa': getattr(current_user, 'gpa', 0.0),
-                'major': getattr(current_user, 'major', ''),
-                'state': getattr(current_user, 'state', 'Kansas'),
-                'gender': getattr(current_user, 'gender', ''),
-                'ethnicity': getattr(current_user, 'ethnicity', ''),
-                'financial_need': filters.get('financial_need', False),
-                'first_generation': filters.get('first_generation', False),
-                'military_affiliation': filters.get('military_affiliation', False)
-            }
-            
-            # Get matched scholarships with scores
-            scholarships = scholarship_matcher.match_scholarships(student_profile, all_scholarships)
-        except Exception as e:
-            logger.error(f"Error matching scholarships: {e}")
-            scholarships = all_scholarships
-    else:
-        scholarships = all_scholarships
+    min_amount = request.args.get('min_amount', type=float)
+    if min_amount:
+        query = query.filter(Scholarship.amount >= min_amount)
+    
+    # Order by deadline (closest first)
+    scholarships = query.order_by(Scholarship.deadline).all()
+    
+    # Get unique categories for filtering
+    all_categories = [c[0] for c in Scholarship.query.with_entities(Scholarship.category).distinct().all() if c[0]]
     
     return render_template(
         "scholarships/browse.html", 
         scholarships=scholarships, 
-        filters=filters,
+        categories=all_categories,
         total_count=len(scholarships),
         title="Browse Scholarships | PittState-Connect"
     )
@@ -102,13 +79,17 @@ def personal_circumstances():
     """Browse scholarships for specific personal circumstances (sensitive categories)"""
     record_page_view("scholarships_personal", current_user.id if current_user.is_authenticated else None)
     
-    # Get personal circumstance scholarships
-    scholarships = scholarship_aggregator.get_personal_circumstance_scholarships()
+    # Get personal circumstance scholarships (specific categories)
+    personal_categories = ['First Generation', 'Military/Veterans', 'General', 'Healthcare', 'Nursing']
+    scholarships = Scholarship.query.filter(
+        Scholarship.is_active == True,
+        Scholarship.category.in_(personal_categories)
+    ).all()
     
     # Group by category
     categories = {}
     for scholarship in scholarships:
-        category = scholarship.get('category', 'Other')
+        category = scholarship.category or 'Other'
         if category not in categories:
             categories[category] = []
         categories[category].append(scholarship)
@@ -124,20 +105,39 @@ def personal_circumstances():
 @bp.route("/api/search")
 def api_search():
     """API endpoint for dynamic scholarship search"""
-    query = request.args.get('q', '')
-    filters = {
-        'major': request.args.get('major', ''),
-        'gpa': float(request.args.get('gpa', 0.0)) if request.args.get('gpa') else 0.0,
-        'state': request.args.get('state', 'Kansas'),
-    }
+    query_text = request.args.get('q', '')
+    category = request.args.get('category', '')
     
-    scholarships = scholarship_aggregator.search_all_sources(filters)
+    # Start with active scholarships
+    query = Scholarship.query.filter_by(is_active=True)
     
-    # Filter by search query if provided
-    if query:
-        query_lower = query.lower()
-        scholarships = [
-            s for s in scholarships 
+    # Apply category filter
+    if category:
+        query = query.filter(Scholarship.category == category)
+    
+    # Apply text search if provided
+    if query_text:
+        search_pattern = f'%{query_text}%'
+        query = query.filter(
+            (Scholarship.title.ilike(search_pattern)) |
+            (Scholarship.description.ilike(search_pattern)) |
+            (Scholarship.provider.ilike(search_pattern))
+        )
+    
+    scholarships = query.order_by(Scholarship.deadline).limit(50).all()
+    
+    # Convert to JSON
+    results = [{
+        'id': s.id,
+        'title': s.title,
+        'amount': float(s.amount) if s.amount else 0,
+        'provider': s.provider,
+        'deadline': s.deadline.isoformat() if s.deadline else None,
+        'category': s.category,
+        'url': s.url
+    } for s in scholarships]
+    
+    return jsonify(results) 
             if query_lower in s.get('title', '').lower() or 
                query_lower in s.get('description', '').lower()
         ]

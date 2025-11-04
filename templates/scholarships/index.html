@@ -42,12 +42,12 @@
 <section class="max-w-7xl mx-auto px-6 py-16">
   <!-- Quick Actions -->
   <div class="flex flex-wrap justify-center gap-4 mb-16 reveal">
-    <a href="{{ url_for('scholarships_bp.browse') }}"
+    <a href="{{ url_for('scholarships.browse') }}"
        class="bg-gradient-to-r from-crimson to-[#660000] text-white px-8 py-4 rounded-xl font-bold hover:shadow-2xl transition-all transform hover:scale-105 shadow-lg">
       🔍 Browse All Scholarships
     </a>
     {% if current_user.is_authenticated %}
-    <a href="#"
+    <a href="{{ url_for('scholarships.browse') }}"
        class="bg-white text-crimson border-2 border-crimson px-8 py-4 rounded-xl font-bold hover:bg-crimson hover:text-white transition-all transform hover:scale-105 shadow-lg">
       📋 My Applications
     </a>
