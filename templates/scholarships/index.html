@@ -1,101 +1,129 @@
 {% extends "base.html" %}
 {% block title %}Scholarship Hub | PittState-Connect{% endblock %}
 {% block content %}
-<section class="bg-light min-h-screen py-8 px-4 sm:px-8 lg:px-16">
-  <div class="container mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
-      <div class="max-w-xl">
-        <h1 class="text-3xl md:text-4xl font-bold text-crimson mb-3">
-          🎓 Scholarship Hub
-        </h1>
-        <p class="text-gray-700 text-lg leading-relaxed">
-          Discover scholarships tailored to your major, GPA, and goals.
-          Use <strong>Smart Match</strong> to automatically find opportunities that fit <em>you</em>.
-        </p>
-        <div class="flex flex-wrap gap-3 mt-6">
-          <a href="{{ safe_url_for('scholarships_bp.smart_match') }}"
-             class="btn btn-crimson text-white px-5 py-2 rounded-full shadow hover:bg-gold hover:text-crimson transition">
-            🔍 Smart Match
-          </a>
-          <a href="{{ safe_url_for('scholarships_bp.browse') }}"
-             class="btn btn-outline-crimson border-2 border-crimson text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
-            Browse All
-          </a>
-          <a href="{{ safe_url_for('scholarships_bp.my_scholarships') }}"
-             class="btn btn-outline-gold border-2 border-gold text-gold px-5 py-2 rounded-full hover:bg-gold hover:text-white transition">
-            My Scholarships
-          </a>
-          <a href="{{ safe_url_for('notifications_bp.settings') }}"
-             class="btn btn-gold text-crimson px-5 py-2 rounded-full hover:bg-crimson hover:text-white transition">
-            ⏰ Reminders
-          </a>
-        </div>
-      </div>
-      <div class="mt-8 md:mt-0">
-        <img src="{{ url_for('static', filename='img/scholarship-banner.png') }}"
-             alt="Scholarship Banner"
-             class="rounded-2xl shadow-lg w-full md:w-96 object-cover">
-      </div>
-    </div>
 
-    <hr class="border-t-2 border-gray-200 my-10" />
+<div class="bg-gradient-to-r from-crimson to-gold text-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-center">
+      🎓 Scholarship Hub
+    </h1>
+    <p class="text-lg text-center opacity-90 max-w-2xl mx-auto">
+      Discover scholarships tailored to your major, GPA, and goals. Find opportunities that fit <em>you</em>.
+    </p>
+  </div>
+</div>
 
-    <h2 class="text-2xl font-semibold text-crimson mb-6">
-      Featured Opportunities
-    </h2>
+<section class="max-w-7xl mx-auto px-6 py-12">
+  <!-- Quick Actions -->
+  <div class="flex flex-wrap justify-center gap-4 mb-16">
+    <a href="{{ url_for('scholarships_bp.browse') }}"
+       class="bg-crimson text-white px-6 py-3 rounded-lg font-semibold hover:bg-gold hover:text-black transition shadow-lg">
+      Browse All Scholarships
+    </a>
+    {% if current_user.is_authenticated %}
+    <a href="#"
+       class="bg-white text-crimson border-2 border-crimson px-6 py-3 rounded-lg font-semibold hover:bg-crimson hover:text-white transition">
+      My Applications
+    </a>
+    {% endif %}
+  </div>
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {% for sch in featured %}
-      <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition group">
-        <div class="flex justify-between items-start">
-          <h3 class="text-xl font-semibold text-crimson group-hover:text-gold transition">
-            {{ sch.name }}
-          </h3>
-          <span class="text-gold font-bold text-lg">${{ sch.amount }}</span>
-        </div>
-        <p class="text-gray-600 text-sm mt-2">
-          Deadline:
-          <span class="font-medium text-gray-800">{{ sch.deadline }}</span>
-        </p>
-        <div class="flex justify-between items-center mt-4">
-          <a href="{{ safe_url_for('scholarships_bp.apply', scholarship_id=sch.id) }}"
-             class="text-sm text-crimson hover:text-gold font-medium transition">
-             Apply Now →
-          </a>
-          <a href="{{ safe_url_for('scholarships_bp.save_scholarship', scholarship_id=sch.id) }}"
-             class="text-sm text-gray-600 hover:text-gold transition">💾 Save</a>
-        </div>
+  <!-- Featured Scholarships -->
+  <h2 class="text-3xl font-bold text-crimson mb-8 text-center">
+    Featured Opportunities
+  </h2>
+
+  <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+    <!-- Placeholder scholarship cards -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-crimson hover:shadow-xl transition">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-xl font-semibold text-gray-800">
+          Presidential Scholarship
+        </h3>
+        <span class="text-gold font-bold text-lg">$10,000</span>
       </div>
-      {% else %}
-      <p class="text-gray-600 col-span-full">
-        No scholarships found. Check back soon!
+      <p class="text-gray-600 text-sm mb-4">
+        Deadline: <span class="font-medium text-gray-800">May 1, 2026</span>
       </p>
-      {% endfor %}
-    </div>
-
-    <div class="mt-12 text-center">
-      <a href="{{ safe_url_for('scholarships_bp.deadlines') }}"
-         class="btn btn-outline-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
-         📅 View All Deadlines
-      </a>
-      <a href="{{ safe_url_for('scholarships_bp.essay_library') }}"
-         class="btn btn-outline-gold px-6 py-2 rounded-full ml-3 hover:bg-gold hover:text-white transition">
-         ✍️ Essay Library
-      </a>
-    </div>
-
-    <div class="mt-20 bg-gradient-to-r from-crimson to-gold text-white rounded-2xl p-8 shadow-lg">
-      <h2 class="text-2xl font-bold mb-2">💡 Funding Journey Timeline</h2>
-      <p class="text-white/90 mb-4">
-        Track your progress from searching to funding success.
+      <p class="text-gray-600 text-sm mb-4">
+        For incoming freshmen with exceptional academic achievement and leadership experience.
       </p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm font-medium">
-        <div class="bg-white/10 p-3 rounded-xl">🔍 Search</div>
-        <div class="bg-white/10 p-3 rounded-xl">✍️ Apply</div>
-        <div class="bg-white/10 p-3 rounded-xl">📅 Interview/Review</div>
-        <div class="bg-white/10 p-3 rounded-xl">🎉 Awarded</div>
+      <div class="flex justify-between items-center">
+        <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">
+           Apply Now →
+        </a>
+        <button class="text-gray-500 hover:text-gold transition text-sm">💾 Save</button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-gold hover:shadow-xl transition">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-xl font-semibold text-gray-800">
+          STEM Excellence Award
+        </h3>
+        <span class="text-gold font-bold text-lg">$5,000</span>
+      </div>
+      <p class="text-gray-600 text-sm mb-4">
+        Deadline: <span class="font-medium text-gray-800">March 15, 2026</span>
+      </p>
+      <p class="text-gray-600 text-sm mb-4">
+        For students pursuing degrees in Science, Technology, Engineering, or Mathematics.
+      </p>
+      <div class="flex justify-between items-center">
+        <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">
+           Apply Now →
+        </a>
+        <button class="text-gray-500 hover:text-gold transition text-sm">💾 Save</button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-crimson hover:shadow-xl transition">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-xl font-semibold text-gray-800">
+          Community Leadership Grant
+        </h3>
+        <span class="text-gold font-bold text-lg">$2,500</span>
+      </div>
+      <p class="text-gray-600 text-sm mb-4">
+        Deadline: <span class="font-medium text-gray-800">April 1, 2026</span>
+      </p>
+      <p class="text-gray-600 text-sm mb-4">
+        Recognizing students who demonstrate outstanding community service and leadership.
+      </p>
+      <div class="flex justify-between items-center">
+        <a href="#" class="text-crimson hover:text-gold font-medium text-sm transition">
+           Apply Now →
+        </a>
+        <button class="text-gray-500 hover:text-gold transition text-sm">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="bg-gradient-to-r from-crimson to-gold text-white rounded-2xl p-8 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3">💡 Your Funding Journey</h2>
+    <p class="text-white/90 mb-6">
+      Track your progress from searching to funding success with our comprehensive scholarship tools.
+    </p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+      <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div class="text-2xl mb-2">🔍</div>
+        <div class="text-sm font-medium">Search</div>
+      </div>
+      <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div class="text-2xl mb-2">✍️</div>
+        <div class="text-sm font-medium">Apply</div>
+      </div>
+      <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div class="text-2xl mb-2">📅</div>
+        <div class="text-sm font-medium">Track</div>
+      </div>
+      <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div class="text-2xl mb-2">🎉</div>
+        <div class="text-sm font-medium">Awarded</div>
       </div>
     </div>
   </div>
 </section>
+
 {% endblock %}
