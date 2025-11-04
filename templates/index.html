@@ -2,30 +2,48 @@
 {% block title %}Pitt State Connect — Gorilla-Link{% endblock %}
 {% block content %}
 
-<!-- Hero Section -->
-<section class="bg-gradient-to-br from-psuRed via-[#660000] to-psuGold text-white py-20">
-  <div class="max-w-6xl mx-auto px-6 text-center">
-    <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-      Welcome to <span class="text-psuGold">Pitt State Connect</span>
+<!-- Hero Section with Animated Background -->
+<section class="relative bg-gradient-to-br from-psuRed via-[#660000] to-psuGold text-white py-24 overflow-hidden animate-gradient">
+  <!-- Floating decorative elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-32 h-32 bg-psuGold/10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute top-1/3 right-20 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-bounce-slow"></div>
+    <div class="absolute bottom-20 left-1/4 w-36 h-36 bg-psuGold/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+  </div>
+  
+  <div class="max-w-6xl mx-auto px-6 text-center relative z-10">
+    <h1 class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-2xl animate-fade-in">
+      Welcome to <span class="text-psuGold animate-pulse-slow">Pitt State Connect</span>
     </h1>
-    <p class="text-lg md:text-xl text-gray-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+    <p class="text-xl md:text-2xl text-gray-100 mb-10 max-w-3xl mx-auto leading-relaxed animate-slide-up" style="animation-delay: 0.2s;">
       A modern platform built for <strong>students, alumni, and faculty</strong> to connect,
-      mentor, and grow together — powered by <em>Gorilla-Link</em>.
+      mentor, and grow together — powered by <em class="text-psuGold">Gorilla-Link</em>.
     </p>
 
     {% if current_user.is_authenticated %}
       <a href="{{ url_for('profile.view_profile') }}"
-         class="inline-block bg-psuGold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition">
-        Go to Profile
+         class="inline-block bg-psuGold text-black font-bold px-8 py-4 rounded-xl hover:bg-yellow-400 transition-all transform hover:scale-105 shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
+        Go to Profile →
       </a>
     {% else %}
-      <div class="flex justify-center gap-4 flex-wrap">
+      <div class="flex justify-center gap-4 flex-wrap animate-slide-up" style="animation-delay: 0.4s;">
         <a href="{{ url_for('auth.login') }}"
-           class="bg-psuGold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition shadow-lg">
-          Login to Get Started
+           class="bg-psuGold text-black font-bold px-8 py-4 rounded-xl hover:bg-yellow-400 transition-all transform hover:scale-105 shadow-2xl">
+          Login to Get Started →
+        </a>
+        <a href="{{ url_for('auth.register') }}"
+           class="bg-white/20 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/30 transition-all transform hover:scale-105 shadow-2xl glass">
+          Create Account
         </a>
       </div>
     {% endif %}
+    
+    <!-- Scroll indicator -->
+    <div class="mt-12 animate-bounce">
+      <svg class="w-6 h-6 mx-auto text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
   </div>
 </section>
 
@@ -65,16 +83,22 @@
 <!-- Spotlight Section -->
 <section class="py-16 bg-white">
   <div class="max-w-6xl mx-auto px-6">
-    <h2 class="text-3xl font-bold text-center text-psuRed mb-12">Community Spotlight</h2>
+    <h2 class="text-4xl font-bold text-center mb-4 reveal">
+      <span class="gradient-text">Community Spotlight</span>
+    </h2>
+    <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto reveal">
+      Celebrating the achievements and impact of our Pitt State community
+    </p>
 
     <div class="grid md:grid-cols-2 gap-8">
       <!-- Career Spotlight -->
-      <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 hover:shadow-2xl transition-shadow">
-        <div class="relative h-64 bg-gradient-to-br from-psuRed to-psuGold">
+      <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 card-hover reveal">
+        <div class="relative h-64 bg-gradient-to-br from-psuRed to-psuGold overflow-hidden">
+          <div class="absolute inset-0 bg-black/10"></div>
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="text-center text-white">
-              <div class="text-6xl mb-4">🎯</div>
-              <h3 class="text-2xl font-bold">Career Spotlight</h3>
+              <div class="text-7xl mb-4 animate-bounce-slow">🎯</div>
+              <h3 class="text-3xl font-bold drop-shadow-lg">Career Spotlight</h3>
             </div>
           </div>
         </div>
@@ -233,23 +257,113 @@
   </div>
 </section>
 
+<!-- Testimonials Section -->
+<section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-4xl font-bold text-center mb-4 reveal">
+      <span class="gradient-text">What Gorillas Are Saying</span>
+    </h2>
+    <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto reveal">
+      Real stories from students and alumni who found success through Pitt State Connect
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Testimonial 1 -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 card-hover reveal relative">
+        <div class="absolute top-4 right-4 text-5xl text-psuGold opacity-20">"</div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-psuRed to-psuGold rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            JD
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800">Jessica Davis</h4>
+            <p class="text-sm text-gray-600">Class of 2024 • Marketing</p>
+          </div>
+        </div>
+        <p class="text-gray-700 leading-relaxed italic mb-4">
+          "PittState Connect helped me find my mentor who guided me to my dream internship. 
+          The platform made networking feel natural and accessible."
+        </p>
+        <div class="flex text-psuGold">
+          ⭐⭐⭐⭐⭐
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 card-hover reveal relative" style="animation-delay: 0.2s;">
+        <div class="absolute top-4 right-4 text-5xl text-psuGold opacity-20">"</div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-psuGold to-psuRed rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            MR
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800">Michael Rodriguez</h4>
+            <p class="text-sm text-gray-600">Alumni '19 • Engineering</p>
+          </div>
+        </div>
+        <p class="text-gray-700 leading-relaxed italic mb-4">
+          "As an alumnus, I love being able to give back and connect with current students. 
+          This platform keeps me engaged with the PSU community."
+        </p>
+        <div class="flex text-psuGold">
+          ⭐⭐⭐⭐⭐
+        </div>
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 card-hover reveal relative" style="animation-delay: 0.4s;">
+        <div class="absolute top-4 right-4 text-5xl text-psuGold opacity-20">"</div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-psuRed to-psuGold rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            AK
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800">Amanda Kim</h4>
+            <p class="text-sm text-gray-600">Junior • Computer Science</p>
+          </div>
+        </div>
+        <p class="text-gray-700 leading-relaxed italic mb-4">
+          "I discovered scholarships I didn't even know existed! The career resources and 
+          alumni connections are game-changers for my future."
+        </p>
+        <div class="flex text-psuGold">
+          ⭐⭐⭐⭐⭐
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Call to Action -->
-<section class="bg-psuRed text-white py-16">
-  <div class="max-w-4xl mx-auto text-center px-6">
-    <h2 class="text-3xl md:text-4xl font-bold mb-6">Be Part of the Pitt State Legacy</h2>
-    <p class="text-lg mb-8 text-gray-100">
-      Whether you're a student, alum, or faculty member — your journey continues here.
+<section class="bg-gradient-to-r from-psuRed via-[#660000] to-psuGold text-white py-20 relative overflow-hidden animate-gradient">
+  <!-- Decorative elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-10 left-10 w-40 h-40 bg-psuGold/10 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="max-w-4xl mx-auto text-center px-6 relative z-10 reveal">
+    <h2 class="text-4xl md:text-5xl font-bold mb-6">Be Part of the Pitt State Legacy</h2>
+    <p class="text-xl mb-10 text-gray-100 leading-relaxed">
+      Whether you're a student, alum, or faculty member — your journey continues here. 
+      <br>Join thousands of Gorillas building their future.
     </p>
 
     {% if not current_user.is_authenticated %}
-      <a href="{{ url_for('auth.login') }}"
-         class="inline-block bg-psuGold text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition">
-        Get Started
-      </a>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <a href="{{ url_for('auth.login') }}"
+           class="bg-psuGold text-black font-bold px-8 py-4 rounded-xl hover:bg-yellow-400 transition-all transform hover:scale-105 shadow-2xl">
+          Get Started Today →
+        </a>
+        <a href="#"
+           class="bg-white/20 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/30 transition-all transform hover:scale-105 glass">
+          Learn More
+        </a>
+      </div>
     {% else %}
       <a href="{{ url_for('profile.view_profile') }}"
-         class="inline-block bg-white text-psuRed font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition">
-        View Your Profile
+         class="inline-block bg-white text-psuRed font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl">
+        View Your Profile →
       </a>
     {% endif %}
   </div>
