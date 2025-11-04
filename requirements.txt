@@ -192,6 +192,7 @@ flask-socketio==5.4.1
 python-socketio==5.11.4
 gevent==24.11.1
 gevent-websocket==0.10.1
+pywebpush==1.14.1
 
 # API Documentation
 flasgger==0.9.7.1

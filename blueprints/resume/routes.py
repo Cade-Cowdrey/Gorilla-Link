@@ -15,7 +15,7 @@ from utils.openai_utils import (
     suggest_resume_improvements
 )
 from utils.input_validation import sanitize_html, validate_email, validate_url
-from utils.rate_limiter import limiter
+from extensions import limiter
 import json
 from datetime import datetime
 from io import BytesIO

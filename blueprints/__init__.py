@@ -81,14 +81,14 @@ def register_blueprints(app):
         logger.error(f"❌ Failed to register analytics blueprint: {e}")
     
     try:
-        from blueprints.events.live import events_bp
-        app.register_blueprint(events_bp)
-        logger.info("✅ Registered events blueprint")
+        from blueprints.events.live import events_bp as live_events_bp
+        app.register_blueprint(live_events_bp)
+        logger.info("✅ Registered live events blueprint")
     except Exception as e:
-        logger.error(f"❌ Failed to register events blueprint: {e}")
+        logger.error(f"❌ Failed to register live events blueprint: {e}")
     
     try:
-        from blueprints.admin.dashboard import admin_growth_bp
+        from blueprints.admin.dashboard import admin_bp as admin_growth_bp
         app.register_blueprint(admin_growth_bp)
         logger.info("✅ Registered admin growth dashboard")
     except Exception as e:
