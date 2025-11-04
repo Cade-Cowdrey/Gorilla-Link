@@ -33,6 +33,17 @@ def register_blueprints(app):
     for _, module_name, is_pkg in pkgutil.iter_modules(package.__path__):
         if is_pkg and module_name not in skip_modules:
             try:
+                # First try importing the package (which runs __init__.py and should expose 'bp')
+                try:
+                    pkg_module = importlib.import_module(f"{package_name}.{module_name}")
+                    if hasattr(pkg_module, "bp"):
+                        app.register_blueprint(pkg_module.bp)
+                        logger.info(f"✅ Registered blueprint: {module_name}")
+                        continue
+                except (ImportError, AttributeError):
+                    pass  # Fall through to try routes.py directly
+                
+                # Fallback: try importing routes.py directly (for blueprints without __init__.py)
                 module = importlib.import_module(f"{package_name}.{module_name}.routes")
 
                 if hasattr(module, "bp"):
