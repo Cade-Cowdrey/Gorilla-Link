@@ -10,7 +10,7 @@
   <p class="text-gray max-w-2xl mx-auto mb-8">
     Stay updated on scholarships, job postings, messages, and event alerts.
   </p>
-  <a href="{{ url_for('notifications_bp.mark_all_read') }}" class="btn btn-gold">Mark All as Read</a>
+  <a href="{{ url_for('notifications.mark_all_read') }}" class="btn btn-gold">Mark All as Read</a>
 </section>
 
 <!-- ============================================================
@@ -27,7 +27,7 @@
         <p class="text-sm text-gray">Received: {{ note.timestamp.strftime('%b %d, %Y %I:%M %p') }}</p>
       </div>
       {% if not note.read %}
-      <a href="{{ url_for('notifications_bp.mark_read', id=note.id) }}" class="btn btn-crimson text-xs px-3 py-1">Mark Read</a>
+      <a href="{{ url_for('notifications.mark_read', id=note.id) }}" class="btn btn-crimson text-xs px-3 py-1">Mark Read</a>
       {% endif %}
     </div>
     {% else %}

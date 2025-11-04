@@ -6,7 +6,7 @@
 {% if logged_in %}
 <div class="card shadow-sm mb-4">
   <div class="card-body">
-    <form method="POST" action="{{ url_for('feed_bp.create_post') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('feed.create_post') }}" enctype="multipart/form-data">
       <h5 class="fw-bold text-danger mb-3">Post to Feed</h5>
       <input type="text" name="title" class="form-control mb-2" placeholder="Title (optional)">
       <textarea name="content" class="form-control mb-2" rows="3" placeholder="Share an update, question, or opportunity..."></textarea>

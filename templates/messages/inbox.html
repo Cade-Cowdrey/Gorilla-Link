@@ -10,7 +10,7 @@
   <p class="text-gray max-w-2xl mx-auto mb-8">
     Stay connected with classmates, faculty, and employers in one secure space.
   </p>
-  <form method="GET" action="{{ url_for('messages_bp.inbox') }}" class="max-w-xl mx-auto flex mb-10">
+  <form method="GET" action="{{ url_for('messages.inbox') }}" class="max-w-xl mx-auto flex mb-10">
     <input type="text" name="q" placeholder="Search conversations..." 
            class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-crimson">
     <button type="submit" class="btn btn-crimson rounded-l-none">Search</button>
@@ -29,7 +29,7 @@
         <p class="text-gray text-sm mb-4">{{ convo.last_message[:120] }}...</p>
       </div>
       <div class="flex justify-between items-center">
-        <a href="{{ url_for('messages_bp.thread', id=convo.id) }}" class="btn btn-gold">Open Chat</a>
+        <a href="{{ url_for('messages.thread', id=convo.id) }}" class="btn btn-gold">Open Chat</a>
         {% if convo.unread_count > 0 %}
         <span class="bg-crimson text-white text-xs px-3 py-1 rounded-full">{{ convo.unread_count }} new</span>
         {% endif %}
@@ -49,7 +49,7 @@
   <p class="text-white mb-6 max-w-2xl mx-auto">
     Send messages, connect with mentors, or start a group discussion instantly.
   </p>
-  <a href="{{ url_for('messages_bp.new') }}" class="btn btn-gold mr-3">New Message</a>
-  <a href="{{ url_for('community_bp.feed') }}" class="btn btn-crimson">View Community Feed</a>
+  <a href="{{ url_for('messages.new') }}" class="btn btn-gold mr-3">New Message</a>
+  <a href="{{ url_for('community.index') }}" class="btn btn-crimson">View Community Feed</a>
 </section>
 {% endblock %}

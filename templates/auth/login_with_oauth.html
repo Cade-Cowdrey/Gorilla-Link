@@ -63,9 +63,8 @@ FILE: templates/auth/login.html - Updated with OAuth
            class="w-full p-3 rounded border border-gray-300 dark:border-gray-700">
     <button type="submit" class="btn btn-crimson w-full">Login</button>
 
-    <div class="flex justify-between text-sm pt-2">
-      <a href="{{ url_for('auth_bp.forgot') }}" class="text-crimson hover:text-gold">Forgot password?</a>
-      <a href="{{ url_for('auth_bp.register') }}" class="text-crimson hover:text-gold">Create account</a>
+    <div class="flex justify-center text-sm pt-2">
+      <a href="{{ url_for('auth.login') }}" class="text-crimson hover:text-gold">Back to Login</a>
     </div>
   </form>
 

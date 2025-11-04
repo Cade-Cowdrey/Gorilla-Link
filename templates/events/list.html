@@ -11,7 +11,7 @@
     Explore upcoming campus events, networking nights, and alumni gatherings — connect and get involved!
   </p>
 
-  <form method="GET" action="{{ url_for('events_bp.list') }}" class="max-w-xl mx-auto flex mb-10">
+  <form method="GET" action="{{ url_for('events.list') }}" class="max-w-xl mx-auto flex mb-10">
     <select name="category" class="border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-crimson">
       <option value="">All Categories</option>
       <option value="career">Career</option>
@@ -38,8 +38,8 @@
       <h3 class="text-2xl font-heading text-crimson mb-2">{{ event.title }}</h3>
       <p class="text-sm text-gray mb-2">{{ event.date.strftime('%B %d, %Y') }} · {{ event.time }}</p>
       <p class="text-gray mb-4">{{ event.description[:150] }}...</p>
-      <a href="{{ url_for('events_bp.details', event_id=event.id) }}" class="btn btn-gold mr-2">View Details</a>
-      <a href="{{ url_for('events_bp.rsvp', event_id=event.id) }}" class="btn btn-crimson">RSVP</a>
+      <a href="{{ url_for('events.details', event_id=event.id) }}" class="btn btn-gold mr-2">View Details</a>
+      <a href="{{ url_for('events.rsvp', event_id=event.id) }}" class="btn btn-crimson">RSVP</a>
     </div>
     {% else %}
     <div class="col-span-3 text-center text-gray">No upcoming events at the moment.</div>
@@ -55,7 +55,7 @@
   <p class="text-white max-w-2xl mx-auto mb-8">
     Faculty, student organizations, and alumni can host events through PittState-Connect to reach the full PSU community.
   </p>
-  <a href="{{ url_for('events_bp.create') }}" class="btn btn-gold mr-3">Create Event</a>
-  <a href="{{ url_for('events_bp.list') }}" class="btn btn-crimson">View All Events</a>
+  <a href="{{ url_for('events.create') }}" class="btn btn-gold mr-3">Create Event</a>
+  <a href="{{ url_for('events.list') }}" class="btn btn-crimson">View All Events</a>
 </section>
 {% endblock %}

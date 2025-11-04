@@ -24,7 +24,7 @@
       <h2 class="text-2xl font-heading text-crimson">{{ user.full_name }}</h2>
       <p class="text-gray text-sm mb-2">{{ user.major or 'Undeclared Major' }}</p>
       <p class="text-gray text-sm mb-4">{{ user.role|capitalize }}</p>
-      <a href="{{ url_for('profile_bp.edit') }}" class="btn btn-gold">Edit Profile</a>
+      <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-gold">Edit Profile</a>
     </div>
 
     <!-- Stats Card -->
@@ -60,10 +60,10 @@
     Continue your journey — explore scholarships, discover jobs, or check your analytics.
   </p>
   <div class="flex flex-wrap justify-center gap-4">
-    <a href="{{ url_for('scholarships_bp.dashboard') }}" class="btn btn-gold">Scholarships</a>
-    <a href="{{ url_for('careers_bp.dashboard') }}" class="btn btn-crimson">Careers</a>
-    <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-gold">Analytics</a>
-    <a href="{{ url_for('community_bp.feed') }}" class="btn btn-crimson">Community</a>
+    <a href="{{ url_for('scholarships_bp.index') }}" class="btn btn-gold">Scholarships</a>
+    <a href="{{ url_for('careers_bp.index') }}" class="btn btn-crimson">Careers</a>
+    <a href="{{ url_for('analytics_bp.index') }}" class="btn btn-gold">Analytics</a>
+    <a href="{{ url_for('community.index') }}" class="btn btn-crimson">Community</a>
   </div>
 </section>
 {% endblock %}

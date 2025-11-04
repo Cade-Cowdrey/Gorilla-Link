@@ -32,7 +32,7 @@
         <a href="#" class="btn btn-outline-danger btn-sm">Message {{ mentor.name }}</a>
       {% else %}
         <p class="text-muted mb-2">No mentor assigned yet.</p>
-        <a href="{{ url_for('mentorship_bp.match') }}" class="btn btn-danger btn-sm">Find a Mentor</a>
+        <a href="{{ url_for('mentorship.match') }}" class="btn btn-danger btn-sm">Find a Mentor</a>
       {% endif %}
     </div>
   </div>

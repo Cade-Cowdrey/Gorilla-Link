@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="container my-4">
-  <a href="{{ url_for('stories_bp.list_stories') }}" class="text-decoration-none small">&larr; Back to Stories</a>
+  <a href="{{ url_for('stories.list_stories') }}" class="text-decoration-none small">&larr; Back to Stories</a>
 
   <div class="row mt-2">
     <div class="col-lg-8">
@@ -28,7 +28,7 @@
           {% if story.summary %}
           <p class="mt-3">{{ story.summary }}</p>
           {% endif %}
-          <a href="{{ url_for('stories_bp.list_stories') }}" class="btn btn-outline-danger btn-sm">More Stories</a>
+          <a href="{{ url_for('stories.list_stories') }}" class="btn btn-outline-danger btn-sm">More Stories</a>
         </div>
       </div>
     </div>
