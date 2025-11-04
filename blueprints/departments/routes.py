@@ -2,8 +2,8 @@
 from flask import Blueprint, render_template, request
 from utils.security_util import login_required_safe
 from utils.analytics_util import record_page_view
-from models import User
-from models_extended import AlumniProfile, Department
+from models import User, Department
+from models_extended import AlumniProfile
 
 bp = Blueprint("departments_bp", __name__, url_prefix="/departments")
 

@@ -12,7 +12,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from extensions import db
 from models_extended import TwoFactorAuth, WebAuthnCredential, AuditLog, ConsentRecord, SecretVault
 import logging

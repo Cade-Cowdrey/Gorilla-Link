@@ -81,6 +81,34 @@ def get_top_pages(limit=20):
     return get_page_stats(limit)
 
 
+def get_timeseries(days=30):
+    """
+    Get time series data for page views over the specified number of days.
+    Used by analytics blueprint for charts/graphs.
+    """
+    try:
+        from datetime import datetime, timedelta
+        start_date = datetime.utcnow() - timedelta(days=days)
+        
+        results = (
+            db.session.query(
+                db.func.date(PageView.timestamp).label("date"),
+                db.func.count(PageView.id).label("views")
+            )
+            .filter(PageView.timestamp >= start_date)
+            .group_by(db.func.date(PageView.timestamp))
+            .order_by(db.func.date(PageView.timestamp))
+            .all()
+        )
+        
+        timeseries = [{"date": str(r.date), "views": r.views} for r in results]
+        logger.info(f"📈 Retrieved {len(timeseries)} days of timeseries data")
+        return timeseries
+    except Exception as e:
+        logger.error(f"❌ get_timeseries failed: {e}")
+        return []
+
+
 def record_api_usage(endpoint, method, status_code, user_id=None):
     """
     Log API usage and performance metrics.

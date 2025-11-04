@@ -40,6 +40,10 @@ class Badge(db.Model):
 class UserBadge(db.Model):
     """Tracks which badges users have earned"""
     __tablename__ = "user_badges"
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'badge_id', name='unique_user_badge'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -52,10 +56,6 @@ class UserBadge(db.Model):
     # Relationships
     user = db.relationship('User', backref=db.backref('earned_badges', lazy='dynamic'))
     badge = db.relationship('Badge', back_populates='user_badges')
-    
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'badge_id', name='unique_user_badge'),
-    )
     
     def __repr__(self):
         return f"<UserBadge user={self.user_id} badge={self.badge_id}>"
