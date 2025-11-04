@@ -1,0 +1,260 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Auto-Apply Queue - PSU Connect{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; padding: 2rem 0;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--psu-crimson); margin-bottom: 1rem;">
+            <i class="fas fa-paper-plane"></i> Auto-Apply Queue
+        </h1>
+        <p style="font-size: 1.1rem; color: #6c757d;">Apply to multiple jobs automatically with AI-tailored resumes</p>
+    </div>
+
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--psu-crimson);">{{ queued_count }}</div>
+            <div style="color: #6c757d;">In Queue</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: #ffc107;">{{ processing_count }}</div>
+            <div style="color: #6c757d;">Processing</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ completed_count }}</div>
+            <div style="color: #6c757d;">Completed</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">{{ failed_count }}</div>
+            <div style="color: #6c757d;">Failed</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
+        <a href="/auto-apply/smart-apply" class="btn-primary">
+            <i class="fas fa-magic"></i> Smart Apply (AI Recommended)
+        </a>
+        <button onclick="processQueue()" class="btn-primary" {% if queued_count == 0 %}disabled{% endif %}>
+            <i class="fas fa-play"></i> Process Queue ({{ queued_count }})
+        </button>
+        <button onclick="clearCompleted()" class="btn-secondary">
+            <i class="fas fa-check-double"></i> Clear Completed
+        </button>
+        <a href="/auto-apply/settings" class="btn-secondary">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+    </div>
+
+    <!-- How It Works -->
+    <div class="psu-card" style="padding: 1.5rem; margin-bottom: 2rem; background: linear-gradient(135deg, rgba(139,26,26,0.05) 0%, rgba(253,181,21,0.05) 100%);">
+        <h3 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-info-circle"></i> How Auto-Apply Works
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: var(--psu-crimson); margin-bottom: 0.5rem;">
+                    <i class="fas fa-list-ul"></i>
+                </div>
+                <strong>1. Add Jobs</strong>
+                <p style="font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem;">
+                    Add jobs to your queue manually or use Smart Apply
+                </p>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: var(--psu-crimson); margin-bottom: 0.5rem;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <strong>2. AI Tailoring</strong>
+                <p style="font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem;">
+                    AI generates custom resume and cover letter for each job
+                </p>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: var(--psu-crimson); margin-bottom: 0.5rem;">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <strong>3. Auto-Submit</strong>
+                <p style="font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem;">
+                    Applications are submitted automatically, up to 5 at once
+                </p>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; color: var(--psu-crimson); margin-bottom: 0.5rem;">
+                    <i class="fas fa-check"></i>
+                </div>
+                <strong>4. Track Results</strong>
+                <p style="font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem;">
+                    Monitor application status and get notifications
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Items -->
+    <div class="psu-card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+            <h3 style="margin: 0; color: var(--psu-crimson);">
+                <i class="fas fa-list"></i> Your Application Queue
+            </h3>
+        </div>
+
+        {% if queue_items %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                        <th style="padding: 1rem; text-align: left;">Job</th>
+                        <th style="padding: 1rem; text-align: left;">Company</th>
+                        <th style="padding: 1rem; text-align: center;">Status</th>
+                        <th style="padding: 1rem; text-align: center;">Added</th>
+                        <th style="padding: 1rem; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in queue_items %}
+                    <tr style="border-bottom: 1px solid #e9ecef;" id="queue-item-{{ item.id }}">
+                        <td style="padding: 1rem;">
+                            <strong style="color: var(--psu-crimson);">{{ item.job.title }}</strong>
+                            <div style="font-size: 0.9rem; color: #6c757d; margin-top: 0.25rem;">
+                                {{ item.job.location }}
+                            </div>
+                        </td>
+                        <td style="padding: 1rem;">
+                            {{ item.job.company }}
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if item.status == 'queued' %}
+                                <span style="background: #6c757d; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-clock"></i> Queued
+                                </span>
+                            {% elif item.status == 'processing' %}
+                                <span style="background: #ffc107; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-spinner fa-spin"></i> Processing
+                                </span>
+                            {% elif item.status == 'completed' %}
+                                <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-check"></i> Completed
+                                </span>
+                            {% elif item.status == 'failed' %}
+                                <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-times"></i> Failed
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; text-align: center; font-size: 0.9rem; color: #6c757d;">
+                            {{ item.created_at.strftime('%b %d, %I:%M %p') }}
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if item.status == 'queued' %}
+                                <button onclick="removeFromQueue({{ item.id }})" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            {% elif item.status == 'completed' %}
+                                <a href="/jobs/{{ item.job_id }}" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            {% elif item.status == 'failed' %}
+                                <button onclick="retryJob({{ item.id }})" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-redo"></i> Retry
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding: 3rem; text-align: center;">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--psu-crimson);">Your queue is empty</h3>
+            <p style="color: #6c757d; margin-bottom: 1.5rem;">
+                Add jobs to your queue to get started with auto-apply
+            </p>
+            <a href="/auto-apply/smart-apply" class="btn-primary">
+                <i class="fas fa-magic"></i> Find Jobs with Smart Apply
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function processQueue() {
+    if (!confirm('Process all queued applications? This will generate AI-tailored resumes and submit applications.')) return;
+    
+    fetch('/auto-apply/process-queue', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Processing ${data.count} applications. This may take a few minutes.`);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to process queue'));
+        }
+    });
+}
+
+function removeFromQueue(itemId) {
+    if (!confirm('Remove this job from queue?')) return;
+    
+    fetch('/auto-apply/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            item_id: itemId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('queue-item-' + itemId).remove();
+        }
+    });
+}
+
+function retryJob(itemId) {
+    fetch('/auto-apply/retry', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            item_id: itemId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function clearCompleted() {
+    if (!confirm('Clear all completed applications from queue?')) return;
+    
+    fetch('/auto-apply/clear-queue', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            status: 'completed'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

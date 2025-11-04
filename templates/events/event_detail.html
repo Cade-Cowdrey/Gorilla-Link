@@ -1,0 +1,178 @@
+{% extends "base_psu.html" %}
+
+{% block title %}{{ event.title }} - PSU Connect{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding: 2rem 0;">
+    <!-- Back Button -->
+    <div style="margin-bottom: 2rem;">
+        <a href="/events" style="color: var(--psu-crimson); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Events
+        </a>
+    </div>
+
+    <!-- Event Header -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, rgba(139,26,26,0.05) 0%, rgba(253,181,21,0.05) 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 2rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <!-- Event Type -->
+                <div style="margin-bottom: 1rem;">
+                    {% if event.event_type == 'career_fair' %}
+                        <span style="background: #007bff; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 600;">
+                            <i class="fas fa-briefcase"></i> Career Fair
+                        </span>
+                    {% elif event.event_type == 'webinar' %}
+                        <span style="background: #6f42c1; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 600;">
+                            <i class="fas fa-video"></i> Webinar
+                        </span>
+                    {% elif event.event_type == 'workshop' %}
+                        <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 600;">
+                            <i class="fas fa-tools"></i> Workshop
+                        </span>
+                    {% else %}
+                        <span style="background: #6c757d; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 600;">
+                            <i class="fas fa-comments"></i> Q&A Session
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Title -->
+                <h1 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">{{ event.title }}</h1>
+
+                <!-- Host -->
+                <div style="color: #6c757d; margin-bottom: 0.5rem;">
+                    <i class="fas fa-user"></i> Hosted by <strong>{{ event.host.full_name }}</strong>
+                </div>
+
+                <!-- Date & Time -->
+                <div style="color: #6c757d; margin-bottom: 0.5rem;">
+                    <i class="fas fa-calendar"></i> {{ event.start_time.strftime('%A, %B %d, %Y') }}
+                </div>
+                <div style="color: #6c757d; margin-bottom: 0.5rem;">
+                    <i class="fas fa-clock"></i> {{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}
+                </div>
+
+                <!-- Attendees -->
+                <div style="color: #6c757d;">
+                    <i class="fas fa-users"></i> {{ attendee_count }} registered
+                    {% if event.max_attendees %}
+                        ({{ event.max_attendees - attendee_count }} spots left)
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div style="min-width: 200px; text-align: center;">
+                {% if is_live %}
+                    <div style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem; animation: pulse 2s infinite;">
+                        <i class="fas fa-circle" style="font-size: 0.5rem;"></i> LIVE NOW
+                    </div>
+                {% endif %}
+
+                {% if is_registered %}
+                    {% if is_live %}
+                        <a href="/events/event/{{ event.id }}/live" class="btn-primary" style="width: 100%; margin-bottom: 0.5rem; font-size: 1.1rem;">
+                            <i class="fas fa-video"></i> Join Live Event
+                        </a>
+                    {% else %}
+                        <button class="btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" disabled>
+                            <i class="fas fa-check"></i> Registered
+                        </button>
+                    {% endif %}
+                    <button onclick="unregister()" class="btn-secondary" style="width: 100%; font-size: 0.9rem;">
+                        <i class="fas fa-times"></i> Cancel Registration
+                    </button>
+                {% else %}
+                    <button onclick="register()" class="btn-primary" style="width: 100%; font-size: 1.1rem;">
+                        <i class="fas fa-calendar-check"></i> Register Now
+                    </button>
+                    {% if event.max_attendees and attendee_count >= event.max_attendees %}
+                        <p style="color: #dc3545; font-size: 0.9rem; margin-top: 0.5rem;">Event is full</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Description -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem;">
+        <h2 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-info-circle"></i> About This Event
+        </h2>
+        <div style="color: #495057; line-height: 1.8;">
+            {{ event.description | safe }}
+        </div>
+    </div>
+
+    <!-- Meeting Link (if registered) -->
+    {% if is_registered and event.meeting_link %}
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--psu-gold);">
+        <h3 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-link"></i> Meeting Details
+        </h3>
+        <p style="margin-bottom: 1rem; color: #6c757d;">
+            You're registered! Here's the link to join:
+        </p>
+        <a href="{{ event.meeting_link }}" target="_blank" class="btn-primary" style="display: inline-block;">
+            <i class="fas fa-external-link-alt"></i> Open Meeting Link
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function register() {
+    if (!confirm('Register for this event?')) return;
+    
+    fetch('/events/event/{{ event.id }}/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Successfully registered! You will receive a reminder notification.');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to register'));
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function unregister() {
+    if (!confirm('Cancel your registration for this event?')) return;
+    
+    fetch('/events/event/{{ event.id }}/unregister', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Registration cancelled.');
+            location.reload();
+        } else {
+            alert('Error: Failed to cancel registration');
+        }
+    });
+}
+</script>
+
+<style>
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+</style>
+{% endblock %}

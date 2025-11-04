@@ -138,12 +138,15 @@ def _safe_json_dumps(obj: Any) -> str:
 
 
 def _scrub_text(text: str) -> str:
+    """Scrub PII from text"""
     s = text
     for pattern, repl in PII_PATTERNS:
         try:
             s = pattern.sub(repl, s)
-        except Exception:
-            pass
+        except Exception as e:
+            # Log pattern that failed but continue with other patterns
+            import logging
+            logging.warning(f"PII pattern scrubbing failed: {e}")
     return s
 
 

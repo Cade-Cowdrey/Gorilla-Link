@@ -41,6 +41,15 @@ app.jinja_env.globals["has_endpoint"] = has_endpoint
 
 register_blueprints(app)
 
+# Register API v1 Blueprint
+from blueprints.api.v1 import api_v1
+app.register_blueprint(api_v1)
+
+# Register Resume/Career Features Blueprint
+from blueprints.resume import resume_bp
+app.register_blueprint(resume_bp)
+logger.info("✅ Resume & Career Features blueprint registered")
+
 @app.route("/")
 def index():
     return "🦍 PittState-Connect Production is Live!"

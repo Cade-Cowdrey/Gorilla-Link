@@ -1,15 +1,101 @@
 {% extends "base.html" %}
-{% block title %}Departments Showcase — PittState Connect{% endblock %}
+{% block title %}Department Showcases — PittState Connect{% endblock %}
 {% block content %}
-<section class="py-5" style="background:#FFC72C;">
+
+<!-- Hero Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #BA0C2F 0%, #FFC72C 100%);">
   <div class="container">
-    <h2 class="fw-bold" style="color:#BA0C2F;">Departments Showcase</h2>
-    <p class="mb-0">Faculty highlights, top student projects, and career pathways.</p>
+    <div class="text-center text-white py-4">
+      <h1 class="display-4 fw-bold mb-3">🏛️ Department Showcases</h1>
+      <p class="lead mb-0">Explore student projects, meet alumni, and discover career pathways across PSU's colleges</p>
+    </div>
   </div>
 </section>
-<section class="py-4 bg-white">
+
+<!-- Department Grid -->
+<section class="py-5 bg-light">
   <div class="container">
-    <div class="alert alert-light border">Coming soon — curated department portfolios with projects and alumni quotes.</div>
+    <div class="row g-4">
+      {% for code, dept in departments.items() %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm hover-shadow" style="transition: all 0.3s;">
+          <!-- Department Header -->
+          <div class="card-header text-white py-4" style="background: {{ dept.colors.primary }};">
+            <h3 class="h5 mb-1 fw-bold">{{ dept.name }}</h3>
+            <p class="small mb-0 opacity-75">{{ dept.tagline }}</p>
+          </div>
+          
+          <!-- Department Stats -->
+          <div class="card-body">
+            <p class="text-muted mb-4">{{ dept.description }}</p>
+            
+            <div class="row g-3 mb-4">
+              <div class="col-6 text-center">
+                <div class="fw-bold fs-4" style="color: {{ dept.colors.primary }};">{{ dept.stats.students }}</div>
+                <div class="small text-muted">Students</div>
+              </div>
+              <div class="col-6 text-center">
+                <div class="fw-bold fs-4" style="color: {{ dept.colors.primary }};">{{ dept.stats.placement_rate }}%</div>
+                <div class="small text-muted">Job Placement</div>
+              </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="d-flex justify-content-between mb-3 p-3 bg-light rounded">
+              <div class="text-center">
+                <div class="fw-semibold">{{ dept.stats.faculty }}</div>
+                <div class="small text-muted">Faculty</div>
+              </div>
+              <div class="text-center">
+                <div class="fw-semibold">${{ "{:,}".format(dept.stats.avg_salary) }}</div>
+                <div class="small text-muted">Avg Salary</div>
+              </div>
+            </div>
+            
+            <!-- Highlights -->
+            <div class="mb-3">
+              <div class="small text-muted mb-2 fw-semibold">✨ Highlights:</div>
+              <div class="d-flex flex-wrap gap-2">
+                <span class="badge" style="background: {{ dept.colors.primary }};">{{ dept.projects|length }} Projects</span>
+                <span class="badge" style="background: {{ dept.colors.accent }}; color: #000;">{{ dept.alumni_quotes|length }} Alumni</span>
+                <span class="badge bg-secondary">{{ dept.faculty_highlights|length }} Faculty</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- View Details Button -->
+          <div class="card-footer bg-white border-0 pt-0">
+            <a href="{{ url_for('departments_bp.showcase', dept_code=code) }}" 
+               class="btn w-100 text-white" 
+               style="background: {{ dept.colors.primary }};">
+              Explore {{ dept.name.split()[-1] }} →
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: #003B71; color: white;">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-3">Ready to Make an Impact?</h2>
+    <p class="lead mb-4">Join one of PSU's premier programs and start building your future today</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/apply" class="btn btn-warning btn-lg px-5">Apply Now</a>
+      <a href="/campus/visit" class="btn btn-outline-light btn-lg px-5">Schedule a Visit</a>
+    </div>
+  </div>
+</section>
+
+<style>
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+</style>
+
 {% endblock %}
+

@@ -1,24 +1,511 @@
-<!-- =========================================================
-FILE: src/templates/scholarships/essay_helper.html
-========================================================= -->
 {% extends "base.html" %}
-{% block title %}Essay Helper · PittState-Connect{% endblock %}
-{% block content %}
-<section class="section max-w-4xl mx-auto px-6 fade-in">
-  <h1 class="text-3xl font-bold mb-6">Essay Helper</h1>
-  <form method="post" class="card p-6 space-y-5">
-    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Prompt or Draft</label>
-    <textarea name="prompt" rows="8" required
-      class="w-full p-3 rounded border border-gray-300 dark:border-gray-700"
-      placeholder="Paste your essay prompt or draft here..."></textarea>
-    <button class="btn btn-crimson w-full">Get Suggestions</button>
-  </form>
 
-  {% if suggestions %}
-  <div class="card p-6 mt-6 bg-gray-50 dark:bg-gray-800">
-    <h3 class="text-xl font-semibold mb-2">Suggestions (AI Placeholder)</h3>
-    <pre class="whitespace-pre-wrap text-gray text-sm">{{ suggestions }}</pre>
+{% block title %}AI Essay Writing Helper | PittState Connect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Hero Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card text-white overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card-body py-5">
+          <h1 class="display-5 fw-bold mb-3">🤖 AI Essay Writing Helper</h1>
+          <p class="lead mb-0">Get instant AI-powered feedback to improve your scholarship essays</p>
+          <p class="mt-2 opacity-75">
+            <i class="bi bi-shield-check"></i> Confidential • <i class="bi bi-stars"></i> Powered by GPT-4 • <i class="bi bi-lightning-fill"></i> Real-time Analysis
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
-  {% endif %}
-</section>
+
+  <div class="row">
+    <!-- Essay Input Section -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Your Essay</h5>
+        </div>
+        <div class="card-body">
+          <form id="essayForm">
+            <!-- Scholarship Type -->
+            <div class="mb-3">
+              <label for="scholarshipType" class="form-label">Scholarship Type</label>
+              <select class="form-select" id="scholarshipType" required>
+                <option value="general">General Scholarship</option>
+                <option value="academic">Academic Achievement</option>
+                <option value="leadership">Leadership</option>
+                <option value="community_service">Community Service</option>
+                <option value="stem">STEM</option>
+                <option value="arts">Arts & Humanities</option>
+                <option value="athletics">Athletics</option>
+                <option value="financial_need">Financial Need</option>
+              </select>
+            </div>
+
+            <!-- Essay Prompt -->
+            <div class="mb-3">
+              <label for="essayPrompt" class="form-label">Essay Prompt/Question (Optional)</label>
+              <input type="text" class="form-control" id="essayPrompt" 
+                     placeholder="e.g., Describe a time you demonstrated leadership...">
+            </div>
+
+            <!-- Word Limit -->
+            <div class="mb-3">
+              <label for="wordLimit" class="form-label">Word Limit</label>
+              <input type="number" class="form-control" id="wordLimit" value="500" min="100" max="2000" required>
+            </div>
+
+            <!-- Essay Text -->
+            <div class="mb-3">
+              <label for="essayText" class="form-label">
+                Essay Text 
+                <span id="wordCount" class="badge bg-secondary">0 words</span>
+              </label>
+              <textarea class="form-control" id="essayText" rows="12" 
+                        placeholder="Paste or type your essay here..." required></textarea>
+              <div class="form-text">
+                Minimum 50 words for analysis. Include your full essay for best results.
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+              <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                <i class="bi bi-stars"></i> Analyze Essay
+              </button>
+              <button type="button" class="btn btn-outline-secondary" id="clearBtn">
+                <i class="bi bi-x-circle"></i> Clear
+              </button>
+              <button type="button" class="btn btn-outline-info" id="examplesBtn" data-bs-toggle="modal" data-bs-target="#examplesModal">
+                <i class="bi bi-book"></i> Examples
+              </button>
+            </div>
+          </form>
+
+          <!-- Loading State -->
+          <div id="loadingState" class="text-center mt-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Analyzing...</span>
+            </div>
+            <p class="mt-2 text-muted">
+              <i class="bi bi-cpu"></i> AI is analyzing your essay... This may take 10-20 seconds.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Results Section -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Analysis Results</h5>
+        </div>
+        <div class="card-body" style="overflow-y: auto; max-height: 800px;">
+          
+          <!-- Empty State -->
+          <div id="emptyState" class="text-center py-5">
+            <i class="bi bi-lightbulb" style="font-size: 4rem; color: #ccc;"></i>
+            <h5 class="mt-3 text-muted">No analysis yet</h5>
+            <p class="text-muted">Submit your essay to get AI-powered feedback</p>
+            
+            <div class="mt-4">
+              <h6 class="text-start mb-3">What we analyze:</h6>
+              <ul class="list-unstyled text-start">
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Grammar & Spelling</li>
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Essay Structure</li>
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Clarity & Coherence</li>
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Scholarship Fit</li>
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Strengths & Improvements</li>
+                <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Overall Score & Next Steps</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Results Content -->
+          <div id="resultsContent" style="display: none;">
+            <!-- Overall Score -->
+            <div class="alert alert-primary mb-4" id="overallScoreSection">
+              <h4 class="alert-heading">
+                <i class="bi bi-trophy"></i> Overall Score: <span id="overallScore">--</span>/100
+              </h4>
+              <p class="mb-0" id="scoreInterpretation"></p>
+            </div>
+
+            <!-- Word Count Status -->
+            <div class="alert mb-4" id="wordCountAlert">
+              <h6><i class="bi bi-paragraph"></i> Word Count</h6>
+              <p class="mb-0" id="wordCountFeedback"></p>
+            </div>
+
+            <!-- Strengths -->
+            <div class="mb-4">
+              <h5 class="text-success"><i class="bi bi-hand-thumbs-up"></i> Strengths</h5>
+              <ul id="strengthsList" class="list-group"></ul>
+            </div>
+
+            <!-- Areas for Improvement -->
+            <div class="mb-4">
+              <h5 class="text-warning"><i class="bi bi-exclamation-triangle"></i> Areas for Improvement</h5>
+              <ul id="improvementsList" class="list-group"></ul>
+            </div>
+
+            <!-- Grammar -->
+            <div class="mb-4" id="grammarSection">
+              <h5 class="text-danger"><i class="bi bi-spellcheck"></i> Grammar & Spelling</h5>
+              <div id="grammarContent"></div>
+            </div>
+
+            <!-- Structure -->
+            <div class="mb-4" id="structureSection">
+              <h5 class="text-info"><i class="bi bi-diagram-3"></i> Essay Structure</h5>
+              <div id="structureContent"></div>
+            </div>
+
+            <!-- Clarity -->
+            <div class="mb-4" id="claritySection">
+              <h5 class="text-primary"><i class="bi bi-eye"></i> Clarity & Coherence</h5>
+              <div id="clarityContent"></div>
+            </div>
+
+            <!-- Scholarship Fit -->
+            <div class="mb-4" id="fitSection">
+              <h5 class="text-purple"><i class="bi bi-bullseye"></i> Scholarship Fit</h5>
+              <div id="fitContent"></div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="mb-4" id="nextStepsSection">
+              <h5 class="text-success"><i class="bi bi-arrow-right-circle"></i> Next Steps</h5>
+              <ol id="nextStepsList" class="list-group list-group-numbered"></ol>
+            </div>
+
+            <!-- Export Button -->
+            <div class="d-grid">
+              <button class="btn btn-outline-primary" id="exportBtn">
+                <i class="bi bi-download"></i> Export Feedback as PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips Section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-body">
+          <h5><i class="bi bi-lightbulb-fill text-warning"></i> Essay Writing Tips</h5>
+          <div class="row mt-3">
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-1-circle"></i> Start Strong</h6>
+              <p class="small text-muted">Hook readers with a compelling opening. Avoid clichés and generic statements.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-2-circle"></i> Be Specific</h6>
+              <p class="small text-muted">Use concrete examples, numbers, and details. Show, don't just tell.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-3-circle"></i> Show Growth</h6>
+              <p class="small text-muted">Reflect on what you learned. Demonstrate self-awareness and maturity.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-4-circle"></i> Stay Authentic</h6>
+              <p class="small text-muted">Write in your own voice. Be genuine and personal.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-5-circle"></i> Proofread</h6>
+              <p class="small text-muted">Read aloud, use spell-check, and have others review your work.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6><i class="bi bi-6-circle"></i> Follow Guidelines</h6>
+              <p class="small text-muted">Adhere to word limits and answer the prompt directly.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Essay Templates Modal -->
+<div class="modal fade" id="examplesModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-book"></i> Essay Templates & Examples</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="templatesContent">
+        <p class="text-center text-muted">Loading templates...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.text-purple {
+  color: #764ba2;
+}
+
+#essayText {
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.list-group-item {
+  border-left: 4px solid transparent;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+</style>
+
+<script>
+let currentAnalysis = null;
+
+// Word count tracker
+const essayText = document.getElementById('essayText');
+const wordCount = document.getElementById('wordCount');
+const wordLimit = document.getElementById('wordLimit');
+
+essayText.addEventListener('input', updateWordCount);
+wordLimit.addEventListener('input', updateWordCount);
+
+function updateWordCount() {
+  const text = essayText.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  const limit = parseInt(wordLimit.value) || 500;
+  
+  wordCount.textContent = `${words} / ${limit} words`;
+  
+  if (words > limit) {
+    wordCount.className = 'badge bg-danger';
+  } else if (words > limit * 0.9) {
+    wordCount.className = 'badge bg-warning';
+  } else if (words > limit * 0.7) {
+    wordCount.className = 'badge bg-success';
+  } else {
+    wordCount.className = 'badge bg-secondary';
+  }
+}
+
+// Form submission
+document.getElementById('essayForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const essay = essayText.value.trim();
+  const scholarshipType = document.getElementById('scholarshipType').value;
+  const prompt = document.getElementById('essayPrompt').value.trim();
+  const limit = parseInt(wordLimit.value) || 500;
+  
+  if (essay.length < 50) {
+    alert('Please write at least 50 characters for meaningful analysis.');
+    return;
+  }
+  
+  // Show loading state
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'none';
+  
+  try {
+    const response = await fetch('{{ url_for("scholarships_bp.analyze_essay") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        essay: essay,
+        scholarship_type: scholarshipType,
+        prompt: prompt,
+        word_limit: limit
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      currentAnalysis = data.analysis;
+      displayAnalysis(data.analysis);
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to analyze essay. Please try again.');
+  } finally {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+});
+
+function displayAnalysis(analysis) {
+  // Hide empty state, show results
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'block';
+  
+  // Overall Score
+  const score = analysis.overall_score || 0;
+  document.getElementById('overallScore').textContent = score;
+  
+  const interpretation = 
+    score >= 90 ? '🏆 Excellent! Your essay is very strong.' :
+    score >= 80 ? '🌟 Great work! Minor improvements will make it outstanding.' :
+    score >= 70 ? '👍 Good foundation. Focus on the suggested improvements.' :
+    score >= 60 ? '📝 Needs work. Review the feedback carefully.' :
+    '⚠️ Significant revisions needed. Consider rewriting.';
+  
+  document.getElementById('scoreInterpretation').textContent = interpretation;
+  
+  // Word Count
+  const wordCountAlert = document.getElementById('wordCountAlert');
+  wordCountAlert.className = `alert mb-4 alert-${analysis.word_count_status === 'over' ? 'danger' : analysis.word_count_status === 'under' ? 'warning' : 'success'}`;
+  document.getElementById('wordCountFeedback').textContent = 
+    `${analysis.word_count} words / ${analysis.word_limit} limit. ${analysis.word_count_feedback || ''}`;
+  
+  // Strengths
+  const strengthsList = document.getElementById('strengthsList');
+  strengthsList.innerHTML = '';
+  (analysis.strengths || []).forEach(strength => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item border-left-success';
+    li.style.borderLeftColor = '#28a745';
+    li.innerHTML = `<i class="bi bi-check-circle text-success me-2"></i>${strength}`;
+    strengthsList.appendChild(li);
+  });
+  
+  // Improvements
+  const improvementsList = document.getElementById('improvementsList');
+  improvementsList.innerHTML = '';
+  (analysis.improvements || []).forEach(improvement => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item border-left-warning';
+    li.style.borderLeftColor = '#ffc107';
+    li.innerHTML = `<i class="bi bi-arrow-right text-warning me-2"></i>${improvement}`;
+    improvementsList.appendChild(li);
+  });
+  
+  // Grammar
+  const grammarContent = document.getElementById('grammarContent');
+  const grammar = analysis.grammar || {};
+  const grammarSeverity = grammar.severity || 'low';
+  const severityColor = grammarSeverity === 'high' ? 'danger' : grammarSeverity === 'medium' ? 'warning' : 'success';
+  
+  grammarContent.innerHTML = `
+    <div class="alert alert-${severityColor}">
+      <strong>Severity: ${grammarSeverity.charAt(0).toUpperCase() + grammarSeverity.slice(1)}</strong>
+    </div>
+    ${(grammar.issues_found || []).length > 0 ? 
+      `<ul class="mb-0">${grammar.issues_found.map(issue => `<li>${issue}</li>`).join('')}</ul>` :
+      '<p class="text-muted mb-0">No significant grammar issues found.</p>'}
+  `;
+  
+  // Structure
+  const structureContent = document.getElementById('structureContent');
+  const structure = analysis.structure || {};
+  structureContent.innerHTML = `
+    <ul class="list-unstyled">
+      <li><i class="bi ${structure.has_clear_intro ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Clear Introduction</li>
+      <li><i class="bi ${structure.has_body_paragraphs ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Body Paragraphs</li>
+      <li><i class="bi ${structure.has_strong_conclusion ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Strong Conclusion</li>
+    </ul>
+    ${(structure.suggestions || []).length > 0 ? 
+      `<h6 class="mt-3">Suggestions:</h6><ul>${structure.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>` : ''}
+  `;
+  
+  // Clarity
+  const clarityContent = document.getElementById('clarityContent');
+  const clarity = analysis.clarity || {};
+  clarityContent.innerHTML = `
+    <p><strong>Clarity Score:</strong> ${clarity.score || 0}/100</p>
+    ${(clarity.issues || []).length > 0 ? 
+      `<h6>Issues:</h6><ul>${clarity.issues.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+    ${(clarity.suggestions || []).length > 0 ? 
+      `<h6>Suggestions:</h6><ul>${clarity.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>` : ''}
+  `;
+  
+  // Scholarship Fit
+  const fitContent = document.getElementById('fitContent');
+  const fit = analysis.scholarship_fit || {};
+  fitContent.innerHTML = `
+    <p><strong>Fit Score:</strong> ${fit.score || 0}/100</p>
+    <ul class="list-unstyled mb-3">
+      <li><i class="bi ${fit.addresses_prompt ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Addresses Prompt</li>
+      <li><i class="bi ${fit.shows_qualifications ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Shows Qualifications</li>
+      <li><i class="bi ${fit.demonstrates_passion ? 'bi-check-circle text-success' : 'bi-x-circle text-danger'}"></i> Demonstrates Passion</li>
+    </ul>
+    <p>${fit.feedback || ''}</p>
+  `;
+  
+  // Next Steps
+  const nextStepsList = document.getElementById('nextStepsList');
+  nextStepsList.innerHTML = '';
+  (analysis.next_steps || []).forEach(step => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.textContent = step;
+    nextStepsList.appendChild(li);
+  });
+  
+  // Scroll to results
+  document.getElementById('resultsContent').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Clear button
+document.getElementById('clearBtn').addEventListener('click', function() {
+  if (confirm('Clear your essay and start over?')) {
+    document.getElementById('essayForm').reset();
+    updateWordCount();
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('resultsContent').style.display = 'none';
+    currentAnalysis = null;
+  }
+});
+
+// Export button
+document.getElementById('exportBtn').addEventListener('click', function() {
+  alert('PDF export coming soon! For now, you can take screenshots of the feedback or copy the text.');
+});
+
+// Load essay templates
+document.getElementById('examplesBtn').addEventListener('click', async function() {
+  const templatesContent = document.getElementById('templatesContent');
+  templatesContent.innerHTML = '<p class="text-center"><div class="spinner-border"></div><br>Loading...</p>';
+  
+  try {
+    const response = await fetch('{{ url_for("scholarships_bp.essay_templates") }}');
+    const data = await response.json();
+    
+    if (data.success) {
+      let html = '';
+      for (const [key, template] of Object.entries(data.templates)) {
+        html += `
+          <div class="mb-4">
+            <h5 class="text-primary">${template.title}</h5>
+            <p class="text-muted">${template.description}</p>
+            <h6>Outline:</h6>
+            <ol>${template.outline.map(item => `<li>${item}</li>`).join('')}</ol>
+            <h6>Tips:</h6>
+            <ul>${template.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+          </div>
+          <hr>
+        `;
+      }
+      templatesContent.innerHTML = html;
+    }
+  } catch (error) {
+    templatesContent.innerHTML = '<p class="text-danger">Failed to load templates.</p>';
+  }
+});
+
+// Initialize
+updateWordCount();
+</script>
 {% endblock %}

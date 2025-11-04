@@ -1,0 +1,182 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Live Events - PSU Connect{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; padding: 2rem 0;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--psu-crimson); margin-bottom: 1rem;">
+            <i class="fas fa-calendar-alt"></i> Live Events & Career Fairs
+        </h1>
+        <p style="font-size: 1.1rem; color: #6c757d;">Join virtual career fairs, webinars, and workshops</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;">
+        <a href="/events/my-events" class="btn-secondary">
+            <i class="fas fa-bookmark"></i> My Events
+        </a>
+        {% if current_user.is_admin or current_user.is_staff %}
+        <a href="/events/create" class="btn-primary">
+            <i class="fas fa-plus"></i> Create Event
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Upcoming Events -->
+    <div style="margin-bottom: 3rem;">
+        <h2 style="color: var(--psu-crimson); margin-bottom: 1.5rem;">
+            <i class="fas fa-calendar-day"></i> Upcoming Events
+        </h2>
+        
+        {% if upcoming %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for event in upcoming %}
+            <div class="psu-card" style="padding: 0; overflow: hidden;">
+                <div style="display: grid; grid-template-columns: 150px 1fr auto; gap: 0;">
+                    <!-- Date Section -->
+                    <div style="background: linear-gradient(135deg, var(--psu-crimson) 0%, var(--psu-gold) 100%); color: white; padding: 1.5rem; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="font-size: 2.5rem; font-weight: bold; line-height: 1;">
+                            {{ event.start_time.strftime('%d') }}
+                        </div>
+                        <div style="font-size: 1rem; text-transform: uppercase; margin-top: 0.25rem;">
+                            {{ event.start_time.strftime('%b') }}
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                            {{ event.start_time.strftime('%I:%M %p') }}
+                        </div>
+                    </div>
+
+                    <!-- Event Info -->
+                    <div style="padding: 1.5rem;">
+                        <!-- Event Type Badge -->
+                        <div style="margin-bottom: 0.75rem;">
+                            {% if event.event_type == 'career_fair' %}
+                                <span style="background: #007bff; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fas fa-briefcase"></i> Career Fair
+                                </span>
+                            {% elif event.event_type == 'webinar' %}
+                                <span style="background: #6f42c1; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fas fa-video"></i> Webinar
+                                </span>
+                            {% elif event.event_type == 'workshop' %}
+                                <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fas fa-tools"></i> Workshop
+                                </span>
+                            {% else %}
+                                <span style="background: #6c757d; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fas fa-comments"></i> Q&A
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Title -->
+                        <h3 style="margin: 0 0 0.5rem 0; color: var(--psu-crimson);">
+                            <a href="/events/event/{{ event.id }}" style="color: inherit; text-decoration: none;">
+                                {{ event.title }}
+                            </a>
+                        </h3>
+
+                        <!-- Description -->
+                        <p style="color: #6c757d; margin: 0.5rem 0; line-height: 1.5;">
+                            {{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}
+                        </p>
+
+                        <!-- Host -->
+                        <div style="margin-top: 0.75rem; font-size: 0.9rem; color: #6c757d;">
+                            <i class="fas fa-user"></i> Hosted by <strong>{{ event.host.full_name }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 1px solid #e9ecef; min-width: 200px;">
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--psu-crimson);">
+                                {{ event.attendees.count() }}
+                            </div>
+                            <div style="font-size: 0.85rem; color: #6c757d;">Registered</div>
+                        </div>
+                        <a href="/events/event/{{ event.id }}" class="btn-primary" style="width: 100%;">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="psu-card" style="padding: 3rem; text-align: center;">
+            <i class="fas fa-calendar-times" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">No upcoming events scheduled</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Past Events with Recordings -->
+    {% if past %}
+    <div>
+        <h2 style="color: var(--psu-crimson); margin-bottom: 1.5rem;">
+            <i class="fas fa-play-circle"></i> Past Events - Watch Recordings
+        </h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for event in past %}
+            <div class="psu-card" style="padding: 0; overflow: hidden;">
+                <!-- Type Badge -->
+                <div style="padding: 1rem; background: #f8f9fa;">
+                    {% if event.event_type == 'career_fair' %}
+                        <span style="background: #007bff; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-briefcase"></i> Career Fair
+                        </span>
+                    {% elif event.event_type == 'webinar' %}
+                        <span style="background: #6f42c1; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-video"></i> Webinar
+                        </span>
+                    {% elif event.event_type == 'workshop' %}
+                        <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            <i class="fas fa-tools"></i> Workshop
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div style="padding: 1.5rem;">
+                    <!-- Title -->
+                    <h3 style="margin: 0 0 0.5rem 0; color: var(--psu-crimson); font-size: 1.1rem;">
+                        {{ event.title }}
+                    </h3>
+
+                    <!-- Date -->
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 1rem;">
+                        <i class="fas fa-calendar"></i> {{ event.start_time.strftime('%b %d, %Y') }}
+                    </div>
+
+                    <!-- Watch Button -->
+                    <a href="{{ event.recording_url }}" target="_blank" class="btn-primary" style="width: 100%;">
+                        <i class="fas fa-play"></i> Watch Recording
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .psu-card > div > div:first-child {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.psu-card {
+    transition: all 0.3s ease;
+}
+
+.psu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(139, 26, 26, 0.15);
+}
+</style>
+{% endblock %}

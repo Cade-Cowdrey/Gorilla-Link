@@ -65,8 +65,8 @@ def monitor_scheduler_health(app):
         app.logger.error(f"[Scheduler Health] Failed: {e}")
         try:
             send_system_alert("Scheduler Health Error", str(e))
-        except Exception:
-            pass
+        except Exception as alert_err:
+            app.logger.error(f"Failed to send alert: {alert_err}")
 
 
 # ---------------------------------------------------------------------

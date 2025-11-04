@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8 px-4">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Campus Settings</h1>
+            <p class="text-gray-600">Configure system settings, features, and integrations for {{ campus.name }}</p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            <!-- Basic Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">📋 Basic Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Campus Name</label>
+                        <input type="text" name="name" value="{{ campus.name }}" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A51C30]" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Campus Code</label>
+                        <input type="text" name="code" value="{{ campus.code }}" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A51C30]" maxlength="10">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                        <select name="timezone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A51C30]">
+                            <option value="America/Chicago" {% if campus.timezone == 'America/Chicago' %}selected{% endif %}>Central Time (CT)</option>
+                            <option value="America/New_York" {% if campus.timezone == 'America/New_York' %}selected{% endif %}>Eastern Time (ET)</option>
+                            <option value="America/Denver" {% if campus.timezone == 'America/Denver' %}selected{% endif %}>Mountain Time (MT)</option>
+                            <option value="America/Los_Angeles" {% if campus.timezone == 'America/Los_Angeles' %}selected{% endif %}>Pacific Time (PT)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branding -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎨 Branding & Colors</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Primary Color (Crimson)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" name="primary_color" value="{{ campus.primary_color or '#A51C30' }}" 
+                                   class="h-12 w-24 border border-gray-300 rounded cursor-pointer">
+                            <input type="text" value="{{ campus.primary_color or '#A51C30' }}" readonly
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Secondary Color (Gold)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" name="secondary_color" value="{{ campus.secondary_color or '#FFC82E' }}" 
+                                   class="h-12 w-24 border border-gray-300 rounded cursor-pointer">
+                            <input type="text" value="{{ campus.secondary_color or '#FFC82E' }}" readonly
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Toggles -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">⚡ Feature Toggles</h2>
+                <div class="space-y-4">
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🤝</span>
+                            <div>
+                                <div class="font-medium text-gray-800">Mentorship Platform</div>
+                                <div class="text-sm text-gray-600">Enable alumni-student mentorship matching</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_mentorship" 
+                               {% if campus.settings.get('enable_mentorship', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💼</span>
+                            <div>
+                                <div class="font-medium text-gray-800">Job Board</div>
+                                <div class="text-sm text-gray-600">Enable career center and job postings</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_job_board"
+                               {% if campus.settings.get('enable_job_board', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🎓</span>
+                            <div>
+                                <div class="font-medium text-gray-800">Scholarships</div>
+                                <div class="text-sm text-gray-600">Enable scholarship management and applications</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_scholarships"
+                               {% if campus.settings.get('enable_scholarships', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🌐</span>
+                            <div>
+                                <div class="font-medium text-gray-800">Alumni Network</div>
+                                <div class="text-sm text-gray-600">Enable alumni directory and networking</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_alumni_network"
+                               {% if campus.settings.get('enable_alumni_network', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📅</span>
+                            <div>
+                                <div class="font-medium text-gray-800">Events System</div>
+                                <div class="text-sm text-gray-600">Enable event creation and RSVP management</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_events"
+                               {% if campus.settings.get('enable_events', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🤖</span>
+                            <div>
+                                <div class="font-medium text-gray-800">AI Tools</div>
+                                <div class="text-sm text-gray-600">Enable AI career coach, resume builder, and essay helper</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_ai_tools"
+                               {% if campus.settings.get('enable_ai_tools', True) %}checked{% endif %}
+                               class="w-6 h-6 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">📧 Notification Settings</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">System Notification Email</label>
+                        <input type="email" name="notification_email" 
+                               value="{{ campus.settings.get('notification_email', '') }}"
+                               placeholder="admin@pittstate.edu"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A51C30]">
+                        <p class="text-sm text-gray-600 mt-1">Receives critical system alerts and reports</p>
+                    </div>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="weekly_digest"
+                               {% if campus.settings.get('weekly_digest', False) %}checked{% endif %}
+                               class="w-5 h-5 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                        <div>
+                            <div class="font-medium text-gray-800">Weekly Digest</div>
+                            <div class="text-sm text-gray-600">Send weekly activity summary every Monday</div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="daily_reports"
+                               {% if campus.settings.get('daily_reports', False) %}checked{% endif %}
+                               class="w-5 h-5 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                        <div>
+                            <div class="font-medium text-gray-800">Daily Reports</div>
+                            <div class="text-sm text-gray-600">Send daily engagement reports</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- API Integrations -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">🔌 API Integrations</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="flex items-center gap-3 mb-3">
+                            <input type="checkbox" name="canvas_enabled"
+                                   {% if campus.settings.get('canvas_enabled', False) %}checked{% endif %}
+                                   class="w-5 h-5 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                            <div>
+                                <div class="font-medium text-gray-800">Canvas LMS Integration</div>
+                                <div class="text-sm text-gray-600">Sync student data and grades from Canvas</div>
+                            </div>
+                        </label>
+                        <input type="password" name="canvas_api_key" 
+                               value="{{ campus.settings.get('canvas_api_key', '') }}"
+                               placeholder="Canvas API Key"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A51C30]">
+                    </div>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="linkedin_sync"
+                               {% if campus.settings.get('linkedin_sync', False) %}checked{% endif %}
+                               class="w-5 h-5 text-[#A51C30] focus:ring-[#A51C30] rounded">
+                        <div>
+                            <div class="font-medium text-gray-800">LinkedIn Sync</div>
+                            <div class="text-sm text-gray-600">Sync alumni employment data from LinkedIn</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="flex items-center justify-between pt-6">
+                <a href="{{ url_for('system_bp.multicampus') }}" class="text-[#A51C30] hover:underline">
+                    ← Back to System Overview
+                </a>
+                <button type="submit" class="bg-[#A51C30] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#8B1625] transition-colors">
+                    💾 Save Settings
+                </button>
+            </div>
+        </form>
+
+        <!-- Last Updated -->
+        {% if campus.updated_at %}
+        <div class="text-center text-sm text-gray-500 mt-8">
+            Last updated: {{ campus.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Color picker sync
+document.querySelectorAll('input[type="color"]').forEach(colorInput => {
+    const textInput = colorInput.nextElementSibling;
+    colorInput.addEventListener('input', function() {
+        textInput.value = this.value;
+    });
+});
+</script>
+{% endblock %}

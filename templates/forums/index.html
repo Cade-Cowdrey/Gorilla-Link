@@ -1,0 +1,77 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Community Forums - PSU Connect{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; padding: 2rem 0;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1><i class="fas fa-comments"></i> Community Forums</h1>
+            <p style="color: #6c757d;">Connect with PSU students and alumni. Ask questions, share knowledge, get advice.</p>
+        </div>
+        <a href="{{ url_for('forums.create_topic') }}" class="btn-primary">
+            <i class="fas fa-plus"></i> Create Topic
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; color: var(--psu-crimson); font-weight: bold;">{{ total_topics }}</div>
+            <div style="color: #6c757d;">Topics</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; color: var(--psu-crimson); font-weight: bold;">{{ total_posts }}</div>
+            <div style="color: #6c757d;">Posts</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2rem; color: var(--psu-crimson); font-weight: bold;">{{ total_users }}</div>
+            <div style="color: #6c757d;">Active Users</div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    {% for category in categories %}
+    <div class="psu-card" style="margin-bottom: 1.5rem;">
+        <div style="padding: 1.5rem;">
+            <div style="display: flex; align-items: start; gap: 1.5rem;">
+                <div style="font-size: 3rem; color: var(--psu-crimson); opacity: 0.7;">
+                    <i class="fas fa-{{ category.icon or 'folder' }}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 0.5rem 0;">
+                        <a href="{{ url_for('forums.category_topics', category_id=category.id) }}" style="color: var(--psu-crimson); text-decoration: none;">
+                            {{ category.name }}
+                        </a>
+                    </h3>
+                    <p style="color: #6c757d; margin: 0 0 1rem 0;">{{ category.description }}</p>
+                    
+                    <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: #6c757d;">
+                        <span><i class="fas fa-comments"></i> {{ category.topic_count }} topics</span>
+                        <span><i class="fas fa-reply"></i> {{ category.post_count }} posts</span>
+                    </div>
+                    
+                    {% if category.latest_post %}
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; font-size: 0.9rem;">
+                        Latest: <a href="{{ url_for('forums.view_topic', topic_id=category.latest_post.topic_id) }}" style="color: var(--psu-crimson);">
+                            {{ category.latest_post.topic.title[:50] }}
+                        </a>
+                        <span style="color: #6c757d;">by {{ category.latest_post.author.full_name }} - {{ category.latest_post.created_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not categories %}
+    <div class="psu-card" style="text-align: center; padding: 3rem;">
+        <i class="fas fa-inbox" style="font-size: 4rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+        <h3>No Categories Yet</h3>
+        <p style="color: #6c757d;">Forum categories will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

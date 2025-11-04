@@ -69,18 +69,69 @@
     </div>
   </div>
 
-  <!-- Department filter mock (future expansion) -->
+  <!-- Enhanced filters with date range and export -->
   <div class="card shadow-sm border-0 mt-3">
     <div class="card-body">
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <span class="text-muted small text-uppercase">Filters:</span>
-        <select class="form-select form-select-sm" style="width:auto" disabled title="Coming soon">
-          <option>All Departments</option>
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="text-muted small text-uppercase fw-bold">Filters:</span>
+        
+        <!-- Date Range Picker -->
+        <div class="d-flex align-items-center gap-2">
+          <label class="small text-muted mb-0">From:</label>
+          <input type="date" id="dateFrom" class="form-control form-control-sm" style="width:150px" 
+                 value="{{ (now - timedelta(days=30)).strftime('%Y-%m-%d') }}">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <label class="small text-muted mb-0">To:</label>
+          <input type="date" id="dateTo" class="form-control form-control-sm" style="width:150px"
+                 value="{{ now.strftime('%Y-%m-%d') }}">
+        </div>
+        
+        <button id="applyDateFilter" class="btn btn-sm btn-primary">
+          Apply Filter
+        </button>
+        
+        <div class="vr"></div>
+        
+        <!-- Department & Role Filters -->
+        <select id="departmentFilter" class="form-select form-select-sm" style="width:auto">
+          <option value="">All Departments</option>
+          <option value="business">Business</option>
+          <option value="education">Education</option>
+          <option value="technology">Technology</option>
+          <option value="arts">Arts & Sciences</option>
         </select>
-        <select class="form-select form-select-sm" style="width:auto" disabled title="Coming soon">
-          <option>All Roles</option>
+        
+        <select id="roleFilter" class="form-select form-select-sm" style="width:auto">
+          <option value="">All Roles</option>
+          <option value="student">Students</option>
+          <option value="alumni">Alumni</option>
+          <option value="faculty">Faculty</option>
+          <option value="employer">Employers</option>
         </select>
-        <span class="badge bg-warning text-dark">PSU-Branded • Ready for data wiring</span>
+        
+        <div class="vr"></div>
+        
+        <!-- Export Options -->
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                  id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            📥 Export
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li><a class="dropdown-item" href="#" onclick="exportData('csv')">
+              <i class="bi bi-filetype-csv"></i> Export as CSV
+            </a></li>
+            <li><a class="dropdown-item" href="#" onclick="exportData('json')">
+              <i class="bi bi-filetype-json"></i> Export as JSON
+            </a></li>
+            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">
+              <i class="bi bi-filetype-pdf"></i> Export as PDF
+            </a></li>
+          </ul>
+        </div>
+        
+        <span class="badge bg-success">✓ Live Data</span>
       </div>
     </div>
   </div>
@@ -89,25 +140,143 @@
 <!-- Plotly (bundled) -->
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  // Summary
-  const s = await fetch('{{ url_for("analytics.api_summary") }}').then(r=>r.json());
-  document.getElementById('pv7').textContent   = s.page_views_7d ?? '0';
-  document.getElementById('uu7').textContent   = s.unique_users_7d ?? '0';
-  document.getElementById('avg30').textContent = s.avg_per_day_30d ?? '0';
-  document.getElementById('endpoints').textContent = s.endpoints ?? '0';
+let currentFilters = {
+  dateFrom: null,
+  dateTo: null,
+  department: '',
+  role: ''
+};
 
-  // Timeseries
-  async function drawSeries(days) {
-    const ts = await fetch(`{{ url_for("analytics.api_timeseries") }}?days=${days}`).then(r=>r.json());
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize date filters
+  const dateFrom = document.getElementById('dateFrom');
+  const dateTo = document.getElementById('dateTo');
+  currentFilters.dateFrom = dateFrom.value;
+  currentFilters.dateTo = dateTo.value;
+  
+  // Load initial data
+  loadDashboardData();
+  
+  // Apply filter button
+  document.getElementById('applyDateFilter').addEventListener('click', () => {
+    currentFilters.dateFrom = dateFrom.value;
+    currentFilters.dateTo = dateTo.value;
+    currentFilters.department = document.getElementById('departmentFilter').value;
+    currentFilters.role = document.getElementById('roleFilter').value;
+    loadDashboardData();
+  });
+  
+  // Quick date range buttons (optional enhancement)
+  addQuickDateButtons();
+});
+
+async function loadDashboardData() {
+  try {
+    // Build query string with filters
+    const params = new URLSearchParams();
+    if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+    if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+    if (currentFilters.department) params.append('department', currentFilters.department);
+    if (currentFilters.role) params.append('role', currentFilters.role);
+    
+    // Summary
+    const s = await fetch(`{{ url_for("analytics_bp.api_summary") }}?${params}`).then(r=>r.json());
+    document.getElementById('pv7').textContent   = s.page_views_7d ?? '0';
+    document.getElementById('uu7').textContent   = s.unique_users_7d ?? '0';
+    document.getElementById('avg30').textContent = s.avg_per_day_30d ?? '0';
+    document.getElementById('endpoints').textContent = s.endpoints ?? '0';
+
+    // Timeseries with date filter
+    const days = Math.ceil((new Date(currentFilters.dateTo) - new Date(currentFilters.dateFrom)) / (1000 * 60 * 60 * 24));
+    const ts = await fetch(`{{ url_for("analytics_bp.api_timeseries") }}?days=${days}&${params}`).then(r=>r.json());
     const x = ts.series.map(p=>p.date), y = ts.series.map(p=>p.count);
-    Plotly.newPlot('timeseries', [{x, y, mode:'lines+markers', name:'Page Views'}], {
+    Plotly.newPlot('timeseries', [{x, y, mode:'lines+markers', name:'Page Views', marker:{color:'#A51C30'}}], {
       margin:{t:10,r:10,b:30,l:40},
       xaxis:{title:'Date'},
       yaxis:{title:'Views'},
     }, {displayModeBar:false});
+
+    // Top pages with filters
+    const top = await fetch(`{{ url_for("analytics_bp.api_top_pages") }}?limit=10&${params}`).then(r=>r.json());
+    displayTopPages(top.items);
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
   }
-  drawSeries(30);
+}
+
+function displayTopPages(items) {
+  const tbody = document.querySelector('#topPagesTable tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = items.map((item, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${item.page}</td>
+      <td>${item.views}</td>
+      <td>
+        <div class="progress" style="height:8px">
+          <div class="progress-bar bg-primary" role="progressbar" 
+               style="width:${(item.views / items[0].views * 100)}%"></div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function addQuickDateButtons() {
+  const container = document.querySelector('.card-body .d-flex');
+  const quickDates = document.createElement('div');
+  quickDates.className = 'd-flex gap-2 align-items-center';
+  quickDates.innerHTML = `
+    <span class="small text-muted">Quick:</span>
+    <button class="btn btn-sm btn-outline-secondary" onclick="setQuickDate(7)">7d</button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="setQuickDate(30)">30d</button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="setQuickDate(90)">90d</button>
+  `;
+  container.appendChild(quickDates);
+}
+
+function setQuickDate(days) {
+  const dateTo = document.getElementById('dateTo');
+  const dateFrom = document.getElementById('dateFrom');
+  const today = new Date();
+  const fromDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+  
+  dateTo.value = today.toISOString().split('T')[0];
+  dateFrom.value = fromDate.toISOString().split('T')[0];
+  
+  document.getElementById('applyDateFilter').click();
+}
+
+async function exportData(format) {
+  try {
+    const params = new URLSearchParams();
+    if (currentFilters.dateFrom) params.append('date_from', currentFilters.dateFrom);
+    if (currentFilters.dateTo) params.append('date_to', currentFilters.dateTo);
+    if (currentFilters.department) params.append('department', currentFilters.department);
+    if (currentFilters.role) params.append('role', currentFilters.role);
+    params.append('format', format);
+    
+    const response = await fetch(`{{ url_for("analytics_bp.export_data") }}?${params}`);
+    const blob = await response.blob();
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_${currentFilters.dateFrom}_to_${currentFilters.dateTo}.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    
+    alert(`✓ Analytics exported as ${format.toUpperCase()}`);
+  } catch (error) {
+    console.error('Export error:', error);
+    alert('Export failed. Please try again.');
+  }
+}
+</script>
   document.getElementById('days').addEventListener('change', e => drawSeries(e.target.value));
 
   // Top Pages

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pittsburg State University Connect - Your gateway to career success">
+    <title>{% block title %}PSU Connect{% endblock %} | Pittsburg State University</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PSU Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/psu_theme.css') }}">
+    
+    <!-- Additional CSS -->
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/psu_favicon.png') }}">
+</head>
+<body>
+    <!-- PSU Header -->
+    <header class="psu-header">
+        <div class="psu-header-top">
+            <div class="container">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-lg">
+                        <span><i class="fas fa-phone-alt"></i> (620) 235-4011</span>
+                        <span><i class="fas fa-envelope"></i> connect@pittstate.edu</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-md">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('core.notifications') }}" class="psu-nav-link">
+                                <i class="fas fa-bell"></i>
+                                {% if notification_count > 0 %}
+                                    <span class="psu-badge psu-badge-gold">{{ notification_count }}</span>
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('profile.view', user_id=current_user.id) }}" class="psu-nav-link">
+                                <i class="fas fa-user-circle"></i>
+                                {{ current_user.first_name }}
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-user-plus"></i> Sign Up
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Logo -->
+                <a href="{{ url_for('core.index') }}" class="psu-logo">
+                    <div class="psu-logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.75rem; line-height: 1;">PSU Connect</div>
+                        <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Pittsburg State University</div>
+                    </div>
+                </a>
+                
+                <!-- Navigation -->
+                <nav class="psu-nav">
+                    <ul class="psu-nav-list">
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('core.index') }}" class="psu-nav-link {% if request.endpoint == 'core.index' %}active{% endif %}">
+                                <i class="fas fa-home"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('careers.job_board') }}" class="psu-nav-link {% if request.endpoint == 'careers.job_board' %}active{% endif %}">
+                                <i class="fas fa-briefcase"></i>
+                                Jobs
+                            </a>
+                        </li>
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('resume.dashboard') }}" class="psu-nav-link {% if 'resume' in request.endpoint %}active{% endif %}">
+                                <i class="fas fa-file-alt"></i>
+                                Resume Builder
+                            </a>
+                        </li>
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('connections.alumni_network') }}" class="psu-nav-link {% if 'connections' in request.endpoint %}active{% endif %}">
+                                <i class="fas fa-users"></i>
+                                Alumni Network
+                            </a>
+                        </li>
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('community.feed') }}" class="psu-nav-link {% if 'community' in request.endpoint %}active{% endif %}">
+                                <i class="fas fa-newspaper"></i>
+                                Community
+                            </a>
+                        </li>
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('events.upcoming') }}" class="psu-nav-link {% if 'events' in request.endpoint %}active{% endif %}">
+                                <i class="fas fa-calendar-alt"></i>
+                                Events
+                            </a>
+                        </li>
+                        {% if current_user.is_authenticated %}
+                            <li class="psu-nav-item">
+                                <a href="{{ url_for('analytics.dashboard') }}" class="psu-nav-link {% if 'analytics' in request.endpoint %}active{% endif %}">
+                                    <i class="fas fa-chart-line"></i>
+                                    Analytics
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-lg">
+                {% for category, message in messages %}
+                    <div class="psu-alert psu-alert-{{ category }} fade-in">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- PSU Footer -->
+    <footer class="psu-footer">
+        <div class="container">
+            <div class="psu-footer-content">
+                <!-- About Section -->
+                <div class="psu-footer-section">
+                    <h4><i class="fas fa-graduation-cap"></i> PSU Connect</h4>
+                    <p>Connecting Pittsburg State students, alumni, and employers to build successful careers and lasting relationships.</p>
+                    <div class="d-flex gap-md mt-md">
+                        <a href="#" class="psu-nav-link" style="padding: 0.5rem;">
+                            <i class="fab fa-facebook fa-lg"></i>
+                        </a>
+                        <a href="#" class="psu-nav-link" style="padding: 0.5rem;">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                        <a href="#" class="psu-nav-link" style="padding: 0.5rem;">
+                            <i class="fab fa-linkedin fa-lg"></i>
+                        </a>
+                        <a href="#" class="psu-nav-link" style="padding: 0.5rem;">
+                            <i class="fab fa-instagram fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div class="psu-footer-section">
+                    <h4><i class="fas fa-link"></i> Quick Links</h4>
+                    <ul class="psu-footer-links">
+                        <li><a href="{{ url_for('core.index') }}">Home</a></li>
+                        <li><a href="{{ url_for('careers.job_board') }}">Job Board</a></li>
+                        <li><a href="{{ url_for('resume.dashboard') }}">Resume Builder</a></li>
+                        <li><a href="{{ url_for('connections.alumni_network') }}">Alumni Network</a></li>
+                        <li><a href="{{ url_for('events.upcoming') }}">Events</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Resources -->
+                <div class="psu-footer-section">
+                    <h4><i class="fas fa-book"></i> Resources</h4>
+                    <ul class="psu-footer-links">
+                        <li><a href="{{ url_for('core.about') }}">About Us</a></li>
+                        <li><a href="{{ url_for('core.contact') }}">Contact</a></li>
+                        <li><a href="{{ url_for('core.faq') }}">FAQ</a></li>
+                        <li><a href="{{ url_for('core.help') }}">Help Center</a></li>
+                        <li><a href="{{ url_for('core.privacy') }}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="psu-footer-section">
+                    <h4><i class="fas fa-address-card"></i> Contact</h4>
+                    <ul class="psu-footer-links">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            1701 S Broadway St<br>
+                            Pittsburg, KS 66762
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            (620) 235-4011
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            connect@pittstate.edu
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            Mon-Fri: 8am-5pm CST
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="psu-footer-bottom">
+                <p>
+                    &copy; {{ current_year or 2025 }} Pittsburg State University. All rights reserved. |
+                    <a href="{{ url_for('core.terms') }}">Terms of Service</a> |
+                    <a href="{{ url_for('core.privacy') }}">Privacy Policy</a> |
+                    <a href="{{ url_for('core.accessibility') }}">Accessibility</a>
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8;">
+                    Made with <i class="fas fa-heart" style="color: var(--psu-gold);"></i> for the PSU Community
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/psu_main.js') }}"></script>
+    
+    <!-- Additional JS -->
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Auto-dismiss alerts after 5 seconds -->
+    <script>
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.psu-alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

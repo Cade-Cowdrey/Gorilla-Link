@@ -1,0 +1,201 @@
+{% extends "base_psu.html" %}
+
+{% block title %}For You - Job Recommendations{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; padding: 2rem 0;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--psu-crimson); margin-bottom: 1rem;">
+            <i class="fas fa-star"></i> Recommended For You
+        </h1>
+        <p style="font-size: 1.1rem; color: #6c757d;">Jobs personalized to your profile with AI matching</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="psu-card" style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--psu-crimson);">{{ recommendations|length }}</div>
+            <div style="color: #6c757d; font-size: 0.9rem;">New Recommendations</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--psu-gold);">{{ viewed_count }}</div>
+            <div style="color: #6c757d; font-size: 0.9rem;">Jobs Viewed</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ applied_count }}</div>
+            <div style="color: #6c757d; font-size: 0.9rem;">Applied</div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    {% if recommendations %}
+    <div style="display: grid; gap: 1.5rem;">
+        {% for rec in recommendations %}
+        <div class="psu-card" style="padding: 0; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 0;">
+                <!-- Job Info -->
+                <div style="padding: 1.5rem;">
+                    <!-- Match Badge -->
+                    <div style="margin-bottom: 1rem;">
+                        {% set match_class = 'success' if rec.match_score >= 70 else 'warning' if rec.match_score >= 50 else 'secondary' %}
+                        {% set match_color = '#28a745' if rec.match_score >= 70 else '#ffc107' if rec.match_score >= 50 else '#6c757d' %}
+                        <span style="background: {{ match_color }}; color: white; padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 600;">
+                            <i class="fas fa-star"></i> {{ rec.match_score }}% Match
+                        </span>
+                        <span style="color: #6c757d; font-size: 0.9rem; margin-left: 0.5rem;">
+                            Expires {{ rec.expires_at.strftime('%b %d') }}
+                        </span>
+                    </div>
+
+                    <!-- Job Title -->
+                    <h3 style="margin: 0 0 0.5rem 0; color: var(--psu-crimson);">
+                        <a href="/jobs/{{ rec.job.id }}" style="color: inherit; text-decoration: none;">
+                            {{ rec.job.title }}
+                        </a>
+                    </h3>
+
+                    <!-- Company -->
+                    <div style="font-size: 1.1rem; color: #6c757d; margin-bottom: 1rem;">
+                        <i class="fas fa-building"></i> {{ rec.job.company }}
+                    </div>
+
+                    <!-- Details -->
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.9rem; color: #6c757d;">
+                        <div>
+                            <i class="fas fa-map-marker-alt"></i> {{ rec.job.location }}
+                        </div>
+                        <div>
+                            <i class="fas fa-briefcase"></i> {{ rec.job.job_type }}
+                        </div>
+                        {% if rec.job.salary_range %}
+                        <div>
+                            <i class="fas fa-dollar-sign"></i> {{ rec.job.salary_range }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Why Recommended -->
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong style="color: var(--psu-crimson);">
+                            <i class="fas fa-info-circle"></i> Why this job?
+                        </strong>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d;">
+                            {% if rec.match_reasons %}
+                                {{ rec.match_reasons }}
+                            {% else %}
+                                Matches your skills, major, and career interests
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; border-left: 1px solid #e9ecef; min-width: 200px;">
+                    <a href="/jobs/{{ rec.job.id }}" class="btn-primary" style="width: 100%; text-align: center;" onclick="trackBehavior({{ rec.id }}, 'click')">
+                        <i class="fas fa-eye"></i> View Job
+                    </a>
+                    <button onclick="quickApply({{ rec.job.id }})" class="btn-secondary" style="width: 100%;">
+                        <i class="fas fa-paper-plane"></i> Quick Apply
+                    </button>
+                    <button onclick="saveJob({{ rec.job.id }})" class="btn-secondary" style="width: 100%;">
+                        <i class="fas fa-bookmark"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load More -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <button onclick="refreshRecommendations()" class="btn-secondary">
+            <i class="fas fa-sync"></i> Refresh Recommendations
+        </button>
+    </div>
+
+    {% else %}
+    <div class="psu-card" style="padding: 3rem; text-align: center;">
+        <i class="fas fa-star" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+        <h3 style="color: var(--psu-crimson);">No recommendations yet</h3>
+        <p style="color: #6c757d;">Complete your profile to get personalized job recommendations!</p>
+        <a href="/profile/edit" class="btn-primary" style="margin-top: 1rem;">
+            <i class="fas fa-user-edit"></i> Complete Profile
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Other Discovery Options -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="psu-card" style="padding: 1.5rem; text-align: center;">
+            <h4 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+                <i class="fas fa-users"></i> Collaborative Filtering
+            </h4>
+            <p style="color: #6c757d; margin-bottom: 1rem;">
+                See what students with your major are applying to
+            </p>
+            <a href="/recommendations/collaborative" class="btn-secondary">
+                View Similar Students' Picks
+            </a>
+        </div>
+
+        <div class="psu-card" style="padding: 1.5rem; text-align: center;">
+            <h4 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+                <i class="fas fa-search"></i> Browse All Jobs
+            </h4>
+            <p style="color: #6c757d; margin-bottom: 1rem;">
+                Search and filter through all available positions
+            </p>
+            <a href="/jobs" class="btn-secondary">
+                Browse Jobs
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function trackBehavior(recId, action) {
+    fetch('/recommendations/api/track', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            recommendation_id: recId,
+            action: action
+        })
+    });
+}
+
+function refreshRecommendations() {
+    fetch('/recommendations/api/refresh', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function quickApply(jobId) {
+    window.location.href = '/jobs/' + jobId + '/apply';
+}
+
+function saveJob(jobId) {
+    // Save job implementation
+    alert('Job saved! (Implement save functionality)');
+}
+</script>
+
+<style>
+.psu-card {
+    transition: all 0.3s ease;
+}
+
+.psu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(139, 26, 26, 0.15);
+}
+</style>
+{% endblock %}

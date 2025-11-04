@@ -1,10 +1,143 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% extends "base_psu.html" %}
+
+{% block title %}Admin Dashboard - PSU Connect{% endblock %}
+
 {% block content %}
-<h2>Admin Dashboard</h2>
-<ul>
-  <li>Content approvals</li>
-  <li>Scholarship management</li>
-  <li>Analytics</li>
-</ul>
+<div class="container" style="max-width: 1400px; padding: 2rem 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+        <div>
+            <a href="/admin/users" class="btn-secondary"><i class="fas fa-users"></i> Users</a>
+            <a href="/admin/content/moderation" class="btn-secondary"><i class="fas fa-flag"></i> Moderation</a>
+            <a href="/admin/analytics" class="btn-secondary"><i class="fas fa-chart-line"></i> Analytics</a>
+        </div>
+    </div>
+
+    <!-- Overview Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-crimson);">{{ total_users }}</div>
+            <div style="color: #6c757d;">Total Users</div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #28a745;">
+                +{{ new_users_week }} this week
+            </div>
+        </div>
+
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-crimson);">{{ active_users }}</div>
+            <div style="color: #6c757d;">Active Users (30d)</div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                {{ ((active_users / total_users * 100)|round(1)) }}% active rate
+            </div>
+        </div>
+
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-crimson);">{{ total_applications }}</div>
+            <div style="color: #6c757d;">Total Applications</div>
+            <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                {{ total_jobs }} active jobs
+            </div>
+        </div>
+
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-crimson);">{{ avg_profile_views }}</div>
+            <div style="color: #6c757d;">Avg Profile Views</div>
+        </div>
+    </div>
+
+    <!-- Engagement Metrics -->
+    <div class="psu-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">Engagement Metrics</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ total_stories }}</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Success Stories</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ total_forum_posts }}</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Forum Posts</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ total_messages }}</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Messages Sent</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ active_mentorships }}</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Active Mentorships</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Growth Chart -->
+    <div class="psu-card" style="padding: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">User Growth (Last 30 Days)</h3>
+        <canvas id="growthChart" height="80"></canvas>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        <div class="psu-card" style="padding: 1.5rem;">
+            <h4 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">
+                <i class="fas fa-users"></i> User Management
+            </h4>
+            <a href="/admin/users" class="btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">View All Users</a>
+            <a href="/admin/export/users" class="btn-secondary" style="width: 100%;">Export User Data</a>
+        </div>
+
+        <div class="psu-card" style="padding: 1.5rem;">
+            <h4 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">
+                <i class="fas fa-flag"></i> Content Moderation
+            </h4>
+            <a href="/admin/content/moderation" class="btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">Moderation Queue</a>
+            <a href="/admin/badges" class="btn-secondary" style="width: 100%;">Manage Badges</a>
+        </div>
+
+        <div class="psu-card" style="padding: 1.5rem;">
+            <h4 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">
+                <i class="fas fa-cog"></i> System
+            </h4>
+            <a href="/admin/system/health" class="btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">System Health</a>
+            <a href="/admin/analytics" class="btn-secondary" style="width: 100%;">Detailed Analytics</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Growth Chart
+const ctx = document.getElementById('growthChart').getContext('2d');
+const growthData = {{ growth_data|tojson }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: growthData.map(d => d.date),
+        datasets: [{
+            label: 'New Users',
+            data: growthData.map(d => d.users),
+            borderColor: '#8B1A1A',
+            backgroundColor: 'rgba(139, 26, 26, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+</script>
 {% endblock %}

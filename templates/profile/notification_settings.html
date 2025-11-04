@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}Notification Settings{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Notification Settings</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Manage how you receive notifications across all channels</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button onclick="enableAll()" class="px-4 py-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-semibold">
+                <i class="fas fa-check-circle mr-2"></i>Enable All
+            </button>
+            <button onclick="disableAll()" class="px-4 py-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-semibold">
+                <i class="fas fa-times-circle mr-2"></i>Disable All
+            </button>
+            <button onclick="enableChannel('email')" class="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-semibold">
+                <i class="fas fa-envelope mr-2"></i>Email Only
+            </button>
+            <button onclick="enableChannel('push')" class="px-4 py-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-semibold">
+                <i class="fas fa-mobile-alt mr-2"></i>Push Only
+            </button>
+        </div>
+    </div>
+
+    <!-- Unread Notifications -->
+    <div class="bg-gradient-to-r from-crimson to-red-700 rounded-lg shadow-md p-6 mb-6 text-white">
+        <div class="flex justify-between items-center">
+            <div>
+                <h3 class="text-2xl font-bold" id="unread-count">Loading...</h3>
+                <p class="text-red-100">Unread notifications</p>
+            </div>
+            <button onclick="markAllRead()" class="bg-white text-crimson px-6 py-2 rounded-lg font-semibold hover:bg-gray-100">
+                Mark All Read
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Categories -->
+    <div class="space-y-6">
+        <!-- Platform Notifications -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-users mr-3"></i>Platform Activity
+                </h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">New Posts</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When someone you follow creates a post</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_post" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_post" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">New Comments</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When someone comments on your posts</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_comment" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_comment" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_comment" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">New Connections</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When someone sends you a connection request</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_connection" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_connection" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_connection" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scholarship Notifications -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-gold to-yellow-500 px-6 py-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-graduation-cap mr-3"></i>Scholarships
+                </h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Scholarship Deadlines</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Critical reminders about upcoming deadlines</p>
+                        <span class="text-xs text-red-600 font-semibold">🔴 Critical Priority</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_deadline" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_deadline" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_deadline" data-channel="sms" checked>
+                            <span>SMS</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_deadline" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Smart Matches</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When new scholarships match your profile</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_matched" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_matched" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="scholarship_matched" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Application Status</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Updates on your scholarship applications</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="application_status" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="application_status" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="application_status" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events & Career -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-calendar-alt mr-3"></i>Events & Career
+                </h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Event Reminders</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Reminders for events you're attending</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="event_reminder" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="event_reminder" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="event_reminder" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">New Job Postings</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When jobs match your interests</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_job" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_job" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_job" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentorship -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-hands-helping mr-3"></i>Mentorship
+                </h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Mentorship Requests</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When someone requests mentorship from you</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="mentorship_request" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="mentorship_request" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="mentorship_request" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Session Reminders</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Reminders for scheduled mentorship sessions</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="session_reminder" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="session_reminder" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communication -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-comments mr-3"></i>Communication
+                </h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">New Messages</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When you receive direct messages</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_message" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_message" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="new_message" data-channel="push" checked>
+                            <span>Push</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Announcements</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Important announcements from departments</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="announcement" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="announcement" data-channel="email" checked>
+                            <span>Email</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="notification-row">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Forum Replies</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">When someone replies to your forum posts</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="forum_reply" data-channel="in_app" checked>
+                            <span>In-App</span>
+                        </label>
+                        <label class="channel-toggle">
+                            <input type="checkbox" data-type="forum_reply" data-channel="email">
+                            <span>Email</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="mt-8 flex justify-end">
+        <button onclick="savePreferences()" class="bg-crimson hover:bg-crimson-dark text-white px-8 py-3 rounded-lg font-semibold text-lg">
+            <i class="fas fa-save mr-2"></i>Save Preferences
+        </button>
+    </div>
+</div>
+
+<script>
+// Load current preferences
+async function loadPreferences() {
+    try {
+        const response = await fetch('/api/v1/notifications/preferences');
+        const data = await response.json();
+        
+        // Update unread count
+        const unreadResponse = await fetch('/api/v1/notifications/list?unread_only=true');
+        const unreadData = await unreadResponse.json();
+        document.getElementById('unread-count').textContent = unreadData.unread_count;
+        
+        // Apply preferences to checkboxes
+        if (data.preferences) {
+            Object.entries(data.preferences).forEach(([notifType, channels]) => {
+                Object.entries(channels).forEach(([channel, enabled]) => {
+                    const checkbox = document.querySelector(`input[data-type="${notifType}"][data-channel="${channel}"]`);
+                    if (checkbox) {
+                        checkbox.checked = enabled;
+                    }
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Error loading preferences:', error);
+    }
+}
+
+// Save preferences
+async function savePreferences() {
+    const checkboxes = document.querySelectorAll('input[data-type][data-channel]');
+    const preferences = {};
+    
+    checkboxes.forEach(cb => {
+        const type = cb.dataset.type;
+        const channel = cb.dataset.channel;
+        
+        if (!preferences[type]) {
+            preferences[type] = {};
+        }
+        preferences[type][channel] = cb.checked;
+    });
+    
+    try {
+        const response = await fetch('/api/v1/notifications/preferences', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({preferences})
+        });
+        
+        if (response.ok) {
+            showNotification('Preferences saved successfully!', 'success');
+        } else {
+            showNotification('Error saving preferences', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving preferences:', error);
+        showNotification('Error saving preferences', 'error');
+    }
+}
+
+// Quick actions
+function enableAll() {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+}
+
+function disableAll() {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+}
+
+async function enableChannel(channel) {
+    try {
+        const response = await fetch(`/api/v1/notifications/channel/${channel}/enable`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            // Enable all checkboxes for this channel
+            document.querySelectorAll(`input[data-channel="${channel}"]`).forEach(cb => cb.checked = true);
+            // Disable other channels
+            const otherChannels = ['in_app', 'email', 'sms', 'push'].filter(c => c !== channel);
+            otherChannels.forEach(c => {
+                document.querySelectorAll(`input[data-channel="${c}"]`).forEach(cb => cb.checked = false);
+            });
+            showNotification(`${channel.toUpperCase()} enabled for all notifications`, 'success');
+        }
+    } catch (error) {
+        console.error('Error enabling channel:', error);
+    }
+}
+
+async function markAllRead() {
+    try {
+        const response = await fetch('/api/v1/notifications/read-all', {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            document.getElementById('unread-count').textContent = '0';
+            showNotification('All notifications marked as read', 'success');
+        }
+    } catch (error) {
+        console.error('Error marking notifications read:', error);
+    }
+}
+
+function showNotification(message, type) {
+    // Simple notification (would use toast library in production)
+    const color = type === 'success' ? 'green' : 'red';
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 bg-${color}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Initialize
+loadPreferences();
+</script>
+
+<style>
+.notification-row {
+    @apply flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition;
+}
+
+.channel-toggle {
+    @apply flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition;
+}
+
+.channel-toggle input[type="checkbox"] {
+    @apply w-4 h-4 text-crimson border-gray-300 rounded focus:ring-crimson;
+}
+
+.channel-toggle span {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.channel-toggle input[type="checkbox"]:checked + span {
+    @apply text-crimson font-semibold;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Chat History - AI Career Coach{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding: 2rem 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1><i class="fas fa-history"></i> Chat History</h1>
+        <a href="/ai-coach/chat" class="btn-primary">
+            <i class="fas fa-comments"></i> Back to Chat
+        </a>
+    </div>
+
+    {% if grouped_messages %}
+        {% for date, messages in grouped_messages.items() %}
+        <div class="psu-card" style="margin-bottom: 2rem;">
+            <div style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                <h3 style="margin: 0; color: var(--psu-crimson);">
+                    <i class="fas fa-calendar-day"></i>
+                    {{ date }}
+                </h3>
+            </div>
+            
+            <div style="padding: 1.5rem;">
+                {% for msg in messages %}
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">
+                    <div style="display: flex; align-items: start; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: {{ 'var(--psu-crimson)' if msg.role == 'assistant' else 'var(--psu-gold)' }}; color: {{ 'white' if msg.role == 'assistant' else 'var(--psu-crimson)' }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-{{ 'robot' if msg.role == 'assistant' else 'user' }}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--psu-crimson);">
+                                {{ 'AI Coach' if msg.role == 'assistant' else 'You' }}
+                                <span style="font-weight: normal; color: #6c757d; font-size: 0.9rem;">
+                                    {{ msg.created_at.strftime('%I:%M %p') }}
+                                </span>
+                            </div>
+                            <div style="line-height: 1.6;">
+                                {{ msg.content|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="psu-card" style="text-align: center; padding: 3rem;">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+            <h3>No chat history yet</h3>
+            <p style="color: #6c757d;">Start a conversation with your AI career coach!</p>
+            <a href="/ai-coach/chat" class="btn-primary" style="margin-top: 1rem;">
+                Start Chatting
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

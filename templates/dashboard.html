@@ -1,0 +1,355 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Dashboard - PSU Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.widget {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s;
+}
+
+.widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--psu-crimson);
+}
+
+.widget-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--psu-crimson), #a52020);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--psu-crimson);
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quick-action {
+    display: block;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.quick-action:hover {
+    background: var(--psu-crimson);
+    color: white;
+    transform: translateX(5px);
+}
+
+.badge-mini {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--psu-gold);
+    color: var(--psu-crimson);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(var(--psu-crimson) 0%, #f8f9fa 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-inner {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--psu-crimson);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1400px; padding: 2rem 0;">
+    <!-- Welcome Header -->
+    <div style="background: linear-gradient(135deg, var(--psu-crimson), #a52020); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h1 style="margin: 0 0 0.5rem 0;">Welcome back, {{ current_user.full_name }}! 👋</h1>
+        <p style="margin: 0; opacity: 0.9;">Your career journey continues. Here's what's happening today.</p>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Profile Completion -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Profile Strength</h3>
+                <div class="widget-icon"><i class="fas fa-user-circle"></i></div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; margin: 1rem 0;">
+                <div class="progress-circle" style="background: conic-gradient(var(--psu-crimson) {{ profile_completion }}%, #f8f9fa 0%);">
+                    <div class="progress-inner">{{ profile_completion }}%</div>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 1rem;">
+                {% if profile_completion == 100 %}
+                    🎉 Perfect! Your profile is complete.
+                {% elif profile_completion >= 75 %}
+                    Almost there! Complete remaining items.
+                {% else %}
+                    Let's boost your profile visibility!
+                {% endif %}
+            </p>
+            <a href="/profile/edit" class="btn-primary" style="width: 100%; text-align: center;">Complete Profile</a>
+        </div>
+
+        <!-- Job Matches -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">New Job Matches</h3>
+                <div class="widget-icon"><i class="fas fa-briefcase"></i></div>
+            </div>
+            <div class="stat-number">{{ new_job_matches }}</div>
+            <div class="stat-label">Recommended for you today</div>
+            <div style="margin-top: 1rem;">
+                <a href="/recommendations/for-you" class="quick-action">
+                    <i class="fas fa-arrow-right"></i> View Recommendations
+                </a>
+                <a href="/auto-apply" class="quick-action">
+                    <i class="fas fa-magic"></i> Auto-Apply Queue
+                </a>
+            </div>
+        </div>
+
+        <!-- Applications Status -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Applications</h3>
+                <div class="widget-icon"><i class="fas fa-paper-plane"></i></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--psu-crimson);">{{ total_applications }}</div>
+                    <div style="font-size: 0.85rem; color: #6c757d;">Total Applied</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">{{ interview_count }}</div>
+                    <div style="font-size: 0.85rem; color: #6c757d;">Interviews</div>
+                </div>
+            </div>
+            <a href="/applications" class="btn-secondary" style="width: 100%; text-align: center;">View All</a>
+        </div>
+
+        <!-- Points & Level -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Your Progress</h3>
+                <div class="widget-icon"><i class="fas fa-trophy"></i></div>
+            </div>
+            <div style="text-align: center; margin: 1rem 0;">
+                <div class="stat-number">{{ user_points }}</div>
+                <div class="stat-label">Total Points</div>
+                <div class="badge-mini" style="margin-top: 1rem;">Level {{ user_level }}</div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <a href="/gamification/badges" class="quick-action">
+                    <i class="fas fa-medal"></i> View Badges ({{ badge_count }})
+                </a>
+                <a href="/gamification/leaderboard" class="quick-action">
+                    <i class="fas fa-chart-line"></i> Leaderboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Streak -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Daily Streak</h3>
+                <div class="widget-icon"><i class="fas fa-fire"></i></div>
+            </div>
+            <div style="text-align: center; margin: 1rem 0;">
+                <div style="font-size: 3rem;">🔥</div>
+                <div class="stat-number">{{ current_streak }}</div>
+                <div class="stat-label">Days in a row</div>
+            </div>
+            {% if current_streak >= 7 %}
+            <div style="text-align: center; padding: 0.5rem; background: #d4edda; color: #155724; border-radius: 8px;">
+                🎉 Amazing! Keep it going!
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Messages -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Messages</h3>
+                <div class="widget-icon"><i class="fas fa-envelope"></i></div>
+            </div>
+            <div class="stat-number">{{ unread_messages }}</div>
+            <div class="stat-label">Unread messages</div>
+            <div style="margin-top: 1rem;">
+                <a href="/messages/inbox" class="quick-action">
+                    <i class="fas fa-inbox"></i> Inbox
+                </a>
+                <a href="/messages/compose" class="quick-action">
+                    <i class="fas fa-pen"></i> Compose New
+                </a>
+            </div>
+        </div>
+
+        <!-- AI Coach -->
+        <div class="widget" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+            <div class="widget-header">
+                <h3 class="widget-title">AI Career Coach</h3>
+                <div class="widget-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+            <p style="margin: 1rem 0; color: #6c757d;">Get instant career advice, resume tips, and interview prep 24/7.</p>
+            <a href="/ai-coach/chat" class="btn-primary" style="width: 100%; text-align: center; background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="fas fa-comments"></i> Start Chat
+            </a>
+        </div>
+
+        <!-- Analytics -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Profile Analytics</h3>
+                <div class="widget-icon"><i class="fas fa-chart-bar"></i></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--psu-crimson);">{{ profile_views }}</div>
+                    <div style="font-size: 0.85rem; color: #6c757d;">Profile Views</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--psu-gold);">{{ resume_downloads }}</div>
+                    <div style="font-size: 0.85rem; color: #6c757d;">Resume Downloads</div>
+                </div>
+            </div>
+            <a href="/analytics/dashboard" class="btn-secondary" style="width: 100%; text-align: center;">View Analytics</a>
+        </div>
+
+        <!-- Mentorship -->
+        <div class="widget">
+            <div class="widget-header">
+                <h3 class="widget-title">Mentorship</h3>
+                <div class="widget-icon"><i class="fas fa-user-friends"></i></div>
+            </div>
+            {% if has_mentor %}
+            <p style="margin: 1rem 0;">
+                <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                Connected with mentor
+            </p>
+            <a href="/mentorship/mentee/dashboard" class="quick-action">
+                <i class="fas fa-calendar"></i> Schedule Session
+            </a>
+            {% else %}
+            <p style="margin: 1rem 0; color: #6c757d;">Get guidance from experienced professionals.</p>
+            <a href="/mentorship/find-mentor" class="btn-primary" style="width: 100%; text-align: center;">Find a Mentor</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="psu-card" style="margin-top: 2rem; padding: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">
+            <i class="fas fa-bolt"></i> Quick Actions
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="/resume-builder" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-file-alt" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Build Resume</strong>
+            </a>
+            <a href="/jobs" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-search" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Search Jobs</strong>
+            </a>
+            <a href="/forums" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-comments" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Community</strong>
+            </a>
+            <a href="/success-stories/feed" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-star" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Success Stories</strong>
+            </a>
+            <a href="/tools/salary" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-calculator" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Salary Tool</strong>
+            </a>
+            <a href="/referrals/dashboard" class="quick-action" style="text-align: center; padding: 1rem;">
+                <i class="fas fa-gift" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                <strong>Earn Rewards</strong>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="psu-card" style="margin-top: 2rem; padding: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--psu-crimson);">
+            <i class="fas fa-history"></i> Recent Activity
+        </h3>
+        {% if recent_activity %}
+        <div style="max-height: 300px; overflow-y: auto;">
+            {% for activity in recent_activity %}
+            <div style="padding: 0.75rem; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 40px; height: 40px; background: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-{{ activity.icon }}" style="color: var(--psu-crimson);"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div>{{ activity.message }}</div>
+                    <div style="font-size: 0.85rem; color: #6c757d;">{{ activity.time }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #6c757d; padding: 2rem;">
+            No recent activity. Start exploring!
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base_psu.html" %}
+
+{% block title %}Referral Program - PSU Connect{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; padding: 2rem 0;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--psu-crimson); margin-bottom: 1rem;">
+            <i class="fas fa-gift"></i> Referral Program
+        </h1>
+        <p style="font-size: 1.2rem; color: #6c757d;">Share PSU Connect and earn rewards!</p>
+    </div>
+
+    <!-- Rewards Banner -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, var(--psu-crimson) 0%, var(--psu-gold) 100%); color: white; text-align: center;">
+        <h2 style="margin: 0 0 1rem 0; color: white;">🎁 Earn Amazing Rewards!</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 1.5rem;">
+            <div>
+                <div style="font-size: 2.5rem; font-weight: bold;">100 Points</div>
+                <div>For each successful referral</div>
+            </div>
+            <div>
+                <div style="font-size: 2.5rem; font-weight: bold;">1 Month FREE</div>
+                <div>Premium for every referral</div>
+            </div>
+            <div>
+                <div style="font-size: 2.5rem; font-weight: bold;">50% OFF</div>
+                <div>Your friends save $10!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-crimson);">{{ referral_count }}</div>
+            <div style="color: #6c757d;">Successful Referrals</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: var(--psu-gold);">{{ points_earned }}</div>
+            <div style="color: #6c757d;">Points Earned</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #28a745;">{{ free_months }}</div>
+            <div style="color: #6c757d;">Free Months Earned</div>
+        </div>
+        <div class="psu-card" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #007bff;">{{ pending_count }}</div>
+            <div style="color: #6c757d;">Pending Referrals</div>
+        </div>
+    </div>
+
+    <!-- Your Referral Code -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem;">
+        <h3 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-link"></i> Your Unique Referral Code
+        </h3>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <input type="text" 
+                   id="referralCode" 
+                   value="{{ referral_code }}" 
+                   readonly 
+                   style="flex: 1; padding: 1rem; border: 2px solid var(--psu-crimson); border-radius: 0.5rem; font-size: 1.2rem; font-weight: bold; text-align: center; letter-spacing: 2px;">
+            <button onclick="copyReferralCode()" class="btn-primary" style="padding: 1rem 2rem;">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+        <div style="margin-top: 1rem;">
+            <strong>Referral Link:</strong><br>
+            <input type="text" 
+                   id="referralLink" 
+                   value="{{ request.url_root }}referrals/process/{{ referral_code }}" 
+                   readonly 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; margin-top: 0.5rem;">
+        </div>
+    </div>
+
+    <!-- Send Invitations -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem;">
+        <h3 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-envelope"></i> Send Email Invitations
+        </h3>
+        <form action="/referrals/send-invite" method="POST">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email Addresses (one per line)</label>
+                <textarea name="emails" 
+                          rows="5" 
+                          placeholder="friend1@example.com&#10;friend2@example.com&#10;friend3@example.com"
+                          style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; font-family: monospace;"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">
+                <i class="fas fa-paper-plane"></i> Send Invitations
+            </button>
+        </form>
+    </div>
+
+    <!-- Referral History -->
+    <div class="psu-card" style="padding: 2rem; margin-bottom: 2rem;">
+        <h3 style="color: var(--psu-crimson); margin: 0 0 1rem 0;">
+            <i class="fas fa-history"></i> Your Referrals
+        </h3>
+        {% if referrals %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa; border-bottom: 2px solid var(--psu-crimson);">
+                        <th style="padding: 0.75rem; text-align: left;">Referred User</th>
+                        <th style="padding: 0.75rem; text-align: left;">Status</th>
+                        <th style="padding: 0.75rem; text-align: left;">Date</th>
+                        <th style="padding: 0.75rem; text-align: right;">Reward</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ref in referrals %}
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 0.75rem;">
+                            {% if ref.referred_user %}
+                                <strong>{{ ref.referred_user.name }}</strong><br>
+                                <small style="color: #6c757d;">{{ ref.referred_user.email }}</small>
+                            {% else %}
+                                <span style="color: #6c757d;">{{ ref.referred_email or 'Pending' }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            {% if ref.status == 'completed' %}
+                                <span style="color: #28a745; font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Completed
+                                </span>
+                            {% elif ref.status == 'pending' %}
+                                <span style="color: #ffc107; font-weight: 600;">
+                                    <i class="fas fa-clock"></i> Pending
+                                </span>
+                            {% else %}
+                                <span style="color: #6c757d;">{{ ref.status.title() }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            {{ ref.created_at.strftime('%b %d, %Y') }}
+                        </td>
+                        <td style="padding: 0.75rem; text-align: right;">
+                            {% if ref.status == 'completed' %}
+                                <span style="color: var(--psu-gold); font-weight: 600;">+100 pts</span>
+                            {% else %}
+                                <span style="color: #6c757d;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #6c757d; padding: 2rem;">
+            You haven't referred anyone yet. Share your code to get started!
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Leaderboard Preview -->
+    <div style="text-align: center;">
+        <a href="/referrals/leaderboard" class="btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+            <i class="fas fa-trophy"></i> View Referral Leaderboard
+        </a>
+    </div>
+</div>
+
+<script>
+function copyReferralCode() {
+    const codeInput = document.getElementById('referralCode');
+    codeInput.select();
+    document.execCommand('copy');
+    
+    // Show success message
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    button.style.background = '#28a745';
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.background = '';
+    }, 2000);
+}
+</script>
+{% endblock %}

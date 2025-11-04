@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for {{ scholarship.title }} | PittState Connect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Hero -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #9D2235 0%, #FFC627 100%);">
+        <div class="card-body py-5">
+          <a href="{{ url_for('scholarships_bp.browse') }}" class="btn btn-light btn-sm mb-3">
+            <i class="bi bi-arrow-left"></i> Back to Scholarships
+          </a>
+          <h1 class="display-5 fw-bold mb-3">{{ scholarship.title }}</h1>
+          <div class="row">
+            <div class="col-md-4 mb-2">
+              <i class="bi bi-cash-coin"></i> <strong>Award Amount:</strong> ${{ "{:,.2f}".format(scholarship.amount) if scholarship.amount else "TBD" }}
+            </div>
+            <div class="col-md-4 mb-2">
+              <i class="bi bi-calendar-event"></i> <strong>Deadline:</strong> {{ scholarship.deadline.strftime('%B %d, %Y') if scholarship.deadline else 'N/A' }}
+            </div>
+            <div class="col-md-4 mb-2">
+              <i class="bi bi-building"></i> <strong>Department:</strong> {{ scholarship.department.name if scholarship.department else 'General' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Status -->
+  {% if application %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-{{ 'success' if application.status == 'submitted' else 'info' if application.status == 'draft' else 'warning' }}">
+        <h5 class="alert-heading">
+          <i class="bi bi-info-circle"></i> Application Status: 
+          <span class="badge bg-{{ 'success' if application.status == 'submitted' else 'secondary' }}">
+            {{ application.status.replace('_', ' ').title() }}
+          </span>
+        </h5>
+        <p class="mb-0">
+          {% if application.status == 'submitted' %}
+            Your application was submitted on {{ application.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}.
+            You can still update it before the deadline.
+          {% elif application.status == 'draft' %}
+            You have a draft saved. Complete and submit your application below.
+          {% endif %}
+        </p>
+        <div class="progress mt-3" style="height: 25px;">
+          <div class="progress-bar" role="progressbar" 
+               style="width: {{ application.progress_percentage }}%;" 
+               aria-valuenow="{{ application.progress_percentage }}" 
+               aria-valuemin="0" 
+               aria-valuemax="100">
+            {{ application.progress_percentage }}% Complete
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Application Form -->
+  <form method="POST" enctype="multipart/form-data" id="applicationForm">
+    <div class="row">
+      <!-- Main Application -->
+      <div class="col-lg-8 mb-4">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Application Form</h5>
+          </div>
+          <div class="card-body">
+            
+            <!-- Scholarship Description -->
+            {% if scholarship.description %}
+            <div class="mb-4">
+              <h6 class="text-muted">About This Scholarship:</h6>
+              <p>{{ scholarship.description }}</p>
+            </div>
+            <hr>
+            {% endif %}
+
+            <!-- Essay -->
+            <div class="mb-4">
+              <label for="essayText" class="form-label">
+                <h6><i class="bi bi-file-text"></i> Essay / Personal Statement <span class="text-danger">*</span></h6>
+              </label>
+              <p class="small text-muted">
+                Tell us why you deserve this scholarship. Include your academic achievements, career goals, 
+                financial need (if applicable), and how this scholarship will help you succeed.
+                <br><strong>Minimum 100 words required.</strong>
+              </p>
+              <textarea class="form-control" 
+                        id="essayText" 
+                        name="essay_text" 
+                        rows="15" 
+                        required 
+                        style="font-family: Georgia, serif; font-size: 1rem; line-height: 1.8;">{{ application.essay_text if application else '' }}</textarea>
+              <div class="form-text">
+                <span id="wordCount">0 words</span> | 
+                <span id="charCount">0 characters</span>
+              </div>
+            </div>
+
+            <!-- Supporting Documents -->
+            <div class="mb-4">
+              <label for="documents" class="form-label">
+                <h6><i class="bi bi-paperclip"></i> Supporting Documents (Optional)</h6>
+              </label>
+              <p class="small text-muted">
+                Upload transcripts, recommendation letters, or other supporting documents.
+                <br>Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)
+              </p>
+              <input class="form-control" 
+                     type="file" 
+                     id="documents" 
+                     name="documents" 
+                     multiple
+                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+              <div class="form-text">
+                You can upload multiple files at once.
+              </div>
+            </div>
+
+            {% if application and application.recommendations_uploaded > 0 %}
+            <div class="alert alert-success">
+              <i class="bi bi-check-circle"></i> 
+              <strong>{{ application.recommendations_uploaded }}</strong> recommendation letter(s) uploaded
+            </div>
+            {% endif %}
+
+            <!-- Certifications -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       id="certifyAccuracy" 
+                       name="certify_accuracy" 
+                       required>
+                <label class="form-check-label" for="certifyAccuracy">
+                  I certify that all information provided in this application is accurate and truthful.
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       id="agreeTerms" 
+                       name="agree_terms" 
+                       required>
+                <label class="form-check-label" for="agreeTerms">
+                  I agree to the scholarship <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>.
+                </label>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="submit" 
+                      name="action" 
+                      value="draft" 
+                      class="btn btn-secondary">
+                <i class="bi bi-save"></i> Save as Draft
+              </button>
+              <button type="submit" 
+                      name="action" 
+                      value="submit" 
+                      class="btn btn-success" 
+                      id="submitBtn">
+                <i class="bi bi-send"></i> Submit Application
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Application Checklist -->
+        <div class="card mb-4">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-list-check"></i> Application Checklist</h6>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li class="mb-2">
+                <i class="bi bi-square" id="check-essay"></i> Complete essay (100+ words)
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-square" id="check-docs"></i> Upload supporting documents
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-square" id="check-certify"></i> Certify accuracy
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-square" id="check-terms"></i> Agree to terms
+              </li>
+              <li>
+                <i class="bi bi-square" id="check-submit"></i> Submit application
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="card bg-light">
+          <div class="card-body">
+            <h6><i class="bi bi-lightbulb text-warning"></i> Application Tips</h6>
+            <ul class="small mb-0">
+              <li>Be specific about your achievements</li>
+              <li>Show your passion and commitment</li>
+              <li>Proofread carefully before submitting</li>
+              <li>Submit well before the deadline</li>
+              <li>Check your email for updates</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Need Help? -->
+        <div class="card mt-3 border-primary">
+          <div class="card-body text-center">
+            <i class="bi bi-question-circle text-primary" style="font-size: 2rem;"></i>
+            <h6 class="mt-2">Need Help?</h6>
+            <p class="small mb-2">Use our AI Essay Helper to improve your writing</p>
+            <a href="{{ url_for('scholarships_bp.essay_helper') }}" 
+               class="btn btn-sm btn-outline-primary" 
+               target="_blank">
+              <i class="bi bi-robot"></i> Essay Helper
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Terms & Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scholarship Terms & Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Eligibility</h6>
+        <p>Applicants must be currently enrolled or accepted at Pittsburg State University with a minimum 2.5 GPA.</p>
+        
+        <h6>Award Disbursement</h6>
+        <p>Scholarship funds will be disbursed directly to the university and applied to tuition, fees, and eligible educational expenses.</p>
+        
+        <h6>Renewal</h6>
+        <p>Some scholarships are renewable based on maintaining eligibility criteria and satisfactory academic progress.</p>
+        
+        <h6>Privacy</h6>
+        <p>Your application information will be kept confidential and used solely for scholarship selection purposes.</p>
+        
+        <h6>Selection Process</h6>
+        <p>Recipients are selected by a committee based on academic merit, financial need, essay quality, and overall application strength.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Word counter
+const essayText = document.getElementById('essayText');
+const wordCount = document.getElementById('wordCount');
+const charCount = document.getElementById('charCount');
+
+function updateCounts() {
+  const text = essayText.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  const chars = text.length;
+  
+  wordCount.textContent = `${words} words`;
+  charCount.textContent = `${chars} characters`;
+  
+  // Update checklist
+  if (words >= 100) {
+    document.getElementById('check-essay').className = 'bi bi-check-square-fill text-success';
+  } else {
+    document.getElementById('check-essay').className = 'bi bi-square';
+  }
+}
+
+essayText.addEventListener('input', updateCounts);
+updateCounts();
+
+// File upload checker
+document.getElementById('documents').addEventListener('change', function() {
+  if (this.files.length > 0) {
+    document.getElementById('check-docs').className = 'bi bi-check-square-fill text-success';
+  }
+});
+
+// Checkbox checkers
+document.getElementById('certifyAccuracy').addEventListener('change', function() {
+  document.getElementById('check-certify').className = this.checked ? 
+    'bi bi-check-square-fill text-success' : 'bi bi-square';
+});
+
+document.getElementById('agreeTerms').addEventListener('change', function() {
+  document.getElementById('check-terms').className = this.checked ? 
+    'bi bi-check-square-fill text-success' : 'bi bi-square';
+});
+
+// Submit confirmation
+document.getElementById('submitBtn').addEventListener('click', function(e) {
+  const words = essayText.value.trim().split(/\s+/).length;
+  
+  if (words < 100) {
+    e.preventDefault();
+    alert('Your essay must be at least 100 words. Currently: ' + words + ' words');
+    return false;
+  }
+  
+  if (!confirm('Are you ready to submit your application? You can still edit it after submission if needed.')) {
+    e.preventDefault();
+    return false;
+  }
+  
+  document.getElementById('check-submit').className = 'bi bi-check-square-fill text-success';
+});
+
+// Auto-save draft (every 2 minutes)
+let autoSaveTimer;
+function autoSaveDraft() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const words = essayText.value.trim().split(/\s+/).length;
+    if (words >= 10) {
+      // Save draft silently
+      const formData = new FormData(document.getElementById('applicationForm'));
+      formData.set('action', 'draft');
+      
+      fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+      }).then(() => {
+        console.log('Draft auto-saved');
+      }).catch(err => {
+        console.error('Auto-save failed:', err);
+      });
+    }
+  }, 120000); // 2 minutes
+}
+
+essayText.addEventListener('input', autoSaveDraft);
+</script>
+
+<style>
+.bg-gradient {
+  background: linear-gradient(135deg, #9D2235 0%, #FFC627 100%);
+}
+</style>
+{% endblock %}

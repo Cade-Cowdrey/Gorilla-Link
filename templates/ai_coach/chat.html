@@ -1,0 +1,584 @@
+{% extends "base_psu.html" %}
+
+{% block title %}AI Career Coach - PSU Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-container {
+    max-width: 900px;
+    margin: 0 auto;
+    height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, var(--psu-crimson), #a52020);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+    box-shadow: var(--shadow-md);
+}
+
+.coach-avatar {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-right: 1rem;
+}
+
+.chat-info h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.chat-status {
+    color: var(--psu-gold);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--psu-gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.quick-actions {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    overflow-x: auto;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.action-btn {
+    background: white;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: var(--psu-crimson);
+    color: white;
+    border-color: var(--psu-crimson);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: #f8f9fa;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 1.5rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.message-content {
+    max-width: 70%;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    position: relative;
+}
+
+.message.assistant .message-content {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 18px 18px 18px 4px;
+}
+
+.message.user .message-content {
+    background: var(--psu-crimson);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.75rem;
+    flex-shrink: 0;
+}
+
+.message.assistant .message-avatar {
+    background: var(--psu-crimson);
+    color: white;
+}
+
+.message.user .message-avatar {
+    background: var(--psu-gold);
+    color: var(--psu-crimson);
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-top: 0.5rem;
+}
+
+.chat-input-container {
+    padding: 1.5rem;
+    background: white;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 12px 12px;
+}
+
+.chat-input-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+#messageInput {
+    flex: 1;
+    border: 2px solid #dee2e6;
+    border-radius: 24px;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+}
+
+#messageInput:focus {
+    outline: none;
+    border-color: var(--psu-crimson);
+}
+
+.send-btn {
+    background: var(--psu-crimson);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.send-btn:hover {
+    background: #a52020;
+    transform: scale(1.05);
+}
+
+.send-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+.typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 18px;
+    width: fit-content;
+    margin-left: 56px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--psu-crimson);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--psu-crimson);
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.chat-tools {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tool-btn {
+    background: white;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.tool-btn:hover {
+    border-color: var(--psu-crimson);
+    color: var(--psu-crimson);
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 150px);
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+    
+    .action-buttons {
+        overflow-x: scroll;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div style="display: flex; align-items: center;">
+            <div class="coach-avatar">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="chat-info">
+                <h2>AI Career Coach</h2>
+                <div class="chat-status">
+                    <span class="status-dot"></span>
+                    <span>Online and ready to help</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="quickAction('resume_tips')">
+                <i class="fas fa-file-alt"></i> Resume Tips
+            </button>
+            <button class="action-btn" onclick="quickAction('interview_prep')">
+                <i class="fas fa-handshake"></i> Interview Prep
+            </button>
+            <button class="action-btn" onclick="quickAction('job_search')">
+                <i class="fas fa-search"></i> Job Search
+            </button>
+            <button class="action-btn" onclick="quickAction('career_advice')">
+                <i class="fas fa-compass"></i> Career Advice
+            </button>
+            <button class="action-btn" onclick="quickAction('networking')">
+                <i class="fas fa-users"></i> Networking
+            </button>
+            <button class="action-btn" onclick="quickAction('salary_negotiation')">
+                <i class="fas fa-dollar-sign"></i> Salary Help
+            </button>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="message {{ msg.role }}">
+                {% if msg.role == 'assistant' %}
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                {% endif %}
+                
+                <div class="message-content">
+                    {{ msg.content|safe }}
+                    <div class="message-time">
+                        {{ msg.created_at.strftime('%I:%M %p') }}
+                    </div>
+                </div>
+                
+                {% if msg.role == 'user' %}
+                <div class="message-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <h3>Welcome to Your AI Career Coach!</h3>
+                <p>I'm here to help you with career advice, resume tips, interview prep, and more.</p>
+                <p>Try one of the quick actions above or type your question below.</p>
+            </div>
+        {% endif %}
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <div class="chat-input-container">
+        <div class="chat-tools">
+            <button class="tool-btn" onclick="clearHistory()">
+                <i class="fas fa-trash"></i> Clear History
+            </button>
+            <button class="tool-btn" onclick="window.location.href='/ai-coach/history'">
+                <i class="fas fa-history"></i> View All History
+            </button>
+        </div>
+        
+        <div class="chat-input-wrapper">
+            <textarea 
+                id="messageInput" 
+                placeholder="Ask me anything about your career..."
+                rows="1"
+                onkeypress="handleKeyPress(event)"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let isTyping = false;
+
+function scrollToBottom() {
+    const messages = document.getElementById('chatMessages');
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function addMessage(role, content) {
+    const messagesDiv = document.getElementById('chatMessages');
+    
+    // Remove empty state if exists
+    const emptyState = messagesDiv.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    
+    if (role === 'assistant') {
+        messageDiv.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                ${content}
+                <div class="message-time">${time}</div>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                ${content}
+                <div class="message-time">${time}</div>
+            </div>
+            <div class="message-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        `;
+    }
+    
+    messagesDiv.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function showTyping() {
+    document.getElementById('typingIndicator').style.display = 'flex';
+    scrollToBottom();
+}
+
+function hideTyping() {
+    document.getElementById('typingIndicator').style.display = 'none';
+}
+
+async function sendMessage() {
+    if (isTyping) return;
+    
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Disable input
+    isTyping = true;
+    input.disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    
+    // Add user message
+    addMessage('user', message);
+    
+    // Clear input
+    input.value = '';
+    input.rows = 1;
+    
+    // Show typing indicator
+    showTyping();
+    
+    try {
+        const response = await fetch('/ai-coach/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
+        
+        const data = await response.json();
+        
+        hideTyping();
+        
+        if (data.success) {
+            // Format the response (preserve line breaks)
+            const formattedResponse = data.response.replace(/\n/g, '<br>');
+            addMessage('assistant', formattedResponse);
+        } else {
+            addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        hideTyping();
+        addMessage('assistant', 'Sorry, something went wrong. Please try again.');
+    } finally {
+        // Re-enable input
+        isTyping = false;
+        input.disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+    }
+}
+
+async function quickAction(action) {
+    if (isTyping) return;
+    
+    const prompts = {
+        'resume_tips': "Can you give me 5 quick tips to improve my resume?",
+        'interview_prep': "I have an interview coming up. What are the most important things to prepare?",
+        'job_search': "What's the best strategy for finding a job in my field?",
+        'career_advice': "What career paths should I consider based on my major?",
+        'networking': "How can I effectively network to find job opportunities?",
+        'salary_negotiation': "How do I negotiate salary for my first job?"
+    };
+    
+    const message = prompts[action];
+    document.getElementById('messageInput').value = message;
+    sendMessage();
+}
+
+async function clearHistory() {
+    if (!confirm('Are you sure you want to clear your chat history?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/ai-coach/api/clear-history', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-comments"></i>
+                    <h3>Chat history cleared!</h3>
+                    <p>Start a new conversation below.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to clear history');
+    }
+}
+
+// Auto-resize textarea
+document.getElementById('messageInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// Scroll to bottom on load
+window.addEventListener('load', scrollToBottom);
+</script>
+{% endblock %}

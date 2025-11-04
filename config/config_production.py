@@ -30,6 +30,14 @@ class ConfigProduction:
     OAUTH_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID")
     OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET")
     OAUTH_ALLOWED_DOMAIN = os.getenv("OAUTH_ALLOWED_DOMAIN", "gus.pittstate.edu")
+    
+    # --- OAuth Providers (Social Login) ---
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    LINKEDIN_CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID")
+    LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
+    MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID")
+    MICROSOFT_CLIENT_SECRET = os.getenv("MICROSOFT_CLIENT_SECRET")
 
     # --- Rate Limiting ---
     RATELIMIT_STORAGE_URL = os.getenv("REDIS_URL", "redis://localhost:6379")

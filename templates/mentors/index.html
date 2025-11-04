@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Mentorship Program | PittState Connect{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Hero Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-gradient-primary text-white overflow-hidden" style="background: linear-gradient(135deg, #9D2235 0%, #FFC627 100%);">
+        <div class="card-body py-5">
+          <h1 class="display-4 fw-bold mb-3">🤝 Mentorship Program</h1>
+          <p class="lead mb-4">Connect with alumni and faculty mentors who can guide your career journey</p>
+          <div class="d-flex gap-3">
+            <a href="#mentors" class="btn btn-light btn-lg">
+              <i class="bi bi-search"></i> Find a Mentor
+            </a>
+            <a href="#conversations" class="btn btn-outline-light btn-lg">
+              <i class="bi bi-chat-dots"></i> My Conversations
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Conversations -->
+  {% if threads %}
+  <div class="row mb-4" id="conversations">
+    <div class="col-12">
+      <h2 class="h4 mb-3"><i class="bi bi-chat-left-text text-primary"></i> Active Conversations ({{ threads|length }})</h2>
+      <div class="row g-3">
+        {% for thread in threads %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 hover-shadow">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                {% if thread.other_user.profile_image_url %}
+                <img src="{{ thread.other_user.profile_image_url }}" 
+                     alt="{{ thread.other_user.full_name }}"
+                     class="rounded-circle me-3"
+                     style="width: 50px; height: 50px; object-fit: cover;">
+                {% else %}
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                     style="width: 50px; height: 50px; font-size: 1.2rem; font-weight: bold;">
+                  {{ thread.other_user.full_name[0]|upper }}
+                </div>
+                {% endif %}
+                
+                <div class="flex-grow-1">
+                  <h5 class="mb-0">{{ thread.other_user.full_name }}</h5>
+                  <small class="text-muted">
+                    {% if thread.other_user.role %}{{ thread.other_user.role.name|title }}{% endif %}
+                  </small>
+                </div>
+                
+                {% if thread.unread_count > 0 %}
+                <span class="badge bg-danger rounded-pill">{{ thread.unread_count }}</span>
+                {% endif %}
+              </div>
+              
+              <p class="text-muted small mb-2">
+                <i class="bi bi-clock"></i> 
+                {{ thread.last_message.created_at.strftime('%b %d, %I:%M %p') }}
+              </p>
+              
+              <p class="mb-3 text-truncate">
+                {% if thread.last_message.sender_id == current_user.id %}
+                  <strong>You:</strong>
+                {% endif %}
+                {{ thread.last_message.body[:60] }}{% if thread.last_message.body|length > 60 %}...{% endif %}
+              </p>
+              
+              <a href="{{ url_for('mentors.chat', mentor_id=thread.other_user.id) }}" 
+                 class="btn btn-sm btn-primary w-100">
+                <i class="bi bi-chat-dots"></i> Continue Chat
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Available Mentors -->
+  <div class="row" id="mentors">
+    <div class="col-12">
+      <h2 class="h4 mb-3"><i class="bi bi-people text-primary"></i> Available Mentors ({{ mentors|length }})</h2>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <input type="text" class="form-control" id="searchMentors" placeholder="🔍 Search mentors...">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filterRole">
+            <option value="">All Roles</option>
+            <option value="alumni">Alumni</option>
+            <option value="faculty">Faculty</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filterDepartment">
+            <option value="">All Departments</option>
+            <option value="business">Business</option>
+            <option value="technology">Technology</option>
+            <option value="education">Education</option>
+            <option value="arts">Arts & Sciences</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-secondary w-100" id="clearFilters">
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+        </div>
+      </div>
+      
+      <div class="row g-3" id="mentorGrid">
+        {% for mentor in mentors %}
+        <div class="col-md-6 col-lg-4 col-xl-3 mentor-card" 
+             data-role="{{ mentor.role.name if mentor.role else '' }}"
+             data-department="{{ mentor.department if mentor.department else '' }}"
+             data-name="{{ mentor.full_name|lower }}">
+          <div class="card h-100 hover-shadow">
+            <div class="card-body text-center">
+              {% if mentor.profile_image_url %}
+              <img src="{{ mentor.profile_image_url }}" 
+                   alt="{{ mentor.full_name }}"
+                   class="rounded-circle mb-3"
+                   style="width: 80px; height: 80px; object-fit: cover;">
+              {% else %}
+              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                   style="width: 80px; height: 80px; font-size: 2rem; font-weight: bold;">
+                {{ mentor.full_name[0]|upper }}
+              </div>
+              {% endif %}
+              
+              <h5 class="mb-1">{{ mentor.full_name }}</h5>
+              
+              {% if mentor.role %}
+              <span class="badge bg-primary mb-2">{{ mentor.role.name|title }}</span>
+              {% endif %}
+              
+              {% if mentor.department %}
+              <p class="text-muted small mb-2">
+                <i class="bi bi-building"></i> {{ mentor.department }}
+              </p>
+              {% endif %}
+              
+              {% if mentor.bio %}
+              <p class="small text-muted mb-3" style="max-height: 60px; overflow: hidden;">
+                {{ mentor.bio[:100] }}{% if mentor.bio|length > 100 %}...{% endif %}
+              </p>
+              {% endif %}
+              
+              <div class="d-flex gap-2">
+                <a href="{{ url_for('profile.view', user_id=mentor.id) }}" 
+                   class="btn btn-sm btn-outline-primary flex-grow-1">
+                  <i class="bi bi-person"></i> Profile
+                </a>
+                <a href="{{ url_for('mentors.chat', mentor_id=mentor.id) }}" 
+                   class="btn btn-sm btn-primary flex-grow-1">
+                  <i class="bi bi-chat"></i> Chat
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      {% if mentors|length == 0 %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No mentors available at the moment. Check back soon!
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.hover-shadow {
+  transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #9D2235 0%, #FFC627 100%);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchMentors');
+  const roleFilter = document.getElementById('filterRole');
+  const deptFilter = document.getElementById('filterDepartment');
+  const clearBtn = document.getElementById('clearFilters');
+  const mentorCards = document.querySelectorAll('.mentor-card');
+  
+  function filterMentors() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedRole = roleFilter.value;
+    const selectedDept = deptFilter.value;
+    
+    let visibleCount = 0;
+    
+    mentorCards.forEach(card => {
+      const name = card.dataset.name;
+      const role = card.dataset.role;
+      const dept = card.dataset.department.toLowerCase();
+      
+      const matchesSearch = name.includes(searchTerm);
+      const matchesRole = !selectedRole || role === selectedRole;
+      const matchesDept = !selectedDept || dept.includes(selectedDept);
+      
+      if (matchesSearch && matchesRole && matchesDept) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    console.log(`Showing ${visibleCount} mentors`);
+  }
+  
+  searchInput.addEventListener('input', filterMentors);
+  roleFilter.addEventListener('change', filterMentors);
+  deptFilter.addEventListener('change', filterMentors);
+  
+  clearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    roleFilter.value = '';
+    deptFilter.value = '';
+    filterMentors();
+  });
+});
+</script>
+{% endblock %}

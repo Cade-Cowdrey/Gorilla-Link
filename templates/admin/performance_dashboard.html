@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Monitoring | Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">
+      <i class="bi bi-speedometer2"></i> Performance Monitoring
+    </h1>
+    <button class="btn btn-outline-secondary" onclick="refreshDashboard()">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Alert for high load -->
+  <div id="alertContainer"></div>
+
+  <!-- System Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-muted mb-0">CPU Usage</h6>
+            <i class="bi bi-cpu fs-4"></i>
+          </div>
+          <h2 class="mb-0" id="cpu-metric">--</h2>
+          <div class="progress mt-2" style="height: 4px;">
+            <div id="cpu-bar" class="progress-bar bg-primary" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-muted mb-0">Memory Usage</h6>
+            <i class="bi bi-memory fs-4"></i>
+          </div>
+          <h2 class="mb-0" id="memory-metric">--</h2>
+          <div class="progress mt-2" style="height: 4px;">
+            <div id="memory-bar" class="progress-bar bg-warning" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-muted mb-0">Cache Hit Rate</h6>
+            <i class="bi bi-lightning-charge fs-4"></i>
+          </div>
+          <h2 class="mb-0" id="cache-metric">--</h2>
+          <small class="text-muted">Redis Memory: <span id="redis-memory">--</span> MB</small>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="text-muted mb-0">Request Rate</h6>
+            <i class="bi bi-graph-up fs-4"></i>
+          </div>
+          <h2 class="mb-0" id="request-metric">--</h2>
+          <small class="text-muted">/min (last 5 min)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0"><i class="bi bi-database"></i> Database Performance</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="border-end pe-3">
+                <h6 class="text-muted">Active Connections</h6>
+                <h3 id="db-connections">--</h3>
+                <small class="text-muted">Pool: <span id="db-pool">--</span> / <span id="db-pool-size">--</span></small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="border-end pe-3">
+                <h6 class="text-muted">Active Sessions</h6>
+                <h3 id="active-sessions">--</h3>
+                <small class="text-muted">Last 15 minutes</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <h6 class="text-muted">Disk Usage</h6>
+              <h3 id="disk-metric">--</h3>
+              <div class="progress" style="height: 8px;">
+                <div id="disk-bar" class="progress-bar bg-danger" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3" id="perfTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="endpoints-tab" data-bs-toggle="tab" data-bs-target="#endpoints" type="button">
+        <i class="bi bi-box-arrow-in-right"></i> Endpoints
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="queries-tab" data-bs-toggle="tab" data-bs-target="#queries" type="button">
+        <i class="bi bi-search"></i> Slow Queries
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="ratelimits-tab" data-bs-toggle="tab" data-bs-target="#ratelimits" type="button">
+        <i class="bi bi-shield-exclamation"></i> Rate Limits
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="recommendations-tab" data-bs-toggle="tab" data-bs-target="#recommendations" type="button">
+        <i class="bi bi-lightbulb"></i> Recommendations
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="perfTabContent">
+    <!-- Endpoints Tab -->
+    <div class="tab-pane fade show active" id="endpoints" role="tabpanel">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>Requests</th>
+                  <th>Avg Time (ms)</th>
+                  <th>Max Time (ms)</th>
+                  <th>Errors</th>
+                  <th>Error Rate</th>
+                </tr>
+              </thead>
+              <tbody id="endpoints-tbody">
+                <tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slow Queries Tab -->
+    <div class="tab-pane fade" id="queries" role="tabpanel">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div id="queries-content">
+            <p class="text-muted">Loading slow queries...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rate Limits Tab -->
+    <div class="tab-pane fade" id="ratelimits" role="tabpanel">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div id="ratelimits-content">
+            <p class="text-muted">Loading rate limit violations...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations Tab -->
+    <div class="tab-pane fade" id="recommendations" role="tabpanel">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div id="recommendations-content">
+            <p class="text-muted">Loading recommendations...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+.progress-bar {
+  transition: width 0.5s ease;
+}
+.badge-metric {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+</style>
+
+<script>
+let metricsInterval;
+
+async function fetchMetrics() {
+  try {
+    const res = await fetch('/admin/performance/api/metrics');
+    const data = await res.json();
+    
+    // Update metrics
+    document.getElementById('cpu-metric').textContent = data.cpu_percent.toFixed(1) + '%';
+    document.getElementById('cpu-bar').style.width = data.cpu_percent + '%';
+    document.getElementById('cpu-bar').className = getBarClass(data.cpu_percent);
+    
+    document.getElementById('memory-metric').textContent = data.memory_percent.toFixed(1) + '%';
+    document.getElementById('memory-bar').style.width = data.memory_percent + '%';
+    document.getElementById('memory-bar').className = getBarClass(data.memory_percent);
+    
+    document.getElementById('cache-metric').textContent = data.cache_hit_rate.toFixed(1) + '%';
+    document.getElementById('redis-memory').textContent = data.redis_memory.toFixed(2);
+    
+    document.getElementById('request-metric').textContent = data.request_rate.toFixed(1);
+    
+    document.getElementById('db-connections').textContent = data.db_connections;
+    document.getElementById('db-pool').textContent = data.db_pool_checked_out;
+    document.getElementById('db-pool-size').textContent = data.db_pool_size;
+    
+    document.getElementById('active-sessions').textContent = data.active_sessions;
+    
+    document.getElementById('disk-metric').textContent = data.disk_percent.toFixed(1) + '%';
+    document.getElementById('disk-bar').style.width = data.disk_percent + '%';
+    document.getElementById('disk-bar').className = getBarClass(data.disk_percent);
+    
+    // Show alert if high load
+    if (data.cpu_percent > 80 || data.memory_percent > 85) {
+      showAlert('High system load detected! Consider scaling resources.', 'danger');
+    }
+    
+  } catch (err) {
+    console.error('Failed to fetch metrics:', err);
+  }
+}
+
+function getBarClass(percent) {
+  if (percent > 85) return 'progress-bar bg-danger';
+  if (percent > 70) return 'progress-bar bg-warning';
+  return 'progress-bar bg-success';
+}
+
+async function fetchEndpoints() {
+  try {
+    const res = await fetch('/admin/performance/api/endpoints');
+    const data = await res.json();
+    
+    const tbody = document.getElementById('endpoints-tbody');
+    tbody.innerHTML = data.endpoints.map(ep => `
+      <tr>
+        <td><code>${ep.endpoint}</code></td>
+        <td><span class="badge bg-primary">${ep.requests}</span></td>
+        <td>${ep.avg_time}</td>
+        <td>${ep.max_time}</td>
+        <td>${ep.errors}</td>
+        <td>
+          <span class="badge ${ep.error_rate > 5 ? 'bg-danger' : 'bg-success'}">
+            ${ep.error_rate}%
+          </span>
+        </td>
+      </tr>
+    `).join('');
+    
+  } catch (err) {
+    document.getElementById('endpoints-tbody').innerHTML = 
+      '<tr><td colspan="6" class="text-danger">Failed to load endpoints</td></tr>';
+  }
+}
+
+async function fetchRecommendations() {
+  try {
+    const res = await fetch('/admin/performance/api/recommendations');
+    const data = await res.json();
+    
+    const content = document.getElementById('recommendations-content');
+    if (data.recommendations.length === 0) {
+      content.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> No recommendations - system is optimized!</div>';
+    } else {
+      content.innerHTML = `
+        <div class="alert alert-${data.priority === 'high' ? 'danger' : 'warning'}">
+          <strong>${data.total} optimization opportunities found</strong>
+        </div>
+        <ul class="list-group">
+          ${data.recommendations.map(rec => `
+            <li class="list-group-item">
+              <i class="bi bi-arrow-right-circle text-primary"></i> ${rec}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+  } catch (err) {
+    document.getElementById('recommendations-content').innerHTML = 
+      '<div class="alert alert-danger">Failed to load recommendations</div>';
+  }
+}
+
+function showAlert(message, type) {
+  const alertContainer = document.getElementById('alertContainer');
+  const alert = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i> ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  `;
+  alertContainer.innerHTML = alert;
+  setTimeout(() => alertContainer.innerHTML = '', 10000);
+}
+
+function refreshDashboard() {
+  fetchMetrics();
+  fetchEndpoints();
+  fetchRecommendations();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  refreshDashboard();
+  
+  // Auto-refresh every 30 seconds
+  metricsInterval = setInterval(fetchMetrics, 30000);
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    if (metricsInterval) clearInterval(metricsInterval);
+  });
+});
+</script>
+{% endblock %}

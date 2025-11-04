@@ -45,7 +45,57 @@ def register_blueprints(app):
             except Exception as e:
                 logger.error(f"❌ Failed to register blueprint '{module_name}': {e}")
 
+    # Register growth feature blueprints (direct .py files)
+    logger.info("🔍 Registering growth feature blueprints...")
+    
+    growth_features = [
+        ('gamification', 'gamification_bp'),
+        ('success_stories', 'success_stories_bp'),
+        ('referrals', 'referrals_bp'),
+        ('recommendations', 'recommendations_bp'),
+        ('ai_coach', 'ai_coach_bp'),
+        ('forums', 'forums_bp'),
+        ('mentorship', 'mentorship_bp'),
+        ('auto_apply', 'auto_apply_bp'),
+        ('push_notifications', 'push_notifications_bp'),
+        ('messages', 'messages_bp'),
+    ]
+    
+    for module_name, bp_name in growth_features:
+        try:
+            module = importlib.import_module(f"{package_name}.{module_name}")
+            if hasattr(module, bp_name):
+                app.register_blueprint(getattr(module, bp_name))
+                logger.info(f"✅ Registered growth feature: {module_name}")
+            else:
+                logger.warning(f"⚠️ No '{bp_name}' found in {module_name} — skipped.")
+        except Exception as e:
+            logger.error(f"❌ Failed to register growth feature '{module_name}': {e}")
+    
+    # Register analytics and events subdirectories
+    try:
+        from blueprints.analytics.user_dashboard import analytics_bp
+        app.register_blueprint(analytics_bp)
+        logger.info("✅ Registered analytics blueprint")
+    except Exception as e:
+        logger.error(f"❌ Failed to register analytics blueprint: {e}")
+    
+    try:
+        from blueprints.events.live import events_bp
+        app.register_blueprint(events_bp)
+        logger.info("✅ Registered events blueprint")
+    except Exception as e:
+        logger.error(f"❌ Failed to register events blueprint: {e}")
+    
+    try:
+        from blueprints.admin.dashboard import admin_growth_bp
+        app.register_blueprint(admin_growth_bp)
+        logger.info("✅ Registered admin growth dashboard")
+    except Exception as e:
+        logger.error(f"❌ Failed to register admin growth dashboard: {e}")
+
     logger.info("🦍 All blueprints loaded successfully for PittState-Connect.")
+
 
 
 # ======================================================

@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Feature Flags - Admin{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Feature Flags</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Manage feature rollouts and A/B tests</p>
+        </div>
+        <button onclick="showCreateFlagModal()" class="bg-crimson hover:bg-crimson-dark text-white px-6 py-3 rounded-lg font-semibold">
+            <i class="fas fa-plus mr-2"></i>Create Flag
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-8">
+            <button onclick="showTab('flags')" id="tab-flags" class="tab-button border-b-2 border-crimson text-crimson py-4 px-1 font-semibold">
+                Feature Flags
+            </button>
+            <button onclick="showTab('abtests')" id="tab-abtests" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1">
+                A/B Tests
+            </button>
+        </nav>
+    </div>
+
+    <!-- Feature Flags Tab -->
+    <div id="content-flags" class="tab-content">
+        <!-- Search and Filter -->
+        <div class="mb-6 flex gap-4">
+            <div class="flex-1">
+                <input type="text" id="flag-search" placeholder="Search flags..." 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crimson dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+            </div>
+            <select id="flag-filter" class="px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                <option value="all">All Flags</option>
+                <option value="enabled">Enabled Only</option>
+                <option value="disabled">Disabled Only</option>
+            </select>
+        </div>
+
+        <!-- Feature Flags List -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flag Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rollout</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Targeting</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="flags-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- A/B Tests Tab -->
+    <div id="content-abtests" class="tab-content hidden">
+        <div class="mb-6 flex justify-between items-center">
+            <div class="flex gap-4">
+                <button onclick="filterTests('all')" class="test-filter-btn active px-4 py-2 rounded-lg">All Tests</button>
+                <button onclick="filterTests('draft')" class="test-filter-btn px-4 py-2 rounded-lg">Draft</button>
+                <button onclick="filterTests('running')" class="test-filter-btn px-4 py-2 rounded-lg">Running</button>
+                <button onclick="filterTests('completed')" class="test-filter-btn px-4 py-2 rounded-lg">Completed</button>
+            </div>
+            <button onclick="showCreateTestModal()" class="bg-gold hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold">
+                <i class="fas fa-flask mr-2"></i>Create A/B Test
+            </button>
+        </div>
+
+        <!-- A/B Tests Grid -->
+        <div id="abtests-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Create Flag Modal -->
+<div id="createFlagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-2xl w-full mx-4">
+        <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Create Feature Flag</h2>
+        <form id="createFlagForm">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Flag Name</label>
+                    <input type="text" id="flag-name" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Description</label>
+                    <textarea id="flag-description" required rows="3"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="flag-enabled" class="mr-2">
+                    <label for="flag-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable immediately</label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Rollout Percentage</label>
+                    <input type="range" id="flag-rollout" min="0" max="100" value="0" 
+                        class="w-full" oninput="updateRolloutValue(this.value)">
+                    <span id="rollout-value" class="text-sm text-gray-600 dark:text-gray-400">0%</span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Target Roles (comma-separated)</label>
+                    <input type="text" id="flag-roles" placeholder="student,alumni,faculty"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" onclick="hideCreateFlagModal()" class="px-6 py-2 border border-gray-300 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-crimson hover:bg-crimson-dark text-white px-6 py-2 rounded-lg">Create Flag</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create A/B Test Modal -->
+<div id="createTestModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-2xl w-full mx-4">
+        <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Create A/B Test</h2>
+        <form id="createTestForm">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Test Name</label>
+                    <input type="text" id="test-name" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Description</label>
+                    <textarea id="test-description" required rows="2"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Variant A (JSON)</label>
+                        <textarea id="variant-a" required rows="3" placeholder='{"layout": "classic"}'
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Variant B (JSON)</label>
+                        <textarea id="variant-b" required rows="3" placeholder='{"layout": "modern"}'
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm"></textarea>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Traffic Split (A vs B)</label>
+                    <input type="range" id="traffic-split" min="0" max="1" step="0.1" value="0.5" 
+                        class="w-full" oninput="updateTrafficValue(this.value)">
+                    <span id="traffic-value" class="text-sm text-gray-600 dark:text-gray-400">50% / 50%</span>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" onclick="hideCreateTestModal()" class="px-6 py-2 border border-gray-300 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-gold hover:bg-yellow-600 text-gray-900 px-6 py-2 rounded-lg">Create Test</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Tab Management
+function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab-button').forEach(el => {
+        el.classList.remove('border-crimson', 'text-crimson');
+        el.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    document.getElementById(`content-${tab}`).classList.remove('hidden');
+    document.getElementById(`tab-${tab}`).classList.add('border-crimson', 'text-crimson');
+    document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
+    
+    if (tab === 'flags') loadFlags();
+    if (tab === 'abtests') loadTests();
+}
+
+// Load Feature Flags
+async function loadFlags() {
+    try {
+        const response = await fetch('/api/v1/feature-flags');
+        const data = await response.json();
+        
+        const tbody = document.getElementById('flags-table-body');
+        tbody.innerHTML = '';
+        
+        // In production, this would fetch from database
+        // For now, show predefined flags
+        const flags = [
+            {name: 'ai_assistant', description: 'Enable GorillaGPT AI assistant', enabled: true, rollout: 100, targeting: 'All users'},
+            {name: 'scholarships_v2', description: 'Enable Scholarship Hub Phase 2', enabled: true, rollout: 75, targeting: '75% rollout'},
+            {name: 'alumni_portal', description: 'Enable alumni engagement portal', enabled: true, rollout: 100, targeting: 'alumni role'},
+            {name: 'forums', description: 'Enable community forums', enabled: true, rollout: 100, targeting: 'All users'},
+            {name: 'webinars', description: 'Enable webinar hub', enabled: true, rollout: 50, targeting: '50% rollout'},
+        ];
+        
+        flags.forEach(flag => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">${flag.name}</td>
+                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">${flag.description}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs rounded-full ${flag.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        ${flag.enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">${flag.rollout}%</td>
+                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">${flag.targeting}</td>
+                <td class="px-6 py-4 text-sm">
+                    <button onclick="editFlag('${flag.name}')" class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                    <button onclick="toggleFlag('${flag.name}', ${!flag.enabled})" class="text-crimson hover:text-crimson-dark">
+                        ${flag.enabled ? 'Disable' : 'Enable'}
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error loading flags:', error);
+    }
+}
+
+// Load A/B Tests
+async function loadTests() {
+    try {
+        const response = await fetch('/api/v1/ab-tests');
+        const data = await response.json();
+        
+        const grid = document.getElementById('abtests-grid');
+        grid.innerHTML = '';
+        
+        // Sample tests
+        const tests = [
+            {id: 1, name: 'Homepage Redesign', status: 'running', participants: 1250, started: '2025-10-15'},
+            {id: 2, name: 'Scholarship Card Layout', status: 'completed', participants: 856, winner: 'B'},
+        ];
+        
+        tests.forEach(test => {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md p-6';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">${test.name}</h3>
+                    <span class="px-3 py-1 text-sm rounded-full ${
+                        test.status === 'running' ? 'bg-blue-100 text-blue-800' :
+                        test.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                    }">${test.status}</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">${test.participants} participants</p>
+                ${test.winner ? `<p class="text-green-600 font-semibold mb-4">Winner: Variant ${test.winner}</p>` : ''}
+                <div class="flex gap-2">
+                    <button onclick="viewTestResults(${test.id})" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg">View Results</button>
+                    ${test.status === 'running' ? `<button onclick="stopTest(${test.id})" class="px-4 py-2 bg-crimson text-white rounded-lg">Stop</button>` : ''}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error loading tests:', error);
+    }
+}
+
+// Modal Functions
+function showCreateFlagModal() {
+    document.getElementById('createFlagModal').classList.remove('hidden');
+}
+
+function hideCreateFlagModal() {
+    document.getElementById('createFlagModal').classList.add('hidden');
+    document.getElementById('createFlagForm').reset();
+}
+
+function showCreateTestModal() {
+    document.getElementById('createTestModal').classList.remove('hidden');
+}
+
+function hideCreateTestModal() {
+    document.getElementById('createTestModal').classList.add('hidden');
+    document.getElementById('createTestForm').reset();
+}
+
+function updateRolloutValue(value) {
+    document.getElementById('rollout-value').textContent = value + '%';
+}
+
+function updateTrafficValue(value) {
+    const percentA = Math.round(value * 100);
+    const percentB = 100 - percentA;
+    document.getElementById('traffic-value').textContent = `${percentA}% / ${percentB}%`;
+}
+
+// Form Submissions
+document.getElementById('createFlagForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const data = {
+        name: document.getElementById('flag-name').value,
+        description: document.getElementById('flag-description').value,
+        enabled: document.getElementById('flag-enabled').checked,
+        rollout_percentage: parseFloat(document.getElementById('flag-rollout').value),
+        target_roles: document.getElementById('flag-roles').value.split(',').map(r => r.trim()).filter(r => r)
+    };
+    
+    try {
+        const response = await fetch('/api/v1/feature-flags', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            hideCreateFlagModal();
+            loadFlags();
+            showNotification('Feature flag created successfully', 'success');
+        }
+    } catch (error) {
+        showNotification('Error creating flag', 'error');
+    }
+});
+
+document.getElementById('createTestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+        const data = {
+            name: document.getElementById('test-name').value,
+            description: document.getElementById('test-description').value,
+            variant_a: JSON.parse(document.getElementById('variant-a').value),
+            variant_b: JSON.parse(document.getElementById('variant-b').value),
+            traffic_split: parseFloat(document.getElementById('traffic-split').value)
+        };
+        
+        const response = await fetch('/api/v1/ab-tests', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            hideCreateTestModal();
+            loadTests();
+            showNotification('A/B test created successfully', 'success');
+        }
+    } catch (error) {
+        showNotification('Error creating test', 'error');
+    }
+});
+
+function showNotification(message, type) {
+    // Simple notification (would use toast library in production)
+    alert(message);
+}
+
+// Initialize
+loadFlags();
+</script>
+
+<style>
+.test-filter-btn.active {
+    @apply bg-crimson text-white;
+}
+.test-filter-btn {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+</style>
+{% endblock %}
