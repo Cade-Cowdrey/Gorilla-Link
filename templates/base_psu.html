@@ -105,7 +105,7 @@
                             </a>
                         </li>
                         <li class="psu-nav-item">
-                            <a href="{{ url_for('events.index') }}" class="psu-nav-link {% if 'events' in request.endpoint %}active{% endif %}">
+                            <a href="{{ url_for('events.events_home') }}" class="psu-nav-link {% if 'events' in request.endpoint %}active{% endif %}">
                                 <i class="fas fa-calendar-alt"></i>
                                 Events
                             </a>
@@ -175,7 +175,7 @@
                         <li><a href="{{ url_for('careers_bp.index') }}">Job Board</a></li>
                         <li><a href="{{ url_for('resume.dashboard') }}">Resume Builder</a></li>
                         <li><a href="{{ url_for('alumni_bp.index') }}">Alumni Network</a></li>
-                        <li><a href="{{ url_for('events.index') }}">Events</a></li>
+                        <li><a href="{{ url_for('events.events_home') }}">Events</a></li>
                     </ul>
                 </div>
                 
