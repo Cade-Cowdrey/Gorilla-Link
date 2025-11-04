@@ -14,4 +14,4 @@ def index():
     record_page_view("alumni_home")
     
     # Render a proper landing page for alumni
-    return render_template("alumni/directory.html", alumni=[])
+    return render_template("alumni/directory.html")

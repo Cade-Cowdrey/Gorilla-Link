@@ -42,7 +42,6 @@ def index():
     return render_template("scholarships/index.html", title="Scholarships Hub | PittState-Connect")
 
 @bp.route("/browse")
-@login_required
 def browse():
     """List available scholarships with basic details."""
     record_page_view("scholarships_browse", current_user.id if current_user.is_authenticated else None)

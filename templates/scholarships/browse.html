@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Browse Scholarships | PittState-Connect{% endblock %}
+{% block content %}
+
+<div class="bg-gradient-to-r from-crimson to-gold text-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-center">
+      🔍 Browse Scholarships
+    </h1>
+    <p class="text-lg text-center opacity-90 max-w-2xl mx-auto">
+      Explore all available scholarship opportunities at Pittsburg State University.
+    </p>
+  </div>
+</div>
+
+<section class="max-w-7xl mx-auto px-6 py-12">
+  <!-- Search and Filter -->
+  <div class="mb-8 bg-white rounded-xl shadow-md p-6">
+    <div class="flex flex-wrap gap-4">
+      <input type="text" 
+             placeholder="Search scholarships..." 
+             class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-crimson">
+      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-crimson">
+        <option value="">All Categories</option>
+        <option value="merit">Merit-Based</option>
+        <option value="need">Need-Based</option>
+        <option value="stem">STEM</option>
+        <option value="arts">Arts & Humanities</option>
+        <option value="athletics">Athletics</option>
+      </select>
+      <button class="bg-crimson text-white px-6 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
+        Search
+      </button>
+    </div>
+  </div>
+
+  <!-- Scholarships Grid -->
+  {% if scholarships and scholarships|length > 0 %}
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {% for scholarship in scholarships %}
+    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-crimson hover:shadow-xl transition">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-xl font-semibold text-gray-800">
+          {{ scholarship.name }}
+        </h3>
+        <span class="text-gold font-bold text-lg">${{ scholarship.amount }}</span>
+      </div>
+      
+      {% if scholarship.deadline %}
+      <p class="text-gray-600 text-sm mb-3">
+        <span class="font-medium">Deadline:</span> {{ scholarship.deadline }}
+      </p>
+      {% endif %}
+      
+      <p class="text-gray-600 text-sm mb-4">
+        {{ scholarship.description }}
+      </p>
+      
+      {% if scholarship.requirements %}
+      <div class="mb-4">
+        <p class="text-sm font-medium text-gray-700 mb-2">Requirements:</p>
+        <ul class="text-sm text-gray-600 space-y-1">
+          {% for req in scholarship.requirements %}
+          <li class="flex items-start">
+            <span class="text-crimson mr-2">•</span>
+            <span>{{ req }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      
+      <div class="flex gap-2 mt-4">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('scholarships_bp.apply', scholarship_id=scholarship.id) }}"
+           class="flex-1 bg-crimson text-white text-center px-4 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
+          Apply Now
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}"
+           class="flex-1 bg-crimson text-white text-center px-4 py-2 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
+          Login to Apply
+        </a>
+        {% endif %}
+        <button class="px-4 py-2 border border-crimson text-crimson rounded-lg hover:bg-crimson hover:text-white transition"
+                title="Save for later">
+          ⭐
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="text-center py-16">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="text-2xl font-bold text-gray-800 mb-2">No Scholarships Found</h3>
+    <p class="text-gray-600 mb-6">
+      Check back soon for new scholarship opportunities, or adjust your search filters.
+    </p>
+    <a href="{{ url_for('scholarships_bp.index') }}"
+       class="inline-block bg-crimson text-white px-6 py-3 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
+      Back to Scholarship Hub
+    </a>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}
