@@ -118,7 +118,7 @@ statsd==4.0.1
 # GraphQL API
 graphene==3.3
 graphene-sqlalchemy==3.0.0rc2
-flask-graphql==2.0.2  # Updated for graphql-core 3.x compatibility
+# flask-graphql==2.0.1  # Conflicts with graphene 3.3 (requires graphql-core 2.x), not currently used
 
 # Payment & Billing
 stripe==11.1.1
