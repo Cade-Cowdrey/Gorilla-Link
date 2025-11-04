@@ -45,10 +45,8 @@ register_blueprints(app)
 from blueprints.api.v1 import api_v1
 app.register_blueprint(api_v1)
 
-# Register Resume/Career Features Blueprint
-from blueprints.resume import resume_bp
-app.register_blueprint(resume_bp)
-logger.info("✅ Resume & Career Features blueprint registered")
+# Note: resume_bp is now auto-registered by register_blueprints()
+# No need to manually register it here to avoid duplicate registration
 
 @app.route("/")
 def index():
