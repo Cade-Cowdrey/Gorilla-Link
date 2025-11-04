@@ -153,31 +153,31 @@ great-expectations==1.2.3
 marshmallow==3.23.1
 pydantic-settings==2.6.1
 
-# Machine Learning & AI
-scikit-learn==1.5.2
-transformers==4.46.3
-sentence-transformers==3.3.1
-torch==2.5.1
+# Machine Learning & AI (Optional - comment out if not needed to reduce build size)
+# scikit-learn==1.5.2
+# transformers==4.46.3
+# sentence-transformers==3.3.1
+# torch==2.5.1  # 906 MB - only needed for ML features
 
 # GraphQL & API Gateway
-ariadne==0.24.1
+ariadne==0.26.2
 strawberry-graphql==0.247.2
 
-# Blockchain (Future Vision)
-web3==7.4.0
-eth-account==0.13.4
+# Blockchain (Future Vision - comment out if not needed)
+# web3==7.4.0
+# eth-account==0.13.4
 
-# Voice Processing (Future Vision)
-SpeechRecognition==3.11.0
-pydub==0.25.1
+# Voice Processing (Future Vision - comment out if not needed)
+# SpeechRecognition==3.11.0
+# pydub==0.25.1
 
-# Image Processing & QR
+# Image Processing & QR (Reduce if not using OpenCV)
 qrcode[pil]==7.4.2
-opencv-python==4.10.0.84
+# opencv-python==4.10.0.84  # Large package - only if needed
 
-# Workflow & Automation
-apache-airflow==2.10.3
-prefect==3.1.4
+# Workflow & Automation (Optional - comment out if not needed)
+# apache-airflow==2.10.3
+# prefect==3.1.4
 
 # Feature Flags & A/B Testing
 flagsmith==3.8.0
