@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import desc, or_
 import json
 
-events_bp = Blueprint('events', __name__, url_prefix='/events')
+events_bp = Blueprint('live_events', __name__, url_prefix='/events/live')
 
 
 @events_bp.route('/')

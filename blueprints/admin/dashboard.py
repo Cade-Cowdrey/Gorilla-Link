@@ -15,7 +15,7 @@ from sqlalchemy import func, desc, extract
 from datetime import datetime, timedelta
 from functools import wraps
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+admin_bp = Blueprint('admin_growth', __name__, url_prefix='/admin/growth')
 
 
 def admin_required(f):
