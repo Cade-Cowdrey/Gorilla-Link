@@ -73,6 +73,10 @@ app.register_blueprint(wait_times_bp)
 app.register_blueprint(events_bp)
 app.register_blueprint(course_library_bp)
 
+# Register Enhanced Admin Dashboard
+from blueprints.admin_dashboard.routes import admin_dashboard_bp
+app.register_blueprint(admin_dashboard_bp)
+
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
 
