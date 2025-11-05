@@ -314,12 +314,6 @@ def seed_jobs():
     
     safe_commit()
     print(f"✅ Created {len(jobs_data)} job postings")
-            posted_at=datetime.utcnow() - timedelta(days=randint(1, 30))
-        )
-        db.session.add(job)
-    
-    safe_commit()
-    print(f"✅ Created {len(jobs_data)} job postings")
 
 
 def seed_events():
@@ -641,16 +635,6 @@ def seed_success_stories():
                 title=title,
                 content=content,
                 created_at=datetime.utcnow() - timedelta(days=randint(30, 365))
-            )
-            db.session.add(story)
-    
-    safe_commit()
-    print(f"✅ Created {len(stories_data)} success stories")
-                graduation_year=randint(2018, 2023),
-                current_position=choice(["Software Engineer", "Business Owner", "Nurse Practitioner", "Data Scientist"]),
-                current_company=choice(["Google", "Own Business", "Regional Hospital", "Tech Startup"]),
-                is_featured=i < 2,
-                created_at=datetime.utcnow() - timedelta(days=randint(1, 90))
             )
             db.session.add(story)
     

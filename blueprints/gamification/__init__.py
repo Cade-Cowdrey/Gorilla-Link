@@ -165,7 +165,7 @@ def check_badge_criteria(user, badge):
     
     # Community Helper - Mentored 3+ students
     elif badge.slug == 'community-helper':
-        from models_growth_features import MentorshipMatch
+        from models_growth_features import MentorshipMatch, MentorProfile
         mentorship_count = MentorshipMatch.query.join(MentorProfile).filter(
             MentorProfile.user_id == user.id,
             MentorshipMatch.status == 'completed'
