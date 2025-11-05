@@ -90,6 +90,22 @@ app.register_blueprint(lost_found_bp)
 app.register_blueprint(sublease_bp)
 app.register_blueprint(free_stuff_bp)
 
+# Register ADVANCED Enterprise Features (5 best-in-class features!)
+from routes_emergency_resources import emergency_bp
+from routes_research_marketplace import research_bp
+from routes_workforce_alignment import workforce_bp
+from routes_smart_housing import housing_bp as smart_housing_bp, roommate_bp
+from routes_global_network import global_network_bp
+from routes_compliance import compliance_bp
+
+app.register_blueprint(emergency_bp)
+app.register_blueprint(research_bp)
+app.register_blueprint(workforce_bp)
+app.register_blueprint(smart_housing_bp)
+app.register_blueprint(roommate_bp)
+app.register_blueprint(global_network_bp)
+app.register_blueprint(compliance_bp)
+
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
 
@@ -109,6 +125,21 @@ def not_found(e):
 def server_error(e):
     logger.exception("Server error: {}", e)
     return Markup("<h3>500 - Internal Server Error</h3>"), 500
+
+# ----------------------------
+# SCHEDULED TASKS
+# ----------------------------
+
+# Start automated data updates (career, housing, skills)
+try:
+    from tasks.update_data import start_scheduler
+    with app.app_context():
+        start_scheduler()
+        logger.info("✓ Automated data update scheduler started")
+except ImportError:
+    logger.warning("⚠ Scheduled tasks module not found - automated updates disabled")
+except Exception as e:
+    logger.error(f"✗ Failed to start scheduler: {e}")
 
 # ----------------------------
 # MAIN ENTRY POINT
