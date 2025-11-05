@@ -105,6 +105,7 @@ class SecretVault(db.Model):
 class ScholarshipExtended(db.Model):
     """Extended scholarship model with AI matching"""
     __tablename__ = "scholarships_extended"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     scholarship_id = db.Column(db.Integer, db.ForeignKey("scholarships.id"), unique=True)
@@ -728,6 +729,7 @@ class Badge(db.Model):
 class UserBadge(db.Model):
     """User badge awards"""
     __tablename__ = "user_badges"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

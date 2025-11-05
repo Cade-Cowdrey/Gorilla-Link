@@ -64,6 +64,7 @@ class UserBadge(db.Model):
 class UserStreak(db.Model):
     """Tracks user daily/weekly streaks for engagement"""
     __tablename__ = "user_streaks"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -236,6 +237,7 @@ class SuccessStory(db.Model):
 class StoryReaction(db.Model):
     """Reactions to success stories (like, celebrate, insightful, etc.)"""
     __tablename__ = "story_reactions"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     story_id = db.Column(db.Integer, db.ForeignKey('success_stories.id'), nullable=False)
@@ -394,6 +396,7 @@ class ForumCategory(db.Model):
 class ForumTopic(db.Model):
     """Forum discussion topics"""
     __tablename__ = "forum_topics"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey('forum_categories.id'), nullable=False)
