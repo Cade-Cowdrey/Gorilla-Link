@@ -70,6 +70,7 @@ class AuditLog(db.Model):
 class ConsentRecord(db.Model):
     """FERPA/GDPR Consent Management"""
     __tablename__ = "consent_records"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -459,6 +460,7 @@ class ForumThread(db.Model):
 class ForumPost(db.Model):
     """Forum thread replies"""
     __tablename__ = "forum_posts"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     thread_id = db.Column(db.Integer, db.ForeignKey("forum_threads.id"), nullable=False)

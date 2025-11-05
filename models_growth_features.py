@@ -331,6 +331,7 @@ class DirectMessage(db.Model):
 class UserMessageCredits(db.Model):
     """Tracks InMail-style messaging credits"""
     __tablename__ = "user_message_credits"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
