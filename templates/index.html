@@ -3,9 +3,9 @@
 {% block content %}
 
 <!-- Modern Hero Section with PSU Logo -->
-<section class="relative h-[650px] bg-cover bg-center overflow-hidden" style="background-image: linear-gradient(rgba(166, 25, 46, 0.75), rgba(28, 28, 28, 0.85)), url('https://www.pittstate.edu/images/student-life/college-park-students-480w.jpg');">
+<section class="relative h-[650px] bg-cover bg-center overflow-hidden" style="background-image: linear-gradient(rgba(28, 28, 28, 0.6), rgba(28, 28, 28, 0.8)), url('https://www.pittstate.edu/images/student-life/college-park-students-480w.jpg');">
   <!-- Animated background -->
-  <div class="absolute inset-0 bg-gradient-to-br from-[#A6192E]/50 to-transparent animate-gradient"></div>
+  <div class="absolute inset-0 bg-gradient-to-br from-black/30 to-transparent animate-gradient"></div>
   
   <div class="relative z-10 flex items-center justify-center h-full text-center px-6">
     <div class="max-w-5xl animate-fade-in">
@@ -203,83 +203,108 @@
   </div>
 </section>
 
-<!-- Quick Access Links -->
+<!-- Quick Access Links - Enhanced Design -->
 <section class="py-20 relative bg-cover bg-center bg-fixed" style="background-image: url('https://www.pittstate.edu/images/student-life/gorilla-village-residence-480w.jpg');">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+  <div class="absolute inset-0 bg-gradient-to-br from-[#A6192E]/80 via-black/70 to-[#1C1C1C]/80"></div>
   
   <div class="relative z-10 max-w-7xl mx-auto px-6">
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4 text-[#FFCC33]" style="font-family: 'Roboto Condensed', sans-serif;">
+      <div class="inline-block h-1 w-32 bg-gradient-to-r from-[#FFCC33] to-[#A6192E] mb-6"></div>
+      <h2 class="text-5xl font-bold mb-4 text-white drop-shadow-lg" style="font-family: 'Roboto Condensed', sans-serif;">
         Student Resources
       </h2>
-      <p class="text-xl text-white/90">
+      <p class="text-xl text-[#FFCC33]">
         Everything you need, right at your fingertips
       </p>
     </div>
 
-    <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <a href="/housing" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-home"></i>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a href="/housing" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-home drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Housing</h3>
+          <p class="text-white/80 text-sm">On-campus living options</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Housing</h3>
-        <p class="text-white/70 text-sm">On-campus living options</p>
       </a>
 
-      <a href="/dining" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-utensils"></i>
+      <a href="/dining" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-utensils drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Dining</h3>
+          <p class="text-white/80 text-sm">Meal plans & menus</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Dining</h3>
-        <p class="text-white/70 text-sm">Meal plans & menus</p>
       </a>
 
-      <a href="https://gus.pittstate.edu/mygus/" target="_blank" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-graduation-cap"></i>
+      <a href="https://gus.pittstate.edu/mygus/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-graduation-cap drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">MyGUS</h3>
+          <p class="text-white/80 text-sm">Student portal access</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">MyGUS</h3>
-        <p class="text-white/70 text-sm">Student portal access</p>
       </a>
 
-      <a href="https://library.pittstate.edu/" target="_blank" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-book"></i>
+      <a href="https://library.pittstate.edu/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-book drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Library</h3>
+          <p class="text-white/80 text-sm">Axe Library resources</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Library</h3>
-        <p class="text-white/70 text-sm">Axe Library resources</p>
       </a>
 
-      <a href="/health" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-heartbeat"></i>
+      <a href="/health" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-heartbeat drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Health</h3>
+          <p class="text-white/80 text-sm">Wellness & counseling</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Health</h3>
-        <p class="text-white/70 text-sm">Wellness & counseling</p>
       </a>
 
-      <a href="/safety" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-shield-alt"></i>
+      <a href="/safety" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-shield-alt drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Safety</h3>
+          <p class="text-white/80 text-sm">Campus security</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Safety</h3>
-        <p class="text-white/70 text-sm">Campus security</p>
       </a>
 
-      <a href="https://www.pittstate.edu/technology/" target="_blank" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-laptop"></i>
+      <a href="https://www.pittstate.edu/technology/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-laptop drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">IT Services</h3>
+          <p class="text-white/80 text-sm">Tech support</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">IT Services</h3>
-        <p class="text-white/70 text-sm">Tech support</p>
       </a>
 
-      <a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="group bg-white/10 backdrop-blur-md rounded-xl p-6 text-center hover:bg-white/20 transition-all hover:scale-105 border border-white/20">
-        <div class="text-[#FFCC33] text-4xl mb-4">
-          <i class="fas fa-map-marked-alt"></i>
+      <a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
+            <i class="fas fa-map-marked-alt drop-shadow-lg"></i>
+          </div>
+          <h3 class="text-white font-bold text-xl mb-2">Campus Map</h3>
+          <p class="text-white/80 text-sm">Find your way</p>
         </div>
-        <h3 class="text-white font-bold text-lg mb-2">Campus Map</h3>
-        <p class="text-white/70 text-sm">Find your way</p>
       </a>
     </div>
   </div>
@@ -368,25 +393,32 @@
   </div>
 </section>
 
-<!-- Final CTA -->
-<section class="py-20 relative overflow-hidden" style="background: linear-gradient(135deg, #A6192E 0%, #8a1525 50%, #A6192E 100%);">
-  <!-- Animated background -->
-  <div class="absolute inset-0 opacity-10">
-    <div class="absolute top-0 left-0 w-96 h-96 bg-[#FFCC33] rounded-full blur-3xl animate-pulse-slow"></div>
-    <div class="absolute bottom-0 right-0 w-96 h-96 bg-[#FFCC33] rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+<!-- Final CTA - Modern Design -->
+<section class="py-20 relative overflow-hidden" style="background: linear-gradient(135deg, #1C1C1C 0%, #2d2d2d 50%, #1C1C1C 100%);">
+  <!-- Animated background patterns -->
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 20% 50%, #FFCC33 1px, transparent 1px), radial-gradient(circle at 80% 80%, #A6192E 1px, transparent 1px); background-size: 50px 50px;"></div>
+  </div>
+  <div class="absolute inset-0 opacity-20">
+    <div class="absolute top-10 left-10 w-72 h-72 bg-[#A6192E] rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-[#FFCC33] rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-[#A6192E] rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 3s;"></div>
   </div>
   
   <div class="relative z-10 max-w-4xl mx-auto text-center px-6">
-    <div class="inline-flex items-center gap-2 bg-[#FFCC33] text-[#1C1C1C] px-6 py-3 rounded-full mb-8 font-bold animate-bounce-slow">
-      <i class="fas fa-fire"></i>
-      <span>Join 15,000+ Active Gorillas Today!</span>
+    <!-- Badge with gradient border -->
+    <div class="inline-block p-1 rounded-full mb-8" style="background: linear-gradient(135deg, #A6192E 0%, #FFCC33 50%, #A6192E 100%);">
+      <div class="flex items-center gap-2 bg-[#1C1C1C] px-6 py-3 rounded-full font-bold text-white">
+        <i class="fas fa-fire text-[#FFCC33]"></i>
+        <span>Join 15,000+ Active Gorillas Today!</span>
+      </div>
     </div>
     
-    <h2 class="text-5xl md:text-6xl font-bold mb-6 text-white" style="font-family: 'Roboto Condensed', sans-serif;">
+    <h2 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-[#FFCC33] to-white bg-clip-text text-transparent" style="font-family: 'Roboto Condensed', sans-serif;">
       Your Success Story Starts Here
     </h2>
     
-    <p class="text-xl mb-10 text-white/90 max-w-2xl mx-auto">
+    <p class="text-xl mb-10 text-gray-300 max-w-2xl mx-auto leading-relaxed">
       Whether you're seeking scholarships, building your career, or connecting with the Gorilla community — 
       your journey begins with Gorilla Link.
     </p>
