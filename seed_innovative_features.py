@@ -1,6 +1,6 @@
 """
 Seed data for innovative features
-Realistic PSU data for testing
+Realistic PSU data for testing (5 features PSU genuinely needs)
 """
 
 from app_pro import app
@@ -8,95 +8,6 @@ from extensions import db
 from models_innovative_features import *
 from datetime import datetime, timedelta, date
 from decimal import Decimal
-
-def seed_rideshare():
-    """Seed rideshare data"""
-    print("Seeding rideshare data...")
-    
-    rides = [
-        RideShare(
-            driver_id=1,
-            trip_type='one_time',
-            direction='to_campus',
-            origin_city='Kansas City',
-            origin_state='MO',
-            origin_zip='64108',
-            destination_city='Pittsburg',
-            departure_date=datetime.utcnow() + timedelta(days=2),
-            departure_time='7:00 AM',
-            available_seats=3,
-            total_seats=3,
-            cost_per_person=Decimal('15.00'),
-            is_free=False,
-            no_smoking=True,
-            luggage_space=True,
-            stops_allowed=True,
-            notes='Coming back to campus after holiday break. Happy to split gas money!',
-            phone_number='(913) 555-0101'
-        ),
-        RideShare(
-            driver_id=2,
-            trip_type='recurring',
-            direction='round_trip',
-            origin_city='Joplin',
-            origin_state='MO',
-            destination_city='Pittsburg',
-            departure_date=datetime.utcnow() + timedelta(days=1),
-            departure_time='8:00 AM',
-            available_seats=2,
-            total_seats=2,
-            recurring_days='Monday,Wednesday,Friday',
-            recurring_until=(datetime.utcnow() + timedelta(days=60)).date(),
-            cost_per_person=Decimal('8.00'),
-            is_free=False,
-            no_smoking=True,
-            luggage_space=False,
-            notes='Commute from Joplin for MWF classes. Leave Joplin at 8am, return at 4pm.',
-            phone_number='(417) 555-0202'
-        ),
-        RideShare(
-            driver_id=3,
-            trip_type='one_time',
-            direction='from_campus',
-            origin_city='Pittsburg',
-            destination_city='Springfield',
-            departure_date=datetime.utcnow() + timedelta(days=5),
-            departure_time='3:00 PM',
-            available_seats=4,
-            total_seats=4,
-            cost_per_person=Decimal('0'),
-            is_free=True,
-            no_smoking=True,
-            luggage_space=True,
-            stops_allowed=True,
-            notes='Heading home for the weekend. Free ride! Just want company for the drive.',
-            phone_number='(417) 555-0303'
-        ),
-        RideShare(
-            driver_id=1,
-            trip_type='one_time',
-            direction='to_campus',
-            origin_city='Tulsa',
-            origin_state='OK',
-            destination_city='Pittsburg',
-            departure_date=datetime.utcnow() + timedelta(days=3),
-            departure_time='9:00 AM',
-            available_seats=1,
-            total_seats=3,
-            cost_per_person=Decimal('12.00'),
-            is_free=False,
-            no_smoking=True,
-            luggage_space=True,
-            notes='Going to Gorillas football game! Have 1 seat left.',
-            phone_number='(918) 555-0404'
-        ),
-    ]
-    
-    for ride in rides:
-        db.session.add(ride)
-    
-    db.session.commit()
-    print(f"✅ Created {len(rides)} rideshare listings")
 
 
 def seed_study_groups():
@@ -400,143 +311,6 @@ def seed_sublease():
     print(f"✅ Created {len(listings)} sublease listings")
 
 
-def seed_parking():
-    """Seed parking spots"""
-    print("Seeding parking spots...")
-    
-    spots = [
-        ParkingSpot(
-            user_id=1,
-            listing_type='daily',
-            location_name='Lot A - Reserved Spot near Library',
-            distance_from_campus=Decimal('0.1'),
-            proximity_to_buildings='2-minute walk to Axe Library, 5 minutes to Heckert-Wells',
-            available_from=date.today() + timedelta(days=1),
-            days_available='Monday-Friday',
-            time_available='8am-5pm',
-            price_per_day=Decimal('5.00'),
-            negotiable=True,
-            covered=False,
-            reserved=True,
-            security_features='Well-lit, camera surveillance',
-            description='I have class Tuesday/Thursday only, so my Monday/Wednesday/Friday parking spot just sits empty. Help me offset my $300 parking pass!',
-            status='available'
-        ),
-        ParkingSpot(
-            user_id=2,
-            listing_type='semester',
-            location_name='Off-campus house - 5 blocks from campus',
-            distance_from_campus=Decimal('0.3'),
-            proximity_to_buildings='8-minute walk to campus center',
-            available_from=date.today(),
-            available_until=date(2025, 5, 15),
-            days_available='All days',
-            time_available='All day',
-            price_per_semester=Decimal('150.00'),
-            negotiable=True,
-            covered=False,
-            reserved=False,
-            description='Extra driveway spot at my house. Cheaper than campus parking and very close! Perfect for commuters.',
-            status='available'
-        ),
-        ParkingSpot(
-            user_id=3,
-            listing_type='event',
-            location_name='Driveway - Walking distance to Carnie Smith Stadium',
-            distance_from_campus=Decimal('0.2'),
-            proximity_to_buildings='5-minute walk to football stadium',
-            available_from=date.today() + timedelta(days=7),
-            days_available='Game day',
-            time_available='All day',
-            price_per_day=Decimal('15.00'),
-            covered=False,
-            reserved=True,
-            description='Rent my driveway for Gorillas home games! Way cheaper than stadium parking ($20) and you don\'t have to fight traffic.',
-            status='available'
-        ),
-    ]
-    
-    for spot in spots:
-        db.session.add(spot)
-    
-    db.session.commit()
-    print(f"✅ Created {len(spots)} parking spots")
-
-
-def seed_tutoring():
-    """Seed tutoring profiles"""
-    print("Seeding tutoring profiles...")
-    
-    tutors = [
-        TutorProfile(
-            user_id=1,
-            bio='Math major, 3.8 GPA. I love helping students understand calculus! Took Calc I-III and got A\'s in all.',
-            major='Mathematics',
-            year='Senior',
-            gpa=Decimal('3.8'),
-            subjects='["MATH 147", "MATH 241", "MATH 242"]',
-            availability='{"Monday": ["4pm-8pm"], "Wednesday": ["4pm-8pm"], "Saturday": ["10am-4pm"]}',
-            preferred_location='Axe Library, Starbucks, or Zoom',
-            offers_online=True,
-            offers_in_person=True,
-            hourly_rate=Decimal('20.00'),
-            first_session_free=True,
-            tutoring_experience='Tutored for 2 years at Academic Success Center. Helped 50+ students improve grades.',
-            avg_rating=Decimal('4.9'),
-            total_sessions=45,
-            total_reviews=38,
-            is_active=True,
-            is_verified=True
-        ),
-        TutorProfile(
-            user_id=2,
-            bio='Chemistry major preparing for medical school. Aced General Chem I & II and Organic Chem.',
-            major='Chemistry',
-            year='Junior',
-            gpa=Decimal('3.9'),
-            subjects='["CHEM 121", "CHEM 122", "CHEM 320", "CHEM 321"]',
-            availability='{"Tuesday": ["5pm-9pm"], "Thursday": ["5pm-9pm"], "Sunday": ["2pm-6pm"]}',
-            preferred_location='Yates Hall study rooms, Online',
-            offers_online=True,
-            offers_in_person=True,
-            hourly_rate=Decimal('25.00'),
-            first_session_free=False,
-            group_discount=True,
-            tutoring_experience='1 year experience. Helped classmates prepare for MCAT chemistry section.',
-            avg_rating=Decimal('5.0'),
-            total_sessions=22,
-            total_reviews=20,
-            is_active=True
-        ),
-        TutorProfile(
-            user_id=3,
-            bio='Computer Science major. Expert in Python, Java, C++. Former TA for CS 101.',
-            major='Computer Science',
-            year='Senior',
-            gpa=Decimal('3.7'),
-            subjects='["CS 101", "CS 201", "CS 240", "Python", "Java"]',
-            availability='{"Monday": ["6pm-10pm"], "Wednesday": ["6pm-10pm"], "Friday": ["4pm-8pm"]}',
-            preferred_location='Heckert-Wells, Discord screenshare, Zoom',
-            offers_online=True,
-            offers_in_person=True,
-            hourly_rate=Decimal('22.00'),
-            first_session_free=True,
-            tutoring_experience='Was a TA for CS 101, tutored 100+ students. Can help with debugging and projects.',
-            avg_rating=Decimal('4.8'),
-            total_sessions=67,
-            total_reviews=55,
-            is_active=True,
-            is_verified=True
-        ),
-    ]
-    
-    for tutor in tutors:
-        db.session.add(tutor)
-    
-    db.session.commit()
-    print(f"✅ Created {len(tutors)} tutor profiles")
-
-
 def seed_free_stuff():
     """Seed free stuff items"""
     print("Seeding free stuff items...")
@@ -610,29 +384,23 @@ def run_all_seeds():
     """Run all seed functions"""
     with app.app_context():
         print("=" * 60)
-        print("SEEDING INNOVATIVE FEATURES")
+        print("SEEDING INNOVATIVE FEATURES (5 PSU-Specific Features)")
         print("=" * 60)
         
-        seed_rideshare()
         seed_study_groups()
         seed_wellness_resources()
         seed_lost_found()
         seed_sublease()
-        seed_parking()
-        seed_tutoring()
         seed_free_stuff()
         
         print("\n" + "=" * 60)
         print("✅ ALL SEED DATA CREATED SUCCESSFULLY!")
         print("=" * 60)
         print("\n📊 Summary:")
-        print("  • 4 rideshare trips")
         print("  • 4 study groups")
         print("  • 7 wellness resources")
         print("  • 4 lost & found items")
         print("  • 3 sublease listings")
-        print("  • 3 parking spots")
-        print("  • 3 tutor profiles")
         print("  • 5 free items")
         print("\n🎉 Ready to test all features!")
 

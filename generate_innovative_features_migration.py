@@ -1,6 +1,6 @@
 """
 Migration script for innovative features
-Creates tables for 8 game-changing features that PSU doesn't have
+Creates tables for 5 genuinely useful features PSU needs
 """
 
 from app_pro import app
@@ -8,10 +8,6 @@ from extensions import db
 
 # Import all innovative feature models
 from models_innovative_features import (
-    # Rideshare models
-    RideShare,
-    RideRequest,
-    
     # Study groups
     StudyGroup,
     StudyGroupMember,
@@ -26,13 +22,6 @@ from models_innovative_features import (
     # Sublease marketplace
     SubleasePosting,
     
-    # Parking exchange
-    ParkingSpot,
-    
-    # Tutoring marketplace
-    TutorProfile,
-    TutoringSession,
-    
     # Free stuff board
     FreeStuff
 )
@@ -46,14 +35,11 @@ def create_tables():
         db.create_all()
         
         print("✅ All tables created successfully!")
-        print("\nCreated 12 models across 8 features:")
-        print("  🚗 Rideshare: RideShare, RideRequest")
+        print("\nCreated 7 models across 5 features:")
         print("  📚 Study Groups: StudyGroup, StudyGroupMember")
         print("  💚 Wellness: WellnessCheckIn, WellnessResource")
         print("  🔑 Lost & Found: LostItem")
         print("  🏠 Sublease: SubleasePosting")
-        print("  🅿️ Parking: ParkingSpot")
-        print("  👨‍🏫 Tutoring: TutorProfile, TutoringSession")
         print("  🎁 Free Stuff: FreeStuff")
         print("\nNext steps:")
         print("1. Run seed_innovative_features.py to populate sample data")
