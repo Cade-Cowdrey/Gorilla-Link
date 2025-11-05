@@ -1507,7 +1507,7 @@ class ScholarshipMatch(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Scholarship Details
     title = db.Column(db.String(255), nullable=False)
@@ -1562,7 +1562,7 @@ class ScholarshipApplication(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     scholarship_match_id = db.Column(db.Integer, db.ForeignKey('scholarship_matches.id'))
     
     # Application Details
@@ -1629,7 +1629,7 @@ class LinkedInProfile(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     
     # LinkedIn Data
     linkedin_id = db.Column(db.String(100), unique=True)
@@ -1698,7 +1698,7 @@ class EmailNotification(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Email Details
     notification_type = db.Column(db.String(50), nullable=False)  # appointment_confirmation, scholarship_match, job_alert
@@ -1739,7 +1739,7 @@ class AIChatSession(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Session Details
     title = db.Column(db.String(255), default='Career Coaching Session')
@@ -1800,7 +1800,7 @@ class EmployerProfile(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Company Information
     company_name = db.Column(db.String(255), nullable=False)
@@ -1831,7 +1831,7 @@ class EmployerProfile(db.Model):
     # Verification
     is_verified = db.Column(db.Boolean, default=False)
     verified_at = db.Column(db.DateTime)
-    verified_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    verified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     # Status
     is_active = db.Column(db.Boolean, default=True)
@@ -1932,7 +1932,7 @@ class StudentRiskScore(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Risk Assessment
     overall_risk_score = db.Column(db.Float)  # 0-100, higher = more at risk
@@ -1954,7 +1954,7 @@ class StudentRiskScore(db.Model):
     
     # Status
     intervention_status = db.Column(db.String(50), default='identified')  # identified, contacted, in_progress, resolved
-    assigned_advisor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    assigned_advisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     contacted_at = db.Column(db.DateTime)
     resolved_at = db.Column(db.DateTime)
     
@@ -2066,7 +2066,7 @@ class UserCertificationProgress(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'), nullable=False)
     
     # Progress Tracking
@@ -2142,7 +2142,7 @@ class CertificationRecommendation(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'), nullable=False)
     
     # Recommendation Details
@@ -2238,7 +2238,7 @@ class UserPathwayProgress(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     pathway_id = db.Column(db.Integer, db.ForeignKey('certification_pathways.id'), nullable=False)
     
     # Progress
