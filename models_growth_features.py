@@ -373,6 +373,7 @@ class UserMessageCredits(db.Model):
 class ForumCategory(db.Model):
     """Forum categories (Career Advice, Technical Help, etc.)"""
     __tablename__ = "forum_categories"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

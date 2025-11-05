@@ -87,6 +87,7 @@ class ConsentRecord(db.Model):
 class SecretVault(db.Model):
     """Encrypted secrets management"""
     __tablename__ = "secret_vault"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     key_name = db.Column(db.String(128), unique=True, nullable=False, index=True)
@@ -712,6 +713,7 @@ class LocalBusiness(db.Model):
 class Badge(db.Model):
     """Gamification badges"""
     __tablename__ = "badges"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
