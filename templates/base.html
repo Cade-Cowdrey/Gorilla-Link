@@ -20,7 +20,9 @@
   <!-- CSS + TAILWIND -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- PSU Official Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -38,6 +40,7 @@
           },
           fontFamily: {
             sans: ['Open Sans', 'system-ui', 'sans-serif'],
+            heading: ['Roboto Condensed', 'sans-serif'],
             serif: ['Merriweather', 'Georgia', 'serif'],
           },
           animation: {
@@ -121,14 +124,46 @@
 </head>
 
 <body class="bg-white text-gray-900 flex flex-col min-h-screen">
+  <!-- PSU OFFICIAL HEADER BAR -->
+  <div class="bg-[#660000] text-white py-2 px-4 text-sm border-b border-[#4d0000]">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <a href="https://www.pittstate.edu" target="_blank" class="hover:text-[#FFCC33] transition-colors font-medium">
+          PSU.edu
+        </a>
+        <a href="https://gus.pittstate.edu/mygus/" target="_blank" class="hover:text-[#FFCC33] transition-colors font-medium">
+          MyGUS
+        </a>
+        <a href="https://www.pittstate.edu/office/human-resources/faculty-staff-directory.html" target="_blank" class="hover:text-[#FFCC33] transition-colors font-medium">
+          Directory
+        </a>
+        <a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="hover:text-[#FFCC33] transition-colors font-medium">
+          Campus Map
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="tel:620-235-4011" class="hover:text-[#FFCC33] transition-colors font-medium">
+          <i class="fas fa-phone mr-1"></i>
+          620-235-4011
+        </a>
+        <button class="hover:text-[#FFCC33] transition-colors">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- PROFESSIONAL PSU NAVBAR -->
-  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md">
+  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md border-b-4 border-[#660000]">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
       <div class="flex items-center gap-3">
-        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-10 h-10">
-        <a href="{{ url_for('index') }}" class="text-xl font-bold tracking-tight hover:text-gold transition-colors">
-          PittState-Connect
-        </a>
+        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-12 h-12">
+        <div class="flex flex-col">
+          <a href="{{ url_for('index') }}" class="text-2xl font-heading font-bold tracking-tight hover:text-gold transition-colors" style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+            Gorilla-Link
+          </a>
+          <span class="text-xs text-gold tracking-wider">PITTSBURG STATE UNIVERSITY</span>
+        </div>
       </div>
 
       <!-- Desktop Navigation -->
@@ -260,82 +295,109 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- PROFESSIONAL FOOTER -->
-  <footer class="bg-psuBlack text-white mt-auto">
+  <!-- OFFICIAL PSU FOOTER -->
+  <footer class="bg-[#660000] text-white mt-auto">
     <div class="max-w-7xl mx-auto px-6 py-12">
       <div class="grid md:grid-cols-4 gap-8 mb-8">
-        <!-- About Section -->
+        
+        <!-- Contact Us -->
         <div>
-          <div class="flex items-center gap-2 mb-4">
-            <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU" class="w-10 h-10">
-            <h3 class="font-bold text-lg">PittState Connect</h3>
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+            Contact Us
+          </h4>
+          <div class="space-y-3 text-sm leading-relaxed">
+            <p class="font-semibold">Pittsburg State University</p>
+            <p>1701 S. Broadway<br>Pittsburg, KS 66762</p>
+            <p class="flex items-center gap-2">
+              <i class="fas fa-phone"></i>
+              <a href="tel:620-235-4011" class="hover:text-[#FFCC33] transition-colors">620-235-4011</a>
+            </p>
+            <p class="flex items-center gap-2">
+              <i class="fas fa-envelope"></i>
+              <a href="mailto:psualumni@pittstate.edu" class="hover:text-[#FFCC33] transition-colors">psualumni@pittstate.edu</a>
+            </p>
           </div>
-          <p class="text-sm text-gray-400 leading-relaxed">
-            Making Lives Better Through Education, Connection, and Opportunity
-          </p>
         </div>
 
-        <!-- Students -->
+        <!-- Quick Links -->
         <div>
-          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Students</h4>
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+            Quick Links
+          </h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="{{ url_for('scholarships_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Scholarships</a></li>
-            <li><a href="{{ url_for('careers_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Career Services</a></li>
-            <li><a href="{{ url_for('mentors.index') }}" class="text-gray-400 hover:text-gold transition-colors">Mentorship</a></li>
-            <li><a href="{{ url_for('events.events_home') }}" class="text-gray-400 hover:text-gold transition-colors">Campus Events</a></li>
+            <li><a href="https://www.pittstate.edu/admissions/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Admissions</a></li>
+            <li><a href="https://www.pittstate.edu/academics/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Academics</a></li>
+            <li><a href="https://www.pittstate.edu/student-life/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Student Life</a></li>
+            <li><a href="https://www.pittstate.edu/athletics/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Athletics</a></li>
+            <li><a href="https://www.pittstate.edu/alumni/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Alumni & Giving</a></li>
+            <li><a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">Scholarships</a></li>
+            <li><a href="{{ url_for('careers_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">Career Services</a></li>
           </ul>
         </div>
 
-        <!-- Alumni & Resources -->
+        <!-- Resources -->
         <div>
-          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Alumni & Resources</h4>
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+            Resources
+          </h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="{{ url_for('alumni_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Alumni Network</a></li>
-            <li><a href="{{ url_for('announcements_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">News & Updates</a></li>
-            <li><a href="{{ url_for('profile.profile_home') }}" class="text-gray-400 hover:text-gold transition-colors">My Profile</a></li>
-            <li><a href="{{ url_for('analytics_bp.index') }}" class="text-gray-400 hover:text-gold transition-colors">Analytics</a></li>
+            <li><a href="https://gus.pittstate.edu/mygus/" target="_blank" class="hover:text-[#FFCC33] transition-colors">MyGUS Portal</a></li>
+            <li><a href="https://library.pittstate.edu/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Axe Library</a></li>
+            <li><a href="https://www.pittstate.edu/technology/" target="_blank" class="hover:text-[#FFCC33] transition-colors">IT Services</a></li>
+            <li><a href="https://www.pittstate.edu/office/human-resources/faculty-staff-directory.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Directory</a></li>
+            <li><a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Campus Map</a></li>
+            <li><a href="{{ url_for('events.events_home') }}" class="hover:text-[#FFCC33] transition-colors">Campus Events</a></li>
+            <li><a href="{{ url_for('announcements_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">News & Updates</a></li>
           </ul>
         </div>
 
-        <!-- Contact -->
+        <!-- Social Media & Gus -->
         <div>
-          <h4 class="font-bold text-sm mb-4 text-gold uppercase tracking-wide">Connect With Us</h4>
-          <ul class="space-y-3 text-sm">
-            <li class="flex items-start gap-2 text-gray-400">
-              <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-              </svg>
-              <a href="mailto:support@pittstateconnect.edu" class="hover:text-gold transition-colors">support@pittstateconnect.edu</a>
-            </li>
-            <li class="flex items-start gap-2 text-gray-400">
-              <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-              </svg>
-              <span>(620) 235-4011</span>
-            </li>
-          </ul>
-          <div class="flex gap-3 mt-4">
-            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+            Connect With Us
+          </h4>
+          <div class="flex gap-3 mb-6">
+            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <i class="fab fa-facebook-f text-lg"></i>
             </a>
-            <a href="https://twitter.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+            <a href="https://twitter.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <i class="fab fa-twitter text-lg"></i>
             </a>
-            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-9 h-9 bg-gray-800 rounded flex items-center justify-center hover:bg-gold hover:text-crimson transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <i class="fab fa-instagram text-lg"></i>
             </a>
+            <a href="https://www.youtube.com/user/PittsburgState" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <i class="fab fa-youtube text-lg"></i>
+            </a>
+            <a href="https://www.linkedin.com/school/pittsburg-state-university/" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <i class="fab fa-linkedin-in text-lg"></i>
+            </a>
+          </div>
+          
+          <!-- Gus the Gorilla -->
+          <div class="text-center mt-4">
+            <div class="text-4xl mb-2 animate-bounce-slow">🦍</div>
+            <p class="font-heading font-bold text-[#FFCC33] text-lg" style="font-family: 'Roboto Condensed', sans-serif;">
+              GO GORILLAS!
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Copyright -->
-      <div class="border-t border-gray-800 pt-6 text-center">
-        <p class="text-sm text-gray-400">
-          © 2025 Pittsburg State University | PittState-Connect
+      <!-- Copyright Bar -->
+      <div class="border-t border-white/20 pt-6 text-center">
+        <p class="text-sm mb-2">
+          © 2025 Pittsburg State University | Gorilla-Link Alumni & Career Platform
         </p>
-        <p class="text-xs text-gray-500 mt-2">
-          All Rights Reserved | Privacy Policy | Terms of Service
-        </p>
+        <div class="flex items-center justify-center gap-4 text-xs text-white/80">
+          <a href="https://www.pittstate.edu/about/equal-opportunity.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Equal Opportunity</a>
+          <span>•</span>
+          <a href="https://www.pittstate.edu/about/privacy.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Privacy Policy</a>
+          <span>•</span>
+          <a href="https://www.pittstate.edu/about/title-ix.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Title IX</a>
+          <span>•</span>
+          <a href="https://www.pittstate.edu/about/accessibility.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Accessibility</a>
+        </div>
       </div>
     </div>
   </footer>
