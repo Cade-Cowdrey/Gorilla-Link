@@ -220,6 +220,12 @@ class Job(db.Model):
     description = db.Column(db.Text)
     posted_at = db.Column(db.DateTime, default=func.now())
     is_active = db.Column(db.Boolean, default=True)
+    
+    # Career upgrade fields for recent graduates
+    experience_level = db.Column(db.String(50), default='entry')  # entry, mid, senior, executive
+    salary_min = db.Column(db.Integer)  # Minimum salary
+    salary_max = db.Column(db.Integer)  # Maximum salary
+    years_experience_required = db.Column(db.String(20))  # 0-1, 1-3, 3-5, 5-10, 10+
 
     def __repr__(self):
         return f"<Job {self.title} at {self.company}>"
