@@ -64,7 +64,10 @@ class UserBadge(db.Model):
 class UserStreak(db.Model):
     """Tracks user daily/weekly streaks for engagement"""
     __tablename__ = "user_streaks"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'streak_type', name='unique_user_streak'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -77,11 +80,6 @@ class UserStreak(db.Model):
     
     # Relationships
     user = db.relationship('User', backref=db.backref('streaks', lazy='dynamic'))
-    
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'streak_type', name='unique_user_streak'),
-        {'extend_existing': True}
-    )
     
     def __repr__(self):
         return f"<UserStreak user={self.user_id} type={self.streak_type} streak={self.current_streak}>"
@@ -237,7 +235,10 @@ class SuccessStory(db.Model):
 class StoryReaction(db.Model):
     """Reactions to success stories (like, celebrate, insightful, etc.)"""
     __tablename__ = "story_reactions"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        db.UniqueConstraint('story_id', 'user_id', name='unique_story_reaction'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     story_id = db.Column(db.Integer, db.ForeignKey('success_stories.id'), nullable=False)
@@ -248,11 +249,6 @@ class StoryReaction(db.Model):
     # Relationships
     story = db.relationship('SuccessStory', back_populates='reactions')
     user = db.relationship('User', backref=db.backref('story_reactions', lazy='dynamic'))
-    
-    __table_args__ = (
-        db.UniqueConstraint('story_id', 'user_id', name='unique_story_reaction'),
-        {'extend_existing': True}
-    )
     
     def __repr__(self):
         return f"<StoryReaction story={self.story_id} user={self.user_id} type={self.reaction_type}>"
