@@ -306,6 +306,7 @@ class Referral(db.Model):
 class DirectMessage(db.Model):
     """Direct messaging system (InMail-style)"""
     __tablename__ = "direct_messages"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

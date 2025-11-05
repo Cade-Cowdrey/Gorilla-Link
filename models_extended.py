@@ -51,6 +51,7 @@ class WebAuthnCredential(db.Model):
 class AuditLog(db.Model):
     """Comprehensive audit trail for compliance"""
     __tablename__ = "audit_logs"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -284,6 +285,7 @@ class SponsorshipTier(db.Model):
 class EventSponsor(db.Model):
     """Event sponsorship records"""
     __tablename__ = "event_sponsors"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey("events.id"), nullable=False)
