@@ -1,7 +1,6 @@
 """Stripe Payment Routes"""
-from flask import render_template, request, redirect, url_for, flash, jsonify, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
-from . import payments_bp
 from extensions import db
 from models_monetization import (
     EmployerSubscription, EmployerTier, SubscriptionStatus,
@@ -11,6 +10,9 @@ from models_monetization import (
 from datetime import datetime, timedelta
 import stripe
 import os
+
+# Create blueprint
+bp = Blueprint('payments', __name__, url_prefix='/payments')
 
 # Stripe configuration
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
@@ -27,14 +29,14 @@ PRICE_IDS = {
 }
 
 
-@payments_bp.route('/pricing')
+@bp.route('/pricing')
 def pricing():
     """Show pricing page"""
     return render_template('employer_pricing.html', 
                          stripe_key=STRIPE_PUBLISHABLE_KEY)
 
 
-@payments_bp.route('/upgrade')
+@bp.route('/upgrade')
 @login_required
 def upgrade():
     """Upgrade subscription page"""
@@ -55,7 +57,7 @@ def upgrade():
                          stripe_key=STRIPE_PUBLISHABLE_KEY)
 
 
-@payments_bp.route('/create-checkout-session', methods=['POST'])
+@bp.route('/create-checkout-session', methods=['POST'])
 @login_required
 def create_checkout_session():
     """Create Stripe checkout session for subscription"""
@@ -111,7 +113,7 @@ def create_checkout_session():
         return jsonify({'error': str(e)}), 500
 
 
-@payments_bp.route('/success')
+@bp.route('/success')
 @login_required
 def success():
     """Payment success page"""
@@ -148,7 +150,7 @@ def success():
     return render_template('payments/success.html')
 
 
-@payments_bp.route('/webhook', methods=['POST'])
+@bp.route('/webhook', methods=['POST'])
 def webhook():
     """Stripe webhook handler"""
     payload = request.get_data()
@@ -264,7 +266,7 @@ def handle_payment_failed(invoice):
         # TODO: Send email notification to user
 
 
-@payments_bp.route('/cancel-subscription', methods=['POST'])
+@bp.route('/cancel-subscription', methods=['POST'])
 @login_required
 def cancel_subscription():
     """Cancel subscription"""
@@ -290,7 +292,7 @@ def cancel_subscription():
     return redirect(url_for('dashboard.employer_dashboard'))
 
 
-@payments_bp.route('/portal')
+@bp.route('/portal')
 @login_required
 def customer_portal():
     """Redirect to Stripe customer portal"""
@@ -315,7 +317,7 @@ def customer_portal():
 
 # One-time payment routes (job boosts, scholarships, etc.)
 
-@payments_bp.route('/boost/<int:job_id>', methods=['POST'])
+@bp.route('/boost/<int:job_id>', methods=['POST'])
 @login_required
 def boost_job(job_id):
     """Purchase job boost"""
@@ -352,7 +354,7 @@ def boost_job(job_id):
         return jsonify({'error': str(e)}), 500
 
 
-@payments_bp.route('/boost/confirm', methods=['POST'])
+@bp.route('/boost/confirm', methods=['POST'])
 @login_required
 def confirm_boost():
     """Confirm job boost payment"""

@@ -34,6 +34,7 @@ class TwoFactorAuth(db.Model):
 class WebAuthnCredential(db.Model):
     """WebAuthn/FIDO2 Credentials"""
     __tablename__ = "webauthn_credentials"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -229,6 +230,7 @@ class AlumniProfile(db.Model):
 class MentorshipSession(db.Model):
     """Track mentorship sessions"""
     __tablename__ = "mentorship_sessions"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

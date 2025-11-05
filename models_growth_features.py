@@ -281,6 +281,7 @@ class StoryComment(db.Model):
 class Referral(db.Model):
     """Referral program tracking"""
     __tablename__ = "referrals"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     referrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -1254,6 +1255,7 @@ class AppointmentFeedback(db.Model):
 class DashboardMetric(db.Model):
     """Real-time metrics for administrator dashboard"""
     __tablename__ = "dashboard_metrics"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     metric_name = db.Column(db.String(100), nullable=False)
@@ -1266,7 +1268,7 @@ class DashboardMetric(db.Model):
     time_period = db.Column(db.String(50))  # daily, weekly, monthly, semester, annual
     calculation_method = db.Column(db.Text)  # SQL query or logic used
     last_calculated = db.Column(db.DateTime, default=func.now())
-    metadata = db.Column(JSONB)  # Additional context
+    metric_metadata = db.Column(JSONB)  # Additional context (renamed from 'metadata')
     
     def calculate_change_percentage(self):
         """Calculate percentage change from previous value"""

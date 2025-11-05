@@ -1,6 +1,4 @@
 """Payments Blueprint - Stripe Integration"""
-from flask import Blueprint
+from .routes import bp
 
-payments_bp = Blueprint('payments', __name__, url_prefix='/payments')
-
-from . import routes
+__all__ = ['bp']
