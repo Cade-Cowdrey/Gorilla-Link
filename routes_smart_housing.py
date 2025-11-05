@@ -11,7 +11,7 @@ from datetime import datetime, date, timedelta
 from sqlalchemy import or_, and_, desc, func
 from decimal import Decimal
 
-housing_bp = Blueprint('housing', __name__, url_prefix='/housing')
+housing_bp = Blueprint('smart_housing', __name__, url_prefix='/housing')
 
 # ==================== HOUSING SEARCH ====================
 
@@ -219,7 +219,7 @@ def ai_housing_finder():
 
 # ==================== ROOMMATE FINDER ====================
 
-@roommate_bp = Blueprint('roommate', __name__, url_prefix='/roommate')
+roommate_bp = Blueprint('roommate', __name__, url_prefix='/roommate')
 
 @roommate_bp.route('/')
 def roommate_finder():

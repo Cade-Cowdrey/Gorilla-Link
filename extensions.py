@@ -25,7 +25,7 @@ limiter = None
 scheduler = APScheduler()
 cache = Cache()
 cors = CORS()
-socketio = SocketIO(cors_allowed_origins="*", async_mode='gevent')
+socketio = SocketIO(cors_allowed_origins="*", async_mode='threading')
 
 # --- Redis client ---
 redis_client = None

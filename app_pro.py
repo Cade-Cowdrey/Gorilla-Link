@@ -74,8 +74,9 @@ app.register_blueprint(events_bp)
 app.register_blueprint(course_library_bp)
 
 # Register Enhanced Admin Dashboard
-from blueprints.admin_dashboard.routes import admin_dashboard_bp
-app.register_blueprint(admin_dashboard_bp)
+# ALREADY REGISTERED by register_blueprints() function
+# from blueprints.admin_dashboard.routes import bp as admin_dashboard_bp
+# app.register_blueprint(admin_dashboard_bp)
 
 # Register Innovative Features (5 features PSU genuinely needs!)
 from blueprints.study_groups.routes import study_groups_bp

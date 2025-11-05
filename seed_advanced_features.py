@@ -8,6 +8,14 @@ Seed Data for Advanced Enterprise Features
 - Compliance: Initial masking rules
 """
 
+import sys
+import io
+
+# Fix Windows console encoding for Unicode
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 from extensions import db
 from app_pro import app
 from models_advanced_features import (

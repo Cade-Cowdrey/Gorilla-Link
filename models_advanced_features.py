@@ -676,6 +676,7 @@ class HousingListing(db.Model):
     __table_args__ = (
         Index('idx_rent_available', 'monthly_rent', 'status'),
         Index('idx_bedrooms_rent', 'bedrooms', 'monthly_rent'),
+        {'extend_existing': True}
     )
 
 

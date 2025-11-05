@@ -29,7 +29,7 @@ class EmployerSubscription(db.Model):
     __tablename__ = 'employer_subscriptions'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     
     # Subscription details
     tier = db.Column(db.Enum(EmployerTier), nullable=False, default=EmployerTier.FREE)

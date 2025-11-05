@@ -24,7 +24,7 @@ def upgrade():
     op.create_table(
         "alumni",
         sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("user_id", sa.Integer(), sa.ForeignKey("user.id")),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id")),
         sa.Column("graduation_year", sa.String(length=10)),
         sa.Column("employer", sa.String(length=120)),
         sa.Column("position", sa.String(length=120)),
@@ -55,7 +55,7 @@ def upgrade():
     op.create_table(
         "post",
         sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("user_id", sa.Integer(), sa.ForeignKey("user.id")),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id")),
         sa.Column("content", sa.Text()),
         sa.Column("category", sa.String(length=80)),
         sa.Column("timestamp", sa.DateTime(), default=datetime.utcnow),
