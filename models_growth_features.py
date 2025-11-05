@@ -1534,6 +1534,7 @@ class ScholarshipMatch(db.Model):
 class ScholarshipApplication(db.Model):
     """Track scholarship application progress"""
     __tablename__ = 'scholarship_applications'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

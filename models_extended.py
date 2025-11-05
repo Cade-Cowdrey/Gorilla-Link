@@ -125,6 +125,7 @@ class ScholarshipExtended(db.Model):
 class ScholarshipApplication(db.Model):
     """Track scholarship applications"""
     __tablename__ = "scholarship_applications"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -1058,6 +1059,7 @@ class ChatRoom(db.Model):
 class ChatMessage(db.Model):
     """Chat messages"""
     __tablename__ = "chat_messages"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.String(128), db.ForeignKey("chat_rooms.room_id"), nullable=False)
