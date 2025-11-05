@@ -30,6 +30,8 @@
             crimsonDark: '#4d0000',
             gold: '#FFCC33',
             goldDark: '#e6b82e',
+            psuRed: '#660000',
+            psuGold: '#FFCC33',
             psuBlack: '#1C1C1C',
             psuGray: '#F5F5F5',
             darkGray: '#4A4A4A',
@@ -37,6 +39,27 @@
           fontFamily: {
             sans: ['Open Sans', 'system-ui', 'sans-serif'],
             serif: ['Merriweather', 'Georgia', 'serif'],
+          },
+          animation: {
+            'gradient': 'gradient 8s ease infinite',
+            'fade-in': 'fadeIn 0.6s ease-out',
+            'slide-up': 'slideUp 0.6s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 3s infinite',
+          },
+          keyframes: {
+            gradient: {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
           },
         },
       },
@@ -59,6 +82,40 @@
     /* Clean dropdown */
     .dropdown-menu {
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Animated gradient backgrounds */
+    .animate-gradient {
+      background-size: 200% 200%;
+      animation: gradient 8s ease infinite;
+    }
+    
+    /* Card hover effect */
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #660000, #FFCC33);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Glass effect */
+    .glass {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Reveal animation */
+    .reveal {
+      animation: slideUp 0.6s ease-out;
     }
   </style>
 </head>
