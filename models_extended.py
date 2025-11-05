@@ -445,6 +445,7 @@ class Forum(db.Model):
 class ForumThread(db.Model):
     """Forum discussion threads"""
     __tablename__ = "forum_threads"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     forum_id = db.Column(db.Integer, db.ForeignKey("forums.id"), nullable=False)

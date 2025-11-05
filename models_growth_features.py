@@ -726,6 +726,7 @@ class AutoApplyQueue(db.Model):
 class NotificationPreference(db.Model):
     """User notification preferences"""
     __tablename__ = "notification_preferences"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -1705,6 +1706,7 @@ class EmailNotification(db.Model):
 class NotificationPreference(db.Model):
     """User preferences for email notifications"""
     __tablename__ = 'notification_preferences'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
