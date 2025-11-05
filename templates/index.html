@@ -88,6 +88,75 @@
   </div>
 </section>
 
+<!-- Quick Links Overlay Section - MyGus Style -->
+<section class="relative py-24 bg-cover bg-center bg-fixed" style="background-image: url('https://www.pittstate.edu/images/student-life/pep-rally-downtown-480w.jpg');">
+  <!-- Dark overlay for readability -->
+  <div class="absolute inset-0" style="background-color: rgba(0, 0, 0, 0.6);"></div>
+  
+  <!-- Content overlays on image -->
+  <div class="relative max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold mb-4" style="color: #FFCC33; font-family: 'Merriweather', serif;">
+        Quick Access
+      </h2>
+      <p class="text-xl" style="color: #ffffff;">
+        Everything you need, right at your fingertips
+      </p>
+    </div>
+
+    <!-- Floating Cards on Background -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Card 1: Find Scholarships -->
+      <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
+        <div class="text-5xl mb-4">🎓</div>
+        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Find Scholarships</h3>
+        <p class="text-sm mb-4" style="color: #4b5563;">Browse 150+ opportunities worth $2.5M+</p>
+        <a href="{{ url_for('scholarships_bp.browse') }}" 
+           class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
+           style="background-color: #660000; color: #ffffff;">
+          Browse Now
+        </a>
+      </div>
+
+      <!-- Card 2: Search Jobs -->
+      <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
+        <div class="text-5xl mb-4">💼</div>
+        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Career Services</h3>
+        <p class="text-sm mb-4" style="color: #4b5563;">500+ active job postings and internships</p>
+        <a href="{{ url_for('careers_bp.index') }}" 
+           class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
+           style="background-color: #660000; color: #ffffff;">
+          Explore Jobs
+        </a>
+      </div>
+
+      <!-- Card 3: Alumni Network -->
+      <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
+        <div class="text-5xl mb-4">🤝</div>
+        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Alumni Network</h3>
+        <p class="text-sm mb-4" style="color: #4b5563;">Connect with 15,000+ Gorilla alumni</p>
+        <a href="{{ url_for('alumni_bp.index') }}" 
+           class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
+           style="background-color: #660000; color: #ffffff;">
+          Connect Now
+        </a>
+      </div>
+
+      <!-- Card 4: Campus Events -->
+      <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
+        <div class="text-5xl mb-4">📅</div>
+        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Campus Events</h3>
+        <p class="text-sm mb-4" style="color: #4b5563;">Homecoming, Welcome Week & more</p>
+        <a href="{{ url_for('events.index') }}" 
+           class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
+           style="background-color: #660000; color: #ffffff;">
+          View Events
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Campus Life Highlights - Light Gray Background -->
 <section class="py-16" style="background-color: #f9fafb;">
   <div class="max-w-7xl mx-auto px-6">
@@ -184,6 +253,57 @@
          style="background-color: #660000; color: #ffffff;">
         VIEW ALL EVENTS
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- Student Resources Overlay - MyGus Style -->
+<section class="relative py-24 bg-cover bg-center bg-fixed" style="background-image: url('https://www.pittstate.edu/images/campus-activities/home/food-trucks-480w.jpg');">
+  <!-- Light overlay for contrast -->
+  <div class="absolute inset-0" style="background-color: rgba(102, 0, 0, 0.75);"></div>
+  
+  <!-- Content overlays on image -->
+  <div class="relative max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold mb-4" style="color: #ffffff; font-family: 'Merriweather', serif;">
+        Student Resources
+      </h2>
+      <p class="text-xl" style="color: #FFCC33;">
+        We're here to support your success at every step
+      </p>
+    </div>
+
+    <!-- Resource Cards -->
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Housing & Dining -->
+      <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
+        <div class="text-4xl mb-4">🏠</div>
+        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Housing & Dining</h3>
+        <p class="mb-4" style="color: #4b5563;">
+          Traditional residence halls, suite-style living, and diverse dining options from buffets to food trucks.
+        </p>
+        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Learn More →</a>
+      </div>
+
+      <!-- Health & Wellness -->
+      <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
+        <div class="text-4xl mb-4">❤️</div>
+        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Health & Wellness</h3>
+        <p class="mb-4" style="color: #4b5563;">
+          Campus recreation, fitness classes, health services, and counseling support for your well-being.
+        </p>
+        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Get Support →</a>
+      </div>
+
+      <!-- Campus Safety -->
+      <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
+        <div class="text-4xl mb-4">🛡️</div>
+        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Campus Safety</h3>
+        <p class="mb-4" style="color: #4b5563;">
+          24/7 campus police, emergency services, and safety resources to keep our Gorilla family secure.
+        </p>
+        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Safety Info →</a>
+      </div>
     </div>
   </div>
 </section>
