@@ -13,13 +13,13 @@
         Become part of a close-knit community that encourages you to dream big, take risks, and redefine what's possible.
       </p>
       {% if not current_user.is_authenticated %}
-      <a href="{{ url_for('auth.login') }}" 
+      <a href="{{ '/auth/login' }}" 
          class="inline-block px-8 py-4 text-lg font-semibold rounded transition-all hover:opacity-90"
          style="background-color: #FFCC33; color: #000000;">
         GET STARTED
       </a>
       {% else %}
-      <a href="{{ url_for('profile.view_profile') }}" 
+      <a href="{{ '/profile' }}" 
          class="inline-block px-8 py-4 text-lg font-semibold rounded transition-all hover:opacity-90"
          style="background-color: #FFCC33; color: #000000;">
         GO TO MY PROFILE
@@ -30,7 +30,7 @@
 </section>
 
 <!-- Official Platform Badge Bar -->
-<section class="py-6" style="background: linear-gradient(135deg, #660000 0%, #4d0000 100%); border-top: 3px solid #FFCC33; border-bottom: 3px solid #FFCC33;">
+<section class="py-6" style="background: linear-gradient(135deg, #A6192E 0%, #4d0000 100%); border-top: 3px solid #FFCC33; border-bottom: 3px solid #FFCC33;">
   <div class="max-w-7xl mx-auto px-6">
     <div class="flex items-center justify-center gap-8 flex-wrap text-white text-sm font-semibold">
       <div class="flex items-center gap-2">
@@ -57,10 +57,10 @@
 <section class="py-16" style="background-color: #ffffff;">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         You Belong Here
       </h2>
       <p class="text-lg max-w-3xl mx-auto" style="color: #4b5563;">
@@ -74,11 +74,11 @@
       <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
         <div class="h-48 bg-cover bg-center" style="background-image: url('https://www.pittstate.edu/images/campus-activities/home/gorilla-engage-480w.jpg');"></div>
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Student Organizations</h3>
+          <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Student Organizations</h3>
           <p class="mb-4" style="color: #4b5563;">
             Discover clubs, join student government, and engage with over 200+ active organizations on campus.
           </p>
-          <a href="{{ url_for('alumni_bp.index') }}" class="font-semibold hover:underline" style="color: #660000;">
+          <a href="{{ '/alumni' }}" class="font-semibold hover:underline" style="color: #A6192E;">
             Explore Organizations →
           </a>
         </div>
@@ -88,11 +88,11 @@
       <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
         <div class="h-48 bg-cover bg-center" style="background-image: url('https://www.pittstate.edu/images/student-life/recreation-pitt-state-college-480w.jpg');"></div>
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Career Development</h3>
+          <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Career Development</h3>
           <p class="mb-4" style="color: #4b5563;">
             Access internships, job opportunities, and connect with alumni who can guide your career journey.
           </p>
-          <a href="{{ url_for('careers_bp.index') }}" class="font-semibold hover:underline" style="color: #660000;">
+          <a href="{{ '/careers' }}" class="font-semibold hover:underline" style="color: #A6192E;">
             Browse Careers →
           </a>
         </div>
@@ -102,11 +102,11 @@
       <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
         <div class="h-48 bg-cover bg-center" style="background-image: url('https://www.pittstate.edu/images/student-life/diversity-inclusion-center-480w.jpg');"></div>
         <div class="p-6">
-          <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Scholarships & Aid</h3>
+          <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Scholarships & Aid</h3>
           <p class="mb-4" style="color: #4b5563;">
             Find scholarships, grants, and financial aid opportunities to support your education.
           </p>
-          <a href="{{ url_for('scholarships_bp.browse') }}" class="font-semibold hover:underline" style="color: #660000;">
+          <a href="{{ '/scholarships' }}" class="font-semibold hover:underline" style="color: #A6192E;">
             Find Scholarships →
           </a>
         </div>
@@ -136,11 +136,11 @@
       <!-- Card 1: Find Scholarships -->
       <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
         <div class="text-5xl mb-4">🎓</div>
-        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Find Scholarships</h3>
+        <h3 class="text-xl font-bold mb-3" style="color: #A6192E;">Find Scholarships</h3>
         <p class="text-sm mb-4" style="color: #4b5563;">Browse 150+ opportunities worth $2.5M+</p>
-        <a href="{{ url_for('scholarships_bp.browse') }}" 
+        <a href="{{ '/scholarships' }}" 
            class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
-           style="background-color: #660000; color: #ffffff;">
+           style="background-color: #A6192E; color: #ffffff;">
           Browse Now
         </a>
       </div>
@@ -148,11 +148,11 @@
       <!-- Card 2: Search Jobs -->
       <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
         <div class="text-5xl mb-4">💼</div>
-        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Career Services</h3>
+        <h3 class="text-xl font-bold mb-3" style="color: #A6192E;">Career Services</h3>
         <p class="text-sm mb-4" style="color: #4b5563;">500+ active job postings and internships</p>
-        <a href="{{ url_for('careers_bp.index') }}" 
+        <a href="{{ '/careers' }}" 
            class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
-           style="background-color: #660000; color: #ffffff;">
+           style="background-color: #A6192E; color: #ffffff;">
           Explore Jobs
         </a>
       </div>
@@ -160,11 +160,11 @@
       <!-- Card 3: Alumni Network -->
       <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
         <div class="text-5xl mb-4">🤝</div>
-        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Alumni Network</h3>
+        <h3 class="text-xl font-bold mb-3" style="color: #A6192E;">Alumni Network</h3>
         <p class="text-sm mb-4" style="color: #4b5563;">Connect with 15,000+ Gorilla alumni</p>
-        <a href="{{ url_for('alumni_bp.index') }}" 
+        <a href="{{ '/alumni' }}" 
            class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
-           style="background-color: #660000; color: #ffffff;">
+           style="background-color: #A6192E; color: #ffffff;">
           Connect Now
         </a>
       </div>
@@ -172,11 +172,11 @@
       <!-- Card 4: Campus Events -->
       <div class="bg-white rounded-xl shadow-2xl p-6 text-center hover:transform hover:scale-105 transition-all">
         <div class="text-5xl mb-4">📅</div>
-        <h3 class="text-xl font-bold mb-3" style="color: #660000;">Campus Events</h3>
+        <h3 class="text-xl font-bold mb-3" style="color: #A6192E;">Campus Events</h3>
         <p class="text-sm mb-4" style="color: #4b5563;">Homecoming, Welcome Week & more</p>
-        <a href="{{ url_for('events.events_home') }}" 
+        <a href="{{ '/events' }}" 
            class="inline-block px-6 py-2 rounded font-semibold transition-all hover:opacity-90"
-           style="background-color: #660000; color: #ffffff;">
+           style="background-color: #A6192E; color: #ffffff;">
           View Events
         </a>
       </div>
@@ -188,10 +188,10 @@
 <section class="py-16" style="background-color: #f9fafb;">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         Campus Life Highlights
       </h2>
     </div>
@@ -202,11 +202,11 @@
       <div class="bg-white rounded-lg overflow-hidden shadow-lg">
         <div class="h-64 bg-cover bg-center" style="background-image: url('https://www.pittstate.edu/images/housing/960-px/housing-block-22-960w.jpg');"></div>
         <div class="p-8">
-          <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Housing</h3>
+          <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Housing</h3>
           <p class="mb-4" style="color: #4b5563;">
             Our on-campus housing options include many different styles. We offer traditional residence halls, suite-style accommodations and for upperclassmen we have downtown apartments.
           </p>
-          <a href="#" class="font-semibold hover:underline" style="color: #660000;">Learn More →</a>
+          <a href="#" class="font-semibold hover:underline" style="color: #A6192E;">Learn More →</a>
         </div>
       </div>
 
@@ -214,11 +214,11 @@
       <div class="bg-white rounded-lg overflow-hidden shadow-lg">
         <div class="h-64 bg-cover bg-center" style="background-image: url('https://www.pittstate.edu/images/student-life/aladdin-dining-services-960w.jpg');"></div>
         <div class="p-8">
-          <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Dining</h3>
+          <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Dining</h3>
           <p class="mb-4" style="color: #4b5563;">
             Whether you're in the mood for a caffeine fix, an all-you-can-eat buffet, or street tacos straight from a food truck, our campus dining options have you covered.
           </p>
-          <a href="#" class="font-semibold hover:underline" style="color: #660000;">View Menu →</a>
+          <a href="#" class="font-semibold hover:underline" style="color: #A6192E;">View Menu →</a>
         </div>
       </div>
     </div>
@@ -229,10 +229,10 @@
 <section class="py-16" style="background-color: #ffffff;">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         Annual Activities and Events
       </h2>
       <p class="text-lg max-w-3xl mx-auto" style="color: #4b5563;">
@@ -245,7 +245,7 @@
       <!-- Welcome Week -->
       <div class="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
         <div class="text-5xl mb-4">🎉</div>
-        <h3 class="text-xl font-bold mb-2" style="color: #660000;">Welcome Week</h3>
+        <h3 class="text-xl font-bold mb-2" style="color: #A6192E;">Welcome Week</h3>
         <p class="text-sm" style="color: #4b5563;">
           GAB Foam Powder Paint Party, Community Fair, Involvement Fair, and many more exciting activities!
         </p>
@@ -254,7 +254,7 @@
       <!-- Family Weekend -->
       <div class="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
         <div class="text-5xl mb-4">👨‍👩‍👧‍👦</div>
-        <h3 class="text-xl font-bold mb-2" style="color: #660000;">Family Weekend</h3>
+        <h3 class="text-xl font-bold mb-2" style="color: #A6192E;">Family Weekend</h3>
         <p class="text-sm" style="color: #4b5563;">
           Invite your family to campus for a fun-filled weekend with activities for everyone!
         </p>
@@ -263,7 +263,7 @@
       <!-- Homecoming -->
       <div class="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
         <div class="text-5xl mb-4">🏈</div>
-        <h3 class="text-xl font-bold mb-2" style="color: #660000;">Homecoming</h3>
+        <h3 class="text-xl font-bold mb-2" style="color: #A6192E;">Homecoming</h3>
         <p class="text-sm" style="color: #4b5563;">
           Celebrate Pitt State Spirit and Pride with competitions, festivities, and alumni gatherings!
         </p>
@@ -272,7 +272,7 @@
       <!-- Apple Day -->
       <div class="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
         <div class="text-5xl mb-4">🍎</div>
-        <h3 class="text-xl font-bold mb-2" style="color: #660000;">Apple Day</h3>
+        <h3 class="text-xl font-bold mb-2" style="color: #A6192E;">Apple Day</h3>
         <p class="text-sm" style="color: #4b5563;">
           Pitt State's longest-standing tradition! Fun, games, food trucks, and community celebration!
         </p>
@@ -281,9 +281,9 @@
 
     <!-- View Events Button -->
     <div class="text-center mt-12">
-      <a href="{{ url_for('events.events_home') }}" 
+      <a href="{{ '/events' }}" 
          class="inline-block px-8 py-4 text-lg font-semibold rounded transition-all hover:opacity-90"
-         style="background-color: #660000; color: #ffffff;">
+         style="background-color: #A6192E; color: #ffffff;">
         VIEW ALL EVENTS
       </a>
     </div>
@@ -294,10 +294,10 @@
 <section class="py-16" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         Recent Graduate Career Hub
       </h2>
       <p class="text-lg max-w-3xl mx-auto" style="color: #4b5563;">
@@ -309,13 +309,13 @@
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       
       <!-- Salary Benchmark Tool -->
-      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all border-t-4" style="border-color: #A6192E;">
         <div class="text-center mb-4">
           <div class="inline-block p-4 rounded-full" style="background-color: rgba(102, 0, 0, 0.1);">
-            <i class="fas fa-chart-line text-3xl" style="color: #660000;"></i>
+            <i class="fas fa-chart-line text-3xl" style="color: #A6192E;"></i>
           </div>
         </div>
-        <h3 class="text-lg font-bold text-center mb-2" style="color: #660000;">Salary Benchmarks</h3>
+        <h3 class="text-lg font-bold text-center mb-2" style="color: #A6192E;">Salary Benchmarks</h3>
         <p class="text-sm text-center mb-4" style="color: #4b5563;">
           See what PSU grads earn by major, years of experience, and location
         </p>
@@ -332,24 +332,24 @@
             <i class="fas fa-rocket text-3xl" style="color: #FFCC33;"></i>
           </div>
         </div>
-        <h3 class="text-lg font-bold text-center mb-2" style="color: #660000;">Job Upgrade Board</h3>
+        <h3 class="text-lg font-bold text-center mb-2" style="color: #A6192E;">Job Upgrade Board</h3>
         <p class="text-sm text-center mb-4" style="color: #4b5563;">
           Mid-level positions requiring 1-3 years experience with higher pay
         </p>
         <div class="text-center">
-          <span class="text-2xl font-bold" style="color: #660000;">85+</span>
+          <span class="text-2xl font-bold" style="color: #A6192E;">85+</span>
           <p class="text-xs" style="color: #4b5563;">Premium jobs posted</p>
         </div>
       </div>
 
       <!-- Skills Gap Analysis -->
-      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all border-t-4" style="border-color: #A6192E;">
         <div class="text-center mb-4">
           <div class="inline-block p-4 rounded-full" style="background-color: rgba(102, 0, 0, 0.1);">
-            <i class="fas fa-graduation-cap text-3xl" style="color: #660000;"></i>
+            <i class="fas fa-graduation-cap text-3xl" style="color: #A6192E;"></i>
           </div>
         </div>
-        <h3 class="text-lg font-bold text-center mb-2" style="color: #660000;">Skill Development</h3>
+        <h3 class="text-lg font-bold text-center mb-2" style="color: #A6192E;">Skill Development</h3>
         <p class="text-sm text-center mb-4" style="color: #4b5563;">
           Identify skills that lead to $10K+ salary increases in your field
         </p>
@@ -366,28 +366,28 @@
             <i class="fas fa-network-wired text-3xl" style="color: #FFCC33;"></i>
           </div>
         </div>
-        <h3 class="text-lg font-bold text-center mb-2" style="color: #660000;">Senior Alumni Network</h3>
+        <h3 class="text-lg font-bold text-center mb-2" style="color: #A6192E;">Senior Alumni Network</h3>
         <p class="text-sm text-center mb-4" style="color: #4b5563;">
           Connect with established alumni for career advice and job referrals
         </p>
         <div class="text-center">
-          <span class="text-2xl font-bold" style="color: #660000;">2,500+</span>
+          <span class="text-2xl font-bold" style="color: #A6192E;">2,500+</span>
           <p class="text-xs" style="color: #4b5563;">Senior professionals</p>
         </div>
       </div>
     </div>
 
     <!-- Career Pivot & Professional Development -->
-    <div class="bg-white rounded-xl shadow-xl p-8 mb-8" style="border-left: 6px solid #660000;">
+    <div class="bg-white rounded-xl shadow-xl p-8 mb-8" style="border-left: 6px solid #A6192E;">
       <div class="grid md:grid-cols-2 gap-8">
         
         <!-- Career Pivot Resources -->
         <div>
           <div class="flex items-center gap-3 mb-4">
             <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: rgba(102, 0, 0, 0.1);">
-              <i class="fas fa-exchange-alt text-xl" style="color: #660000;"></i>
+              <i class="fas fa-exchange-alt text-xl" style="color: #A6192E;"></i>
             </div>
-            <h3 class="text-2xl font-bold" style="color: #660000; font-family: 'Roboto Condensed', sans-serif;">
+            <h3 class="text-2xl font-bold" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif;">
               Career Pivot Support
             </h3>
           </div>
@@ -416,7 +416,7 @@
             <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: rgba(255, 204, 51, 0.1);">
               <i class="fas fa-certificate text-xl" style="color: #FFCC33;"></i>
             </div>
-            <h3 class="text-2xl font-bold" style="color: #660000; font-family: 'Roboto Condensed', sans-serif;">
+            <h3 class="text-2xl font-bold" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif;">
               Professional Dev Fund
             </h3>
           </div>
@@ -442,7 +442,7 @@
     </div>
 
     <!-- Real Salary Data Section -->
-    <div class="bg-gradient-to-br from-[#660000] to-[#4d0000] rounded-xl shadow-2xl p-8 text-white">
+    <div class="bg-gradient-to-br from-[#A6192E] to-[#4d0000] rounded-xl shadow-2xl p-8 text-white">
       <div class="text-center mb-8">
         <h3 class="text-3xl font-bold mb-2" style="font-family: 'Roboto Condensed', sans-serif;">
           📊 Real PSU Graduate Salary Data
@@ -497,7 +497,7 @@
       </div>
 
       <div class="text-center mt-8">
-        <a href="{{ url_for('careers_bp.index') }}" 
+        <a href="{{ '/careers' }}" 
            class="inline-block px-8 py-3 rounded-lg font-bold transition-all hover:scale-105"
            style="background-color: #FFCC33; color: #000000;">
           🚀 ACCESS CAREER UPGRADE TOOLS
@@ -528,31 +528,31 @@
       <!-- Housing & Dining -->
       <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
         <div class="text-4xl mb-4">🏠</div>
-        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Housing & Dining</h3>
+        <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Housing & Dining</h3>
         <p class="mb-4" style="color: #4b5563;">
           Traditional residence halls, suite-style living, and diverse dining options from buffets to food trucks.
         </p>
-        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Learn More →</a>
+        <a href="#" class="font-semibold hover:underline" style="color: #A6192E;">Learn More →</a>
       </div>
 
       <!-- Health & Wellness -->
       <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
         <div class="text-4xl mb-4">❤️</div>
-        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Health & Wellness</h3>
+        <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Health & Wellness</h3>
         <p class="mb-4" style="color: #4b5563;">
           Campus recreation, fitness classes, health services, and counseling support for your well-being.
         </p>
-        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Get Support →</a>
+        <a href="#" class="font-semibold hover:underline" style="color: #A6192E;">Get Support →</a>
       </div>
 
       <!-- Campus Safety -->
       <div class="bg-white bg-opacity-95 rounded-xl shadow-2xl p-8 hover:bg-opacity-100 transition-all">
         <div class="text-4xl mb-4">🛡️</div>
-        <h3 class="text-2xl font-bold mb-3" style="color: #660000;">Campus Safety</h3>
+        <h3 class="text-2xl font-bold mb-3" style="color: #A6192E;">Campus Safety</h3>
         <p class="mb-4" style="color: #4b5563;">
           24/7 campus police, emergency services, and safety resources to keep our Gorilla family secure.
         </p>
-        <a href="#" class="font-semibold hover:underline" style="color: #660000;">Safety Info →</a>
+        <a href="#" class="font-semibold hover:underline" style="color: #A6192E;">Safety Info →</a>
       </div>
     </div>
   </div>
@@ -562,10 +562,10 @@
 <section class="py-16" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         Platform Impact & ROI
       </h2>
       <p class="text-lg max-w-3xl mx-auto" style="color: #4b5563;">
@@ -575,21 +575,21 @@
 
     <div class="grid md:grid-cols-3 gap-8">
       <!-- Student Retention Impact -->
-      <div class="bg-white rounded-xl shadow-xl p-8 border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-xl p-8 border-t-4" style="border-color: #A6192E;">
         <div class="text-center mb-4">
           <div class="inline-block p-4 rounded-full" style="background-color: rgba(102, 0, 0, 0.1);">
-            <i class="fas fa-graduation-cap text-4xl" style="color: #660000;"></i>
+            <i class="fas fa-graduation-cap text-4xl" style="color: #A6192E;"></i>
           </div>
         </div>
-        <h3 class="text-2xl font-bold text-center mb-3" style="color: #660000;">Student Success</h3>
+        <h3 class="text-2xl font-bold text-center mb-3" style="color: #A6192E;">Student Success</h3>
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Retention Rate:</span>
-            <span class="text-xl font-bold" style="color: #660000;">+12%</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">+12%</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Engagement:</span>
-            <span class="text-xl font-bold" style="color: #660000;">85%</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">85%</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Scholarship Access:</span>
@@ -605,15 +605,15 @@
             <i class="fas fa-users text-4xl" style="color: #FFCC33;"></i>
           </div>
         </div>
-        <h3 class="text-2xl font-bold text-center mb-3" style="color: #660000;">Alumni Connection</h3>
+        <h3 class="text-2xl font-bold text-center mb-3" style="color: #A6192E;">Alumni Connection</h3>
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Active Network:</span>
-            <span class="text-xl font-bold" style="color: #660000;">15,000+</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">15,000+</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Mentorships:</span>
-            <span class="text-xl font-bold" style="color: #660000;">500+</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">500+</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Giving Rate:</span>
@@ -623,21 +623,21 @@
       </div>
 
       <!-- Career Outcomes -->
-      <div class="bg-white rounded-xl shadow-xl p-8 border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-xl p-8 border-t-4" style="border-color: #A6192E;">
         <div class="text-center mb-4">
           <div class="inline-block p-4 rounded-full" style="background-color: rgba(102, 0, 0, 0.1);">
-            <i class="fas fa-briefcase text-4xl" style="color: #660000;"></i>
+            <i class="fas fa-briefcase text-4xl" style="color: #A6192E;"></i>
           </div>
         </div>
-        <h3 class="text-2xl font-bold text-center mb-3" style="color: #660000;">Career Placement</h3>
+        <h3 class="text-2xl font-bold text-center mb-3" style="color: #A6192E;">Career Placement</h3>
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Placement Rate:</span>
-            <span class="text-xl font-bold" style="color: #660000;">95%</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">95%</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Avg. Salary:</span>
-            <span class="text-xl font-bold" style="color: #660000;">$52K</span>
+            <span class="text-xl font-bold" style="color: #A6192E;">$52K</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold" style="color: #4b5563;">Job Postings:</span>
@@ -648,29 +648,29 @@
     </div>
 
     <!-- Key Administrator Benefits -->
-    <div class="mt-12 bg-white rounded-xl shadow-xl p-8" style="border-left: 6px solid #660000;">
-      <h3 class="text-2xl font-bold mb-6 text-center" style="color: #660000; font-family: 'Roboto Condensed', sans-serif;">
+    <div class="mt-12 bg-white rounded-xl shadow-xl p-8" style="border-left: 6px solid #A6192E;">
+      <h3 class="text-2xl font-bold mb-6 text-center" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif;">
         ✨ Why Administrators Choose Gorilla-Link
       </h3>
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="text-center">
           <div class="text-3xl mb-2">💰</div>
-          <p class="font-semibold" style="color: #660000;">Cost-Effective</p>
+          <p class="font-semibold" style="color: #A6192E;">Cost-Effective</p>
           <p class="text-sm" style="color: #4b5563;">No licensing fees</p>
         </div>
         <div class="text-center">
           <div class="text-3xl mb-2">📊</div>
-          <p class="font-semibold" style="color: #660000;">Real-Time Analytics</p>
+          <p class="font-semibold" style="color: #A6192E;">Real-Time Analytics</p>
           <p class="text-sm" style="color: #4b5563;">Track engagement</p>
         </div>
         <div class="text-center">
           <div class="text-3xl mb-2">🔒</div>
-          <p class="font-semibold" style="color: #660000;">FERPA Compliant</p>
+          <p class="font-semibold" style="color: #A6192E;">FERPA Compliant</p>
           <p class="text-sm" style="color: #4b5563;">Secure data</p>
         </div>
         <div class="text-center">
           <div class="text-3xl mb-2">🎯</div>
-          <p class="font-semibold" style="color: #660000;">Proven Results</p>
+          <p class="font-semibold" style="color: #A6192E;">Proven Results</p>
           <p class="text-sm" style="color: #4b5563;">Data-driven success</p>
         </div>
       </div>
@@ -679,7 +679,7 @@
 </section>
 
 <!-- Stats Section - Crimson Background -->
-<section class="py-16" style="background-color: #660000; color: #ffffff;">
+<section class="py-16" style="background-color: #A6192E; color: #ffffff;">
   <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-12">
       <h2 class="text-4xl font-bold mb-4" style="color: #FFCC33; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
@@ -721,10 +721,10 @@
 <section class="py-16" style="background-color: #ffffff;">
   <div class="max-w-7xl mx-auto px-6">
     <!-- PSU Accent Bar -->
-    <div class="h-1 w-24 bg-gradient-to-r from-[#660000] to-[#FFCC33] mx-auto mb-8"></div>
+    <div class="h-1 w-24 bg-gradient-to-r from-[#A6192E] to-[#FFCC33] mx-auto mb-8"></div>
     
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4" style="color: #660000; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+      <h2 class="text-4xl font-bold mb-4" style="color: #A6192E; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
         What Our Gorilla Community Says
       </h2>
       <p class="text-lg max-w-3xl mx-auto" style="color: #4b5563;">
@@ -734,13 +734,13 @@
 
     <div class="grid md:grid-cols-3 gap-8">
       <!-- Student Testimonial -->
-      <div class="bg-white rounded-xl shadow-lg p-8 border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-lg p-8 border-t-4" style="border-color: #A6192E;">
         <div class="flex items-center mb-4">
           <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl" style="background-color: rgba(102, 0, 0, 0.1);">
             👨‍🎓
           </div>
           <div class="ml-4">
-            <h4 class="font-bold" style="color: #660000;">Marcus Johnson</h4>
+            <h4 class="font-bold" style="color: #A6192E;">Marcus Johnson</h4>
             <p class="text-sm" style="color: #4b5563;">Senior, Business Admin</p>
           </div>
         </div>
@@ -759,7 +759,7 @@
             👩‍💼
           </div>
           <div class="ml-4">
-            <h4 class="font-bold" style="color: #660000;">Sarah Mitchell</h4>
+            <h4 class="font-bold" style="color: #A6192E;">Sarah Mitchell</h4>
             <p class="text-sm" style="color: #4b5563;">Class of '18, Marketing Dir.</p>
           </div>
         </div>
@@ -772,13 +772,13 @@
       </div>
 
       <!-- Administrator Testimonial -->
-      <div class="bg-white rounded-xl shadow-lg p-8 border-t-4" style="border-color: #660000;">
+      <div class="bg-white rounded-xl shadow-lg p-8 border-t-4" style="border-color: #A6192E;">
         <div class="flex items-center mb-4">
           <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl" style="background-color: rgba(102, 0, 0, 0.1);">
             👔
           </div>
           <div class="ml-4">
-            <h4 class="font-bold" style="color: #660000;">Dr. Amanda Chen</h4>
+            <h4 class="font-bold" style="color: #A6192E;">Dr. Amanda Chen</h4>
             <p class="text-sm" style="color: #4b5563;">Dean of Student Affairs</p>
           </div>
         </div>
@@ -796,7 +796,7 @@
       <p class="text-sm font-semibold mb-4" style="color: #4b5563;">TRUSTED BY LEADING UNIVERSITIES</p>
       <div class="flex items-center justify-center gap-8 flex-wrap opacity-60">
         <div class="text-3xl">🏛️</div>
-        <div class="text-sm font-bold" style="color: #660000;">Pittsburg State University</div>
+        <div class="text-sm font-bold" style="color: #A6192E;">Pittsburg State University</div>
         <div class="text-3xl">✓</div>
         <div class="text-sm font-bold" style="color: #4b5563;">FERPA Certified</div>
         <div class="text-3xl">🔒</div>
@@ -807,7 +807,7 @@
 </section>
 
 <!-- Call to Action -->
-<section class="py-20" style="background: linear-gradient(135deg, #660000 0%, #4d0000 100%); position: relative; overflow: hidden;">
+<section class="py-20" style="background: linear-gradient(135deg, #A6192E 0%, #4d0000 100%); position: relative; overflow: hidden;">
   <!-- Decorative Elements -->
   <div class="absolute top-0 left-0 w-64 h-64 rounded-full opacity-10" style="background-color: #FFCC33; transform: translate(-50%, -50%);"></div>
   <div class="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-10" style="background-color: #FFCC33; transform: translate(50%, 50%);"></div>
@@ -852,7 +852,7 @@
 
     {% if not current_user.is_authenticated %}
       <div class="flex justify-center gap-4 flex-wrap mb-6">
-        <a href="{{ url_for('auth.login') }}"
+        <a href="{{ '/auth/login' }}"
            class="px-10 py-5 text-lg font-bold rounded-lg transition-all hover:scale-105 shadow-2xl"
            style="background-color: #FFCC33; color: #000000;">
           🚀 GET STARTED FREE
@@ -868,7 +868,7 @@
         ✓ Free Forever &nbsp; | &nbsp; ✓ No Credit Card Required &nbsp; | &nbsp; ✓ Set Up in 2 Minutes
       </p>
     {% else %}
-      <a href="{{ url_for('profile.view_profile') }}"
+      <a href="{{ '/profile' }}"
          class="inline-block px-10 py-5 text-lg font-bold rounded-lg transition-all hover:scale-105 shadow-2xl"
          style="background-color: #FFCC33; color: #000000;">
         🎯 VIEW YOUR DASHBOARD
