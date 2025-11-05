@@ -168,6 +168,7 @@
         <a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a>
         <a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a>
         <a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni Network</a>
+        <a href="{{ url_for('dining.dining_home') }}" class="nav-link">Dining</a>
 
         <!-- Resources Dropdown -->
         <div class="relative group">
@@ -179,6 +180,9 @@
           </button>
           <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
+              <a href="{{ url_for('gpa.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+                <i class="fas fa-calculator mr-2"></i>GPA Calculator
+              </a>
               <a href="{{ url_for('careers_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
                 Career Services
               </a>

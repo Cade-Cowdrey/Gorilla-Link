@@ -50,6 +50,10 @@ app.register_blueprint(api_v1, url_prefix="/api/v1")
 from blueprints.tools.gpa_calculator import gpa_bp
 app.register_blueprint(gpa_bp)
 
+# Register Dining Blueprint
+from blueprints.dining.routes import dining_bp
+app.register_blueprint(dining_bp)
+
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
 
