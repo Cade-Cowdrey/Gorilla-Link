@@ -146,6 +146,7 @@ class ScholarshipApplication(db.Model):
 class EssayLibrary(db.Model):
     """Shared essay repository with AI assistance"""
     __tablename__ = "essay_library"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -374,6 +375,7 @@ class AutomatedTag(db.Model):
 class Message(db.Model):
     """Unified messaging system"""
     __tablename__ = "messages"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -411,6 +413,7 @@ class CalendarSync(db.Model):
 class Announcement(db.Model):
     """Department/system announcements"""
     __tablename__ = "announcements"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -430,6 +433,7 @@ class Announcement(db.Model):
 class Forum(db.Model):
     """Community forums"""
     __tablename__ = "forums"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -481,6 +485,7 @@ class ForumPost(db.Model):
 class Webinar(db.Model):
     """Webinar management"""
     __tablename__ = "webinars"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -500,6 +505,7 @@ class Webinar(db.Model):
 class WebinarRegistration(db.Model):
     """Webinar attendee tracking"""
     __tablename__ = "webinar_registrations"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     webinar_id = db.Column(db.Integer, db.ForeignKey("webinars.id"), nullable=False)
@@ -745,6 +751,7 @@ class UserBadge(db.Model):
 class Survey(db.Model):
     """Survey engine"""
     __tablename__ = "surveys"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -762,6 +769,7 @@ class Survey(db.Model):
 class SurveyResponse(db.Model):
     """Survey responses"""
     __tablename__ = "survey_responses"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     survey_id = db.Column(db.Integer, db.ForeignKey("surveys.id"), nullable=False)
