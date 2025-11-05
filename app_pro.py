@@ -54,6 +54,25 @@ app.register_blueprint(gpa_bp)
 from blueprints.dining.routes import dining_bp
 app.register_blueprint(dining_bp)
 
+# Register NEW Student Features Blueprints (8 new features!)
+from blueprints.textbook_exchange.routes import textbook_bp
+from blueprints.housing_reviews.routes import housing_bp
+from blueprints.student_discounts.routes import discounts_bp
+from blueprints.grade_explorer.routes import grade_explorer_bp
+from blueprints.professor_reviews.routes import professor_bp
+from blueprints.wait_times.routes import wait_times_bp
+from blueprints.student_events.routes import events_bp
+from blueprints.course_library.routes import course_library_bp
+
+app.register_blueprint(textbook_bp)
+app.register_blueprint(housing_bp)
+app.register_blueprint(discounts_bp)
+app.register_blueprint(grade_explorer_bp)
+app.register_blueprint(professor_bp)
+app.register_blueprint(wait_times_bp)
+app.register_blueprint(events_bp)
+app.register_blueprint(course_library_bp)
+
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
 
