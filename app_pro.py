@@ -44,7 +44,11 @@ register_blueprints(app)
 
 # Register API v1 Blueprint
 from blueprints.api.v1 import api_v1
-app.register_blueprint(api_v1)
+app.register_blueprint(api_v1, url_prefix="/api/v1")
+
+# Register GPA Calculator Blueprint
+from blueprints.tools.gpa_calculator import gpa_bp
+app.register_blueprint(gpa_bp)
 
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
