@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}PittState-Connect | Pittsburg State University{% endblock %}</title>
   <meta name="description" content="PittState-Connect — Pittsburg State University's all-in-one student, alumni, and employer engagement platform." />
-  <meta name="theme-color" content="#660000" />
+  <meta name="theme-color" content="#A6192E" />
   <meta property="og:title" content="PittState-Connect" />
   <meta property="og:description" content="Making Lives Better Through EDUCATION" />
   <meta property="og:image" content="{{ url_for('static', filename='img/psu-logo.png') }}" />
@@ -28,11 +28,11 @@
       theme: {
         extend: {
           colors: {
-            crimson: '#660000',
+            crimson: '#A6192E',
             crimsonDark: '#4d0000',
             gold: '#FFCC33',
             goldDark: '#e6b82e',
-            psuRed: '#660000',
+            psuRed: '#A6192E',
             psuGold: '#FFCC33',
             psuBlack: '#1C1C1C',
             psuGray: '#F5F5F5',
@@ -104,7 +104,7 @@
     
     /* Gradient text */
     .gradient-text {
-      background: linear-gradient(135deg, #660000, #FFCC33);
+      background: linear-gradient(135deg, #A6192E, #FFCC33);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -125,7 +125,7 @@
 
 <body class="bg-white text-gray-900 flex flex-col min-h-screen">
   <!-- PSU OFFICIAL HEADER BAR -->
-  <div class="bg-[#660000] text-white py-2 px-4 text-sm border-b border-[#4d0000]">
+  <div class="bg-[#A6192E] text-white py-2 px-4 text-sm border-b border-[#4d0000]">
     <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center gap-3 md:gap-6 flex-wrap">
         <a href="https://www.pittstate.edu" target="_blank" class="hover:text-[#FFCC33] transition-colors font-medium">
@@ -154,7 +154,7 @@
   </div>
 
   <!-- PROFESSIONAL PSU NAVBAR -->
-  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md border-b-4 border-[#660000]">
+  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md border-b-4 border-[#A6192E]">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
       <div class="flex items-center gap-3">
         <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-12 h-12">
@@ -296,7 +296,7 @@
   </main>
 
   <!-- OFFICIAL PSU FOOTER -->
-  <footer class="bg-[#660000] text-white mt-auto">
+  <footer class="bg-[#A6192E] text-white mt-auto">
     <div class="max-w-7xl mx-auto px-6 py-12">
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         
@@ -376,7 +376,9 @@
           
           <!-- Gus the Gorilla -->
           <div class="text-center mt-4">
-            <div class="text-4xl mb-2 animate-bounce-slow">🦍</div>
+            <div class="text-5xl mb-2">
+              <i class="fas fa-paw text-[#FFCC33] animate-bounce-slow"></i>
+            </div>
             <p class="font-heading font-bold text-[#FFCC33] text-lg" style="font-family: 'Roboto Condensed', sans-serif;">
               GO GORILLAS!
             </p>
