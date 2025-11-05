@@ -282,3 +282,188 @@ class FreeStuff(db.Model):
     
     giver = db.relationship('User', foreign_keys=[user_id], backref='items_given')
     claimer = db.relationship('User', foreign_keys=[claimed_by_id], backref='items_claimed')
+
+
+# ==================== PARKING SPOT FINDER ====================
+class ParkingSpot(db.Model):
+    __tablename__ = 'parking_spots'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Location Details
+    lot_name = db.Column(db.String(100), nullable=False, index=True)  # "Lot A", "Gorilla Village Parking"
+    spot_number = db.Column(db.String(20))  # "A-45", "GV-203"
+    location_description = db.Column(db.Text)
+    building_proximity = db.Column(db.String(200))  # "Near Russ Hall"
+    
+    # Availability
+    available_from = db.Column(db.DateTime, nullable=False)
+    available_to = db.Column(db.DateTime, nullable=False)
+    is_recurring = db.Column(db.Boolean, default=False)
+    recurring_schedule = db.Column(db.String(200))  # "Every weekday 8am-5pm"
+    
+    # Pricing
+    price_per_day = db.Column(db.Numeric(10, 2))
+    price_per_hour = db.Column(db.Numeric(10, 2))
+    is_free = db.Column(db.Boolean, default=False)
+    
+    # Spot Details
+    spot_type = db.Column(db.String(30))  # covered, uncovered, reserved, handicap
+    is_covered = db.Column(db.Boolean, default=False)
+    distance_to_campus = db.Column(db.String(100))  # "5 min walk", "0.3 miles"
+    
+    # Requirements
+    permit_required = db.Column(db.Boolean, default=False)
+    permit_type = db.Column(db.String(50))  # "Student", "Faculty", "Visitor"
+    vehicle_restrictions = db.Column(db.String(200))  # "Compact cars only"
+    
+    # Contact
+    contact_method = db.Column(db.String(20), default='message')
+    phone_number = db.Column(db.String(20))
+    
+    # Status
+    status = db.Column(db.String(20), default='available', index=True)  # available, booked, expired
+    booked_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    view_count = db.Column(db.Integer, default=0)
+    
+    owner = db.relationship('User', foreign_keys=[user_id], backref='parking_spots_owned')
+    renter = db.relationship('User', foreign_keys=[booked_by_id], backref='parking_spots_rented')
+
+
+# ==================== RIDESHARE / CARPOOL ====================
+class RideShare(db.Model):
+    __tablename__ = 'rideshares'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    driver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Trip Details
+    origin = db.Column(db.String(200), nullable=False)
+    destination = db.Column(db.String(200), nullable=False)
+    departure_time = db.Column(db.DateTime, nullable=False, index=True)
+    estimated_arrival = db.Column(db.DateTime)
+    
+    # Route
+    route_description = db.Column(db.Text)
+    waypoints = db.Column(db.Text)  # JSON array of stops
+    distance_miles = db.Column(db.Numeric(10, 2))
+    
+    # Capacity
+    total_seats = db.Column(db.Integer, default=3)
+    seats_available = db.Column(db.Integer, default=3)
+    
+    # Pricing
+    price_per_person = db.Column(db.Numeric(10, 2))
+    split_gas_cost = db.Column(db.Boolean, default=True)
+    is_free = db.Column(db.Boolean, default=False)
+    
+    # Preferences
+    female_only = db.Column(db.Boolean, default=False)
+    student_only = db.Column(db.Boolean, default=True)
+    verified_users_only = db.Column(db.Boolean, default=False)
+    no_smoking = db.Column(db.Boolean, default=True)
+    pets_allowed = db.Column(db.Boolean, default=False)
+    
+    # Vehicle Info
+    vehicle_make = db.Column(db.String(50))
+    vehicle_model = db.Column(db.String(50))
+    vehicle_color = db.Column(db.String(30))
+    license_plate = db.Column(db.String(20))
+    
+    # Trip Type
+    trip_type = db.Column(db.String(30), index=True)  # one_time, recurring, commute, event
+    is_recurring = db.Column(db.Boolean, default=False)
+    recurring_days = db.Column(db.String(100))  # "Mon,Wed,Fri"
+    
+    # Status
+    status = db.Column(db.String(20), default='open', index=True)  # open, full, completed, cancelled
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    driver = db.relationship('User', backref='rides_offered')
+
+
+# ==================== PEER TUTORING MARKETPLACE ====================
+class TutorProfile(db.Model):
+    __tablename__ = 'tutor_profiles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    
+    # Academic Info
+    major = db.Column(db.String(100), nullable=False)
+    gpa = db.Column(db.Numeric(3, 2))
+    graduation_year = db.Column(db.Integer)
+    
+    # Subjects (JSON array of subjects they can tutor)
+    subjects = db.Column(db.Text, nullable=False)  # JSON: ["CS 1080", "MATH 2130", "PHYS 1030"]
+    
+    # Experience
+    bio = db.Column(db.Text)
+    years_experience = db.Column(db.Integer, default=0)
+    total_sessions = db.Column(db.Integer, default=0)
+    
+    # Pricing
+    hourly_rate = db.Column(db.Numeric(10, 2), nullable=False)
+    is_negotiable = db.Column(db.Boolean, default=False)
+    offers_free_consultation = db.Column(db.Boolean, default=True)
+    
+    # Availability
+    available_hours = db.Column(db.Text)  # JSON schedule
+    preferred_location = db.Column(db.String(200))  # "Axe Library", "Virtual only"
+    offers_virtual = db.Column(db.Boolean, default=True)
+    offers_in_person = db.Column(db.Boolean, default=True)
+    
+    # Rating
+    rating = db.Column(db.Numeric(3, 2), default=0.0)
+    total_reviews = db.Column(db.Integer, default=0)
+    
+    # Verification
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_documents = db.Column(db.Text)  # Transcript, etc
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True, index=True)
+    accepting_students = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('tutor_profile', uselist=False))
+
+
+class TutoringSession(db.Model):
+    __tablename__ = 'tutoring_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    tutor_id = db.Column(db.Integer, db.ForeignKey('tutor_profiles.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Session Details
+    subject = db.Column(db.String(100), nullable=False)
+    topic = db.Column(db.String(200))
+    session_type = db.Column(db.String(20))  # virtual, in_person
+    location = db.Column(db.String(200))
+    
+    # Scheduling
+    scheduled_time = db.Column(db.DateTime, nullable=False)
+    duration_minutes = db.Column(db.Integer, default=60)
+    actual_start_time = db.Column(db.DateTime)
+    actual_end_time = db.Column(db.DateTime)
+    
+    # Pricing
+    agreed_rate = db.Column(db.Numeric(10, 2))
+    total_cost = db.Column(db.Numeric(10, 2))
+    
+    # Status
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, in_progress, completed, cancelled
+    cancellation_reason = db.Column(db.Text)
+    
+    # Feedback
+    student_rating = db.Column(db.Integer)  # 1-5
+    student_review = db.Column(db.Text)
+    tutor_notes = db.Column(db.Text)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    tutor = db.relationship('TutorProfile', backref='sessions')
+    student = db.relationship('User', backref='tutoring_sessions_as_student')
