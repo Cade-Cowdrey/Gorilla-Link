@@ -149,7 +149,7 @@ class UserPoints(db.Model):
     def add_points(self, amount, reason):
         """Add points and check for level up"""
         self.total_points += amount
-        self.last_points_earned = datetime.datetime.utcnow()
+        self.last_points_earned = datetime.func.now()
         
         # Check for level up
         while self.total_points >= self.points_to_next_level:
@@ -347,7 +347,7 @@ class UserMessageCredits(db.Model):
         if not self.unlimited:
             self.credits_available = 5
             self.credits_used_this_month = 0
-            self.last_refill = datetime.datetime.utcnow()
+            self.last_refill = datetime.func.now()
             self.next_refill = self.last_refill + datetime.timedelta(days=30)
     
     def use_credit(self):
@@ -1544,7 +1544,7 @@ class ScholarshipMatch(db.Model):
         """Calculate days remaining until deadline"""
         if not self.deadline:
             return None
-        delta = self.deadline - datetime.utcnow()
+        delta = self.deadline - func.now()
         return max(0, delta.days)
     
     def is_deadline_soon(self):
@@ -1669,7 +1669,7 @@ class LinkedInProfile(db.Model):
         """Check if OAuth token is still valid"""
         if not self.token_expires_at:
             return False
-        return datetime.utcnow() < self.token_expires_at
+        return func.now() < self.token_expires_at
     
     def get_current_role(self):
         """Get current employment role"""
@@ -1943,7 +1943,7 @@ class EmployerJobPosting(db.Model):
         """Check if job posting is currently active"""
         if self.status != 'active':
             return False
-        if self.expires_at and self.expires_at < datetime.utcnow():
+        if self.expires_at and self.expires_at < func.now():
             return False
         return True
     
@@ -1951,7 +1951,7 @@ class EmployerJobPosting(db.Model):
         """Days until posting expires"""
         if not self.expires_at:
             return None
-        delta = self.expires_at - datetime.utcnow()
+        delta = self.expires_at - func.now()
         return max(0, delta.days)
     
     def __repr__(self):
@@ -2159,7 +2159,7 @@ class UserCertificationProgress(db.Model):
         """Check if user hasn't made progress in 7+ days"""
         if not self.last_activity:
             return False
-        days_since_activity = (datetime.utcnow() - self.last_activity).days
+        days_since_activity = (func.now() - self.last_activity).days
         return days_since_activity >= 7 and self.status == 'in_progress'
     
     def days_to_complete(self):
