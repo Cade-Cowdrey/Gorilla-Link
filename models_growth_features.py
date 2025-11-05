@@ -493,6 +493,7 @@ class MentorshipProgram(db.Model):
 class MentorProfile(db.Model):
     """Mentor-specific profile information"""
     __tablename__ = "mentor_profiles"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -521,6 +522,7 @@ class MentorProfile(db.Model):
 class MenteeProfile(db.Model):
     """Mentee-specific profile and goals"""
     __tablename__ = "mentee_profiles"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -542,6 +544,7 @@ class MenteeProfile(db.Model):
 class MentorshipMatch(db.Model):
     """Active mentorship relationships"""
     __tablename__ = "mentorship_matches"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     program_id = db.Column(db.Integer, db.ForeignKey('mentorship_programs.id'))
