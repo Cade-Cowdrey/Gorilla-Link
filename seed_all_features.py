@@ -17,7 +17,7 @@ from models_advanced_features import (
     EmergencyResource, CareerPathway, SkillDemandForecast, 
     HousingListing, InternationalStudent
 )
-from models_innovative_features import ParkingSpot, RideShare, TutorProfile
+from models_innovative_features import ParkingSpot, TutorProfile
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -368,34 +368,8 @@ def seed_parking_spots():
     print(f"✅ Seeded {len(spots)} parking spots")
 
 
-def seed_rideshares():
-    """Seed sample rideshare listings"""
-    print("\n🚗 Seeding Rideshare Listings...")
-    
-    rides = [
-        {
-            'driver_id': 1,
-            'origin': 'Pittsburg State University',
-            'destination': 'Kansas City, MO',
-            'departure_time': datetime.now() + timedelta(days=7, hours=15),
-            'total_seats': 3,
-            'seats_available': 3,
-            'price_per_person': Decimal('15.00'),
-            'split_gas_cost': True,
-            'student_only': True,
-            'no_smoking': True,
-            'trip_type': 'one_time',
-            'status': 'open'
-        }
-    ]
-    
-    for data in rides:
-        ride = RideShare(**data)
-        db.session.add(ride)
-        print(f"  ✅ Added: {data['origin']} → {data['destination']}")
-    
-    db.session.commit()
-    print(f"✅ Seeded {len(rides)} rideshare listings")
+# RIDESHARE REMOVED - Not applicable for local PSU campus
+# Students live on or near campus, no need for ridesharing
 
 
 def seed_tutors():
@@ -441,7 +415,7 @@ def main():
             seed_skill_forecasts()
             seed_housing_listings()
             seed_parking_spots()
-            seed_rideshares()
+            # Rideshare removed - not applicable for local campus
             seed_tutors()
             
             print("\n" + "=" * 60)
@@ -453,7 +427,6 @@ def main():
             print(f"  • Skill Forecasts: {SkillDemandForecast.query.count()}")
             print(f"  • Housing Listings: {HousingListing.query.count()}")
             print(f"  • Parking Spots: {ParkingSpot.query.count()}")
-            print(f"  • Rideshares: {RideShare.query.count()}")
             print(f"  • Tutor Profiles: {TutorProfile.query.count()}")
             
         except Exception as e:

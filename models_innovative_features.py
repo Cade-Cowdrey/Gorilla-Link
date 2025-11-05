@@ -332,56 +332,10 @@ class ParkingSpot(db.Model):
     renter = db.relationship('User', foreign_keys=[booked_by_id], backref='parking_spots_rented')
 
 
-# ==================== RIDESHARE / CARPOOL ====================
-class RideShare(db.Model):
-    __tablename__ = 'rideshares'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    driver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # Trip Details
-    origin = db.Column(db.String(200), nullable=False)
-    destination = db.Column(db.String(200), nullable=False)
-    departure_time = db.Column(db.DateTime, nullable=False, index=True)
-    estimated_arrival = db.Column(db.DateTime)
-    
-    # Route
-    route_description = db.Column(db.Text)
-    waypoints = db.Column(db.Text)  # JSON array of stops
-    distance_miles = db.Column(db.Numeric(10, 2))
-    
-    # Capacity
-    total_seats = db.Column(db.Integer, default=3)
-    seats_available = db.Column(db.Integer, default=3)
-    
-    # Pricing
-    price_per_person = db.Column(db.Numeric(10, 2))
-    split_gas_cost = db.Column(db.Boolean, default=True)
-    is_free = db.Column(db.Boolean, default=False)
-    
-    # Preferences
-    female_only = db.Column(db.Boolean, default=False)
-    student_only = db.Column(db.Boolean, default=True)
-    verified_users_only = db.Column(db.Boolean, default=False)
-    no_smoking = db.Column(db.Boolean, default=True)
-    pets_allowed = db.Column(db.Boolean, default=False)
-    
-    # Vehicle Info
-    vehicle_make = db.Column(db.String(50))
-    vehicle_model = db.Column(db.String(50))
-    vehicle_color = db.Column(db.String(30))
-    license_plate = db.Column(db.String(20))
-    
-    # Trip Type
-    trip_type = db.Column(db.String(30), index=True)  # one_time, recurring, commute, event
-    is_recurring = db.Column(db.Boolean, default=False)
-    recurring_days = db.Column(db.String(100))  # "Mon,Wed,Fri"
-    
-    # Status
-    status = db.Column(db.String(20), default='open', index=True)  # open, full, completed, cancelled
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    driver = db.relationship('User', backref='rides_offered')
+# ==================== RIDESHARE REMOVED ====================
+# Ridesharing doesn't make sense for PSU - it's a local campus where students
+# live on or very near campus. No significant commuter population to warrant
+# a rideshare feature. Removed to reduce complexity.
 
 
 # ==================== PEER TUTORING MARKETPLACE ====================
