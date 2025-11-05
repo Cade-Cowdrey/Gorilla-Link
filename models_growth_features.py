@@ -674,6 +674,7 @@ class Recommendation(db.Model):
 class UserBehavior(db.Model):
     """Track user behavior for recommendation engine"""
     __tablename__ = "user_behavior"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -698,6 +699,7 @@ class UserBehavior(db.Model):
 class AutoApplyQueue(db.Model):
     """Queue of jobs to auto-apply to"""
     __tablename__ = "auto_apply_queue"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -804,6 +806,7 @@ class ChatMessage(db.Model):
 class LiveEvent(db.Model):
     """Virtual career fairs, webinars, and Q&A sessions"""
     __tablename__ = "live_events"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -828,6 +831,7 @@ class LiveEvent(db.Model):
 class EventAttendee(db.Model):
     """Tracks event registrations and attendance"""
     __tablename__ = "event_attendees"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('live_events.id'), nullable=False)
@@ -846,6 +850,7 @@ class EventAttendee(db.Model):
 class EventMessage(db.Model):
     """Chat messages and Q&A in live events"""
     __tablename__ = "event_messages"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('live_events.id'), nullable=False)
@@ -870,6 +875,7 @@ class EventMessage(db.Model):
 class UniversityVerification(db.Model):
     """Verify users are actual PSU students/alumni"""
     __tablename__ = "university_verifications"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -898,6 +904,7 @@ class UniversityVerification(db.Model):
 class DepartmentAffiliation(db.Model):
     """Link users to official PSU departments"""
     __tablename__ = "department_affiliations"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -918,6 +925,7 @@ class DepartmentAffiliation(db.Model):
 class AcademicRecord(db.Model):
     """Store basic academic information (FERPA compliant - no grades)"""
     __tablename__ = "academic_records"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -942,6 +950,7 @@ class AcademicRecord(db.Model):
 class EmployerPartnership(db.Model):
     """Official PSU employer partnerships"""
     __tablename__ = "employer_partnerships"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(255), nullable=False)
@@ -968,6 +977,7 @@ class EmployerPartnership(db.Model):
 class CareerServiceAppointment(db.Model):
     """Schedule appointments with career services advisors"""
     __tablename__ = "career_service_appointments"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -994,6 +1004,7 @@ class CareerServiceAppointment(db.Model):
 class InstitutionalAnnouncement(db.Model):
     """Official university announcements and alerts"""
     __tablename__ = "institutional_announcements"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -1022,6 +1033,7 @@ class InstitutionalAnnouncement(db.Model):
 class ComplianceLog(db.Model):
     """Track compliance-related activities (FERPA, data access, etc.)"""
     __tablename__ = "compliance_logs"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1046,6 +1058,7 @@ class ComplianceLog(db.Model):
 class DataExportRequest(db.Model):
     """GDPR/FERPA data export requests"""
     __tablename__ = "data_export_requests"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -1068,6 +1081,7 @@ class DataExportRequest(db.Model):
 class SystemHealthMetric(db.Model):
     """Track system health and performance"""
     __tablename__ = "system_health_metrics"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     metric_type = db.Column(db.String(50), nullable=False)  # response_time, error_rate, active_users, db_connections
@@ -1085,6 +1099,7 @@ class SystemHealthMetric(db.Model):
 class AdministratorRole(db.Model):
     """Granular admin permissions for university staff"""
     __tablename__ = "administrator_roles"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -1117,6 +1132,7 @@ class AdministratorRole(db.Model):
 class AlumniDonation(db.Model):
     """Track alumni donations (for engagement scoring)"""
     __tablename__ = "alumni_donations"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     alumni_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -1167,6 +1183,7 @@ class EventSponsor(db.Model):
 class OutcomeReport(db.Model):
     """Track graduate outcomes for institutional reporting"""
     __tablename__ = "outcome_reports"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -1212,6 +1229,7 @@ class OutcomeReport(db.Model):
 class AdvisorAvailability(db.Model):
     """Track when career advisors are available for appointments"""
     __tablename__ = "advisor_availability"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     advisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -1234,6 +1252,7 @@ class AdvisorAvailability(db.Model):
 class AppointmentFeedback(db.Model):
     """Student feedback on career services appointments"""
     __tablename__ = "appointment_feedback"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     appointment_id = db.Column(db.Integer, db.ForeignKey('career_service_appointments.id'), nullable=False)
@@ -1295,6 +1314,7 @@ class DashboardMetric(db.Model):
 class PlatformEngagement(db.Model):
     """Daily engagement metrics for tracking platform usage"""
     __tablename__ = "platform_engagement"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False, unique=True)
@@ -1331,6 +1351,7 @@ class PlatformEngagement(db.Model):
 class CareerServicesImpact(db.Model):
     """Track ROI and effectiveness of career services integration"""
     __tablename__ = "career_services_impact"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     report_period = db.Column(db.String(20))  # weekly, monthly, semester, annual
@@ -1399,6 +1420,7 @@ class CareerServicesImpact(db.Model):
 class AdminAlert(db.Model):
     """Automated alerts for administrators about important events"""
     __tablename__ = "admin_alerts"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     alert_type = db.Column(db.String(50), nullable=False)  # metric_drop, high_engagement, system_issue, milestone
@@ -1426,6 +1448,7 @@ class AdminAlert(db.Model):
 class IntegrationLog(db.Model):
     """Track integrations with other PSU systems"""
     __tablename__ = "integration_logs"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     integration_name = db.Column(db.String(100), nullable=False)  # mygus, banner, canvas, handshake
@@ -1451,6 +1474,7 @@ class IntegrationLog(db.Model):
 class ExportableReport(db.Model):
     """Pre-generated reports for administrators to download"""
     __tablename__ = "exportable_reports"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     report_name = db.Column(db.String(255), nullable=False)
@@ -1480,6 +1504,7 @@ class ExportableReport(db.Model):
 class ScholarshipMatch(db.Model):
     """AI-matched scholarships from real APIs"""
     __tablename__ = 'scholarship_matches'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -1601,6 +1626,7 @@ class ScholarshipApplication(db.Model):
 class LinkedInProfile(db.Model):
     """Store LinkedIn profile data for graduate outcome tracking"""
     __tablename__ = 'linkedin_profiles'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
@@ -1669,6 +1695,7 @@ class LinkedInProfile(db.Model):
 class EmailNotification(db.Model):
     """Track sent email notifications"""
     __tablename__ = 'email_notifications'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -1745,6 +1772,7 @@ class NotificationPreference(db.Model):
 class AIChatSession(db.Model):
     """AI Career Coach chat sessions"""
     __tablename__ = 'ai_chat_sessions'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -1774,6 +1802,7 @@ class AIChatSession(db.Model):
 class AIChatMessage(db.Model):
     """Individual messages in AI chat sessions"""
     __tablename__ = 'ai_chat_messages'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.Integer, db.ForeignKey('ai_chat_sessions.id'), nullable=False)
@@ -1804,6 +1833,7 @@ class AIChatMessage(db.Model):
 class EmployerProfile(db.Model):
     """Employer company profiles"""
     __tablename__ = 'employer_profiles'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -1861,6 +1891,7 @@ class EmployerProfile(db.Model):
 class EmployerJobPosting(db.Model):
     """Job postings from employer portal"""
     __tablename__ = 'employer_job_postings'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     employer_id = db.Column(db.Integer, db.ForeignKey('employer_profiles.id'), nullable=False)
@@ -1934,6 +1965,7 @@ class EmployerJobPosting(db.Model):
 class StudentRiskScore(db.Model):
     """AI-predicted risk scores for student intervention"""
     __tablename__ = 'student_risk_scores'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -1999,6 +2031,7 @@ class StudentRiskScore(db.Model):
 class FreeCertification(db.Model):
     """Curated free certifications from Google, Microsoft, AWS, etc."""
     __tablename__ = 'free_certifications'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     
@@ -2066,6 +2099,7 @@ class FreeCertification(db.Model):
 class UserCertificationProgress(db.Model):
     """Track student progress through free certifications"""
     __tablename__ = 'user_certification_progress'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -2137,11 +2171,12 @@ class UserCertificationProgress(db.Model):
     def __repr__(self):
         return f"<UserCertificationProgress {self.user.email} - {self.certification.title} - {self.status}>"
 
-
 class CertificationRecommendation(db.Model):
     """AI-recommended certifications based on user profile"""
     __tablename__ = 'certification_recommendations'
+    __table_args__ = {'extend_existing': True}
     
+    id = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'), nullable=False)
@@ -2185,6 +2220,7 @@ class CertificationRecommendation(db.Model):
 class CertificationPathway(db.Model):
     """Curated learning paths (sequences of certifications)"""
     __tablename__ = 'certification_pathways'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     
@@ -2235,6 +2271,7 @@ class CertificationPathway(db.Model):
 class UserPathwayProgress(db.Model):
     """Track student progress through certification pathways"""
     __tablename__ = 'user_pathway_progress'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
