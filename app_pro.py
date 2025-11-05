@@ -8,6 +8,7 @@ from loguru import logger
 
 # ----------------------------
 # APP FACTORY
+# Force rebuild: 2025-11-05
 # ----------------------------
 
 app = Flask(__name__)
