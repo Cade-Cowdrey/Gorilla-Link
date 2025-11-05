@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="success-page max-w-3xl mx-auto px-4 py-16 text-center">
+    <div class="bg-white rounded-lg shadow-2xl p-12">
+        <!-- Success Icon -->
+        <div class="mb-8">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full">
+                <svg class="w-16 h-16 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to {{ current_user.subscription.tier.value|title }}!</h1>
+        <p class="text-xl text-gray-600 mb-8">Your subscription is now active. Let's get started!</p>
+
+        <!-- Quick Stats -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6">
+                <div class="text-3xl font-bold text-green-600 mb-2">
+                    {% if current_user.subscription.tier.value == 'professional' %}5
+                    {% elif current_user.subscription.tier.value in ['enterprise', 'platinum'] %}∞{% endif %}
+                </div>
+                <div class="text-sm text-gray-700 font-semibold">Active Job Postings</div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                <div class="text-3xl font-bold text-blue-600 mb-2">1,200+</div>
+                <div class="text-sm text-gray-700 font-semibold">PSU Students</div>
+            </div>
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-6">
+                <div class="text-3xl font-bold text-purple-600 mb-2">
+                    {% if current_user.subscription.has_featured_placement %}3X{% else %}10X{% endif %}
+                </div>
+                <div class="text-sm text-gray-700 font-semibold">More Visibility</div>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6 mb-8 text-left">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">🚀 Next Steps</h3>
+            <ol class="space-y-3">
+                <li class="flex items-start gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold text-sm">1</span>
+                    <span class="text-gray-700"><strong>Post your first job</strong> - Takes 2 minutes, gets seen by 1,200+ students</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold text-sm">2</span>
+                    <span class="text-gray-700"><strong>Complete your company profile</strong> - Add logo, banner, description</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold text-sm">3</span>
+                    <span class="text-gray-700"><strong>Browse student profiles</strong> - Find candidates proactively</span>
+                </li>
+            </ol>
+        </div>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ url_for('jobs.post_job') }}" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-green-700 hover:to-blue-700 shadow-lg transition-all">
+                Post Your First Job
+            </a>
+            <a href="{{ url_for('dashboard.employer_dashboard') }}" class="bg-white text-gray-900 border-2 border-gray-300 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all">
+                Go to Dashboard
+            </a>
+        </div>
+
+        <!-- Support -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+            <p class="text-gray-600">
+                Questions? Email us at <a href="mailto:support@pittstate-connect.com" class="text-blue-600 hover:underline font-semibold">support@pittstate-connect.com</a>
+                or call <span class="font-semibold">(620) 235-4000</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success-page {
+    animation: slideUp 0.5s ease-out;
+}
+</style>
+{% endblock %}

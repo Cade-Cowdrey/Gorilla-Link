@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gorilla-Link{% endblock %}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #660000 0%, #800000 100%);
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .footer {
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #660000;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #800000;
+        }
+        .alert-box {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .alert-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        .alert-success {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .alert-warning {
+            background-color: #fff3e0;
+            border-left: 4px solid #FF9800;
+        }
+        h2 {
+            color: #660000;
+            font-size: 20px;
+        }
+        .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        .details-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .details-table td:first-child {
+            font-weight: bold;
+            width: 40%;
+            color: #666;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFCC33;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span class="logo">🦍</span> Gorilla-Link</h1>
+            <p>PITTSBURG STATE UNIVERSITY</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Gorilla-Link</strong> - Pittsburg State University</p>
+            <p>1701 S. Broadway St., Pittsburg, KS 66762</p>
+            <p>
+                <a href="https://pittstate-connect.onrender.com" style="color: #660000;">Visit Platform</a> | 
+                <a href="https://pittstate-connect.onrender.com/profile/settings" style="color: #660000;">Email Settings</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 11px; color: #999;">
+                You're receiving this email because you have an account on Gorilla-Link.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

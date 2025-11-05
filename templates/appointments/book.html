@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-calendar-plus text-psu-crimson mr-2"></i>
+                Book Career Services Appointment
+            </h1>
+            <p class="text-gray-600">Select an advisor and available time slot</p>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form id="bookingForm">
+                <!-- Step 1: Select Advisor -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-user-tie text-psu-crimson mr-2"></i>
+                        Step 1: Select Your Advisor
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for advisor in advisors %}
+                        <div class="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-psu-crimson transition-colors advisor-card"
+                             data-advisor-id="{{ advisor.id }}">
+                            <div class="flex items-center mb-2">
+                                <div class="bg-psu-crimson rounded-full w-12 h-12 flex items-center justify-center text-white font-bold mr-3">
+                                    {{ advisor.first_name[0] }}{{ advisor.last_name[0] }}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">{{ advisor.first_name }} {{ advisor.last_name }}</h3>
+                                    <p class="text-sm text-gray-600">Career Advisor</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">
+                                Specializes in career planning, resume review, interview prep, and job search strategies.
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="selectedAdvisorId" name="advisor_id" required>
+                </div>
+
+                <!-- Step 2: Select Appointment Type -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-clipboard-list text-psu-crimson mr-2"></i>
+                        Step 2: Appointment Type
+                    </label>
+                    <select id="appointmentType" name="appointment_type" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-psu-crimson focus:border-transparent"
+                            required>
+                        <option value="">Select appointment type...</option>
+                        <option value="resume_review">Resume Review</option>
+                        <option value="interview_prep">Interview Preparation</option>
+                        <option value="career_planning">Career Planning</option>
+                        <option value="job_search">Job Search Strategy</option>
+                        <option value="networking">Networking Advice</option>
+                        <option value="general">General Advising</option>
+                    </select>
+                </div>
+
+                <!-- Step 3: Select Date & Time -->
+                <div class="mb-8" id="schedulingSection" style="display: none;">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-calendar text-psu-crimson mr-2"></i>
+                        Step 3: Select Date & Time
+                    </label>
+                    <div id="availableSlots" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Slots will be populated via JavaScript -->
+                    </div>
+                    <input type="hidden" id="selectedSlot" name="scheduled_at" required>
+                </div>
+
+                <!-- Step 4: Add Notes (Optional) -->
+                <div class="mb-8" id="notesSection" style="display: none;">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-sticky-note text-psu-crimson mr-2"></i>
+                        Step 4: Additional Notes (Optional)
+                    </label>
+                    <textarea id="notes" name="notes" rows="4"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-psu-crimson focus:border-transparent"
+                              placeholder="Any specific topics you'd like to discuss or questions you have..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div id="submitSection" style="display: none;">
+                    <button type="submit" 
+                            class="w-full bg-psu-crimson text-white py-4 rounded-lg font-bold text-lg hover:bg-psu-crimson-dark transition-colors">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Confirm Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-8 text-center">
+                <i class="fas fa-spinner fa-spin text-psu-crimson text-4xl mb-4"></i>
+                <p class="text-gray-700 font-semibold">Booking your appointment...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedAdvisorId = null;
+let selectedSlot = null;
+
+// Step 1: Advisor Selection
+document.querySelectorAll('.advisor-card').forEach(card => {
+    card.addEventListener('click', function() {
+        // Remove previous selection
+        document.querySelectorAll('.advisor-card').forEach(c => {
+            c.classList.remove('border-psu-crimson', 'bg-red-50');
+            c.classList.add('border-gray-200');
+        });
+        
+        // Mark as selected
+        this.classList.remove('border-gray-200');
+        this.classList.add('border-psu-crimson', 'bg-red-50');
+        
+        selectedAdvisorId = this.dataset.advisorId;
+        document.getElementById('selectedAdvisorId').value = selectedAdvisorId;
+        
+        // Load available slots
+        if (selectedAdvisorId) {
+            loadAvailableSlots(selectedAdvisorId);
+        }
+    });
+});
+
+// Load available slots for selected advisor
+function loadAvailableSlots(advisorId) {
+    const slotsContainer = document.getElementById('availableSlots');
+    slotsContainer.innerHTML = '<p class="col-span-3 text-gray-500 text-center">Loading available times...</p>';
+    
+    fetch(`/appointments/api/advisor/${advisorId}/availability`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.available_slots.length === 0) {
+                slotsContainer.innerHTML = '<p class="col-span-3 text-gray-500 text-center">No available slots in the next 14 days.</p>';
+                return;
+            }
+            
+            // Group slots by date
+            const slotsByDate = {};
+            data.available_slots.forEach(slot => {
+                if (!slotsByDate[slot.date]) {
+                    slotsByDate[slot.date] = [];
+                }
+                slotsByDate[slot.date].push(slot);
+            });
+            
+            // Render slots
+            let html = '';
+            for (const [date, slots] of Object.entries(slotsByDate)) {
+                html += `<div class="col-span-3 mt-4 mb-2 font-semibold text-gray-900">${slots[0].day}, ${new Date(date).toLocaleDateString()}</div>`;
+                slots.forEach(slot => {
+                    html += `
+                        <button type="button" class="slot-button border-2 border-gray-300 rounded-lg p-3 hover:border-psu-crimson hover:bg-red-50 transition-colors text-center"
+                                data-datetime="${slot.datetime}">
+                            <i class="fas fa-clock text-gray-600 mr-1"></i>
+                            ${slot.time}
+                        </button>
+                    `;
+                });
+            }
+            
+            slotsContainer.innerHTML = html;
+            document.getElementById('schedulingSection').style.display = 'block';
+            
+            // Add click handlers to slots
+            document.querySelectorAll('.slot-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove previous selection
+                    document.querySelectorAll('.slot-button').forEach(b => {
+                        b.classList.remove('border-psu-crimson', 'bg-red-100');
+                        b.classList.add('border-gray-300');
+                    });
+                    
+                    // Mark as selected
+                    this.classList.remove('border-gray-300');
+                    this.classList.add('border-psu-crimson', 'bg-red-100');
+                    
+                    selectedSlot = this.dataset.datetime;
+                    document.getElementById('selectedSlot').value = selectedSlot;
+                    document.getElementById('notesSection').style.display = 'block';
+                    document.getElementById('submitSection').style.display = 'block';
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            slotsContainer.innerHTML = '<p class="col-span-3 text-red-500 text-center">Error loading slots. Please try again.</p>';
+        });
+}
+
+// Form Submission
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        advisor_id: parseInt(document.getElementById('selectedAdvisorId').value),
+        appointment_type: document.getElementById('appointmentType').value,
+        scheduled_at: document.getElementById('selectedSlot').value,
+        notes: document.getElementById('notes').value
+    };
+    
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    
+    fetch('/appointments/api/book', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        
+        if (data.success) {
+            alert(data.message);
+            window.location.href = '/appointments/';
+        } else {
+            alert(data.error || 'Failed to book appointment');
+        }
+    })
+    .catch(error => {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+</script>
+{% endblock %}

@@ -1196,3 +1196,1072 @@ class OutcomeReport(db.Model):
     
     def __repr__(self):
         return f"<OutcomeReport user={self.user_id} year={self.graduation_year} outcome={self.outcome_type}>"
+
+
+# =======================
+# APPOINTMENT BOOKING SYSTEM
+# =======================
+
+class AdvisorAvailability(db.Model):
+    """Track when career advisors are available for appointments"""
+    __tablename__ = "advisor_availability"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    advisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    day_of_week = db.Column(db.String(10), nullable=False)  # monday, tuesday, etc.
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    is_recurring = db.Column(db.Boolean, default=True)
+    specific_date = db.Column(db.Date)  # For one-time availability changes
+    is_available = db.Column(db.Boolean, default=True)
+    max_appointments_per_slot = db.Column(db.Integer, default=1)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    advisor = db.relationship('User', backref=db.backref('availability_slots', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AdvisorAvailability advisor={self.advisor_id} {self.day_of_week} {self.start_time}-{self.end_time}>"
+
+
+class AppointmentFeedback(db.Model):
+    """Student feedback on career services appointments"""
+    __tablename__ = "appointment_feedback"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('career_service_appointments.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    rating = db.Column(db.Integer)  # 1-5 stars
+    was_helpful = db.Column(db.Boolean)
+    followed_advice = db.Column(db.Boolean)
+    outcome_improved = db.Column(db.Boolean)  # Did they get interview/job after?
+    comments = db.Column(db.Text)
+    would_recommend_advisor = db.Column(db.Boolean)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    appointment = db.relationship('CareerServiceAppointment', backref=db.backref('feedback', uselist=False))
+    student = db.relationship('User', backref=db.backref('appointment_feedback', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AppointmentFeedback appointment={self.appointment_id} rating={self.rating}>"
+
+
+# =======================
+# ANALYTICS DASHBOARD MODELS
+# =======================
+
+class DashboardMetric(db.Model):
+    """Real-time metrics for administrator dashboard"""
+    __tablename__ = "dashboard_metrics"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    metric_name = db.Column(db.String(100), nullable=False)
+    metric_category = db.Column(db.String(50))  # engagement, outcomes, financial, retention
+    current_value = db.Column(db.Float, nullable=False)
+    previous_value = db.Column(db.Float)
+    target_value = db.Column(db.Float)
+    unit = db.Column(db.String(20))  # percentage, count, dollars, days
+    trend = db.Column(db.String(20))  # increasing, decreasing, stable
+    time_period = db.Column(db.String(50))  # daily, weekly, monthly, semester, annual
+    calculation_method = db.Column(db.Text)  # SQL query or logic used
+    last_calculated = db.Column(db.DateTime, default=func.now())
+    metadata = db.Column(JSONB)  # Additional context
+    
+    def calculate_change_percentage(self):
+        """Calculate percentage change from previous value"""
+        if not self.previous_value or self.previous_value == 0:
+            return 0
+        return ((self.current_value - self.previous_value) / self.previous_value) * 100
+    
+    def is_on_track(self):
+        """Check if metric is meeting target"""
+        if not self.target_value:
+            return None
+        return self.current_value >= self.target_value
+    
+    def __repr__(self):
+        return f"<DashboardMetric {self.metric_name}={self.current_value}{self.unit}>"
+
+
+class PlatformEngagement(db.Model):
+    """Daily engagement metrics for tracking platform usage"""
+    __tablename__ = "platform_engagement"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False, unique=True)
+    
+    # User Activity
+    daily_active_users = db.Column(db.Integer, default=0)
+    new_registrations = db.Column(db.Integer, default=0)
+    returning_users = db.Column(db.Integer, default=0)
+    
+    # Feature Usage
+    job_applications_submitted = db.Column(db.Integer, default=0)
+    scholarship_applications_submitted = db.Column(db.Integer, default=0)
+    appointments_booked = db.Column(db.Integer, default=0)
+    messages_sent = db.Column(db.Integer, default=0)
+    profile_updates = db.Column(db.Integer, default=0)
+    resume_downloads = db.Column(db.Integer, default=0)
+    
+    # Alumni Engagement
+    alumni_logins = db.Column(db.Integer, default=0)
+    mentorship_connections = db.Column(db.Integer, default=0)
+    donations_initiated = db.Column(db.Integer, default=0)
+    
+    # System Health
+    average_session_duration_minutes = db.Column(db.Float)
+    pages_per_session = db.Column(db.Float)
+    bounce_rate = db.Column(db.Float)
+    
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    def __repr__(self):
+        return f"<PlatformEngagement {self.date} DAU={self.daily_active_users}>"
+
+
+class CareerServicesImpact(db.Model):
+    """Track ROI and effectiveness of career services integration"""
+    __tablename__ = "career_services_impact"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    report_period = db.Column(db.String(20))  # weekly, monthly, semester, annual
+    period_start = db.Column(db.Date, nullable=False)
+    period_end = db.Column(db.Date, nullable=False)
+    
+    # Efficiency Metrics
+    total_appointments_booked = db.Column(db.Integer, default=0)
+    appointments_via_platform = db.Column(db.Integer, default=0)
+    appointments_via_traditional = db.Column(db.Integer, default=0)
+    average_booking_time_seconds = db.Column(db.Float)  # Time to book via platform
+    staff_hours_saved = db.Column(db.Float, default=0)
+    
+    # Reach Metrics
+    unique_students_helped = db.Column(db.Integer, default=0)
+    students_percentage_of_total = db.Column(db.Float)
+    first_time_users = db.Column(db.Integer, default=0)
+    repeat_users = db.Column(db.Integer, default=0)
+    
+    # Outcome Metrics
+    students_who_got_interviews = db.Column(db.Integer, default=0)
+    students_who_got_jobs = db.Column(db.Integer, default=0)
+    average_days_to_interview = db.Column(db.Float)
+    average_days_to_job_offer = db.Column(db.Float)
+    average_starting_salary = db.Column(db.Integer)
+    
+    # Satisfaction Metrics
+    average_appointment_rating = db.Column(db.Float)
+    would_recommend_percentage = db.Column(db.Float)
+    students_who_followed_advice = db.Column(db.Integer, default=0)
+    
+    # Financial Impact
+    estimated_cost_savings = db.Column(db.Float)  # vs. hiring more staff
+    alumni_giving_increase = db.Column(db.Float)
+    scholarship_dollars_distributed = db.Column(db.Float)
+    
+    # Accreditation Ready
+    outcome_data_completeness_percentage = db.Column(db.Float)  # How much grad outcome data we have
+    
+    created_at = db.Column(db.DateTime, default=func.now())
+    generated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    
+    # Relationships
+    generator = db.relationship('User', backref=db.backref('generated_impact_reports', lazy='dynamic'))
+    
+    def calculate_efficiency_gain(self):
+        """Calculate percentage improvement over traditional methods"""
+        if self.appointments_via_traditional == 0:
+            return 0
+        return ((self.appointments_via_platform - self.appointments_via_traditional) / 
+                self.appointments_via_traditional) * 100
+    
+    def calculate_roi(self):
+        """Calculate return on investment"""
+        # Cost savings + alumni giving increase + scholarship value
+        total_value = (self.estimated_cost_savings or 0) + \
+                      (self.alumni_giving_increase or 0) + \
+                      (self.scholarship_dollars_distributed or 0)
+        # Platform cost (essentially zero for PSU-built platform)
+        return total_value
+    
+    def __repr__(self):
+        return f"<CareerServicesImpact {self.period_start} to {self.period_end}>"
+
+
+class AdminAlert(db.Model):
+    """Automated alerts for administrators about important events"""
+    __tablename__ = "admin_alerts"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    alert_type = db.Column(db.String(50), nullable=False)  # metric_drop, high_engagement, system_issue, milestone
+    severity = db.Column(db.String(20), default='info')  # info, warning, critical
+    title = db.Column(db.String(255), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    action_required = db.Column(db.Boolean, default=False)
+    action_url = db.Column(db.String(255))  # Link to take action
+    related_metric = db.Column(db.String(100))
+    metric_value = db.Column(db.Float)
+    threshold_crossed = db.Column(db.Float)
+    is_read = db.Column(db.Boolean, default=False)
+    is_resolved = db.Column(db.Boolean, default=False)
+    assigned_to = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=func.now())
+    resolved_at = db.Column(db.DateTime)
+    
+    # Relationships
+    assignee = db.relationship('User', backref=db.backref('assigned_alerts', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AdminAlert {self.alert_type} severity={self.severity}>"
+
+
+class IntegrationLog(db.Model):
+    """Track integrations with other PSU systems"""
+    __tablename__ = "integration_logs"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    integration_name = db.Column(db.String(100), nullable=False)  # mygus, banner, canvas, handshake
+    action = db.Column(db.String(50), nullable=False)  # sync, export, import, api_call
+    status = db.Column(db.String(20), nullable=False)  # success, failure, partial
+    records_processed = db.Column(db.Integer, default=0)
+    records_failed = db.Column(db.Integer, default=0)
+    error_message = db.Column(db.Text)
+    execution_time_seconds = db.Column(db.Float)
+    api_endpoint = db.Column(db.String(255))
+    request_payload = db.Column(JSONB)
+    response_payload = db.Column(JSONB)
+    initiated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    initiator = db.relationship('User', backref=db.backref('integration_actions', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<IntegrationLog {self.integration_name} {self.action} status={self.status}>"
+
+
+class ExportableReport(db.Model):
+    """Pre-generated reports for administrators to download"""
+    __tablename__ = "exportable_reports"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    report_name = db.Column(db.String(255), nullable=False)
+    report_type = db.Column(db.String(50), nullable=False)  # engagement, outcomes, financial, accreditation
+    description = db.Column(db.Text)
+    file_format = db.Column(db.String(10))  # pdf, csv, xlsx, json
+    file_path = db.Column(db.String(500))
+    file_size_bytes = db.Column(db.Integer)
+    period_covered = db.Column(db.String(100))  # "Fall 2024", "January 2025", etc.
+    generated_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    is_public = db.Column(db.Boolean, default=False)
+    download_count = db.Column(db.Integer, default=0)
+    expires_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=func.now())
+    
+    # Relationships
+    generator = db.relationship('User', backref=db.backref('generated_reports', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<ExportableReport {self.report_name} type={self.report_type}>"
+
+
+# ==============================================================================
+# SCHOLARSHIP INTEGRATION MODELS
+# ==============================================================================
+
+class ScholarshipMatch(db.Model):
+    """AI-matched scholarships from real APIs"""
+    __tablename__ = 'scholarship_matches'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Scholarship Details
+    title = db.Column(db.String(255), nullable=False)
+    provider = db.Column(db.String(255))
+    amount = db.Column(db.Integer)  # Scholarship amount in dollars
+    deadline = db.Column(db.DateTime)
+    description = db.Column(db.Text)
+    requirements = db.Column(db.JSON)  # List of requirements
+    url = db.Column(db.String(500))
+    source = db.Column(db.String(50))  # scholarships.com, fastweb, college_board
+    
+    # Match Details
+    match_score = db.Column(db.Float)  # 0-100 how well student matches
+    is_eligible = db.Column(db.Boolean, default=True)
+    missing_requirements = db.Column(db.JSON)  # What student needs
+    recommendations = db.Column(db.JSON)  # Action items
+    
+    # Status Tracking
+    status = db.Column(db.String(50), default='matched')  # matched, applied, awarded, declined
+    applied_at = db.Column(db.DateTime)
+    awarded_at = db.Column(db.DateTime)
+    awarded_amount = db.Column(db.Integer)  # Actual amount if different
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_synced = db.Column(db.DateTime, default=datetime.utcnow)
+    is_renewable = db.Column(db.Boolean, default=False)
+    essay_required = db.Column(db.Boolean, default=False)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('scholarship_matches', lazy='dynamic'))
+    
+    def days_until_deadline(self):
+        """Calculate days remaining until deadline"""
+        if not self.deadline:
+            return None
+        delta = self.deadline - datetime.utcnow()
+        return max(0, delta.days)
+    
+    def is_deadline_soon(self):
+        """Check if deadline is within 2 weeks"""
+        days = self.days_until_deadline()
+        return days is not None and days < 14
+    
+    def __repr__(self):
+        return f"<ScholarshipMatch {self.title} - ${self.amount} - {self.match_score}%>"
+
+
+class ScholarshipApplication(db.Model):
+    """Track scholarship application progress"""
+    __tablename__ = 'scholarship_applications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    scholarship_match_id = db.Column(db.Integer, db.ForeignKey('scholarship_matches.id'))
+    
+    # Application Details
+    scholarship_name = db.Column(db.String(255), nullable=False)
+    amount = db.Column(db.Integer)
+    deadline = db.Column(db.DateTime)
+    
+    # Progress Tracking
+    status = db.Column(db.String(50), default='not_started')  # not_started, in_progress, submitted, awarded, rejected
+    progress_percentage = db.Column(db.Integer, default=0)
+    
+    # Requirements Checklist
+    essay_completed = db.Column(db.Boolean, default=False)
+    recommendation_letters_count = db.Column(db.Integer, default=0)
+    recommendation_letters_required = db.Column(db.Integer, default=0)
+    transcript_submitted = db.Column(db.Boolean, default=False)
+    
+    # Timestamps
+    started_at = db.Column(db.DateTime)
+    submitted_at = db.Column(db.DateTime)
+    result_received_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Result
+    awarded = db.Column(db.Boolean)
+    awarded_amount = db.Column(db.Integer)
+    award_notification = db.Column(db.Text)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('scholarship_applications', lazy='dynamic'))
+    scholarship_match = db.relationship('ScholarshipMatch', backref='applications')
+    
+    def update_progress(self):
+        """Calculate application progress percentage"""
+        total_items = 1  # Base application
+        completed_items = 0
+        
+        if self.essay_completed:
+            completed_items += 1
+        total_items += 1
+        
+        if self.recommendation_letters_required > 0:
+            total_items += self.recommendation_letters_required
+            completed_items += min(self.recommendation_letters_count, self.recommendation_letters_required)
+        
+        if self.transcript_submitted:
+            completed_items += 1
+        total_items += 1
+        
+        self.progress_percentage = int((completed_items / total_items) * 100)
+        return self.progress_percentage
+    
+    def __repr__(self):
+        return f"<ScholarshipApplication {self.scholarship_name} - {self.status}>"
+
+
+# ==============================================================================
+# LINKEDIN INTEGRATION MODELS
+# ==============================================================================
+
+class LinkedInProfile(db.Model):
+    """Store LinkedIn profile data for graduate outcome tracking"""
+    __tablename__ = 'linkedin_profiles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+    
+    # LinkedIn Data
+    linkedin_id = db.Column(db.String(100), unique=True)
+    profile_url = db.Column(db.String(500))
+    headline = db.Column(db.String(255))
+    current_position = db.Column(db.String(255))
+    current_company = db.Column(db.String(255))
+    industry = db.Column(db.String(100))
+    location = db.Column(db.String(255))
+    
+    # Career Data
+    total_experience_years = db.Column(db.Integer)
+    skills = db.Column(db.JSON)  # Array of skills
+    endorsements_count = db.Column(db.Integer)
+    connections_count = db.Column(db.Integer)
+    
+    # Employment History
+    employment_history = db.Column(db.JSON)  # Array of {title, company, start_date, end_date, description}
+    
+    # OAuth Tokens
+    access_token = db.Column(db.String(500))
+    refresh_token = db.Column(db.String(500))
+    token_expires_at = db.Column(db.DateTime)
+    
+    # Sync Status
+    last_synced = db.Column(db.DateTime)
+    sync_enabled = db.Column(db.Boolean, default=True)
+    sync_frequency = db.Column(db.String(20), default='weekly')  # daily, weekly, monthly
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('linkedin_profile', uselist=False))
+    
+    def is_token_valid(self):
+        """Check if OAuth token is still valid"""
+        if not self.token_expires_at:
+            return False
+        return datetime.utcnow() < self.token_expires_at
+    
+    def get_current_role(self):
+        """Get current employment role"""
+        if self.employment_history:
+            # Return most recent position
+            sorted_history = sorted(
+                self.employment_history, 
+                key=lambda x: x.get('start_date', ''), 
+                reverse=True
+            )
+            if sorted_history:
+                return sorted_history[0]
+        return None
+    
+    def __repr__(self):
+        return f"<LinkedInProfile {self.user.email} - {self.current_position}>"
+
+
+# ==============================================================================
+# EMAIL NOTIFICATION MODELS
+# ==============================================================================
+
+class EmailNotification(db.Model):
+    """Track sent email notifications"""
+    __tablename__ = 'email_notifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Email Details
+    notification_type = db.Column(db.String(50), nullable=False)  # appointment_confirmation, scholarship_match, job_alert
+    subject = db.Column(db.String(255))
+    body = db.Column(db.Text)
+    recipient_email = db.Column(db.String(255))
+    
+    # Status
+    status = db.Column(db.String(50), default='queued')  # queued, sent, failed, bounced
+    sent_at = db.Column(db.DateTime)
+    error_message = db.Column(db.Text)
+    
+    # Engagement Tracking
+    opened_at = db.Column(db.DateTime)
+    clicked_at = db.Column(db.DateTime)
+    unsubscribed = db.Column(db.Boolean, default=False)
+    
+    # Related Entities
+    related_entity_type = db.Column(db.String(50))  # appointment, scholarship, job
+    related_entity_id = db.Column(db.Integer)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('email_notifications', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<EmailNotification {self.notification_type} to {self.recipient_email} - {self.status}>"
+
+
+class NotificationPreference(db.Model):
+    """User preferences for email notifications"""
+    __tablename__ = 'notification_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+    
+    # Notification Settings
+    email_enabled = db.Column(db.Boolean, default=True)
+    sms_enabled = db.Column(db.Boolean, default=False)
+    push_enabled = db.Column(db.Boolean, default=True)
+    
+    # Type-specific Settings
+    appointment_reminders = db.Column(db.Boolean, default=True)
+    scholarship_matches = db.Column(db.Boolean, default=True)
+    job_alerts = db.Column(db.Boolean, default=True)
+    event_notifications = db.Column(db.Boolean, default=True)
+    mentorship_messages = db.Column(db.Boolean, default=True)
+    platform_updates = db.Column(db.Boolean, default=False)
+    
+    # Frequency Settings
+    digest_frequency = db.Column(db.String(20), default='daily')  # immediate, daily, weekly
+    quiet_hours_start = db.Column(db.Time)  # Don't send during these hours
+    quiet_hours_end = db.Column(db.Time)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('notification_preferences', uselist=False))
+    
+    def __repr__(self):
+        return f"<NotificationPreference {self.user.email}>"
+
+
+# ==============================================================================
+# AI CAREER COACH MODELS
+# ==============================================================================
+
+class AIChatSession(db.Model):
+    """AI Career Coach chat sessions"""
+    __tablename__ = 'ai_chat_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Session Details
+    title = db.Column(db.String(255), default='Career Coaching Session')
+    session_type = db.Column(db.String(50), default='general')  # general, resume, interview, career_planning
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Metadata
+    message_count = db.Column(db.Integer, default=0)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_message_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ended_at = db.Column(db.DateTime)
+    
+    # Rating
+    rating = db.Column(db.Integer)  # 1-5 stars
+    feedback = db.Column(db.Text)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('ai_chat_sessions', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AIChatSession {self.id} - {self.user.email}>"
+
+
+class AIChatMessage(db.Model):
+    """Individual messages in AI chat sessions"""
+    __tablename__ = 'ai_chat_messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('ai_chat_sessions.id'), nullable=False)
+    
+    # Message Content
+    role = db.Column(db.String(20), nullable=False)  # user, assistant, system
+    content = db.Column(db.Text, nullable=False)
+    
+    # AI Model Details
+    model = db.Column(db.String(50))  # gpt-4, gpt-3.5-turbo
+    tokens_used = db.Column(db.Integer)
+    cost = db.Column(db.Float)  # Estimated cost in USD
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    session = db.relationship('AIChatSession', backref=db.backref('messages', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f"<AIChatMessage {self.role}: {self.content[:50]}...>"
+
+
+# ==============================================================================
+# EMPLOYER PORTAL MODELS
+# ==============================================================================
+
+class EmployerProfile(db.Model):
+    """Employer company profiles"""
+    __tablename__ = 'employer_profiles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Company Information
+    company_name = db.Column(db.String(255), nullable=False)
+    industry = db.Column(db.String(100))
+    company_size = db.Column(db.String(50))  # 1-10, 11-50, 51-200, 201-500, 500+
+    website = db.Column(db.String(500))
+    logo_url = db.Column(db.String(500))
+    
+    # Location
+    headquarters_location = db.Column(db.String(255))
+    hiring_locations = db.Column(db.JSON)  # Array of locations
+    
+    # Description
+    description = db.Column(db.Text)
+    culture = db.Column(db.Text)
+    benefits = db.Column(db.JSON)  # Array of benefits
+    
+    # Contact Information
+    recruiter_name = db.Column(db.String(255))
+    recruiter_email = db.Column(db.String(255))
+    recruiter_phone = db.Column(db.String(50))
+    
+    # Subscription
+    subscription_tier = db.Column(db.String(50), default='free')  # free, basic, premium
+    subscription_expires_at = db.Column(db.DateTime)
+    job_posts_remaining = db.Column(db.Integer, default=3)  # Free tier gets 3 posts
+    
+    # Verification
+    is_verified = db.Column(db.Boolean, default=False)
+    verified_at = db.Column(db.DateTime)
+    verified_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('employer_profile', uselist=False))
+    verifier = db.relationship('User', foreign_keys=[verified_by])
+    
+    def can_post_job(self):
+        """Check if employer can post more jobs"""
+        if self.subscription_tier == 'premium':
+            return True
+        return self.job_posts_remaining > 0
+    
+    def __repr__(self):
+        return f"<EmployerProfile {self.company_name}>"
+
+
+class EmployerJobPosting(db.Model):
+    """Job postings from employer portal"""
+    __tablename__ = 'employer_job_postings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    employer_id = db.Column(db.Integer, db.ForeignKey('employer_profiles.id'), nullable=False)
+    
+    # Job Details
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.JSON)  # Array of requirements
+    responsibilities = db.Column(db.JSON)  # Array of responsibilities
+    
+    # Compensation
+    salary_min = db.Column(db.Integer)
+    salary_max = db.Column(db.Integer)
+    salary_currency = db.Column(db.String(10), default='USD')
+    hourly_rate = db.Column(db.Float)
+    benefits = db.Column(db.JSON)
+    
+    # Location
+    location = db.Column(db.String(255))
+    remote_policy = db.Column(db.String(50))  # onsite, hybrid, remote
+    
+    # Employment Details
+    employment_type = db.Column(db.String(50))  # full_time, part_time, contract, internship
+    experience_level = db.Column(db.String(50))  # entry, mid, senior, executive
+    education_required = db.Column(db.String(100))
+    
+    # Application
+    application_url = db.Column(db.String(500))
+    application_email = db.Column(db.String(255))
+    application_instructions = db.Column(db.Text)
+    
+    # Status
+    status = db.Column(db.String(50), default='draft')  # draft, active, filled, closed
+    posted_at = db.Column(db.DateTime)
+    expires_at = db.Column(db.DateTime)
+    filled_at = db.Column(db.DateTime)
+    
+    # Metrics
+    views_count = db.Column(db.Integer, default=0)
+    applications_count = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    employer = db.relationship('EmployerProfile', backref=db.backref('job_postings', lazy='dynamic'))
+    
+    def is_active(self):
+        """Check if job posting is currently active"""
+        if self.status != 'active':
+            return False
+        if self.expires_at and self.expires_at < datetime.utcnow():
+            return False
+        return True
+    
+    def days_remaining(self):
+        """Days until posting expires"""
+        if not self.expires_at:
+            return None
+        delta = self.expires_at - datetime.utcnow()
+        return max(0, delta.days)
+    
+    def __repr__(self):
+        return f"<EmployerJobPosting {self.title} at {self.employer.company_name}>"
+
+
+# ==============================================================================
+# AI SUCCESS PREDICTOR MODELS
+# ==============================================================================
+
+class StudentRiskScore(db.Model):
+    """AI-predicted risk scores for student intervention"""
+    __tablename__ = 'student_risk_scores'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Risk Assessment
+    overall_risk_score = db.Column(db.Float)  # 0-100, higher = more at risk
+    risk_level = db.Column(db.String(20))  # low, medium, high, critical
+    
+    # Component Scores
+    academic_risk = db.Column(db.Float)  # Based on GPA, course load
+    engagement_risk = db.Column(db.Float)  # Based on platform activity
+    career_readiness_risk = db.Column(db.Float)  # Based on applications, appointments
+    financial_risk = db.Column(db.Float)  # Based on scholarship applications
+    
+    # Factors
+    contributing_factors = db.Column(db.JSON)  # Array of risk factors
+    protective_factors = db.Column(db.JSON)  # Array of positive factors
+    
+    # Recommendations
+    recommended_interventions = db.Column(db.JSON)  # Array of suggested actions
+    priority_level = db.Column(db.Integer)  # 1-5, higher = more urgent
+    
+    # Status
+    intervention_status = db.Column(db.String(50), default='identified')  # identified, contacted, in_progress, resolved
+    assigned_advisor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    contacted_at = db.Column(db.DateTime)
+    resolved_at = db.Column(db.DateTime)
+    
+    # Model Details
+    model_version = db.Column(db.String(50))
+    prediction_confidence = db.Column(db.Float)  # 0-1
+    calculated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Historical
+    previous_score = db.Column(db.Float)
+    score_trend = db.Column(db.String(20))  # improving, stable, declining
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('risk_scores', lazy='dynamic'))
+    assigned_advisor = db.relationship('User', foreign_keys=[assigned_advisor_id])
+    
+    def needs_immediate_attention(self):
+        """Check if student needs immediate intervention"""
+        return self.risk_level in ['high', 'critical'] and self.intervention_status == 'identified'
+    
+    def get_top_concerns(self, limit=3):
+        """Get top N contributing factors"""
+        if not self.contributing_factors:
+            return []
+        return self.contributing_factors[:limit]
+    
+    def __repr__(self):
+        return f"<StudentRiskScore {self.user.email} - {self.risk_level} ({self.overall_risk_score})>"
+
+
+# ==============================================================================
+# FREE CERTIFICATIONS & SKILLS HUB
+# ==============================================================================
+
+class FreeCertification(db.Model):
+    """Curated free certifications from Google, Microsoft, AWS, etc."""
+    __tablename__ = 'free_certifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Certification Details
+    title = db.Column(db.String(255), nullable=False)
+    provider = db.Column(db.String(100), nullable=False)  # Google, Microsoft, AWS, HubSpot, etc.
+    category = db.Column(db.String(100))  # Technology, Marketing, Business, Safety, etc.
+    subcategory = db.Column(db.String(100))  # Programming, Cloud, Analytics, etc.
+    
+    # Description
+    description = db.Column(db.Text)
+    skills_gained = db.Column(db.JSON)  # Array of skills learned
+    
+    # Course Details
+    duration_hours = db.Column(db.Integer)  # Estimated time to complete
+    difficulty_level = db.Column(db.String(50))  # beginner, intermediate, advanced
+    language = db.Column(db.String(50), default='English')
+    
+    # Links
+    course_url = db.Column(db.String(500), nullable=False)
+    certificate_url = db.Column(db.String(500))  # Link to get certificate after completion
+    provider_logo_url = db.Column(db.String(500))
+    
+    # Value Indicators
+    industry_recognition = db.Column(db.String(50))  # high, medium, low
+    resume_boost_score = db.Column(db.Integer)  # 0-100, how much it helps resume
+    job_relevance_score = db.Column(db.Integer)  # 0-100, how relevant to jobs
+    salary_impact = db.Column(db.String(100))  # "$5K-$10K increase", "Entry-level requirement", etc.
+    
+    # Prerequisites
+    prerequisites = db.Column(db.JSON)  # Array of requirements
+    recommended_for_majors = db.Column(db.JSON)  # Array of majors this is relevant for
+    recommended_for_careers = db.Column(db.JSON)  # Array of career paths
+    
+    # Engagement
+    views_count = db.Column(db.Integer, default=0)
+    enrollments_count = db.Column(db.Integer, default=0)
+    completions_count = db.Column(db.Integer, default=0)
+    average_rating = db.Column(db.Float)
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    is_featured = db.Column(db.Boolean, default=False)
+    verified_by_psu = db.Column(db.Boolean, default=False)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_verified = db.Column(db.DateTime)
+    
+    def get_completion_rate(self):
+        """Calculate completion rate percentage"""
+        if self.enrollments_count == 0:
+            return 0
+        return (self.completions_count / self.enrollments_count) * 100
+    
+    def is_quick_win(self):
+        """Check if certification can be completed quickly (under 10 hours)"""
+        return self.duration_hours and self.duration_hours <= 10
+    
+    def __repr__(self):
+        return f"<FreeCertification {self.title} by {self.provider}>"
+
+
+class UserCertificationProgress(db.Model):
+    """Track student progress through free certifications"""
+    __tablename__ = 'user_certification_progress'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'), nullable=False)
+    
+    # Progress Tracking
+    status = db.Column(db.String(50), default='not_started')  # not_started, in_progress, completed, abandoned
+    progress_percentage = db.Column(db.Integer, default=0)
+    
+    # Timestamps
+    enrolled_at = db.Column(db.DateTime, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    last_activity = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Certification Results
+    certificate_issued = db.Column(db.Boolean, default=False)
+    certificate_url = db.Column(db.String(500))  # Link to earned certificate
+    certificate_id = db.Column(db.String(255))  # Certificate verification ID
+    score = db.Column(db.Integer)  # If certification has scoring
+    
+    # Engagement
+    time_spent_hours = db.Column(db.Float, default=0.0)
+    modules_completed = db.Column(db.Integer, default=0)
+    total_modules = db.Column(db.Integer)
+    
+    # User Feedback
+    rating = db.Column(db.Integer)  # 1-5 stars
+    review = db.Column(db.Text)
+    would_recommend = db.Column(db.Boolean)
+    
+    # Resume Integration
+    added_to_resume = db.Column(db.Boolean, default=False)
+    added_to_linkedin = db.Column(db.Boolean, default=False)
+    shared_with_employers = db.Column(db.Boolean, default=False)
+    
+    # Reminder Settings
+    reminders_enabled = db.Column(db.Boolean, default=True)
+    last_reminder_sent = db.Column(db.DateTime)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('certifications', lazy='dynamic'))
+    certification = db.relationship('FreeCertification', backref='user_progress')
+    
+    def calculate_time_remaining(self):
+        """Estimate hours remaining based on progress"""
+        if not self.certification.duration_hours:
+            return None
+        total_hours = self.certification.duration_hours
+        completed_hours = (self.progress_percentage / 100) * total_hours
+        return max(0, total_hours - completed_hours)
+    
+    def is_stalled(self):
+        """Check if user hasn't made progress in 7+ days"""
+        if not self.last_activity:
+            return False
+        days_since_activity = (datetime.utcnow() - self.last_activity).days
+        return days_since_activity >= 7 and self.status == 'in_progress'
+    
+    def days_to_complete(self):
+        """Calculate days since enrollment to completion"""
+        if not self.completed_at or not self.enrolled_at:
+            return None
+        return (self.completed_at - self.enrolled_at).days
+    
+    def __repr__(self):
+        return f"<UserCertificationProgress {self.user.email} - {self.certification.title} - {self.status}>"
+
+
+class CertificationRecommendation(db.Model):
+    """AI-recommended certifications based on user profile"""
+    __tablename__ = 'certification_recommendations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'), nullable=False)
+    
+    # Recommendation Details
+    recommendation_score = db.Column(db.Float)  # 0-100, how relevant this cert is
+    recommendation_reason = db.Column(db.Text)  # Why this cert was recommended
+    
+    # Context
+    based_on = db.Column(db.JSON)  # Array of factors: major, career goals, resume gaps, etc.
+    priority = db.Column(db.String(20))  # high, medium, low
+    
+    # Impact Prediction
+    estimated_salary_boost = db.Column(db.String(50))  # "$5K-$10K", "10-15%", etc.
+    job_match_improvement = db.Column(db.Integer)  # Percentage improvement in job matching
+    skills_gap_filled = db.Column(db.JSON)  # Array of skills this cert addresses
+    
+    # Status
+    viewed = db.Column(db.Boolean, default=False)
+    enrolled = db.Column(db.Boolean, default=False)
+    dismissed = db.Column(db.Boolean, default=False)
+    
+    # Timestamps
+    recommended_at = db.Column(db.DateTime, default=datetime.utcnow)
+    viewed_at = db.Column(db.DateTime)
+    enrolled_at = db.Column(db.DateTime)
+    dismissed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('certification_recommendations', lazy='dynamic'))
+    certification = db.relationship('FreeCertification')
+    
+    def is_urgent(self):
+        """Check if this cert should be completed soon (job deadline, etc.)"""
+        return self.priority == 'high' and not self.enrolled
+    
+    def __repr__(self):
+        return f"<CertificationRecommendation {self.certification.title} for {self.user.email}>"
+
+
+class CertificationPathway(db.Model):
+    """Curated learning paths (sequences of certifications)"""
+    __tablename__ = 'certification_pathways'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Pathway Details
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(100))  # Technology, Marketing, Business, etc.
+    
+    # Target Audience
+    target_career = db.Column(db.String(255))  # "Software Developer", "Digital Marketer", etc.
+    target_salary_range = db.Column(db.String(100))  # "$50K-$70K", "$70K-$90K", etc.
+    difficulty_level = db.Column(db.String(50))  # beginner, intermediate, advanced
+    
+    # Pathway Structure
+    certification_sequence = db.Column(db.JSON)  # Ordered array of certification IDs
+    total_duration_hours = db.Column(db.Integer)
+    total_certifications = db.Column(db.Integer)
+    
+    # Value Indicators
+    completion_rate = db.Column(db.Float)  # Percentage of users who complete full pathway
+    average_salary_after = db.Column(db.Integer)  # Average salary of completers
+    job_placement_rate = db.Column(db.Float)  # Percentage who get relevant job
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    is_featured = db.Column(db.Boolean, default=False)
+    verified_by_career_services = db.Column(db.Boolean, default=False)
+    
+    # Engagement
+    enrollments_count = db.Column(db.Integer, default=0)
+    completions_count = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def get_certifications(self):
+        """Get ordered list of certifications in this pathway"""
+        if not self.certification_sequence:
+            return []
+        return FreeCertification.query.filter(
+            FreeCertification.id.in_(self.certification_sequence)
+        ).all()
+    
+    def __repr__(self):
+        return f"<CertificationPathway {self.title}>"
+
+
+class UserPathwayProgress(db.Model):
+    """Track student progress through certification pathways"""
+    __tablename__ = 'user_pathway_progress'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('certification_pathways.id'), nullable=False)
+    
+    # Progress
+    status = db.Column(db.String(50), default='in_progress')  # in_progress, completed, abandoned
+    certifications_completed = db.Column(db.Integer, default=0)
+    current_certification_id = db.Column(db.Integer, db.ForeignKey('free_certifications.id'))
+    progress_percentage = db.Column(db.Integer, default=0)
+    
+    # Timestamps
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+    estimated_completion_date = db.Column(db.DateTime)
+    
+    # Outcomes
+    got_job = db.Column(db.Boolean)
+    salary_before = db.Column(db.Integer)
+    salary_after = db.Column(db.Integer)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('pathway_progress', lazy='dynamic'))
+    pathway = db.relationship('CertificationPathway')
+    current_certification = db.relationship('FreeCertification')
+    
+    def calculate_salary_increase(self):
+        """Calculate salary increase from pathway completion"""
+        if self.salary_before and self.salary_after:
+            increase = self.salary_after - self.salary_before
+            percentage = (increase / self.salary_before) * 100
+            return {'amount': increase, 'percentage': percentage}
+        return None
+    
+    def __repr__(self):
+        return f"<UserPathwayProgress {self.user.email} - {self.pathway.title}>"
+

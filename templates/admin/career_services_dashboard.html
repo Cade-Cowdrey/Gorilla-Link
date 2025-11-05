@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Career Services Dashboard - Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-calendar-check text-psu-crimson mr-2"></i>
+                Career Services Dashboard
+            </h1>
+            <p class="text-gray-600">Appointments, outcomes, and ROI tracking</p>
+        </div>
+
+        <!-- Appointment Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-psu-crimson">
+                <p class="text-gray-500 text-sm font-medium">Total Appointments</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_appointments }}</p>
+                <p class="text-sm text-gray-600 mt-1">This month</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm font-medium">Average Rating</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ "{:.2f}".format(avg_rating) }}</p>
+                <p class="text-sm text-yellow-500 mt-1">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm font-medium">Students Helped</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ unique_students }}</p>
+                <p class="text-sm text-gray-600 mt-1">Unique students</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-psu-gold">
+                <p class="text-gray-500 text-sm font-medium">Follow-up Rate</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ follow_up_rate }}%</p>
+                <p class="text-sm text-gray-600 mt-1">Required follow-ups</p>
+            </div>
+        </div>
+
+        <!-- Appointment Type Breakdown -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">
+                <i class="fas fa-chart-pie text-psu-crimson mr-2"></i>
+                Appointment Type Breakdown
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% for type, count in appointment_types.items() %}
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700 font-medium">{{ type|title }}</span>
+                        <span class="text-2xl font-bold text-psu-crimson">{{ count }}</span>
+                    </div>
+                    <div class="mt-2 bg-gray-200 rounded-full h-2">
+                        <div class="bg-psu-crimson h-2 rounded-full" 
+                             style="width: {{ (count / total_appointments * 100)|int }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Graduate Outcomes -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">
+                    <i class="fas fa-graduation-cap text-psu-crimson mr-2"></i>
+                    Graduate Outcomes
+                </h3>
+                <a href="{{ url_for('admin_dashboard.outcomes') }}" 
+                   class="text-psu-crimson hover:text-psu-crimson-dark font-semibold">
+                    View Full Report <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">Employment Rate</p>
+                    <p class="text-4xl font-bold text-green-600 mt-2">{{ employment_rate }}%</p>
+                    <p class="text-sm text-gray-600 mt-1">Within 6 months</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">Related to Major</p>
+                    <p class="text-4xl font-bold text-blue-600 mt-2">{{ related_to_major_rate }}%</p>
+                    <p class="text-sm text-gray-600 mt-1">Relevant positions</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">Avg. Satisfaction</p>
+                    <p class="text-4xl font-bold text-psu-gold mt-2">{{ avg_satisfaction }}/5</p>
+                    <p class="text-sm text-gray-600 mt-1">Graduate survey</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Outcomes by Type -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Outcome Type Distribution</h3>
+            <div class="space-y-3">
+                {% for outcome in outcome_breakdown %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-{{ outcome.icon }} text-psu-crimson mr-3"></i>
+                        <span class="text-gray-700">{{ outcome.type }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-2xl font-bold text-gray-900 mr-4">{{ outcome.count }}</span>
+                        <span class="text-sm text-gray-500">{{ outcome.percentage }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ROI & Efficiency Gains -->
+        <div class="bg-gradient-to-r from-psu-crimson to-red-800 rounded-lg shadow-lg p-6 text-white">
+            <h3 class="text-xl font-bold mb-4">
+                <i class="fas fa-chart-line mr-2"></i>
+                Platform ROI & Efficiency
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-white text-opacity-90 text-sm">Staff Hours Saved</p>
+                    <p class="text-3xl font-bold mt-2">{{ staff_hours_saved }} hrs</p>
+                    <p class="text-sm text-white text-opacity-75 mt-1">Per month</p>
+                </div>
+                <div>
+                    <p class="text-white text-opacity-90 text-sm">Cost Savings</p>
+                    <p class="text-3xl font-bold mt-2">${{ "{:,.0f}".format(cost_savings) }}</p>
+                    <p class="text-sm text-white text-opacity-75 mt-1">Annual estimate</p>
+                </div>
+                <div>
+                    <p class="text-white text-opacity-90 text-sm">Efficiency Gain</p>
+                    <p class="text-3xl font-bold mt-2">{{ efficiency_gain }}%</p>
+                    <p class="text-sm text-white text-opacity-75 mt-1">vs. manual process</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 flex gap-4">
+            <a href="{{ url_for('admin_dashboard.export_outcomes') }}" 
+               class="bg-psu-crimson text-white px-6 py-3 rounded-lg hover:bg-psu-crimson-dark transition-colors">
+                <i class="fas fa-download mr-2"></i>
+                Export for KSDE
+            </a>
+            <a href="{{ url_for('admin_dashboard.reports') }}" 
+               class="bg-white text-psu-crimson border-2 border-psu-crimson px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fas fa-file-alt mr-2"></i>
+                View All Reports
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

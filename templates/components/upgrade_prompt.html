@@ -1,0 +1,277 @@
+<!-- Upgrade Prompts for Employer Dashboard -->
+
+{% if current_user.employer_tier == 'free' %}
+    <!-- FREE TIER UPGRADE PROMPTS -->
+    
+    {% if jobs_posted >= 1 %}
+    <!-- Out of Jobs Limit -->
+    <div class="upgrade-prompt bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-400 rounded-lg p-6 mb-6 shadow-lg">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">⚠️ You've Hit Your Job Limit</h3>
+                <p class="text-gray-700 mb-4">You've used your 1 free job posting this month. Upgrade to Professional to post 4 more jobs and get 3X more visibility.</p>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="text-sm text-gray-600 mb-1">Your Current Views</div>
+                        <div class="text-3xl font-bold text-gray-900">{{ current_views }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Limited to 5 profile views/week</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-lg p-4">
+                        <div class="text-sm opacity-90 mb-1">With Professional</div>
+                        <div class="text-3xl font-bold">{{ current_views * 3 }}+</div>
+                        <div class="text-xs opacity-90 mt-1">Unlimited profile views + featured placement</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <a href="/employer/upgrade?plan=professional" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-md">
+                        Upgrade to Professional - $299/mo
+                    </a>
+                    <span class="text-sm text-gray-600">14-day free trial, cancel anytime</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if profile_views_limited %}
+    <!-- Profile Views Limit -->
+    <div class="upgrade-prompt bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">You've Used {{ profile_views_used }}/5 Profile Views This Week</h3>
+                <p class="text-gray-700 mb-3">Unlock unlimited profile views + direct messaging with Professional.</p>
+                <a href="/employer/upgrade?plan=professional" class="inline-block bg-yellow-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-700">
+                    Unlock Unlimited Views
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if days_since_signup >= 7 and applications_count < 5 %}
+    <!-- Low Applications After 1 Week -->
+    <div class="upgrade-prompt bg-red-50 border-2 border-red-400 rounded-lg p-6 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Your Job Isn't Getting Enough Views</h3>
+                <p class="text-gray-700 mb-3">You've only received {{ applications_count }} applications in 7 days. Professional members get 3X more visibility with featured placement.</p>
+                
+                <div class="bg-white rounded-lg p-4 mb-4 border border-red-200">
+                    <div class="text-sm text-gray-600 mb-2">Last week's Professional member average:</div>
+                    <div class="flex items-center gap-6">
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">47</div>
+                            <div class="text-xs text-gray-600">Applications</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">12</div>
+                            <div class="text-xs text-gray-600">Interviews</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">3.2</div>
+                            <div class="text-xs text-gray-600">Hires</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/employer/upgrade?plan=professional&promo=BOOST50" class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700">
+                    Get 3X More Views - 50% Off First Month
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% elif current_user.employer_tier == 'professional' %}
+    <!-- PROFESSIONAL TIER UPGRADE PROMPTS -->
+    
+    {% if months_subscribed >= 3 and hires_count >= 3 %}
+    <!-- Successful Professional - Enterprise Upsell -->
+    <div class="upgrade-prompt bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-400 rounded-lg p-6 mb-6 shadow-lg">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">🎉 You're Crushing It!</h3>
+                <p class="text-gray-700 mb-4">You've hired {{ hires_count }} PSU students in {{ months_subscribed }} months. Imagine what you could do with Enterprise features:</p>
+                
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <div class="text-sm font-semibold text-purple-900 mb-2">Unlimited Jobs</div>
+                        <div class="text-xs text-gray-600">Post as many positions as you need</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <div class="text-sm font-semibold text-purple-900 mb-2">Premium Placement</div>
+                        <div class="text-xs text-gray-600">Always in Top 3 (10X views)</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                        <div class="text-sm font-semibold text-purple-900 mb-2">Account Manager</div>
+                        <div class="text-xs text-gray-600">Dedicated support + sourcing</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-100 to-blue-100 border border-green-300 rounded-lg p-4 mb-4">
+                    <div class="font-bold text-gray-900 mb-2">Your ROI with Enterprise:</div>
+                    <div class="text-sm text-gray-700">
+                        Based on your hiring rate, you'll hire <span class="font-bold text-green-600">{{ projected_enterprise_hires }} students/year</span> with Enterprise.
+                        That's a <span class="font-bold text-green-600">${{ enterprise_savings_amount }}</span> savings vs traditional recruiting.
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <a href="/employer/upgrade?plan=enterprise&offer=professional-upgrade" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 shadow-md">
+                        Upgrade to Enterprise - $799/mo
+                    </a>
+                    <span class="text-sm text-gray-600">First month 20% off</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if jobs_posted >= 4 %}
+    <!-- At Job Limit -->
+    <div class="upgrade-prompt bg-blue-50 border-2 border-blue-400 rounded-lg p-6 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">You've Hit Your 5 Job Limit</h3>
+                <p class="text-gray-700 mb-3">Growing fast? Enterprise gives you unlimited jobs + premium placement for faster hires.</p>
+                <a href="/employer/upgrade?plan=enterprise" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">
+                    Unlock Unlimited Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% elif current_user.employer_tier == 'enterprise' %}
+    <!-- ENTERPRISE TIER UPGRADE PROMPTS -->
+    
+    {% if months_subscribed >= 6 and hires_count >= 10 %}
+    <!-- Major Employer - Platinum Upsell -->
+    <div class="upgrade-prompt bg-gradient-to-r from-yellow-50 to-orange-50 border-4 border-yellow-500 rounded-lg p-8 mb-6 shadow-2xl">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <svg class="w-16 h-16 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">🏆 Become a Platinum Partner</h3>
+                <p class="text-gray-700 mb-4">You've hired {{ hires_count }} students—clearly PSU is a strategic talent source for you. Platinum Partnership gives you unmatched access:</p>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white rounded-lg p-4 border-2 border-yellow-400">
+                        <div class="font-semibold text-yellow-900 mb-2">🎯 Dedicated Talent Pipeline</div>
+                        <div class="text-sm text-gray-700">Your personal account manager sources the top 50 PSU students each semester, matched to your needs before they're public.</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border-2 border-yellow-400">
+                        <div class="font-semibold text-yellow-900 mb-2">🏢 On-Campus Recruiting Days</div>
+                        <div class="text-sm text-gray-700">4 exclusive on-campus days per year. Meet students, conduct interviews, host info sessions—all coordinated for you.</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border-2 border-yellow-400">
+                        <div class="font-semibold text-yellow-900 mb-2">💰 Major Scholarship ($25K-$100K)</div>
+                        <div class="text-sm text-gray-700">Tax-deductible scholarship in your company's name. Massive PR + recruiting advantage + first access to recipients.</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border-2 border-yellow-400">
+                        <div class="font-semibold text-yellow-900 mb-2">⭐ Title Sponsor Status</div>
+                        <div class="text-sm text-gray-700">Your brand on every major career event. Executive mentorship program. White-glove service.</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-100 to-blue-100 border-2 border-green-400 rounded-lg p-4 mb-4">
+                    <div class="font-bold text-gray-900 mb-2">Your Projected ROI:</div>
+                    <div class="text-sm text-gray-700">
+                        Based on your success rate, Platinum Partnership will deliver <span class="font-bold text-green-600">{{ projected_platinum_hires }} hires/year</span>.
+                        vs traditional recruiting, that's a <span class="font-bold text-green-600 text-lg">${{ platinum_savings_amount }}</span> annual savings.
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <a href="/contact?subject=Platinum&company={{ current_user.company_name }}" class="bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-8 py-4 rounded-lg font-bold hover:from-yellow-700 hover:to-orange-700 shadow-xl text-lg">
+                        Become a Platinum Partner - $2,499/mo
+                    </a>
+                    <span class="text-sm text-gray-600">Schedule a strategy call</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% endif %}
+
+<!-- SUCCESS STORIES (Show to all tiers) -->
+{% if show_success_stories %}
+<div class="success-stories bg-green-50 border-2 border-green-400 rounded-lg p-6 mb-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4">💚 Recent Hiring Success Stories</h3>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-lg p-4 border border-green-200">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="/static/img/company-logos/sample1.png" alt="Company" class="w-8 h-8 rounded">
+                <div class="font-semibold text-sm">Local Tech Co.</div>
+            </div>
+            <div class="text-sm text-gray-700">"Upgraded to Professional, hired 3 developers in 2 weeks. Best recruiting investment we've made."</div>
+            <div class="text-xs text-gray-500 mt-2">Professional Member • 2 months ago</div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-4 border border-green-200">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="/static/img/company-logos/sample2.png" alt="Company" class="w-8 h-8 rounded">
+                <div class="font-semibold text-sm">Regional Hospital</div>
+            </div>
+            <div class="text-sm text-gray-700">"Enterprise account manager sources perfect candidates before we even post. Game-changer."</div>
+            <div class="text-xs text-gray-500 mt-2">Enterprise Member • 1 month ago</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- STYLE -->
+<style>
+.upgrade-prompt {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.upgrade-prompt:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+</style>

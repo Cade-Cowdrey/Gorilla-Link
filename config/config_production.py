@@ -38,6 +38,21 @@ class ConfigProduction:
     LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
     MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID")
     MICROSOFT_CLIENT_SECRET = os.getenv("MICROSOFT_CLIENT_SECRET")
+    
+    # --- External API Keys ---
+    # Scholarship APIs
+    SCHOLARSHIPS_COM_API_KEY = os.getenv("SCHOLARSHIPS_COM_API_KEY")
+    FASTWEB_API_KEY = os.getenv("FASTWEB_API_KEY")
+    COLLEGE_BOARD_API_KEY = os.getenv("COLLEGE_BOARD_API_KEY")
+    
+    # Video Conferencing
+    ZOOM_CLIENT_ID = os.getenv("ZOOM_CLIENT_ID")
+    ZOOM_CLIENT_SECRET = os.getenv("ZOOM_CLIENT_SECRET")
+    ZOOM_WEBHOOK_SECRET = os.getenv("ZOOM_WEBHOOK_SECRET")
+    
+    # Calendar Integration
+    GOOGLE_CALENDAR_CREDENTIALS = os.getenv("GOOGLE_CALENDAR_CREDENTIALS")
+    MICROSOFT_GRAPH_API_KEY = os.getenv("MICROSOFT_GRAPH_API_KEY")
 
     # --- Rate Limiting ---
     RATELIMIT_STORAGE_URL = os.getenv("REDIS_URL", "redis://localhost:6379")

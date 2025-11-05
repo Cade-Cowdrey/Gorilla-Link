@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Career Pathways - Guided Learning Tracks | Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="pathways-page">
+    <!-- Hero -->
+    <div class="hero bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold mb-4">🎯 Career Pathways</h1>
+            <p class="text-2xl mb-2">Curated certification sequences to fast-track your career</p>
+            <p class="text-xl opacity-90">Follow proven paths to your dream job</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters bg-white border-b sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <form method="get" class="flex items-center gap-4">
+                <label class="text-sm font-semibold text-gray-700">Category:</label>
+                <select name="category" class="border rounded px-4 py-2" onchange="this.form.submit()">
+                    <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-12">
+        <!-- Pathways Grid -->
+        {% if pathways %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for pathway in pathways %}
+            <a href="{{ url_for('certifications.pathway_detail', id=pathway.id) }}" 
+               class="pathway-card bg-white border-2 rounded-lg shadow-sm hover:shadow-xl transition-all overflow-hidden
+                      {% if pathway.is_featured %}border-yellow-300{% else %}border-gray-200{% endif %}">
+                
+                <!-- Header -->
+                <div class="pathway-header p-6 
+                            {% if pathway.category == 'Technology' %}bg-gradient-to-br from-blue-50 to-indigo-100
+                            {% elif pathway.category == 'Marketing' %}bg-gradient-to-br from-purple-50 to-pink-100
+                            {% elif pathway.category == 'Business' %}bg-gradient-to-br from-green-50 to-teal-100
+                            {% else %}bg-gradient-to-br from-gray-50 to-slate-100{% endif %}">
+                    
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="
+                            {% if pathway.category == 'Technology' %}bg-blue-600
+                            {% elif pathway.category == 'Marketing' %}bg-purple-600
+                            {% elif pathway.category == 'Business' %}bg-green-600
+                            {% else %}bg-gray-600{% endif %}
+                            text-white px-3 py-1 rounded-full text-xs font-bold">
+                            {{ pathway.category }}
+                        </span>
+                        {% if pathway.is_featured %}
+                        <span class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                            ⭐ FEATURED
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ pathway.title }}</h2>
+                    <p class="text-sm text-gray-700 font-semibold">{{ pathway.target_career }}</p>
+                </div>
+                
+                <!-- Content -->
+                <div class="p-6">
+                    <p class="text-gray-700 mb-6 line-clamp-3">{{ pathway.description }}</p>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-indigo-600">{{ pathway.total_certifications }}</div>
+                            <div class="text-xs text-gray-600">Certs</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ pathway.total_duration_hours }}h</div>
+                            <div class="text-xs text-gray-600">Duration</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-purple-600 capitalize">{{ pathway.difficulty_level }}</div>
+                            <div class="text-xs text-gray-600">Level</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Salary Impact -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div class="text-xs text-green-700 font-semibold mb-1">Expected Salary Range</div>
+                        <div class="text-xl font-bold text-green-900">{{ pathway.target_salary_range }}</div>
+                    </div>
+                    
+                    <!-- Verification Badge -->
+                    {% if pathway.verified_by_career_services %}
+                    <div class="flex items-center gap-2 text-sm text-blue-700 mb-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-semibold">Verified by Career Services</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- CTA -->
+                    <div class="text-center">
+                        <span class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+                            View Pathway Details →
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="text-6xl mb-4">🎯</div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">No Pathways Found</h2>
+            <p class="text-lg text-gray-600 mb-8">Try selecting a different category</p>
+            <a href="{{ url_for('certifications.pathways') }}" class="text-indigo-600 hover:underline font-semibold">
+                View All Pathways
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Why Follow Pathways -->
+        <div class="mt-16 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-8">
+            <h2 class="text-3xl font-bold text-indigo-900 mb-6 text-center">Why Follow a Career Pathway?</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="text-5xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Structured Learning</h3>
+                    <p class="text-gray-700">Follow a proven sequence designed by career experts</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-5xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Faster Results</h3>
+                    <p class="text-gray-700">Complete multiple certifications in the right order</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-5xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Higher Salary</h3>
+                    <p class="text-gray-700">Pathway completers earn significantly more</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

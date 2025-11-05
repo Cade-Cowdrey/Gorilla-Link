@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Upgrade Your Plan - Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="upgrade-page max-w-4xl mx-auto px-4 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Upgrade to {{ plan|title }}</h1>
+        <p class="text-xl text-gray-600">Unlock more features and hire faster</p>
+    </div>
+
+    <!-- Current Plan -->
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Your Current Plan: {{ subscription.tier.value|title }}</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+            <div>
+                <div class="text-sm text-gray-600">Jobs This Month</div>
+                <div class="text-2xl font-bold">{{ subscription.jobs_posted_this_month }}/{{ subscription.job_limit }}</div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-600">Total Applications</div>
+                <div class="text-2xl font-bold">{{ subscription.total_applications_received }}</div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-600">Successful Hires</div>
+                <div class="text-2xl font-bold">{{ subscription.total_hires }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade Benefits -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h3 class="text-2xl font-bold mb-6">What You'll Get with {{ plan|title }}</h3>
+        
+        {% if plan == 'professional' %}
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">5 Active Job Postings</div>
+                    <div class="text-sm text-gray-600">Up from 1 job/month on FREE plan</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Featured Placement (3X Views)</div>
+                    <div class="text-sm text-gray-600">Your jobs appear higher in search results</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Unlimited Profile Views</div>
+                    <div class="text-sm text-gray-600">No more 5 views/week limit</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">AI Candidate Matching</div>
+                    <div class="text-sm text-gray-600">Get matched with the best candidates automatically</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Application Tracking System</div>
+                    <div class="text-sm text-gray-600">Manage candidates easily</div>
+                </div>
+            </div>
+        </div>
+        {% elif plan == 'enterprise' %}
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Unlimited Job Postings</div>
+                    <div class="text-sm text-gray-600">No limits on active jobs</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Premium Placement (Top 3, 10X Views)</div>
+                    <div class="text-sm text-gray-600">Always featured prominently</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Dedicated Account Manager</div>
+                    <div class="text-sm text-gray-600">Personal support and candidate sourcing</div>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <div>
+                    <div class="font-semibold text-gray-900">Virtual Career Fair Participation (2/year)</div>
+                    <div class="text-sm text-gray-600">Direct access to hundreds of students</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pricing -->
+    <div class="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg p-8 mb-8">
+        <div class="text-center mb-6">
+            {% if plan == 'professional' %}
+            <div class="text-5xl font-bold text-blue-600 mb-2">$299<span class="text-2xl text-gray-600">/month</span></div>
+            <div class="text-sm text-gray-600">or $2,988/year (save $600)</div>
+            {% elif plan == 'enterprise' %}
+            <div class="text-5xl font-bold text-purple-600 mb-2">$799<span class="text-2xl text-gray-600">/month</span></div>
+            <div class="text-sm text-gray-600">or $7,990/year (save $1,598)</div>
+            {% elif plan == 'platinum' %}
+            <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600 mb-2">$2,499<span class="text-2xl text-gray-600">/month</span></div>
+            <div class="text-sm text-gray-600">or $24,990/year (save $5,098)</div>
+            {% endif %}
+        </div>
+
+        {% if promo == 'BOOST50' %}
+        <div class="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 mb-6 text-center">
+            <div class="font-bold text-yellow-900 text-lg">🎉 Special Offer: 50% Off First Month!</div>
+            <div class="text-sm text-yellow-800">Limited time offer expires in 48 hours</div>
+        </div>
+        {% endif %}
+
+        <!-- Billing Options -->
+        <div class="flex justify-center gap-4 mb-8">
+            <button id="monthly-btn" class="billing-option active px-6 py-3 rounded-lg font-semibold transition-all">
+                Monthly
+            </button>
+            <button id="annual-btn" class="billing-option px-6 py-3 rounded-lg font-semibold transition-all">
+                Annual (Save 20%)
+            </button>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center">
+            <button id="checkout-button" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-12 py-4 rounded-lg text-xl font-bold hover:from-green-700 hover:to-blue-700 shadow-xl transition-all">
+                Start 14-Day Free Trial
+            </button>
+            <p class="mt-4 text-sm text-gray-600">No credit card required for trial. Cancel anytime.</p>
+        </div>
+    </div>
+
+    <!-- Money-Back Guarantee -->
+    <div class="text-center">
+        <div class="inline-flex items-center gap-2 bg-green-100 border-2 border-green-400 rounded-full px-6 py-3">
+            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <span class="font-semibold text-green-900">30-Day Money-Back Guarantee</span>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{ stripe_key }}');
+const plan = '{{ plan }}';
+let billingCycle = 'monthly';
+
+// Billing toggle
+document.getElementById('monthly-btn').addEventListener('click', () => {
+    billingCycle = 'monthly';
+    document.getElementById('monthly-btn').classList.add('active');
+    document.getElementById('annual-btn').classList.remove('active');
+});
+
+document.getElementById('annual-btn').addEventListener('click', () => {
+    billingCycle = 'annual';
+    document.getElementById('annual-btn').classList.add('active');
+    document.getElementById('monthly-btn').classList.remove('active');
+});
+
+// Checkout
+document.getElementById('checkout-button').addEventListener('click', async () => {
+    const button = document.getElementById('checkout-button');
+    button.disabled = true;
+    button.textContent = 'Loading...';
+    
+    try {
+        const response = await fetch('/payments/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                plan: plan,
+                billing_cycle: billingCycle
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert(data.error);
+            button.disabled = false;
+            button.textContent = 'Start 14-Day Free Trial';
+            return;
+        }
+        
+        // Redirect to Stripe Checkout
+        const result = await stripe.redirectToCheckout({
+            sessionId: data.sessionId
+        });
+        
+        if (result.error) {
+            alert(result.error.message);
+            button.disabled = false;
+            button.textContent = 'Start 14-Day Free Trial';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        button.disabled = false;
+        button.textContent = 'Start 14-Day Free Trial';
+    }
+});
+</script>
+
+<style>
+.billing-option {
+    background: white;
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.billing-option.active {
+    background: linear-gradient(to right, #059669, #2563eb);
+    border-color: #059669;
+    color: white;
+    transform: scale(1.05);
+}
+
+.billing-option:hover {
+    transform: scale(1.02);
+}
+</style>
+{% endblock %}

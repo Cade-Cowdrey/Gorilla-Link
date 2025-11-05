@@ -1,0 +1,70 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Appointment Confirmed{% endblock %}
+
+{% block content %}
+<h2>✅ Your Appointment is Confirmed!</h2>
+
+<p>Hello {{ student.first_name }},</p>
+
+<p>Great news! Your career services appointment has been successfully scheduled.</p>
+
+<table class="details-table">
+    <tr>
+        <td>📅 Date</td>
+        <td><strong>{{ appointment.scheduled_at.strftime('%A, %B %d, %Y') }}</strong></td>
+    </tr>
+    <tr>
+        <td>🕐 Time</td>
+        <td><strong>{{ appointment.scheduled_at.strftime('%I:%M %p') }}</strong></td>
+    </tr>
+    <tr>
+        <td>⏱️ Duration</td>
+        <td>{{ appointment.duration_minutes }} minutes</td>
+    </tr>
+    <tr>
+        <td>👤 Advisor</td>
+        <td>{{ advisor.first_name }} {{ advisor.last_name }}</td>
+    </tr>
+    <tr>
+        <td>📝 Type</td>
+        <td>{{ appointment.appointment_type.replace('_', ' ').title() }}</td>
+    </tr>
+    <tr>
+        <td>📍 Location</td>
+        <td>{{ appointment.location }}</td>
+    </tr>
+</table>
+
+{% if appointment.student_notes %}
+<div class="alert-box alert-info">
+    <strong>Your Notes:</strong><br>
+    {{ appointment.student_notes }}
+</div>
+{% endif %}
+
+<div class="alert-box alert-success">
+    <strong>💡 How to Prepare:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Bring a copy of your resume (if applicable)</li>
+        <li>Prepare 2-3 questions for your advisor</li>
+        <li>Arrive 5 minutes early</li>
+        <li>Bring a notebook or device for taking notes</li>
+    </ul>
+</div>
+
+<center>
+    <a href="https://pittstate-connect.onrender.com/appointments/" class="button">View My Appointments</a>
+</center>
+
+<p style="margin-top: 30px; font-size: 13px; color: #666;">
+    Need to cancel or reschedule? Visit your appointments page at least 2 hours before your scheduled time.
+</p>
+
+<p>We look forward to seeing you!</p>
+
+<p>
+    <strong>GO GORILLAS! 🦍</strong><br>
+    Career Services Team
+</p>
+{% endblock %}

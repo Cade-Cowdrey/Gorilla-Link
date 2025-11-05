@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pathway.title }} - Career Pathway | Gorilla-Link{% endblock %}
+
+{% block content %}
+<div class="pathway-detail-page">
+    <!-- Hero -->
+    <div class="hero bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-white text-indigo-600 px-4 py-2 rounded-full text-sm font-bold">
+                        CAREER PATHWAY
+                    </span>
+                    {% if pathway.is_featured %}
+                    <span class="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full text-sm font-bold">
+                        ⭐ FEATURED
+                    </span>
+                    {% endif %}
+                </div>
+                <h1 class="text-5xl font-bold mb-4">{{ pathway.title }}</h1>
+                <p class="text-2xl mb-6 opacity-90">{{ pathway.description }}</p>
+                
+                <div class="flex gap-6 text-lg">
+                    <div>
+                        <span class="opacity-75">Target Role:</span>
+                        <span class="font-bold">{{ pathway.target_career }}</span>
+                    </div>
+                    <div>
+                        <span class="opacity-75">Salary Range:</span>
+                        <span class="font-bold">{{ pathway.target_salary_range }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-12">
+        <!-- Progress Overview (if enrolled) -->
+        {% if user_pathway_progress %}
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-8 mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-indigo-900">Your Pathway Progress</h2>
+                    <p class="text-gray-700">Keep going! You're making great progress.</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold text-indigo-600">{{ user_pathway_progress.overall_progress }}%</div>
+                    <div class="text-sm text-gray-600">Complete</div>
+                </div>
+            </div>
+            
+            <div class="w-full bg-white rounded-full h-6 mb-4">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-6 rounded-full transition-all" 
+                     style="width: {{ user_pathway_progress.overall_progress }}%"></div>
+            </div>
+            
+            <div class="flex items-center gap-6 text-sm">
+                <div>
+                    <span class="text-gray-600">Certifications:</span>
+                    <span class="font-bold text-indigo-900">
+                        {{ user_pathway_progress.certifications_completed }}/{{ pathway.total_certifications }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Started:</span>
+                    <span class="font-bold">{{ user_pathway_progress.pathway_started_at.strftime('%b %d, %Y') }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pathway Stats -->
+        <div class="grid md:grid-cols-4 gap-6 mb-12">
+            <div class="stat-card bg-white border rounded-lg shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-indigo-600">{{ pathway.total_certifications }}</div>
+                <div class="text-gray-600 mt-2">Certifications</div>
+            </div>
+            <div class="stat-card bg-white border rounded-lg shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600">{{ pathway.total_duration_hours }}h</div>
+                <div class="text-gray-600 mt-2">Total Duration</div>
+            </div>
+            <div class="stat-card bg-white border rounded-lg shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-purple-600 capitalize">{{ pathway.difficulty_level }}</div>
+                <div class="text-gray-600 mt-2">Difficulty</div>
+            </div>
+            <div class="stat-card bg-white border rounded-lg shadow-sm p-6 text-center">
+                <div class="text-2xl font-bold text-green-600">{{ pathway.target_salary_range }}</div>
+                <div class="text-gray-600 mt-2">Expected Salary</div>
+            </div>
+        </div>
+
+        <!-- Certification Sequence -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">🎯 Certification Sequence</h2>
+            <p class="text-gray-600 mb-8">Complete these certifications in order for best results</p>
+            
+            <div class="space-y-6">
+                {% for cert in ordered_certs %}
+                <div class="cert-step bg-white border-2 rounded-lg shadow-sm overflow-hidden
+                            {% if user_cert_progress.get(cert.id) %}
+                                {% if user_cert_progress[cert.id].status == 'completed' %}
+                                    border-green-300
+                                {% else %}
+                                    border-blue-300
+                                {% endif %}
+                            {% else %}
+                                border-gray-200
+                            {% endif %}">
+                    
+                    <div class="flex items-start gap-6 p-6">
+                        <!-- Step Number -->
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl
+                                        {% if user_cert_progress.get(cert.id) %}
+                                            {% if user_cert_progress[cert.id].status == 'completed' %}
+                                                bg-green-500 text-white
+                                            {% else %}
+                                                bg-blue-500 text-white
+                                            {% endif %}
+                                        {% else %}
+                                            bg-gray-200 text-gray-600
+                                        {% endif %}">
+                                {% if user_cert_progress.get(cert.id) and user_cert_progress[cert.id].status == 'completed' %}
+                                ✓
+                                {% else %}
+                                {{ loop.index }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Cert Info -->
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-1">{{ cert.title }}</h3>
+                                    <p class="text-gray-600">{{ cert.provider }}</p>
+                                </div>
+                                {% if user_cert_progress.get(cert.id) %}
+                                    {% if user_cert_progress[cert.id].status == 'completed' %}
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                                        ✓ Completed
+                                    </span>
+                                    {% else %}
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">
+                                        In Progress
+                                    </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                            <p class="text-gray-700 mb-4">{{ cert.description[:200] }}...</p>
+                            
+                            <!-- Skills -->
+                            {% if cert.skills_gained %}
+                            <div class="mb-4">
+                                <div class="text-sm text-gray-600 mb-2">Skills:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    {% for skill in cert.skills_gained[:5] %}
+                                    <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Stats -->
+                            <div class="flex gap-6 mb-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600">Duration:</span>
+                                    <span class="font-semibold">{{ cert.duration_hours }}h</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Difficulty:</span>
+                                    <span class="font-semibold capitalize">{{ cert.difficulty_level }}</span>
+                                </div>
+                                {% if cert.estimated_salary_boost %}
+                                <div>
+                                    <span class="text-gray-600">Salary Impact:</span>
+                                    <span class="font-semibold text-green-600">+${{ '{:,.0f}'.format(cert.estimated_salary_boost) }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Progress Bar (if enrolled) -->
+                            {% if user_cert_progress.get(cert.id) and user_cert_progress[cert.id].status != 'completed' %}
+                            <div class="mb-4">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-600">Your Progress</span>
+                                    <span class="text-blue-600 font-bold">{{ user_cert_progress[cert.id].progress_percentage }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ user_cert_progress[cert.id].progress_percentage }}%"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Actions -->
+                            <div class="flex gap-3">
+                                <a href="{{ url_for('certifications.detail', id=cert.id) }}" 
+                                   class="bg-indigo-600 text-white px-4 py-2 rounded font-semibold hover:bg-indigo-700 transition-colors">
+                                    View Details
+                                </a>
+                                
+                                {% if current_user.is_authenticated %}
+                                    {% if not user_cert_progress.get(cert.id) %}
+                                    <form method="post" action="{{ url_for('certifications.enroll', id=cert.id) }}">
+                                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors">
+                                            Enroll
+                                        </button>
+                                    </form>
+                                    {% elif user_cert_progress[cert.id].status != 'completed' %}
+                                    <a href="{{ cert.course_url }}" target="_blank" 
+                                       class="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700 transition-colors">
+                                        Continue Learning
+                                    </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Enroll CTA (if not enrolled) -->
+        {% if current_user.is_authenticated and not user_pathway_progress %}
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-xl p-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to Start Your Journey?</h2>
+            <p class="text-xl mb-6 opacity-90">Enroll in this pathway and we'll guide you through each certification</p>
+            
+            <form method="post" action="{{ url_for('certifications.enroll_pathway', id=pathway.id) }}">
+                <button type="submit" class="bg-white text-indigo-600 px-8 py-4 rounded-lg text-xl font-bold hover:bg-gray-100 transition-colors">
+                    Enroll in {{ pathway.title }}
+                </button>
+            </form>
+            
+            <p class="mt-4 text-sm opacity-75">100% Free • No Credit Card Required</p>
+        </div>
+        {% elif not current_user.is_authenticated %}
+        <div class="bg-gray-100 border-2 border-gray-300 rounded-lg p-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Login to Enroll in This Pathway</h2>
+            <a href="{{ url_for('auth.login') }}" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700">
+                Login / Sign Up
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
