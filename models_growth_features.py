@@ -1532,8 +1532,8 @@ class ScholarshipMatch(db.Model):
     awarded_amount = db.Column(db.Integer)  # Actual amount if different
     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_synced = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    last_synced = db.Column(db.DateTime, default=func.now())
     is_renewable = db.Column(db.Boolean, default=False)
     essay_required = db.Column(db.Boolean, default=False)
     
@@ -1584,7 +1584,7 @@ class ScholarshipApplication(db.Model):
     started_at = db.Column(db.DateTime)
     submitted_at = db.Column(db.DateTime)
     result_received_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
     
     # Result
     awarded = db.Column(db.Boolean)
@@ -1659,8 +1659,8 @@ class LinkedInProfile(db.Model):
     sync_enabled = db.Column(db.Boolean, default=True)
     sync_frequency = db.Column(db.String(20), default='weekly')  # daily, weekly, monthly
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = db.relationship('User', backref=db.backref('linkedin_profile', uselist=False))
@@ -1720,49 +1720,13 @@ class EmailNotification(db.Model):
     related_entity_type = db.Column(db.String(50))  # appointment, scholarship, job
     related_entity_id = db.Column(db.Integer)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
     
     # Relationships
     user = db.relationship('User', backref=db.backref('email_notifications', lazy='dynamic'))
     
     def __repr__(self):
         return f"<EmailNotification {self.notification_type} to {self.recipient_email} - {self.status}>"
-
-
-class NotificationPreference(db.Model):
-    """User preferences for email notifications"""
-    __tablename__ = 'notification_preferences'
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
-    
-    # Notification Settings
-    email_enabled = db.Column(db.Boolean, default=True)
-    sms_enabled = db.Column(db.Boolean, default=False)
-    push_enabled = db.Column(db.Boolean, default=True)
-    
-    # Type-specific Settings
-    appointment_reminders = db.Column(db.Boolean, default=True)
-    scholarship_matches = db.Column(db.Boolean, default=True)
-    job_alerts = db.Column(db.Boolean, default=True)
-    event_notifications = db.Column(db.Boolean, default=True)
-    mentorship_messages = db.Column(db.Boolean, default=True)
-    platform_updates = db.Column(db.Boolean, default=False)
-    
-    # Frequency Settings
-    digest_frequency = db.Column(db.String(20), default='daily')  # immediate, daily, weekly
-    quiet_hours_start = db.Column(db.Time)  # Don't send during these hours
-    quiet_hours_end = db.Column(db.Time)
-    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    user = db.relationship('User', backref=db.backref('notification_preferences', uselist=False))
-    
-    def __repr__(self):
-        return f"<NotificationPreference {self.user.email}>"
 
 
 # ==============================================================================
@@ -1784,8 +1748,8 @@ class AIChatSession(db.Model):
     
     # Metadata
     message_count = db.Column(db.Integer, default=0)
-    started_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_message_at = db.Column(db.DateTime, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime, default=func.now())
+    last_message_at = db.Column(db.DateTime, default=func.now())
     ended_at = db.Column(db.DateTime)
     
     # Rating
@@ -1817,7 +1781,7 @@ class AIChatMessage(db.Model):
     cost = db.Column(db.Float)  # Estimated cost in USD
     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
     
     # Relationships
     session = db.relationship('AIChatSession', backref=db.backref('messages', lazy='dynamic'))
@@ -1871,8 +1835,8 @@ class EmployerProfile(db.Model):
     
     # Status
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('employer_profile', uselist=False))
@@ -1933,8 +1897,8 @@ class EmployerJobPosting(db.Model):
     views_count = db.Column(db.Integer, default=0)
     applications_count = db.Column(db.Integer, default=0)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     employer = db.relationship('EmployerProfile', backref=db.backref('job_postings', lazy='dynamic'))
@@ -1997,14 +1961,14 @@ class StudentRiskScore(db.Model):
     # Model Details
     model_version = db.Column(db.String(50))
     prediction_confidence = db.Column(db.Float)  # 0-1
-    calculated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    calculated_at = db.Column(db.DateTime, default=func.now())
     
     # Historical
     previous_score = db.Column(db.Float)
     score_trend = db.Column(db.String(20))  # improving, stable, declining
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('risk_scores', lazy='dynamic'))
@@ -2078,8 +2042,8 @@ class FreeCertification(db.Model):
     verified_by_psu = db.Column(db.Boolean, default=False)
     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     last_verified = db.Column(db.DateTime)
     
     def get_completion_rate(self):
@@ -2110,10 +2074,10 @@ class UserCertificationProgress(db.Model):
     progress_percentage = db.Column(db.Integer, default=0)
     
     # Timestamps
-    enrolled_at = db.Column(db.DateTime, default=datetime.utcnow)
+    enrolled_at = db.Column(db.DateTime, default=func.now())
     started_at = db.Column(db.DateTime)
     completed_at = db.Column(db.DateTime)
-    last_activity = db.Column(db.DateTime, default=datetime.utcnow)
+    last_activity = db.Column(db.DateTime, default=func.now())
     
     # Certification Results
     certificate_issued = db.Column(db.Boolean, default=False)
@@ -2140,8 +2104,8 @@ class UserCertificationProgress(db.Model):
     reminders_enabled = db.Column(db.Boolean, default=True)
     last_reminder_sent = db.Column(db.DateTime)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = db.relationship('User', backref=db.backref('certifications', lazy='dynamic'))
@@ -2200,7 +2164,7 @@ class CertificationRecommendation(db.Model):
     dismissed = db.Column(db.Boolean, default=False)
     
     # Timestamps
-    recommended_at = db.Column(db.DateTime, default=datetime.utcnow)
+    recommended_at = db.Column(db.DateTime, default=func.now())
     viewed_at = db.Column(db.DateTime)
     enrolled_at = db.Column(db.DateTime)
     dismissed_at = db.Column(db.DateTime)
@@ -2253,8 +2217,8 @@ class CertificationPathway(db.Model):
     enrollments_count = db.Column(db.Integer, default=0)
     completions_count = db.Column(db.Integer, default=0)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     def get_certifications(self):
         """Get ordered list of certifications in this pathway"""
@@ -2284,7 +2248,7 @@ class UserPathwayProgress(db.Model):
     progress_percentage = db.Column(db.Integer, default=0)
     
     # Timestamps
-    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime, default=func.now())
     completed_at = db.Column(db.DateTime)
     estimated_completion_date = db.Column(db.DateTime)
     
@@ -2293,8 +2257,8 @@ class UserPathwayProgress(db.Model):
     salary_before = db.Column(db.Integer)
     salary_after = db.Column(db.Integer)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = db.relationship('User', backref=db.backref('pathway_progress', lazy='dynamic'))
