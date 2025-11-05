@@ -451,7 +451,10 @@ class ForumPost(db.Model):
 class ForumVote(db.Model):
     """Upvotes/downvotes on forum posts"""
     __tablename__ = "forum_votes"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = (
+        db.UniqueConstraint('post_id', 'user_id', name='unique_forum_vote'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_posts.id'), nullable=False)
@@ -462,10 +465,6 @@ class ForumVote(db.Model):
     # Relationships
     post = db.relationship('ForumPost', back_populates='votes')
     user = db.relationship('User', backref=db.backref('forum_votes', lazy='dynamic'))
-    
-    __table_args__ = (
-        db.UniqueConstraint('post_id', 'user_id', name='unique_forum_vote'),
-    )
     
     def __repr__(self):
         return f"<ForumVote post={self.post_id} user={self.user_id} type={self.vote_type}>"
