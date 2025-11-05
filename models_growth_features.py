@@ -649,6 +649,7 @@ class UserAnalytics(db.Model):
 class Recommendation(db.Model):
     """AI-generated recommendations for users"""
     __tablename__ = "recommendations"
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
