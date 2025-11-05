@@ -77,6 +77,25 @@ app.register_blueprint(course_library_bp)
 from blueprints.admin_dashboard.routes import admin_dashboard_bp
 app.register_blueprint(admin_dashboard_bp)
 
+# Register Innovative Features (8 game-changing features PSU doesn't have!)
+from blueprints.rideshare.routes import rideshare_bp
+from blueprints.study_groups.routes import study_groups_bp
+from blueprints.wellness.routes import wellness_bp
+from blueprints.lost_found.routes import lost_found_bp
+from blueprints.sublease.routes import sublease_bp
+from blueprints.parking.routes import parking_bp
+from blueprints.tutoring.routes import tutoring_bp
+from blueprints.free_stuff.routes import free_stuff_bp
+
+app.register_blueprint(rideshare_bp)
+app.register_blueprint(study_groups_bp)
+app.register_blueprint(wellness_bp)
+app.register_blueprint(lost_found_bp)
+app.register_blueprint(sublease_bp)
+app.register_blueprint(parking_bp)
+app.register_blueprint(tutoring_bp)
+app.register_blueprint(free_stuff_bp)
+
 # Note: resume_bp is now auto-registered by register_blueprints()
 # No need to manually register it here to avoid duplicate registration
 
