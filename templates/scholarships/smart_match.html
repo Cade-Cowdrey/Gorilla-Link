@@ -11,11 +11,11 @@
           Improve your results by completing your profile and letting the AI assist with essay suggestions.
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href="{{ safe_url_for('scholarships_bp.browse') }}"
+          <a href="{{ safe_url_for('scholarships.browse') }}"
              class="btn btn-crimson text-white px-6 py-2 rounded-full hover:bg-gold hover:text-crimson transition">
             🎓 Browse All Scholarships
           </a>
-          <a href="{{ safe_url_for('scholarships_bp.my_scholarships') }}"
+          <a href="{{ safe_url_for('scholarships.my_scholarships') }}"
              class="btn btn-outline-gold border-2 border-gold text-gold px-6 py-2 rounded-full hover:bg-gold hover:text-white transition">
             📚 My Scholarships
           </a>
@@ -45,11 +45,11 @@
           Deadline: <span class="font-medium text-gray-800">{{ rec.deadline }}</span>
         </p>
         <div class="mt-4 flex justify-between items-center">
-          <a href="{{ safe_url_for('scholarships_bp.apply', scholarship_id=rec.id) }}"
+          <a href="{{ safe_url_for('scholarships.apply', scholarship_id=rec.id) }}"
              class="text-sm text-crimson hover:text-gold font-medium transition">
              Apply Now →
           </a>
-          <a href="{{ safe_url_for('scholarships_bp.save_scholarship', scholarship_id=rec.id) }}"
+          <a href="{{ safe_url_for('scholarships.save_scholarship', scholarship_id=rec.id) }}"
              class="text-sm text-gray-600 hover:text-gold transition">💾 Save</a>
         </div>
       </div>
@@ -72,11 +72,11 @@
     </div>
 
     <div class="mt-12 text-center">
-      <a href="{{ safe_url_for('scholarships_bp.essay_library') }}"
+      <a href="{{ safe_url_for('scholarships.essay_library') }}"
          class="btn btn-outline-crimson border-2 border-crimson text-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
          ✍️ Visit Essay Library
       </a>
-      <a href="{{ safe_url_for('analytics_bp.index') }}"
+      <a href="{{ safe_url_for('analytics.index') }}"
          class="btn btn-outline-gold border-2 border-gold text-gold px-6 py-2 rounded-full ml-3 hover:bg-gold hover:text-white transition">
          📊 View Analytics
       </a>

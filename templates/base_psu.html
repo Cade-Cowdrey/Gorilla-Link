@@ -61,7 +61,7 @@
         <div class="container">
             <div class="d-flex align-items-center justify-content-between">
                 <!-- Logo -->
-                <a href="{{ url_for('core_bp.home') }}" class="psu-logo">
+                <a href="{{ url_for('core.home') }}" class="psu-logo">
                     <div class="psu-logo-icon">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
@@ -75,13 +75,13 @@
                 <nav class="psu-nav">
                     <ul class="psu-nav-list">
                         <li class="psu-nav-item">
-                            <a href="{{ url_for('core_bp.home') }}" class="psu-nav-link {% if request.endpoint == 'core_bp.home' %}active{% endif %}">
+                            <a href="{{ url_for('core.home') }}" class="psu-nav-link {% if request.endpoint == 'core.home' %}active{% endif %}">
                                 <i class="fas fa-home"></i>
                                 Home
                             </a>
                         </li>
                         <li class="psu-nav-item">
-                            <a href="{{ url_for('careers_bp.index') }}" class="psu-nav-link {% if 'careers' in request.endpoint %}active{% endif %}">
+                            <a href="{{ url_for('careers.index') }}" class="psu-nav-link {% if 'careers' in request.endpoint %}active{% endif %}">
                                 <i class="fas fa-briefcase"></i>
                                 Jobs
                             </a>
@@ -93,7 +93,7 @@
                             </a>
                         </li>
                         <li class="psu-nav-item">
-                            <a href="{{ url_for('alumni_bp.index') }}" class="psu-nav-link {% if 'alumni' in request.endpoint %}active{% endif %}">
+                            <a href="{{ url_for('alumni.index') }}" class="psu-nav-link {% if 'alumni' in request.endpoint %}active{% endif %}">
                                 <i class="fas fa-users"></i>
                                 Alumni Network
                             </a>
@@ -112,7 +112,7 @@
                         </li>
                         {% if current_user.is_authenticated %}
                             <li class="psu-nav-item">
-                                <a href="{{ url_for('analytics_bp.index') }}" class="psu-nav-link {% if 'analytics' in request.endpoint %}active{% endif %}">
+                                <a href="{{ url_for('analytics.index') }}" class="psu-nav-link {% if 'analytics' in request.endpoint %}active{% endif %}">
                                     <i class="fas fa-chart-line"></i>
                                     Analytics
                                 </a>
@@ -171,10 +171,10 @@
                 <div class="psu-footer-section">
                     <h4><i class="fas fa-link"></i> Quick Links</h4>
                     <ul class="psu-footer-links">
-                        <li><a href="{{ url_for('core_bp.home') }}">Home</a></li>
-                        <li><a href="{{ url_for('careers_bp.index') }}">Job Board</a></li>
+                        <li><a href="{{ url_for('core.home') }}">Home</a></li>
+                        <li><a href="{{ url_for('careers.index') }}">Job Board</a></li>
                         <li><a href="{{ url_for('resume.dashboard') }}">Resume Builder</a></li>
-                        <li><a href="{{ url_for('alumni_bp.index') }}">Alumni Network</a></li>
+                        <li><a href="{{ url_for('alumni.index') }}">Alumni Network</a></li>
                         <li><a href="{{ url_for('events.events_home') }}">Events</a></li>
                     </ul>
                 </div>
@@ -183,7 +183,7 @@
                 <div class="psu-footer-section">
                     <h4><i class="fas fa-book"></i> Resources</h4>
                     <ul class="psu-footer-links">
-                        <li><a href="{{ url_for('core_bp.about') }}">About Us</a></li>
+                        <li><a href="{{ url_for('core.about') }}">About Us</a></li>
                         <li><a href="#">Contact</a></li>
                         <li><a href="#">FAQ</a></li>
                         <li><a href="#">Help Center</a></li>

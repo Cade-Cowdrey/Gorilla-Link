@@ -180,7 +180,7 @@ async function loadDashboardData() {
     if (currentFilters.role) params.append('role', currentFilters.role);
     
     // Summary
-    const s = await fetch(`{{ url_for("analytics_bp.api_summary") }}?${params}`).then(r=>r.json());
+    const s = await fetch(`{{ url_for("analytics.api_summary") }}?${params}`).then(r=>r.json());
     document.getElementById('pv7').textContent   = s.page_views_7d ?? '0';
     document.getElementById('uu7').textContent   = s.unique_users_7d ?? '0';
     document.getElementById('avg30').textContent = s.avg_per_day_30d ?? '0';
@@ -188,7 +188,7 @@ async function loadDashboardData() {
 
     // Timeseries with date filter
     const days = Math.ceil((new Date(currentFilters.dateTo) - new Date(currentFilters.dateFrom)) / (1000 * 60 * 60 * 24));
-    const ts = await fetch(`{{ url_for("analytics_bp.api_timeseries") }}?days=${days}&${params}`).then(r=>r.json());
+    const ts = await fetch(`{{ url_for("analytics.api_timeseries") }}?days=${days}&${params}`).then(r=>r.json());
     const x = ts.series.map(p=>p.date), y = ts.series.map(p=>p.count);
     Plotly.newPlot('timeseries', [{x, y, mode:'lines+markers', name:'Page Views', marker:{color:'#A51C30'}}], {
       margin:{t:10,r:10,b:30,l:40},
@@ -197,7 +197,7 @@ async function loadDashboardData() {
     }, {displayModeBar:false});
 
     // Top pages with filters
-    const top = await fetch(`{{ url_for("analytics_bp.api_top_pages") }}?limit=10&${params}`).then(r=>r.json());
+    const top = await fetch(`{{ url_for("analytics.api_top_pages") }}?limit=10&${params}`).then(r=>r.json());
     displayTopPages(top.items);
   } catch (error) {
     console.error('Error loading dashboard data:', error);
@@ -257,7 +257,7 @@ async function exportData(format) {
     if (currentFilters.role) params.append('role', currentFilters.role);
     params.append('format', format);
     
-    const response = await fetch(`{{ url_for("analytics_bp.export_data") }}?${params}`);
+    const response = await fetch(`{{ url_for("analytics.export_data") }}?${params}`);
     const blob = await response.blob();
     
     // Create download link

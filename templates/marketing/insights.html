@@ -12,8 +12,8 @@
       <input class="form-control" type="date" name="start" value="{{ start }}" />
       <input class="form-control" type="date" name="end" value="{{ end }}" />
       <button class="btn btn-danger">Apply</button>
-      <a class="btn btn-outline-secondary" href="{{ url_for('marketing_bp.insights_csv', start=start, end=end) }}">CSV</a>
-      <a class="btn btn-outline-danger" href="{{ url_for('marketing_bp.insights_pdf', start=start, end=end) }}">PDF</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('marketing.insights_csv', start=start, end=end) }}">CSV</a>
+      <a class="btn btn-outline-danger" href="{{ url_for('marketing.insights_pdf', start=start, end=end) }}">PDF</a>
     </form>
   </div>
 

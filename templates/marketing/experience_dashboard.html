@@ -50,7 +50,7 @@
                     <h6 class="fw-bold text-danger mb-1">{{ s.title }}</h6>
                     <div class="small text-muted">{{ s.student_name }}{% if s.graduation_year %}, ’{{ s.graduation_year|string|slice(-2) }}{% endif %}</div>
                     <p class="mb-2 small">{{ s.summary or s.body[:120] ~ ('...' if s.body|length > 120) }}</p>
-                    <a class="btn btn-outline-danger btn-sm" href="{{ url_for('stories_bp.detail', slug=s.slug) }}">Read Story</a>
+                    <a class="btn btn-outline-danger btn-sm" href="{{ url_for('stories.detail', slug=s.slug) }}">Read Story</a>
                   </div>
                 </div>
               </div>
@@ -76,8 +76,8 @@
             {% endfor %}
           </ul>
           <div class="card-footer d-flex gap-2 justify-content-end">
-            <a href="{{ url_for('marketing_bp.experience_export_csv') }}" class="btn btn-outline-secondary btn-sm">Export CSV</a>
-            <a href="{{ url_for('marketing_bp.experience_export_pdf') }}" class="btn btn-outline-danger btn-sm">Export PDF</a>
+            <a href="{{ url_for('marketing.experience_export_csv') }}" class="btn btn-outline-secondary btn-sm">Export CSV</a>
+            <a href="{{ url_for('marketing.experience_export_pdf') }}" class="btn btn-outline-danger btn-sm">Export PDF</a>
           </div>
         </div>
       </div>

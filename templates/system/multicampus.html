@@ -24,8 +24,8 @@
         <li>Jobs Posted: <strong>{{ campus.metrics.jobs_posted }}</strong></li>
         <li>Events This Month: <strong>{{ campus.metrics.events_month }}</strong></li>
       </ul>
-      <a href="{{ url_for('system_bp.campus_detail', id=campus.id) }}" class="btn btn-gold mr-2">View Details</a>
-      <a href="{{ url_for('system_bp.campus_settings', id=campus.id) }}" class="btn btn-crimson">Settings</a>
+      <a href="{{ url_for('system.campus_detail', id=campus.id) }}" class="btn btn-gold mr-2">View Details</a>
+      <a href="{{ url_for('system.campus_settings', id=campus.id) }}" class="btn btn-crimson">Settings</a>
     </div>
     {% else %}
     <div class="col-span-3 text-center text-gray">No campuses configured yet.</div>

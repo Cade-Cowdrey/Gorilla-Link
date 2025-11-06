@@ -12,8 +12,8 @@ FILE: src/templates/donor/portal.html
       <p class="text-gray mt-1">Fund scholarships, view impact, and manage visibility tiers.</p>
     </div>
     <div class="flex gap-3 mt-4 md:mt-0">
-      <a href="{{ url_for('scholarships_bp.index') }}" class="btn btn-gold">Fund Scholarships</a>
-      <a href="{{ url_for('analytics_bp.dashboard') }}" class="btn btn-crimson">View Impact</a>
+      <a href="{{ url_for('scholarships.index') }}" class="btn btn-gold">Fund Scholarships</a>
+      <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-crimson">View Impact</a>
     </div>
   </div>
 
@@ -58,7 +58,7 @@ FILE: src/templates/donor/portal.html
     <div class="card p-6 bg-gray-50 dark:bg-gray-800">
       <h3 class="text-xl font-semibold mb-2">Visibility & Impact</h3>
       <p class="text-gray text-sm">Sponsor logos appear across scholarships hub, digest emails, and career pages based on tier.</p>
-      <a href="{{ url_for('emails_bp.digest_preview') }}" class="text-crimson hover:text-gold text-sm mt-2 inline-block">Preview Digest Placement →</a>
+      <a href="{{ url_for('emails.digest_preview') }}" class="text-crimson hover:text-gold text-sm mt-2 inline-block">Preview Digest Placement →</a>
     </div>
   </div>
 </section>

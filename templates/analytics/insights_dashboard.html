@@ -43,7 +43,7 @@
   <div class="d-flex gap-2">
     <a id="btn-export-pdf"
        class="btn btn-outline-secondary"
-       href="{{ url_for('analytics_bp.monthly_pdf', month=request.args.get('month', now().month), year=request.args.get('year', now().year), department_id=request.args.get('department_id')) }}">
+       href="{{ url_for('analytics.monthly_pdf', month=request.args.get('month', now().month), year=request.args.get('year', now().year), department_id=request.args.get('department_id')) }}">
       <i class="bi bi-filetype-pdf me-1"></i> Export PDF
     </a>
     <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#emailModal">
@@ -199,7 +199,7 @@
 <!-- Email Modal -->
 <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="emailForm" class="modal-content" method="post" action="{{ url_for('analytics_bp.monthly_email') }}">
+    <form id="emailForm" class="modal-content" method="post" action="{{ url_for('analytics.monthly_email') }}">
       <div class="modal-header">
         <h5 class="modal-title" id="emailModalLabel">Email Monthly Report</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" ></button>

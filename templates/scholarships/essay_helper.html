@@ -316,7 +316,7 @@ document.getElementById('essayForm').addEventListener('submit', async function(e
   document.getElementById('resultsContent').style.display = 'none';
   
   try {
-    const response = await fetch('{{ url_for("scholarships_bp.analyze_essay") }}', {
+    const response = await fetch('{{ url_for("scholarships.analyze_essay") }}', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -480,7 +480,7 @@ document.getElementById('examplesBtn').addEventListener('click', async function(
   templatesContent.innerHTML = '<p class="text-center"><div class="spinner-border"></div><br>Loading...</p>';
   
   try {
-    const response = await fetch('{{ url_for("scholarships_bp.essay_templates") }}');
+    const response = await fetch('{{ url_for("scholarships.essay_templates") }}');
     const data = await response.json();
     
     if (data.success) {

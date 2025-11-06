@@ -21,7 +21,7 @@
         <p>{{ user.bio or 'No bio yet.' }}</p>
 
         {% if is_self %}
-        <form method="POST" action="{{ url_for('profile_bp.edit_profile') }}">
+        <form method="POST" action="{{ url_for('profile.edit_profile') }}">
           <hr>
           <h6 class="fw-bold text-danger mb-2">Edit Profile</h6>
 

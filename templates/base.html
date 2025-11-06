@@ -165,9 +165,9 @@
       <!-- Desktop Navigation -->
       <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold uppercase tracking-wide">
         <a href="{{ url_for('index') }}" class="nav-link">Home</a>
-        <a href="{{ url_for('scholarships_bp.index') }}" class="nav-link">Scholarships</a>
-        <a href="{{ url_for('careers_bp.index') }}" class="nav-link">Careers</a>
-        <a href="{{ url_for('alumni_bp.index') }}" class="nav-link">Alumni Network</a>
+        <a href="{{ url_for('scholarships.index') }}" class="nav-link">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="nav-link">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="nav-link">Alumni Network</a>
         <a href="{{ url_for('dining.dining_home') }}" class="nav-link">Dining</a>
 
         <!-- Student Life Dropdown (NEW FEATURES!) -->
@@ -235,7 +235,7 @@
           </button>
           <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
-              <a href="{{ url_for('careers_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+              <a href="{{ url_for('careers.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
                 Career Services
               </a>
               <a href="{{ url_for('mentors.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
@@ -244,7 +244,7 @@
               <a href="{{ url_for('portfolio.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
                 My Profile
               </a>
-              <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
+              <a href="{{ url_for('analytics.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
                 Analytics Dashboard
               </a>
             </div>
@@ -313,15 +313,15 @@
     <div id="mobile-menu" class="hidden lg:hidden bg-crimson border-t border-white/10">
       <div class="max-w-7xl mx-auto px-6 py-4 space-y-2">
         <a href="{{ url_for('index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Home</a>
-        <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Scholarships</a>
-        <a href="{{ url_for('careers_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Careers</a>
-        <a href="{{ url_for('alumni_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Alumni Network</a>
+        <a href="{{ url_for('scholarships.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Alumni Network</a>
         <a href="{{ url_for('events.events_home') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Events</a>
         <a href="{{ url_for('announcements_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">News</a>
         <div class="border-t border-white/10 pt-2 mt-2">
           <p class="text-xs text-gray-300 mb-2 uppercase font-semibold">Resources</p>
-          <a href="{{ url_for('scholarships_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Scholarships</a>
-          <a href="{{ url_for('careers_bp.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Career Services</a>
+          <a href="{{ url_for('scholarships.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Scholarships</a>
+          <a href="{{ url_for('careers.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Career Services</a>
           <a href="{{ url_for('mentors.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Mentorship</a>
           <a href="{{ url_for('portfolio.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">My Profile</a>
         </div>
@@ -382,8 +382,8 @@
             <li><a href="https://www.pittstate.edu/student-life/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Student Life</a></li>
             <li><a href="https://www.pittstate.edu/athletics/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Athletics</a></li>
             <li><a href="https://www.pittstate.edu/alumni/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Alumni & Giving</a></li>
-            <li><a href="{{ url_for('scholarships_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">Scholarships</a></li>
-            <li><a href="{{ url_for('careers_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">Career Services</a></li>
+            <li><a href="{{ url_for('scholarships.index') }}" class="hover:text-[#FFCC33] transition-colors">Scholarships</a></li>
+            <li><a href="{{ url_for('careers.index') }}" class="hover:text-[#FFCC33] transition-colors">Career Services</a></li>
           </ul>
         </div>
 

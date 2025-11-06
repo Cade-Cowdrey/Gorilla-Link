@@ -65,7 +65,7 @@
           
           <!-- View Details Button -->
           <div class="card-footer bg-white border-0 pt-0">
-            <a href="{{ url_for('departments_bp.showcase', dept_code=code) }}" 
+            <a href="{{ url_for('departments.showcase', dept_code=code) }}" 
                class="btn w-100 text-white" 
                style="background: {{ dept.colors.primary }};">
               Explore {{ dept.name.split()[-1] }} →

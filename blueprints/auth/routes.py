@@ -33,3 +33,47 @@ def logout():
     flash("Logged out successfully.", "info")
     return redirect(url_for("auth.login"))
 
+
+@bp.route("/register", methods=["GET", "POST"])
+def register():
+    """User registration"""
+    record_page_view("auth_register")
+    
+    if current_user.is_authenticated:
+        return redirect(url_for("core.home"))
+    
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        
+        # Validation
+        if not username or not email or not password:
+            flash("All fields are required.", "danger")
+            return render_template("auth/register.html", title="Register | PittState-Connect")
+        
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template("auth/register.html", title="Register | PittState-Connect")
+        
+        # Check if user already exists
+        if User.query.filter_by(username=username).first():
+            flash("Username already taken.", "danger")
+            return render_template("auth/register.html", title="Register | PittState-Connect")
+        
+        if User.query.filter_by(email=email).first():
+            flash("Email already registered.", "danger")
+            return render_template("auth/register.html", title="Register | PittState-Connect")
+        
+        # Create new user
+        user = User(username=username, email=email)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        flash("Registration successful! Please log in.", "success")
+        return redirect(url_for("auth.login"))
+    
+    return render_template("auth/register.html", title="Register | PittState-Connect")
+

@@ -157,8 +157,8 @@
   };
 
   // --------------------------- Data Layer -----------------------------------
-  const ENDPOINT_SUMMARY = "{{ url_for('analytics_bp.api_summary') }}";
-  const ENDPOINT_SERIES  = (fields) => "{{ url_for('analytics_bp.api_timeseries') }}" + "?fields=" + encodeURIComponent(fields);
+  const ENDPOINT_SUMMARY = "{{ url_for('analytics.api_summary') }}";
+  const ENDPOINT_SERIES  = (fields) => "{{ url_for('analytics.api_timeseries') }}" + "?fields=" + encodeURIComponent(fields);
 
   // Basic cache (session-only)
   const cache = new Map();

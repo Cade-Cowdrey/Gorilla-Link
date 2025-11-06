@@ -27,7 +27,7 @@
             <td>{{ e.to_email }}</td>
             <td>{{ e.cc_email or '-' }}</td>
             <td>{{ (e.pdf_bytes_len / 1024)|round(1) }} KB</td>
-            <td><a href="{{ url_for('analytics_bp.digest_archive_detail', entry_id=e.id) }}" class="btn btn-sm btn-outline-danger">View</a></td>
+            <td><a href="{{ url_for('analytics.digest_archive_detail', entry_id=e.id) }}" class="btn btn-sm btn-outline-danger">View</a></td>
           </tr>
           {% endfor %}
         </tbody>

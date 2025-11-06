@@ -13,7 +13,7 @@
 
   <!-- SEARCH BAR -->
   <div class="flex justify-center mb-8">
-    <form action="{{ safe_url_for('faculty_bp.index') }}" method="get" class="w-full md:w-1/2 relative">
+    <form action="{{ safe_url_for('faculty.index') }}" method="get" class="w-full md:w-1/2 relative">
       <input
         type="text"
         name="q"
@@ -47,7 +47,7 @@
       </p>
 
       <div class="mt-4 flex justify-between items-center">
-        <a href="{{ safe_url_for('faculty_bp.detail', slug=member.slug) }}"
+        <a href="{{ safe_url_for('faculty.detail', slug=member.slug) }}"
            class="text-gold hover:text-crimson font-semibold text-sm transition">
           View Profile →
         </a>
@@ -59,7 +59,7 @@
   {% else %}
   <div class="text-center text-gray-500 mt-12">
     <p>No faculty found matching your search.</p>
-    <a href="{{ safe_url_for('faculty_bp.index') }}" class="text-crimson hover:text-gold font-medium mt-2 inline-block">
+    <a href="{{ safe_url_for('faculty.index') }}" class="text-crimson hover:text-gold font-medium mt-2 inline-block">
       ← Reset Search
     </a>
   </div>
@@ -67,11 +67,11 @@
 
   <!-- FOOTER NAV -->
   <div class="mt-16 text-center">
-    <a href="{{ safe_url_for('departments_bp.index') }}"
+    <a href="{{ safe_url_for('departments.index') }}"
        class="inline-block px-5 py-3 bg-crimson text-white rounded-xl shadow-md hover:bg-gold hover:text-crimson transition">
       ← Back to Departments
     </a>
-    <a href="{{ safe_url_for('analytics_bp.index') }}"
+    <a href="{{ safe_url_for('analytics.index') }}"
        class="inline-block px-5 py-3 bg-gold text-crimson rounded-xl shadow-md hover:bg-crimson hover:text-gold transition ml-4">
       View Analytics
     </a>

@@ -3,14 +3,14 @@
 <!-- Top controls -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
   <div class="btn-group" role="group">
-    <a href="{{ url_for('analytics_bp.insights', metric='posts') }}" class="btn btn-sm {% if metric=='posts' %}btn-danger{% else %}btn-outline-danger{% endif %}">Posts</a>
-    <a href="{{ url_for('analytics_bp.insights', metric='events') }}" class="btn btn-sm {% if metric=='events' %}btn-danger{% else %}btn-outline-danger{% endif %}">Events</a>
-    <a href="{{ url_for('analytics_bp.insights', metric='badges') }}" class="btn btn-sm {% if metric=='badges' %}btn-danger{% else %}btn-outline-danger{% endif %}">Badges</a>
+    <a href="{{ url_for('analytics.insights', metric='posts') }}" class="btn btn-sm {% if metric=='posts' %}btn-danger{% else %}btn-outline-danger{% endif %}">Posts</a>
+    <a href="{{ url_for('analytics.insights', metric='events') }}" class="btn btn-sm {% if metric=='events' %}btn-danger{% else %}btn-outline-danger{% endif %}">Events</a>
+    <a href="{{ url_for('analytics.insights', metric='badges') }}" class="btn btn-sm {% if metric=='badges' %}btn-danger{% else %}btn-outline-danger{% endif %}">Badges</a>
   </div>
 
   <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mt-md-0">
-    <a href="{{ url_for('analytics_bp.digest_archive_list') }}" class="btn btn-outline-dark btn-sm">🗂️ View Digest Archive</a>
-    <form action="{{ url_for('analytics_bp.send_digest_email') }}" method="POST" class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('analytics.digest_archive_list') }}" class="btn btn-outline-dark btn-sm">🗂️ View Digest Archive</a>
+    <form action="{{ url_for('analytics.send_digest_email') }}" method="POST" class="d-flex flex-wrap gap-2">
       <input type="email" name="to_email" class="form-control form-control-sm" placeholder="Recipient email" required>
       <input type="email" name="cc_email" class="form-control form-control-sm" placeholder="CC (optional)">
       <input type="text" name="subject" class="form-control form-control-sm" value="🦍 The Jungle Digest — Weekly Insights">
@@ -137,7 +137,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   // Heatmap
   try {
-    const resp = await fetch("{{ url_for('analytics_bp.heatmap_data') }}");
+    const resp = await fetch("{{ url_for('analytics.heatmap_data') }}");
     const data = await resp.json();
     const ctx = document.getElementById("heatmapChart").getContext("2d");
     const labels = Array.from({length: 8}, (_, i) => `W-${i+1}`);
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
     tiles.addTo(map);
 
-    const res = await fetch("{{ url_for('analytics_bp.alumni_map_data') }}");
+    const res = await fetch("{{ url_for('analytics.alumni_map_data') }}");
     const pts = await res.json();
 
     const markers = [];

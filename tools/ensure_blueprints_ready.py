@@ -41,7 +41,7 @@ HTML_TEMPLATE = """{% extends "base.html" %}
   <div class="container-fluid py-5 text-center">
     <h1 class="display-6 fw-bold">{{ title }}</h1>
     <p class="fs-5 text-muted">Welcome to the {{ title }} — part of the PittState-Connect ecosystem.</p>
-    <a class="btn btn-warning mt-3" href="{{ url_for('core_bp.home') }}">Back to Home</a>
+    <a class="btn btn-warning mt-3" href="{{ url_for('core.home') }}">Back to Home</a>
   </div>
 </div>
 {% endblock %}

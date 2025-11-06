@@ -3,7 +3,7 @@ from flask_login import current_user
 from utils.analytics_util import track_page_view, record_page_view
 from loguru import logger
 
-core_bp = Blueprint("core_bp", __name__)
+core_bp = Blueprint("core", __name__)
 
 # ==========================================================
 # 🏠 HOME / LANDING
@@ -94,3 +94,29 @@ def maintenance():
         "errors/maintenance.html",
         title="Maintenance Mode | PittState-Connect"
     )
+
+
+# ==========================================================
+# 📝 REGISTER (Core registration page)
+# ==========================================================
+
+@core_bp.route("/register", methods=["GET", "POST"])
+def register():
+    """Registration page - can be accessed from core or auth"""
+    record_page_view("core_register")
+    if request.method == "POST":
+        # Handle registration logic here or redirect to auth.register
+        from flask import redirect, url_for
+        return redirect(url_for("auth.register"))
+    return render_template("core/register.html", title="Register | PittState-Connect")
+
+
+# ==========================================================
+# 📧 CONTACT
+# ==========================================================
+
+@core_bp.route("/contact", methods=["GET", "POST"])
+def contact():
+    """Contact page for support and inquiries"""
+    record_page_view("contact")
+    return render_template("core/contact.html", title="Contact Us | PittState-Connect")

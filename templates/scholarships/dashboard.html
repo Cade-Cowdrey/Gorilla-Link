@@ -11,7 +11,7 @@
     Explore curated scholarships, receive smart matches, and track your progress toward funding your PSU journey.
   </p>
 
-  <form method="GET" action="{{ url_for('scholarships_bp.search') }}" class="max-w-xl mx-auto flex mb-10">
+  <form method="GET" action="{{ url_for('scholarships.search') }}" class="max-w-xl mx-auto flex mb-10">
     <input type="text" name="q" placeholder="Search scholarships..." 
            class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-crimson">
     <button type="submit" class="btn btn-crimson rounded-l-none">Search</button>
@@ -29,7 +29,7 @@
       <h3 class="text-2xl font-heading text-crimson mb-2">{{ s.title }}</h3>
       <p class="text-gray mb-2">Deadline: <strong>{{ s.deadline.strftime('%b %d, %Y') }}</strong></p>
       <p class="text-gray mb-4">{{ s.summary[:150] }}...</p>
-      <a href="{{ url_for('scholarships_bp.details', id=s.id) }}" class="btn btn-gold">View Details</a>
+      <a href="{{ url_for('scholarships.details', id=s.id) }}" class="btn btn-gold">View Details</a>
     </div>
     {% else %}
     <div class="col-span-3 text-center text-gray">No matching scholarships found. Try refining your search.</div>

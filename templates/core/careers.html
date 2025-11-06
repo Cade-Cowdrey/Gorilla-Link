@@ -11,15 +11,15 @@
           Connect with top employers and alumni who hire Pitt State talent.
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href="{{ safe_url_for('careers_bp.jobs') }}"
+          <a href="{{ safe_url_for('careers.jobs') }}"
              class="btn btn-crimson text-white px-6 py-2 rounded-full shadow hover:bg-gold hover:text-crimson transition">
              🔍 Find Jobs
           </a>
-          <a href="{{ safe_url_for('careers_bp.jobs') }}"
+          <a href="{{ safe_url_for('careers.jobs') }}"
              class="btn btn-outline-crimson border-2 border-crimson text-crimson px-6 py-2 rounded-full hover:bg-crimson hover:text-white transition">
              🧠 Career Dashboard
           </a>
-          <a href="{{ safe_url_for('analytics_bp.index') }}"
+          <a href="{{ safe_url_for('analytics.index') }}"
              class="btn btn-outline-gold border-2 border-gold text-gold px-6 py-2 rounded-full hover:bg-gold hover:text-white transition">
              📊 View Analytics
           </a>
@@ -38,7 +38,7 @@
         <p class="text-gray-700 mb-3">
           Highlighted partner companies recruiting Pitt State students this month.
         </p>
-        <a href="{{ safe_url_for('careers_bp.jobs') }}" class="text-sm text-gold hover:underline">
+        <a href="{{ safe_url_for('careers.jobs') }}" class="text-sm text-gold hover:underline">
           View Open Positions →
         </a>
       </div>

@@ -4,10 +4,10 @@
 <p class="text-muted mb-3">Filter results, view top performers, and export analytics reports.</p>
 
 <div class="d-flex justify-content-end mb-2">
-  <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-dark">🤖 AI Insights</a>
+  <a href="{{ url_for('analytics.insights') }}" class="btn btn-outline-dark">🤖 AI Insights</a>
 </div>
 
-<form class="row g-3 mb-4" method="get" action="{{ url_for('analytics_bp.dashboard') }}">
+<form class="row g-3 mb-4" method="get" action="{{ url_for('analytics.dashboard') }}">
   <div class="col-md-3"><label class="form-label">Start Date</label><input type="date" name="start" value="{{ filters.start }}" class="form-control"></div>
   <div class="col-md-3"><label class="form-label">End Date</label><input type="date" name="end" value="{{ filters.end }}" class="form-control"></div>
   <div class="col-md-3"><label class="form-label">Department</label>
@@ -22,8 +22,8 @@
 </form>
 
 <div class="d-flex justify-content-end mb-3">
-  <a href="{{ url_for('analytics_bp.export_csv') }}" class="btn btn-outline-secondary me-2">📤 Export CSV</a>
-  <a href="{{ url_for('analytics_bp.export_pdf') }}" class="btn btn-outline-danger">📄 Export PDF</a>
+  <a href="{{ url_for('analytics.export_csv') }}" class="btn btn-outline-secondary me-2">📤 Export CSV</a>
+  <a href="{{ url_for('analytics.export_pdf') }}" class="btn btn-outline-danger">📄 Export PDF</a>
 </div>
 
 <div class="row mb-4">

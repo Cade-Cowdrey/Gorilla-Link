@@ -22,7 +22,7 @@
         <h3 class="text-lg font-bold text-gray-800 mb-1">🇺🇸 Federal Grants Available</h3>
         <p class="text-sm text-gray-700">Add 5 federal grants (Pell, FSEOG, TEACH, etc.) - 100% FREE, no API key needed!</p>
       </div>
-      <form method="POST" action="{{ url_for('scholarships_bp.admin_add_federal_grants') }}">
+      <form method="POST" action="{{ url_for('scholarships.admin_add_federal_grants') }}">
         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
           ➕ Add Federal Grants
         </button>
@@ -57,7 +57,7 @@
       <span>🎯</span> Find Your Perfect Scholarship
     </h3>
     
-    <form method="GET" action="{{ url_for('scholarships_bp.browse') }}" class="space-y-4">
+    <form method="GET" action="{{ url_for('scholarships.browse') }}" class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Major -->
         <div>
@@ -120,7 +120,7 @@
                 class="flex-1 bg-gradient-to-r from-crimson to-[#660000] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-2xl transition-all transform hover:scale-105">
           🔍 Search Scholarships
         </button>
-        <a href="{{ url_for('scholarships_bp.browse') }}"
+        <a href="{{ url_for('scholarships.browse') }}"
            class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">
           Clear Filters
         </a>
@@ -140,7 +140,7 @@
           </p>
         </div>
       </div>
-      <a href="{{ url_for('scholarships_bp.personal_circumstances') }}"
+      <a href="{{ url_for('scholarships.personal_circumstances') }}"
          class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition whitespace-nowrap">
         View Personal →
       </a>
@@ -291,7 +291,7 @@
     <p class="text-gray-600 mb-6">
       Try adjusting your filters to see more opportunities.
     </p>
-    <a href="{{ url_for('scholarships_bp.browse') }}"
+    <a href="{{ url_for('scholarships.browse') }}"
        class="inline-block bg-crimson text-white px-6 py-3 rounded-lg font-semibold hover:bg-gold hover:text-black transition">
       Clear Filters
     </a>

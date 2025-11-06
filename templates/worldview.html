@@ -4,7 +4,7 @@
 
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h3 class="mb-0">🌍 Gorilla Worldview</h3>
-    <a href="{{ url_for('analytics_bp.insights') }}" class="btn btn-outline-danger btn-sm">← Back to Insights</a>
+    <a href="{{ url_for('analytics.insights') }}" class="btn btn-outline-danger btn-sm">← Back to Insights</a>
   </div>
 
   <div class="row g-3 mb-3">
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
 
   // Load alumni points
-  const resp = await fetch("{{ url_for('analytics_bp.alumni_map_data') }}");
+  const resp = await fetch("{{ url_for('analytics.alumni_map_data') }}");
   const pts = await resp.json();
 
   // Counters

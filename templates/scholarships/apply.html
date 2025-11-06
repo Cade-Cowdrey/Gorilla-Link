@@ -9,7 +9,7 @@
     <div class="col-12">
       <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #9D2235 0%, #FFC627 100%);">
         <div class="card-body py-5">
-          <a href="{{ url_for('scholarships_bp.browse') }}" class="btn btn-light btn-sm mb-3">
+          <a href="{{ url_for('scholarships.browse') }}" class="btn btn-light btn-sm mb-3">
             <i class="bi bi-arrow-left"></i> Back to Scholarships
           </a>
           <h1 class="display-5 fw-bold mb-3">{{ scholarship.title }}</h1>
@@ -223,7 +223,7 @@
             <i class="bi bi-question-circle text-primary" style="font-size: 2rem;"></i>
             <h6 class="mt-2">Need Help?</h6>
             <p class="small mb-2">Use our AI Essay Helper to improve your writing</p>
-            <a href="{{ url_for('scholarships_bp.essay_helper') }}" 
+            <a href="{{ url_for('scholarships.essay_helper') }}" 
                class="btn btn-sm btn-outline-primary" 
                target="_blank">
               <i class="bi bi-robot"></i> Essay Helper
