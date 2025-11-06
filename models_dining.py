@@ -24,6 +24,7 @@ class DiningLocation(db.Model):
     # Contact & Info
     phone = db.Column(db.String(20))
     website = db.Column(db.String(512))
+    image_url = db.Column(db.String(512))  # Dining location image
     
     # Stats
     average_rating = db.Column(db.Float, default=0.0)
