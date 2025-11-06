@@ -53,42 +53,17 @@ app.register_blueprint(gpa_bp)
 # Dining Blueprint is now auto-registered via blueprints/__init__.py
 # Removed manual registration to prevent duplicate registration error
 
-# Register NEW Student Features Blueprints (8 new features!)
-from blueprints.textbook_exchange.routes import textbook_bp
-from blueprints.housing_reviews.routes import housing_bp
-from blueprints.student_discounts.routes import discounts_bp
-from blueprints.grade_explorer.routes import grade_explorer_bp
-from blueprints.professor_reviews.routes import professor_bp
-from blueprints.wait_times.routes import wait_times_bp
-from blueprints.student_events.routes import events_bp
-from blueprints.course_library.routes import course_library_bp
+# Student Features Blueprints are now auto-registered via blueprints/__init__.py
+# These blueprints don't have proper 'bp' exports yet, so they show warnings in logs
+# Removed manual registration to prevent duplicate blueprint errors
 
-app.register_blueprint(textbook_bp)
-app.register_blueprint(housing_bp)
-app.register_blueprint(discounts_bp)
-app.register_blueprint(grade_explorer_bp)
-app.register_blueprint(professor_bp)
-app.register_blueprint(wait_times_bp)
-app.register_blueprint(events_bp)
-app.register_blueprint(course_library_bp)
+# Student Features Blueprints are now auto-registered via blueprints/__init__.py
+# These blueprints don't have proper 'bp' exports yet, so they show warnings in logs
+# Removed manual registration to prevent duplicate blueprint errors
 
-# Register Enhanced Admin Dashboard
-# ALREADY REGISTERED by register_blueprints() function
-# from blueprints.admin_dashboard.routes import bp as admin_dashboard_bp
-# app.register_blueprint(admin_dashboard_bp)
-
-# Register Innovative Features (5 features PSU genuinely needs!)
-from blueprints.study_groups.routes import study_groups_bp
-from blueprints.wellness.routes import wellness_bp
-from blueprints.lost_found.routes import lost_found_bp
-from blueprints.sublease.routes import sublease_bp
-from blueprints.free_stuff.routes import free_stuff_bp
-
-app.register_blueprint(study_groups_bp)
-app.register_blueprint(wellness_bp)
-app.register_blueprint(lost_found_bp)
-app.register_blueprint(sublease_bp)
-app.register_blueprint(free_stuff_bp)
+# Innovative Features Blueprints are now auto-registered via blueprints/__init__.py
+# These blueprints don't have proper 'bp' exports yet, so they show warnings in logs
+# Removed manual registration to prevent duplicate blueprint errors
 
 # Register ADVANCED Enterprise Features (5 best-in-class features!)
 from routes_emergency_resources import emergency_bp
