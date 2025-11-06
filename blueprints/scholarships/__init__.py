@@ -3,6 +3,7 @@
 # ============================================================
 from flask import Blueprint
 
-scholarships_bp = Blueprint("scholarships_bp", __name__, url_prefix="/scholarships", template_folder="../../templates/scholarships")
+scholarships_bp = Blueprint("scholarships", __name__, url_prefix="/scholarships", template_folder="../../templates/scholarships")
+bp = scholarships_bp  # Alias for auto-registration
 
 from . import routes  # noqa: E402,F401
