@@ -76,15 +76,30 @@
       background-color: #ffffff;
     }
     
-    /* Professional hover effects */
-    .nav-link:hover {
-      color: #FFCC33;
-      transition: color 0.2s ease;
+    /* Professional hover effects - Clean gold underline */
+    .nav-link {
+      position: relative;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background-color: #FDB515;
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    
+    .nav-link:hover::after {
+      width: 80%;
     }
     
     /* Clean dropdown */
     .dropdown-menu {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
     /* Animated gradient backgrounds */
@@ -149,51 +164,72 @@
     </div>
   </div>
 
-  <!-- PROFESSIONAL PSU NAVBAR -->
-  <header class="sticky top-0 z-50 bg-crimson text-white shadow-md border-b-4 border-[#A6192E]">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-      <div class="flex items-center gap-3">
-        <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-12 h-12">
-        <div class="flex flex-col">
-          <a href="{{ url_for('index') }}" class="text-2xl font-heading font-bold tracking-tight hover:text-gold transition-colors" style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
-            Gorilla-Link
-          </a>
-          <span class="text-xs text-gold tracking-wider">PITTSBURG STATE UNIVERSITY</span>
+  <!-- PROFESSIONAL PSU NAVBAR - Clean White Design -->
+  <header class="bg-white text-gray-900 shadow-sm border-b-2 border-[#002C5F]">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <!-- Logo and Brand -->
+        <div class="flex items-center gap-4">
+          <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-14 h-14">
+          <div class="flex flex-col">
+            <a href="{{ url_for('index') }}" class="text-2xl font-heading font-bold tracking-tight text-[#002C5F] hover:text-[#FDB515] transition-colors" style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+              Gorilla-Link
+            </a>
+            <span class="text-[10px] text-gray-600 tracking-wider uppercase font-semibold">Pittsburg State University</span>
+          </div>
+        </div>
+
+        </div>
+
+        <!-- Login/User Actions -->
+        <div class="flex items-center gap-4">
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile.view_profile') }}" class="text-sm font-semibold text-[#002C5F] hover:text-[#FDB515] transition-colors">
+              <i class="fas fa-user-circle mr-1"></i>{{ current_user.first_name }}
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="bg-[#002C5F] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#FDB515] hover:text-[#002C5F] transition-all">
+              Logout
+            </a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="bg-[#002C5F] text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-[#FDB515] hover:text-[#002C5F] transition-all">
+              Login
+            </a>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Desktop Navigation -->
-      <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold uppercase tracking-wide">
-        <a href="{{ url_for('index') }}" class="nav-link">Home</a>
-        <a href="{{ url_for('scholarships.index') }}" class="nav-link">Scholarships</a>
-        <a href="{{ url_for('careers.index') }}" class="nav-link">Careers</a>
-        <a href="{{ url_for('alumni.index') }}" class="nav-link">Alumni Network</a>
-        <a href="{{ url_for('dining.dining_home') }}" class="nav-link">Dining</a>
+      <!-- Desktop Navigation - Below Logo -->
+      <nav class="hidden lg:flex items-center gap-1 mt-4 border-t border-gray-200 pt-3">
+        <a href="{{ url_for('index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Home</a>
+        <a href="{{ url_for('scholarships.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Alumni Network</a>
+        <a href="{{ url_for('dining.dining_home') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Dining</a>
 
         <!-- Student Life Dropdown (NEW FEATURES!) -->
         <div class="relative group">
-          <button class="nav-link inline-flex items-center gap-1">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
             Student Life
-            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
-            <div class="py-2">
-              <a href="{{ url_for('textbook.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-book mr-2"></i>Textbook Exchange
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+            <div class="py-1">
+              <a href="{{ url_for('textbook.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-book mr-2 text-[#002C5F]"></i>Textbook Exchange
               </a>
-              <a href="{{ url_for('housing.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-home mr-2"></i>Housing Reviews
+              <a href="{{ url_for('housing.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-home mr-2 text-[#002C5F]"></i>Housing Reviews
               </a>
-              <a href="{{ url_for('discounts.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-tags mr-2"></i>Student Discounts
+              <a href="{{ url_for('discounts.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-tags mr-2 text-[#002C5F]"></i>Student Discounts
               </a>
-              <a href="{{ url_for('student_events.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-calendar mr-2"></i>Events Calendar
+              <a href="{{ url_for('student_events.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-calendar mr-2 text-[#002C5F]"></i>Events Calendar
               </a>
-              <a href="{{ url_for('wait_times.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-clock mr-2"></i>Campus Wait Times
+              <a href="{{ url_for('wait_times.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-clock mr-2 text-[#002C5F]"></i>Campus Wait Times
               </a>
             </div>
           </div>
@@ -201,25 +237,25 @@
 
         <!-- Academic Resources Dropdown -->
         <div class="relative group">
-          <button class="nav-link inline-flex items-center gap-1">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
             Academics
-            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
-            <div class="py-2">
-              <a href="{{ url_for('course_library.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-folder mr-2"></i>Course Materials
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+            <div class="py-1">
+              <a href="{{ url_for('course_library.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-folder mr-2 text-[#002C5F]"></i>Course Materials
               </a>
-              <a href="{{ url_for('professor.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-chalkboard-teacher mr-2"></i>Professor Reviews
+              <a href="{{ url_for('professor.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-chalkboard-teacher mr-2 text-[#002C5F]"></i>Professor Reviews
               </a>
-              <a href="{{ url_for('grade_explorer.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-chart-bar mr-2"></i>Grade Distribution
+              <a href="{{ url_for('grade_explorer.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-chart-bar mr-2 text-[#002C5F]"></i>Grade Distribution
               </a>
-              <a href="{{ url_for('gpa_calculator.calculator_home') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                <i class="fas fa-calculator mr-2"></i>GPA Calculator
+              <a href="{{ url_for('gpa_calculator.calculator_home') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-calculator mr-2 text-[#002C5F]"></i>GPA Calculator
               </a>
             </div>
           </div>
@@ -227,36 +263,34 @@
 
         <!-- Resources Dropdown -->
         <div class="relative group">
-          <button class="nav-link inline-flex items-center gap-1">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
             Resources
-            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-2 w-64 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
-            <div class="py-2">
-              <a href="{{ url_for('careers.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                Career Services
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+            <div class="py-1">
+              <a href="{{ url_for('careers.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-briefcase mr-2 text-[#002C5F]"></i>Career Services
               </a>
-              <a href="{{ url_for('mentors.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                Mentorship Program
+              <a href="{{ url_for('mentors.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-users mr-2 text-[#002C5F]"></i>Mentorship Program
               </a>
-              <a href="{{ url_for('portfolio.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                My Profile
+              <a href="{{ url_for('portfolio.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-user mr-2 text-[#002C5F]"></i>My Profile
               </a>
-              <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-3 hover:bg-crimson hover:text-white transition-colors text-sm font-medium">
-                Analytics Dashboard
+              <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
+                <i class="fas fa-chart-line mr-2 text-[#002C5F]"></i>Analytics Dashboard
               </a>
             </div>
           </div>
         </div>
 
-        <a href="{{ url_for('events.events_home') }}" class="nav-link">Events</a>
-        <a href="{{ url_for('announcements_bp.index') }}" class="nav-link">News</a>
+        <a href="{{ url_for('events.events_home') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Events</a>
+        <a href="{{ url_for('announcements_bp.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">News</a>
       </nav>
-
-      <!-- User Actions -->
-      <div class="flex items-center gap-3">
+    </div>
         {% if current_user.is_authenticated %}
         <!-- Notifications -->
         <button class="relative hover:text-gold transition-colors">
