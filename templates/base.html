@@ -28,12 +28,16 @@
       theme: {
         extend: {
           colors: {
+            // PSU Official Crimson & Gold Colors
             crimson: '#A6192E',
-            crimsonDark: '#4d0000',
-            gold: '#FFCC33',
-            goldDark: '#e6b82e',
-            psuRed: '#A6192E',
-            psuGold: '#FFCC33',
+            crimsonDark: '#8a1525',
+            crimsonLight: '#c01e36',
+            gold: '#FFC726',
+            goldDark: '#e6b31e',
+            goldLight: '#ffd24d',
+            // PSU brand colors
+            psuCrimson: '#A6192E',
+            psuGold: '#FFC726',
             psuBlack: '#1C1C1C',
             psuGray: '#F5F5F5',
             darkGray: '#4A4A4A',
@@ -88,7 +92,7 @@
       left: 50%;
       width: 0;
       height: 2px;
-      background-color: #FDB515;
+      background-color: #FFC726;
       transition: all 0.3s ease;
       transform: translateX(-50%);
     }
@@ -97,9 +101,15 @@
       width: 80%;
     }
     
-    /* Clean dropdown */
+    /* Clean dropdown - High z-index to appear above images */
     .dropdown-menu {
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 9999;
+    }
+    
+    /* Ensure group hover dropdowns appear above everything */
+    .group:hover > div {
+      z-index: 9999;
     }
     
     /* Animated gradient backgrounds */
@@ -165,14 +175,14 @@
   </div>
 
   <!-- PROFESSIONAL PSU NAVBAR - Clean White Design -->
-  <header class="bg-white text-gray-900 shadow-sm border-b-2 border-[#002C5F]">
+  <header class="bg-white text-gray-900 shadow-sm border-b-2 border-[#A6192E] relative z-50">
     <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="flex items-center justify-between">
         <!-- Logo and Brand -->
         <div class="flex items-center gap-4">
           <img src="{{ url_for('static', filename='img/psu-logo.png') }}" alt="PSU Logo" class="w-14 h-14">
           <div class="flex flex-col">
-            <a href="{{ url_for('index') }}" class="text-2xl font-heading font-bold tracking-tight text-[#002C5F] hover:text-[#FDB515] transition-colors" style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
+            <a href="{{ url_for('index') }}" class="text-2xl font-heading font-bold tracking-tight text-[#A6192E] hover:text-[#FFC726] transition-colors" style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700;">
               Gorilla-Link
             </a>
             <span class="text-[10px] text-gray-600 tracking-wider uppercase font-semibold">Pittsburg State University</span>
@@ -184,14 +194,14 @@
         <!-- Login/User Actions -->
         <div class="flex items-center gap-4">
           {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile.view_profile') }}" class="text-sm font-semibold text-[#002C5F] hover:text-[#FDB515] transition-colors">
+            <a href="{{ url_for('profile.view_profile') }}" class="text-sm font-semibold text-[#A6192E] hover:text-[#FFC726] transition-colors">
               <i class="fas fa-user-circle mr-1"></i>{{ current_user.first_name }}
             </a>
-            <a href="{{ url_for('auth.logout') }}" class="bg-[#002C5F] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#FDB515] hover:text-[#002C5F] transition-all">
+            <a href="{{ url_for('auth.logout') }}" class="bg-[#A6192E] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#FFC726] hover:text-[#A6192E] transition-all">
               Logout
             </a>
           {% else %}
-            <a href="{{ url_for('auth.login') }}" class="bg-[#002C5F] text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-[#FDB515] hover:text-[#002C5F] transition-all">
+            <a href="{{ url_for('auth.login') }}" class="bg-[#A6192E] text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-[#FFC726] hover:text-[#A6192E] transition-all">
               Login
             </a>
           {% endif %}
@@ -200,95 +210,95 @@
 
       <!-- Desktop Navigation - Below Logo -->
       <nav class="hidden lg:flex items-center gap-1 mt-4 border-t border-gray-200 pt-3">
-        <a href="{{ url_for('index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Home</a>
-        <a href="{{ url_for('scholarships.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Scholarships</a>
-        <a href="{{ url_for('careers.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Careers</a>
-        <a href="{{ url_for('alumni.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Alumni Network</a>
-        <a href="{{ url_for('dining.dining_home') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Dining</a>
+        <a href="{{ url_for('index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Home</a>
+        <a href="{{ url_for('scholarships.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Alumni Network</a>
+        <a href="{{ url_for('dining.dining_home') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Dining</a>
 
         <!-- Student Life Dropdown (NEW FEATURES!) -->
-        <div class="relative group">
-          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
+        <div class="relative group z-50">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
             Student Life
             <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
             <div class="py-1">
               <a href="{{ url_for('textbook.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-book mr-2 text-[#002C5F]"></i>Textbook Exchange
+                <i class="fas fa-book mr-2 text-[#A6192E]"></i>Textbook Exchange
               </a>
               <a href="{{ url_for('housing.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-home mr-2 text-[#002C5F]"></i>Housing Reviews
+                <i class="fas fa-home mr-2 text-[#A6192E]"></i>Housing Reviews
               </a>
               <a href="{{ url_for('discounts.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-tags mr-2 text-[#002C5F]"></i>Student Discounts
+                <i class="fas fa-tags mr-2 text-[#A6192E]"></i>Student Discounts
               </a>
               <a href="{{ url_for('student_events.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-calendar mr-2 text-[#002C5F]"></i>Events Calendar
+                <i class="fas fa-calendar mr-2 text-[#A6192E]"></i>Events Calendar
               </a>
               <a href="{{ url_for('wait_times.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-clock mr-2 text-[#002C5F]"></i>Campus Wait Times
+                <i class="fas fa-clock mr-2 text-[#A6192E]"></i>Campus Wait Times
               </a>
             </div>
           </div>
         </div>
 
         <!-- Academic Resources Dropdown -->
-        <div class="relative group">
-          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
+        <div class="relative group z-50">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
             Academics
             <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
             <div class="py-1">
               <a href="{{ url_for('course_library.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-folder mr-2 text-[#002C5F]"></i>Course Materials
+                <i class="fas fa-folder mr-2 text-[#A6192E]"></i>Course Materials
               </a>
               <a href="{{ url_for('professor.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chalkboard-teacher mr-2 text-[#002C5F]"></i>Professor Reviews
+                <i class="fas fa-chalkboard-teacher mr-2 text-[#A6192E]"></i>Professor Reviews
               </a>
               <a href="{{ url_for('grade_explorer.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chart-bar mr-2 text-[#002C5F]"></i>Grade Distribution
+                <i class="fas fa-chart-bar mr-2 text-[#A6192E]"></i>Grade Distribution
               </a>
               <a href="{{ url_for('gpa_calculator.calculator_home') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-calculator mr-2 text-[#002C5F]"></i>GPA Calculator
+                <i class="fas fa-calculator mr-2 text-[#A6192E]"></i>GPA Calculator
               </a>
             </div>
           </div>
         </div>
 
         <!-- Resources Dropdown -->
-        <div class="relative group">
-          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] transition-all inline-flex items-center gap-1">
+        <div class="relative group z-50">
+          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
             Resources
             <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200">
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
             <div class="py-1">
               <a href="{{ url_for('careers.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-briefcase mr-2 text-[#002C5F]"></i>Career Services
+                <i class="fas fa-briefcase mr-2 text-[#A6192E]"></i>Career Services
               </a>
               <a href="{{ url_for('mentors.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-users mr-2 text-[#002C5F]"></i>Mentorship Program
+                <i class="fas fa-users mr-2 text-[#A6192E]"></i>Mentorship Program
               </a>
               <a href="{{ url_for('portfolio.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-user mr-2 text-[#002C5F]"></i>My Profile
+                <i class="fas fa-user mr-2 text-[#A6192E]"></i>My Profile
               </a>
               <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chart-line mr-2 text-[#002C5F]"></i>Analytics Dashboard
+                <i class="fas fa-chart-line mr-2 text-[#A6192E]"></i>Analytics Dashboard
               </a>
             </div>
           </div>
         </div>
 
-        <a href="{{ url_for('events.events_home') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">Events</a>
-        <a href="{{ url_for('announcements_bp.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FDB515] hover:border-b-2 hover:border-[#FDB515] transition-all">News</a>
+        <a href="{{ url_for('events.events_home') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Events</a>
+        <a href="{{ url_for('announcements_bp.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">News</a>
       </nav>
     </div>
         {% if current_user.is_authenticated %}
@@ -388,7 +398,7 @@
         
         <!-- Contact Us -->
         <div>
-          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFC726] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
             Contact Us
           </h4>
           <div class="space-y-3 text-sm leading-relaxed">
@@ -396,73 +406,73 @@
             <p>1701 S. Broadway<br>Pittsburg, KS 66762</p>
             <p class="flex items-center gap-2">
               <i class="fas fa-phone"></i>
-              <a href="tel:620-235-4011" class="hover:text-[#FFCC33] transition-colors">620-235-4011</a>
+              <a href="tel:620-235-4011" class="hover:text-[#FFC726] transition-colors">620-235-4011</a>
             </p>
             <p class="flex items-center gap-2">
               <i class="fas fa-envelope"></i>
-              <a href="mailto:psualumni@pittstate.edu" class="hover:text-[#FFCC33] transition-colors">psualumni@pittstate.edu</a>
+              <a href="mailto:psualumni@pittstate.edu" class="hover:text-[#FFC726] transition-colors">psualumni@pittstate.edu</a>
             </p>
           </div>
         </div>
 
         <!-- Quick Links -->
         <div>
-          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFC726] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
             Quick Links
           </h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="https://www.pittstate.edu/admissions/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Admissions</a></li>
-            <li><a href="https://www.pittstate.edu/academics/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Academics</a></li>
-            <li><a href="https://www.pittstate.edu/student-life/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Student Life</a></li>
-            <li><a href="https://www.pittstate.edu/athletics/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Athletics</a></li>
-            <li><a href="https://www.pittstate.edu/alumni/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Alumni & Giving</a></li>
-            <li><a href="{{ url_for('scholarships.index') }}" class="hover:text-[#FFCC33] transition-colors">Scholarships</a></li>
-            <li><a href="{{ url_for('careers.index') }}" class="hover:text-[#FFCC33] transition-colors">Career Services</a></li>
+            <li><a href="https://www.pittstate.edu/admissions/" target="_blank" class="hover:text-[#FFC726] transition-colors">Admissions</a></li>
+            <li><a href="https://www.pittstate.edu/academics/" target="_blank" class="hover:text-[#FFC726] transition-colors">Academics</a></li>
+            <li><a href="https://www.pittstate.edu/student-life/" target="_blank" class="hover:text-[#FFC726] transition-colors">Student Life</a></li>
+            <li><a href="https://www.pittstate.edu/athletics/" target="_blank" class="hover:text-[#FFC726] transition-colors">Athletics</a></li>
+            <li><a href="https://www.pittstate.edu/alumni/" target="_blank" class="hover:text-[#FFC726] transition-colors">Alumni & Giving</a></li>
+            <li><a href="{{ url_for('scholarships.index') }}" class="hover:text-[#FFC726] transition-colors">Scholarships</a></li>
+            <li><a href="{{ url_for('careers.index') }}" class="hover:text-[#FFC726] transition-colors">Career Services</a></li>
           </ul>
         </div>
 
         <!-- Resources -->
         <div>
-          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFC726] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
             Resources
           </h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="https://gus.pittstate.edu/mygus/" target="_blank" class="hover:text-[#FFCC33] transition-colors">MyGUS Portal</a></li>
-            <li><a href="https://library.pittstate.edu/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Axe Library</a></li>
-            <li><a href="https://www.pittstate.edu/technology/" target="_blank" class="hover:text-[#FFCC33] transition-colors">IT Services</a></li>
-            <li><a href="https://www.pittstate.edu/office/human-resources/faculty-staff-directory.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Directory</a></li>
-            <li><a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Campus Map</a></li>
-            <li><a href="{{ url_for('events.events_home') }}" class="hover:text-[#FFCC33] transition-colors">Campus Events</a></li>
-            <li><a href="{{ url_for('announcements_bp.index') }}" class="hover:text-[#FFCC33] transition-colors">News & Updates</a></li>
+            <li><a href="https://gus.pittstate.edu/mygus/" target="_blank" class="hover:text-[#FFC726] transition-colors">MyGUS Portal</a></li>
+            <li><a href="https://library.pittstate.edu/" target="_blank" class="hover:text-[#FFC726] transition-colors">Axe Library</a></li>
+            <li><a href="https://www.pittstate.edu/technology/" target="_blank" class="hover:text-[#FFC726] transition-colors">IT Services</a></li>
+            <li><a href="https://www.pittstate.edu/office/human-resources/faculty-staff-directory.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Directory</a></li>
+            <li><a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Campus Map</a></li>
+            <li><a href="{{ url_for('events.events_home') }}" class="hover:text-[#FFC726] transition-colors">Campus Events</a></li>
+            <li><a href="{{ url_for('announcements_bp.index') }}" class="hover:text-[#FFC726] transition-colors">News & Updates</a></li>
           </ul>
         </div>
 
         <!-- Social Media & Gus -->
         <div>
-          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFCC33] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
+          <h4 class="font-heading font-bold text-lg mb-4 text-[#FFC726] uppercase tracking-wide" style="font-family: 'Roboto Condensed', sans-serif;">
             Connect With Us
           </h4>
           <div class="flex gap-3 mb-6">
-            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <a href="https://www.facebook.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFC726] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
               <i class="fab fa-facebook-f text-lg"></i>
             </a>
-            <a href="https://twitter.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <a href="https://twitter.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFC726] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
               <i class="fab fa-twitter text-lg"></i>
             </a>
-            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <a href="https://www.instagram.com/pittstate" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFC726] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
               <i class="fab fa-instagram text-lg"></i>
             </a>
-            <a href="https://www.youtube.com/user/PittsburgState" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <a href="https://www.youtube.com/user/PittsburgState" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFC726] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
               <i class="fab fa-youtube text-lg"></i>
             </a>
-            <a href="https://www.linkedin.com/school/pittsburg-state-university/" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFCC33] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <a href="https://www.linkedin.com/school/pittsburg-state-university/" target="_blank" class="w-10 h-10 bg-white/10 hover:bg-[#FFC726] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
               <i class="fab fa-linkedin-in text-lg"></i>
             </a>
           </div>
           
           <!-- Gus the Gorilla -->
           <div class="text-center mt-4">
-            <p class="font-heading font-bold text-[#FFCC33] text-2xl" style="font-family: 'Roboto Condensed', sans-serif;">
+            <p class="font-heading font-bold text-[#FFC726] text-2xl" style="font-family: 'Roboto Condensed', sans-serif;">
               GO GORILLAS!
             </p>
           </div>
@@ -474,12 +484,12 @@
         <!-- Contact Info -->
         <div class="text-center mb-6">
           <div class="flex items-center justify-center gap-4 text-white/90 mb-3 flex-wrap">
-            <a href="tel:+16202317000" class="hover:text-[#FFCC33] transition-colors flex items-center gap-2">
+            <a href="tel:+16202317000" class="hover:text-[#FFC726] transition-colors flex items-center gap-2">
               <i class="fas fa-phone"></i>
               <span>620-231-7000</span>
             </a>
             <span class="hidden sm:inline">•</span>
-            <a href="tel:+18008547488" class="hover:text-[#FFCC33] transition-colors flex items-center gap-2">
+            <a href="tel:+18008547488" class="hover:text-[#FFC726] transition-colors flex items-center gap-2">
               <i class="fas fa-phone"></i>
               <span>1-800-854-PITT (7488)</span>
             </a>
@@ -497,15 +507,15 @@
         
         <!-- Legal Links -->
         <div class="flex items-center justify-center gap-3 text-xs text-white/70 flex-wrap">
-          <a href="https://www.pittstate.edu/about/equal-opportunity.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Equal Opportunity</a>
+          <a href="https://www.pittstate.edu/about/equal-opportunity.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Equal Opportunity</a>
           <span>•</span>
-          <a href="https://www.pittstate.edu/about/privacy.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Privacy Policy</a>
+          <a href="https://www.pittstate.edu/about/privacy.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Privacy Policy</a>
           <span>•</span>
-          <a href="https://www.pittstate.edu/about/title-ix.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Title IX</a>
+          <a href="https://www.pittstate.edu/about/title-ix.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Title IX</a>
           <span>•</span>
-          <a href="https://www.pittstate.edu/about/accessibility.html" target="_blank" class="hover:text-[#FFCC33] transition-colors">Accessibility</a>
+          <a href="https://www.pittstate.edu/about/accessibility.html" target="_blank" class="hover:text-[#FFC726] transition-colors">Accessibility</a>
           <span>•</span>
-          <a href="https://www.pittstate.edu/safety/" target="_blank" class="hover:text-[#FFCC33] transition-colors">Safety/Emergency</a>
+          <a href="https://www.pittstate.edu/safety/" target="_blank" class="hover:text-[#FFC726] transition-colors">Safety/Emergency</a>
         </div>
         
         <!-- Accreditation Notice -->
