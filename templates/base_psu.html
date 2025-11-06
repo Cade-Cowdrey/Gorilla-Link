@@ -58,69 +58,75 @@
             </div>
         </div>
         
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between">
+        <!-- Main Header with Logo and Navigation -->
+        <div class="container" style="padding: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0;">
                 <!-- Logo -->
                 <a href="{{ url_for('core.home') }}" class="psu-logo">
                     <div class="psu-logo-icon">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
                     <div>
-                        <div style="font-size: 1.75rem; line-height: 1;">PSU Connect</div>
-                        <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Pittsburg State University</div>
+                        <div style="font-size: 1.5rem; line-height: 1.1; font-weight: 700;">PSU Connect</div>
+                        <div style="font-size: 0.7rem; font-weight: 400; opacity: 0.7; margin-top: 2px;">Pittsburg State University</div>
                     </div>
                 </a>
                 
-                <!-- Navigation -->
-                <nav class="psu-nav">
-                    <ul class="psu-nav-list">
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('core.home') }}" class="psu-nav-link {% if request.endpoint == 'core.home' %}active{% endif %}">
-                                <i class="fas fa-home"></i>
-                                Home
-                            </a>
-                        </li>
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('careers.index') }}" class="psu-nav-link {% if 'careers' in request.endpoint %}active{% endif %}">
-                                <i class="fas fa-briefcase"></i>
-                                Jobs
-                            </a>
-                        </li>
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('resume.dashboard') }}" class="psu-nav-link {% if 'resume' in request.endpoint %}active{% endif %}">
-                                <i class="fas fa-file-alt"></i>
-                                Resume Builder
-                            </a>
-                        </li>
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('alumni.index') }}" class="psu-nav-link {% if 'alumni' in request.endpoint %}active{% endif %}">
-                                <i class="fas fa-users"></i>
-                                Alumni Network
-                            </a>
-                        </li>
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('community.index') }}" class="psu-nav-link {% if 'community' in request.endpoint %}active{% endif %}">
-                                <i class="fas fa-newspaper"></i>
-                                Community
-                            </a>
-                        </li>
-                        <li class="psu-nav-item">
-                            <a href="{{ url_for('events.events_home') }}" class="psu-nav-link {% if 'events' in request.endpoint %}active{% endif %}">
-                                <i class="fas fa-calendar-alt"></i>
-                                Events
-                            </a>
-                        </li>
-                        {% if current_user.is_authenticated %}
-                            <li class="psu-nav-item">
-                                <a href="{{ url_for('analytics.index') }}" class="psu-nav-link {% if 'analytics' in request.endpoint %}active{% endif %}">
-                                    <i class="fas fa-chart-line"></i>
-                                    Analytics
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                <!-- Right Side: Search placeholder -->
+                <div style="flex: 1; max-width: 400px; margin-left: auto; margin-right: 2rem;">
+                    <!-- Optional: Add search bar here later -->
+                </div>
             </div>
+            
+            <!-- Navigation - Full Width Bottom Border -->
+            <nav class="psu-nav">
+                <ul class="psu-nav-list">
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('core.home') }}" class="psu-nav-link {% if request.endpoint == 'core.home' %}active{% endif %}">
+                            <i class="fas fa-home"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('scholarships.index') }}" class="psu-nav-link {% if 'scholarships' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            Scholarships
+                        </a>
+                    </li>
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('careers.index') }}" class="psu-nav-link {% if 'careers' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-briefcase"></i>
+                            Careers
+                        </a>
+                    </li>
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('alumni.index') }}" class="psu-nav-link {% if 'alumni' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            Alumni
+                        </a>
+                    </li>
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('events.events_home') }}" class="psu-nav-link {% if 'events' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-calendar-alt"></i>
+                            Events
+                        </a>
+                    </li>
+                    <li class="psu-nav-item">
+                        <a href="{{ url_for('community.index') }}" class="psu-nav-link {% if 'community' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-newspaper"></i>
+                            Community
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="psu-nav-item">
+                            <a href="{{ url_for('analytics.index') }}" class="psu-nav-link {% if 'analytics' in request.endpoint %}active{% endif %}">
+                                <i class="fas fa-chart-line"></i>
+                                Analytics
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </header>
 

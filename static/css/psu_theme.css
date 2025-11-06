@@ -1,17 +1,18 @@
 /* 
  * Pittsburg State University (PSU) Official Branding
- * Colors: Crimson Red #8B1A1A, Gold #FDB515, White #FFFFFF
+ * Colors: Navy Blue #002C5F, Gold #FDB515, White #FFFFFF
  * Modern, Professional, Accessible Design System
+ * Matches official pittstate.edu design
  */
 
 :root {
-    /* PSU Official Colors */
-    --psu-crimson: #8B1A1A;
-    --psu-crimson-dark: #6B0F0F;
-    --psu-crimson-light: #A52A2A;
+    /* PSU Official Colors - Navy & Gold (NOT Red) */
+    --psu-navy: #002C5F;
+    --psu-navy-dark: #001933;
+    --psu-navy-light: #003D7A;
     --psu-gold: #FDB515;
-    --psu-gold-dark: #E6A312;
-    --psu-gold-light: #FFD966;
+    --psu-gold-dark: #D99D13;
+    --psu-gold-light: #FFCC4D;
     
     /* Neutral Colors */
     --psu-white: #FFFFFF;
@@ -80,6 +81,21 @@ body {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container - Match Pitt State spacing */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
 }
 
 /* Typography */
@@ -103,30 +119,31 @@ p {
 }
 
 a {
-    color: var(--psu-crimson);
+    color: var(--psu-navy);
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 a:hover {
-    color: var(--psu-crimson-dark);
+    color: var(--psu-gold-dark);
     text-decoration: underline;
 }
 
-/* PSU Header */
+/* PSU Header - Clean White Design (NOT Sticky) */
 .psu-header {
-    background: linear-gradient(135deg, var(--psu-crimson) 0%, var(--psu-crimson-dark) 100%);
-    color: var(--psu-white);
-    padding: var(--spacing-sm) 0;
-    box-shadow: var(--shadow-md);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    background: var(--psu-white);
+    color: var(--psu-navy);
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 100;
+    border-bottom: 3px solid var(--psu-gold);
 }
 
 .psu-header-top {
-    background-color: var(--psu-crimson-dark);
-    padding: var(--spacing-xs) 0;
+    background-color: var(--psu-navy);
+    color: var(--psu-white);
+    padding: 0.5rem 0;
     font-size: 0.875rem;
 }
 
@@ -139,45 +156,46 @@ a:hover {
 .psu-logo {
     display: flex;
     align-items: center;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     font-family: var(--font-display);
     text-decoration: none;
-    color: var(--psu-white);
+    color: var(--psu-navy);
+    padding: 1.25rem 0;
 }
 
 .psu-logo:hover {
     text-decoration: none;
-    opacity: 0.9;
+    color: var(--psu-gold-dark);
 }
 
 .psu-logo-icon {
-    width: 50px;
-    height: 50px;
-    margin-right: var(--spacing-sm);
-    background: var(--psu-gold);
-    border-radius: var(--radius-lg);
+    width: 48px;
+    height: 48px;
+    margin-right: var(--spacing-md);
+    background: var(--psu-navy);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    color: var(--psu-crimson);
+    color: var(--psu-gold);
     font-size: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 44, 95, 0.15);
 }
 
-/* Navigation */
+/* Navigation - Clean Horizontal Design */
 .psu-nav {
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-lg);
-    margin-top: var(--spacing-sm);
+    background-color: transparent;
+    border-top: 1px solid var(--psu-gray-200);
 }
 
 .psu-nav-list {
     list-style: none;
     display: flex;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs);
+    gap: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .psu-nav-item {
@@ -188,23 +206,26 @@ a:hover {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    color: var(--psu-white);
-    border-radius: var(--radius-md);
+    padding: 1rem 1.5rem;
+    color: var(--psu-navy);
+    border-bottom: 3px solid transparent;
     transition: all 0.2s ease;
     font-weight: 500;
+    font-size: 0.95rem;
 }
 
 .psu-nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--psu-gray-50);
+    border-bottom-color: var(--psu-gold);
     text-decoration: none;
-    transform: translateY(-2px);
+    color: var(--psu-navy-dark);
 }
 
 .psu-nav-link.active {
-    background-color: var(--psu-gold);
-    color: var(--psu-crimson);
+    background-color: var(--psu-navy);
+    color: var(--psu-gold);
     font-weight: 600;
+    border-bottom-color: var(--psu-gold);
 }
 
 .psu-nav-icon {
@@ -235,17 +256,17 @@ a:hover {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--psu-crimson) 0%, var(--psu-crimson-dark) 100%);
+    background: linear-gradient(135deg, var(--psu-navy) 0%, var(--psu-navy-dark) 100%);
     color: var(--psu-white);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--psu-crimson-dark) 0%, #4B0808 100%);
+    background: linear-gradient(135deg, var(--psu-navy-dark) 0%, #000D1A 100%);
 }
 
 .btn-secondary {
     background: linear-gradient(135deg, var(--psu-gold) 0%, var(--psu-gold-dark) 100%);
-    color: var(--psu-crimson);
+    color: var(--psu-navy);
 }
 
 .btn-secondary:hover {
@@ -254,12 +275,12 @@ a:hover {
 
 .btn-outline {
     background: transparent;
-    border: 2px solid var(--psu-crimson);
-    color: var(--psu-crimson);
+    border: 2px solid var(--psu-navy);
+    color: var(--psu-navy);
 }
 
 .btn-outline:hover {
-    background: var(--psu-crimson);
+    background: var(--psu-navy);
     color: var(--psu-white);
 }
 
@@ -300,7 +321,7 @@ a:hover {
 .psu-card-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--psu-crimson);
+    color: var(--psu-navy);
     margin-bottom: 0;
 }
 
@@ -322,13 +343,13 @@ a:hover {
 }
 
 .psu-badge-primary {
-    background: var(--psu-crimson-light);
+    background: var(--psu-navy-light);
     color: var(--psu-white);
 }
 
 .psu-badge-gold {
     background: var(--psu-gold);
-    color: var(--psu-crimson);
+    color: var(--psu-navy);
 }
 
 .psu-badge-success {
@@ -353,7 +374,7 @@ a:hover {
 
 .psu-progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--psu-crimson) 0%, var(--psu-gold) 100%);
+    background: linear-gradient(90deg, var(--psu-navy) 0%, var(--psu-gold) 100%);
     border-radius: var(--radius-full);
     transition: width 0.5s ease;
     box-shadow: 0 2px 8px rgba(139, 26, 26, 0.3);
@@ -421,7 +442,7 @@ a:hover {
 .psu-textarea:focus,
 .psu-select:focus {
     outline: none;
-    border-color: var(--psu-crimson);
+    border-color: var(--psu-navy);
     box-shadow: 0 0 0 3px rgba(139, 26, 26, 0.1);
 }
 
@@ -449,7 +470,7 @@ a:hover {
 .psu-section-title {
     text-align: center;
     margin-bottom: var(--spacing-2xl);
-    color: var(--psu-crimson);
+    color: var(--psu-navy);
 }
 
 /* Grid System */
@@ -588,7 +609,7 @@ a:hover {
     width: 40px;
     height: 40px;
     border: 4px solid var(--psu-gray-200);
-    border-top-color: var(--psu-crimson);
+    border-top-color: var(--psu-navy);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
