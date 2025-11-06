@@ -15,7 +15,7 @@
         
         <!-- Quick Actions -->
         <div class="flex gap-4 justify-center flex-wrap">
-          <a href="#trending" class="px-6 py-3 bg-[#FFCC33] text-[#1C1C1C] font-bold rounded-lg hover:bg-white transition-all">
+          <a href="#trending" class="px-6 py-3 bg-[#FFC726] text-[#1C1C1C] font-bold rounded-lg hover:bg-white transition-all">
             <i class="fas fa-fire mr-2"></i>Trending Now
           </a>
           {% if current_user.is_authenticated %}
@@ -29,7 +29,7 @@
   </section>
 
   <!-- Info Bar -->
-  <section class="py-6 bg-gradient-to-r from-[#FFCC33]/20 to-[#FFCC33]/10 border-b-2 border-[#FFCC33]/30">
+  <section class="py-6 bg-gradient-to-r from-[#FFC726]/20 to-[#FFC726]/10 border-b-2 border-[#FFC726]/30">
     <div class="max-w-7xl mx-auto px-6">
       <div class="flex items-center justify-center gap-8 flex-wrap text-center">
         <div class="flex items-center gap-3">
@@ -112,7 +112,7 @@
             
             {% if location.avg_rating %}
             <div class="flex items-center gap-2 mb-3">
-              <div class="flex items-center text-[#FFCC33]">
+              <div class="flex items-center text-[#FFC726]">
                 {% for i in range(5) %}
                   {% if i < location.avg_rating|round|int %}
                     <i class="fas fa-star"></i>
@@ -149,7 +149,7 @@
                   <i class="fas fa-check-circle mr-1"></i>Meal Swipes
                 </span>
                 {% elif 'Gorilla Crossing' in location.name %}
-                <span class="text-[#FFCC33] font-semibold">
+                <span class="text-[#FFC726] font-semibold">
                   <i class="fas fa-dollar-sign mr-1"></i>Dining Dollars Only
                 </span>
                 {% else %}
@@ -186,8 +186,8 @@
           </div>
         </div>
         
-        <div class="bg-gradient-to-br from-[#FFCC33]/10 to-white rounded-xl p-6 border-2 border-[#FFCC33]/30">
-          <div class="w-12 h-12 bg-[#FFCC33] rounded-full flex items-center justify-center mb-4">
+        <div class="bg-gradient-to-br from-[#FFC726]/10 to-white rounded-xl p-6 border-2 border-[#FFC726]/30">
+          <div class="w-12 h-12 bg-[#FFC726] rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-dollar-sign text-[#1C1C1C] text-xl"></i>
           </div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">Dining Dollars</h3>
@@ -224,7 +224,7 @@
             <h3 class="text-lg font-bold text-gray-900">
               {{ item.name }}
             </h3>
-            <div class="flex items-center gap-1 text-[#FFCC33]">
+            <div class="flex items-center gap-1 text-[#FFC726]">
               <i class="fas fa-star"></i>
               <span class="font-bold">{{ item.average_rating|round(1) }}</span>
             </div>
