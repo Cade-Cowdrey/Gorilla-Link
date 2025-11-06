@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <!-- Header -->
+    <section class="bg-gradient-to-r from-[#002C5F] to-[#004080] text-white py-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">Campus Safety & Security</h1>
+                <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+                    Your safety is our top priority. We're here 24/7 to keep our campus secure.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Banner -->
+    <section class="bg-red-600 text-white py-6">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-3xl"></i>
+                    <span class="text-2xl font-bold">EMERGENCY?</span>
+                </div>
+                <a href="tel:911" class="px-8 py-3 bg-white text-red-600 rounded-full font-bold text-xl hover:bg-gray-100 transition-all">
+                    CALL 911
+                </a>
+                <div class="text-center">
+                    <div class="text-sm opacity-90">Campus Police:</div>
+                    <a href="tel:6202354624" class="text-xl font-bold hover:underline">(620) 235-4624</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety Services -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#002C5F] mb-4">Safety Services</h2>
+                <p class="text-xl text-gray-600">Comprehensive security for peace of mind</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                {% for service in safety_services %}
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border-2 border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center text-white text-2xl flex-shrink-0">
+                            <i class="fas {{ service.icon }}"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-[#002C5F] mb-2">{{ service.name }}</h3>
+                            <p class="text-gray-600">{{ service.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4 text-sm">
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-map-marker-alt text-[#FDB515]"></i>
+                            <span>{{ service.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-phone text-[#FDB515]"></i>
+                            <a href="tel:{{ service.phone.replace('(', '').replace(')', '').replace(' ', '').replace('-', '') }}" class="hover:text-[#002C5F] font-semibold">{{ service.phone }}</a>
+                        </div>
+                        {% if service.get('hours') %}
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-clock text-[#FDB515]"></i>
+                            <span>{{ service.hours }}</span>
+                        </div>
+                        {% endif %}
+                        {% if service.get('emergency') %}
+                        <div class="flex items-center gap-2 text-red-600 font-bold">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Emergency: {{ service.emergency }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        {% for item in service.services %}
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                            <i class="fas fa-check mr-1"></i>{{ item }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety Tips -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#002C5F] mb-4">Safety Tips</h2>
+                <p class="text-xl text-gray-600">Simple practices to stay safe on campus</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                {% for tip in safety_tips %}
+                <div class="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-all">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center text-white text-2xl">
+                        <i class="fas {{ tip.icon }}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-[#002C5F] mb-2">{{ tip.title }}</h3>
+                    <p class="text-gray-600">{{ tip.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Contacts -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#002C5F] mb-4">Emergency Contacts</h2>
+                <p class="text-xl text-gray-600">Save these numbers in your phone</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                {% for contact in emergency_contacts %}
+                <div class="bg-white rounded-xl p-6 shadow-md border-2 border-red-200 text-center hover:border-red-400 transition-all">
+                    <h3 class="font-bold text-[#002C5F] mb-2">{{ contact.name }}</h3>
+                    <a href="tel:{{ contact.number.replace('(', '').replace(')', '').replace(' ', '').replace('-', '') }}" class="text-2xl font-bold text-red-600 hover:text-red-700 block mb-1">
+                        {{ contact.number }}
+                    </a>
+                    <div class="text-sm text-green-600 font-semibold">{{ contact.available }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Crime Statistics -->
+    <section class="py-20 bg-gradient-to-r from-[#002C5F] to-[#004080] text-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">{{ crime_stats.title }}</h2>
+                <p class="text-xl text-gray-200">{{ crime_stats.year }} Campus Safety Report</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6">
+                {% for stat in crime_stats.stats %}
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border-2 border-white/20">
+                    <div class="text-3xl font-bold text-[#FDB515] mb-2">{{ stat.value }}</div>
+                    <div class="text-sm font-semibold">{{ stat.category }}</div>
+                    {% if stat.trend == 'down' %}
+                    <div class="mt-2 text-green-300 text-sm"><i class="fas fa-arrow-down"></i> Improving</div>
+                    {% elif stat.trend == 'up' %}
+                    <div class="mt-2 text-green-300 text-sm"><i class="fas fa-arrow-up"></i> Growing</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="https://www.pittstate.edu/office/campus-police/clery-report.html" target="_blank" class="inline-block px-8 py-4 bg-[#FDB515] text-[#002C5F] rounded-full font-bold hover:bg-white transition-all">
+                    View Full Clery Report
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-[#002C5F] mb-4">Download the PSU Safety App</h2>
+            <p class="text-xl text-gray-600 mb-8">Quick access to emergency services, safe ride requests, and safety resources.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#" class="px-8 py-4 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-all">
+                    <i class="fab fa-apple mr-2"></i>Download on App Store
+                </a>
+                <a href="#" class="px-8 py-4 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all">
+                    <i class="fab fa-google-play mr-2"></i>Get it on Google Play
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

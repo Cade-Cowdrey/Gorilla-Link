@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <!-- Header -->
+    <section class="bg-gradient-to-r from-[#002C5F] to-[#004080] text-white py-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">Health & Wellness</h1>
+                <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+                    Your wellbeing is our priority. Access comprehensive health services and support.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Banner -->
+    <section class="bg-red-600 text-white py-4">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-center gap-4">
+                <i class="fas fa-exclamation-triangle text-2xl"></i>
+                <span class="font-bold">EMERGENCY?</span>
+                <a href="tel:911" class="px-6 py-2 bg-white text-red-600 rounded-full font-bold hover:bg-gray-100">Call 911</a>
+                <span class="text-sm">or Campus Police: (620) 235-4624</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#002C5F] mb-4">Health Services</h2>
+                <p class="text-xl text-gray-600">Comprehensive care for your physical and mental health</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                {% for service in services %}
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border-2 border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center text-white text-2xl flex-shrink-0">
+                            <i class="fas {{ service.icon }}"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-[#002C5F] mb-2">{{ service.name }}</h3>
+                            <p class="text-gray-600">{{ service.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4 text-sm">
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-map-marker-alt text-[#FDB515]"></i>
+                            <span>{{ service.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-phone text-[#FDB515]"></i>
+                            <a href="tel:{{ service.phone.replace('(', '').replace(')', '').replace(' ', '').replace('-', '') }}" class="hover:text-[#002C5F] font-semibold">{{ service.phone }}</a>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i class="fas fa-clock text-[#FDB515]"></i>
+                            <span>{{ service.hours }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        {% for item in service.services %}
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">{{ item }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Crisis Resources -->
+    <section class="py-20 bg-red-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-red-700 mb-4">Crisis Resources</h2>
+                <p class="text-xl text-gray-700">Immediate help is available 24/7</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for resource in crisis_resources %}
+                <div class="bg-white rounded-2xl p-6 shadow-lg text-center border-2 border-red-200 hover:border-red-400 transition-all">
+                    <h3 class="text-lg font-bold text-[#002C5F] mb-2">{{ resource.name }}</h3>
+                    <div class="text-2xl font-bold text-red-600 mb-2">{{ resource.phone }}</div>
+                    <div class="text-sm text-green-600 font-semibold mb-2">{{ resource.available }}</div>
+                    <p class="text-sm text-gray-600">{{ resource.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Wellness Tips -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#002C5F] mb-4">Wellness Tips</h2>
+                <p class="text-xl text-gray-600">Simple habits for a healthier you</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-8">
+                {% for tip in wellness_tips %}
+                <div class="text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center text-white text-3xl">
+                        <i class="fas {{ tip.icon }}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-[#002C5F] mb-2">{{ tip.title }}</h3>
+                    <p class="text-gray-600">{{ tip.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 bg-gradient-to-r from-[#002C5F] to-[#004080]">
+        <div class="max-w-4xl mx-auto px-6 text-center text-white">
+            <h2 class="text-3xl font-bold mb-4">Need to Schedule an Appointment?</h2>
+            <p class="text-xl mb-8">Our health professionals are here to help you stay healthy and succeed.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="tel:6202354251" class="px-8 py-4 bg-[#FDB515] text-[#002C5F] rounded-full font-bold text-lg hover:bg-white transition-all">
+                    <i class="fas fa-phone mr-2"></i>Call Health Center
+                </a>
+                <a href="tel:6202354309" class="px-8 py-4 bg-white/10 border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white hover:text-[#002C5F] transition-all">
+                    <i class="fas fa-comments mr-2"></i>Call Counseling
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
