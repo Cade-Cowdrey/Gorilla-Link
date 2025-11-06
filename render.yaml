@@ -11,7 +11,7 @@ services:
     name: pittstate-connect
     env: python
     plan: starter
-    buildCommand: pip install -r requirements.txt && flask db upgrade
+    buildCommand: pip install -r requirements.txt && flask db upgrade && python seed_simple.py
     startCommand: gunicorn app_pro:app --workers=4 --threads=2 --timeout=120 --log-level=info
     autoDeploy: true
     envVars:
