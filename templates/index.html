@@ -281,108 +281,159 @@
 </section>
 
 <!-- Quick Access Links - Enhanced Design -->
-<section class="py-20 relative bg-cover bg-center bg-fixed" style="background-image: url('https://www.pittstate.edu/images/student-life/gorilla-village-residence-480w.jpg');">
-  <div class="absolute inset-0 bg-gradient-to-br from-[#A6192E]/80 via-black/70 to-[#1C1C1C]/80"></div>
-  
-  <div class="relative z-10 max-w-7xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <div class="inline-block h-1 w-32 bg-gradient-to-r from-[#FFCC33] to-[#A6192E] mb-6"></div>
-      <h2 class="text-5xl font-bold mb-4 text-white drop-shadow-lg" style="font-family: 'Roboto Condensed', sans-serif;">
-        Student Resources
+<section class="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div class="inline-block">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <div class="h-1 w-16 bg-gradient-to-r from-[#002C5F] to-[#FDB515]"></div>
+          <i class="fas fa-star text-[#FDB515] text-2xl"></i>
+          <div class="h-1 w-16 bg-gradient-to-r from-[#FDB515] to-[#002C5F]"></div>
+        </div>
+      </div>
+      <h2 class="text-5xl font-bold mb-4 text-[#002C5F]" style="font-family: 'Roboto Condensed', sans-serif;">
+        Student Resources Hub
       </h2>
-      <p class="text-xl text-[#FFCC33]">
-        Everything you need, right at your fingertips
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Quick access to everything you need for campus life • Fast • Easy • All in one place
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <a href="/housing" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-home drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Housing</h3>
-          <p class="text-white/80 text-sm">On-campus living options</p>
+    <!-- Category Tabs for Better Organization -->
+    <div class="flex flex-wrap justify-center gap-3 mb-12">
+      <button class="px-6 py-2 bg-[#002C5F] text-white rounded-full font-semibold text-sm hover:bg-[#FDB515] hover:text-[#002C5F] transition-all">
+        <i class="fas fa-th-large mr-2"></i>All Resources
+      </button>
+      <button class="px-6 py-2 bg-white text-gray-700 rounded-full font-semibold text-sm hover:bg-[#002C5F] hover:text-white transition-all border-2 border-gray-200">
+        <i class="fas fa-graduation-cap mr-2"></i>Academic
+      </button>
+      <button class="px-6 py-2 bg-white text-gray-700 rounded-full font-semibold text-sm hover:bg-[#002C5F] hover:text-white transition-all border-2 border-gray-200">
+        <i class="fas fa-users mr-2"></i>Campus Life
+      </button>
+      <button class="px-6 py-2 bg-white text-gray-700 rounded-full font-semibold text-sm hover:bg-[#002C5F] hover:text-white transition-all border-2 border-gray-200">
+        <i class="fas fa-heart mr-2"></i>Support
+      </button>
+    </div>
+
+    <!-- Resource Cards Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Housing Card -->
+      <a href="/housing" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-home text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Housing</h3>
+        <p class="text-gray-600 text-sm mb-4">Find your perfect on-campus home</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Explore Options <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="/dining" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-utensils drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Dining</h3>
-          <p class="text-white/80 text-sm">Meal plans & menus</p>
+      <!-- Dining Card -->
+      <a href="/dining" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-utensils text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Dining</h3>
+        <p class="text-gray-600 text-sm mb-4">Meal plans, menus & dining hours</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          View Dining <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="https://gus.pittstate.edu/mygus/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-graduation-cap drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">MyGUS</h3>
-          <p class="text-white/80 text-sm">Student portal access</p>
+      <!-- MyGUS Card -->
+      <a href="https://gus.pittstate.edu/mygus/" target="_blank" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#FDB515] to-[#FD9500] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-graduation-cap text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">MyGUS Portal</h3>
+        <p class="text-gray-600 text-sm mb-4">Grades, classes & registration</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Open Portal <i class="fas fa-external-link-alt ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="https://library.pittstate.edu/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-book drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Library</h3>
-          <p class="text-white/80 text-sm">Axe Library resources</p>
+      <!-- Library Card -->
+      <a href="https://library.pittstate.edu/" target="_blank" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-book text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Axe Library</h3>
+        <p class="text-gray-600 text-sm mb-4">Research, study spaces & books</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Visit Library <i class="fas fa-external-link-alt ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="/health" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-heartbeat drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Health</h3>
-          <p class="text-white/80 text-sm">Wellness & counseling</p>
+      <!-- Health Card -->
+      <a href="/health" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-heartbeat text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Health & Wellness</h3>
+        <p class="text-gray-600 text-sm mb-4">Medical services & counseling</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Learn More <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="/safety" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-shield-alt drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Safety</h3>
-          <p class="text-white/80 text-sm">Campus security</p>
+      <!-- Safety Card -->
+      <a href="/safety" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-shield-alt text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Campus Safety</h3>
+        <p class="text-gray-600 text-sm mb-4">Security, parking & emergency info</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Safety Info <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="https://www.pittstate.edu/technology/" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-laptop drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">IT Services</h3>
-          <p class="text-white/80 text-sm">Tech support</p>
+      <!-- IT Services Card -->
+      <a href="https://www.pittstate.edu/technology/" target="_blank" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#002C5F] to-[#004080] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-laptop text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">IT Services</h3>
+        <p class="text-gray-600 text-sm mb-4">Tech support, WiFi & software</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Get Support <i class="fas fa-external-link-alt ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
 
-      <a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="group relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-2xl p-8 text-center hover:from-[#A6192E]/40 hover:to-[#A6192E]/20 transition-all hover:scale-105 border-2 border-[#FFCC33]/30 hover:border-[#FFCC33] shadow-xl hover:shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#FFCC33]/0 to-[#FFCC33]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div class="relative">
-          <div class="text-[#FFCC33] text-5xl mb-4 transform group-hover:scale-110 transition-transform">
-            <i class="fas fa-map-marked-alt drop-shadow-lg"></i>
-          </div>
-          <h3 class="text-white font-bold text-xl mb-2">Campus Map</h3>
-          <p class="text-white/80 text-sm">Find your way</p>
+      <!-- Campus Map Card -->
+      <a href="https://www.pittstate.edu/visit/map.html" target="_blank" class="group bg-white rounded-2xl p-8 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-gray-100 hover:border-[#FDB515]">
+        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#FDB515] to-[#FD9500] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+          <i class="fas fa-map-marked-alt text-white text-3xl"></i>
+        </div>
+        <h3 class="text-[#002C5F] font-bold text-xl mb-3 group-hover:text-[#FDB515] transition-colors">Campus Map</h3>
+        <p class="text-gray-600 text-sm mb-4">Find buildings, parking & more</p>
+        <div class="inline-flex items-center text-[#002C5F] text-sm font-semibold group-hover:text-[#FDB515] transition-colors">
+          Open Map <i class="fas fa-external-link-alt ml-2 group-hover:translate-x-1 transition-transform"></i>
         </div>
       </a>
+    </div>
+
+    <!-- Quick Help Banner -->
+    <div class="mt-16 bg-gradient-to-r from-[#002C5F] via-[#003366] to-[#002C5F] rounded-3xl p-10 text-center shadow-2xl">
+      <div class="max-w-3xl mx-auto">
+        <div class="inline-block mb-4">
+          <i class="fas fa-question-circle text-[#FDB515] text-5xl"></i>
+        </div>
+        <h3 class="text-white text-3xl font-bold mb-4">Need Help Finding Something?</h3>
+        <p class="text-white/90 text-lg mb-6">
+          Our support team is here to help you navigate campus resources and answer any questions.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/contact" class="inline-flex items-center px-8 py-4 bg-[#FDB515] text-[#002C5F] rounded-full font-bold text-lg hover:bg-white transition-all hover:scale-105 shadow-lg">
+            <i class="fas fa-envelope mr-3"></i>Contact Support
+          </a>
+          <a href="tel:6202354000" class="inline-flex items-center px-8 py-4 bg-white/10 text-white border-2 border-white rounded-full font-bold text-lg hover:bg-white hover:text-[#002C5F] transition-all hover:scale-105">
+            <i class="fas fa-phone mr-3"></i>Call (620) 235-4000
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
