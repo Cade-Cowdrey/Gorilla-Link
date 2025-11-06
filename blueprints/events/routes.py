@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from utils.analytics_util import track_page_view
+from utils.analytics_util import record_page_view
 from flask_login import current_user
 from models import Event
 from datetime import datetime
@@ -8,7 +8,7 @@ bp = Blueprint("events", __name__, url_prefix="/events")
 
 @bp.route("/")
 def events_home():
-    track_page_view("events_home", current_user.id if current_user.is_authenticated else None)
+    record_page_view("events_home", current_user.id if current_user.is_authenticated else None)
     
     # Get upcoming events
     upcoming = Event.query.filter(Event.event_date >= datetime.utcnow()).order_by(Event.event_date).limit(20).all()

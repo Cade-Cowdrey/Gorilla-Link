@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, jsonify
 from utils.analytics_util import record_page_view
 
-bp = Blueprint("alumni_bp", __name__, url_prefix="/alumni")
+bp = Blueprint("alumni", __name__, url_prefix="/alumni")
 
 @bp.get("/health")
 def health():

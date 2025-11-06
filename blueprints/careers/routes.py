@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, jsonify, request
 from utils.analytics_util import record_page_view
 from models import Job
 
-bp = Blueprint("careers_bp", __name__, url_prefix="/careers")
+bp = Blueprint("careers", __name__, url_prefix="/careers")
 
 @bp.get("/health")
 def health():

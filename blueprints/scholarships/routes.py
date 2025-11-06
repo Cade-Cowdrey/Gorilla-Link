@@ -33,7 +33,7 @@ def check_file_size(file):
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 # Scholarships blueprint for handling scholarship hub features
-bp = Blueprint("scholarships_bp", __name__, url_prefix="/scholarships")
+bp = Blueprint("scholarships", __name__, url_prefix="/scholarships")
 
 @bp.route("/")
 @limiter.limit("20/minute")
