@@ -1,8 +1,7 @@
 # File: blueprints/alumni/routes.py
-from flask import Blueprint, render_template, jsonify
+from flask import render_template, jsonify
 from utils.analytics_util import record_page_view
-
-bp = Blueprint("alumni", __name__, url_prefix="/alumni")
+from . import bp
 
 @bp.get("/health")
 def health():

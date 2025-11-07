@@ -1,5 +1,5 @@
 # File: blueprints/mentors/routes.py
-from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
+from flask import render_template, jsonify, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from utils.analytics_util import track_page_view
 from services.live_chat_service import LiveChatService
@@ -7,8 +7,7 @@ from models import User, db
 from models_extended import Message
 from datetime import datetime
 from sqlalchemy import or_, and_
-
-bp = Blueprint("mentors", __name__, url_prefix="/mentors")
+from . import bp
 
 @bp.get("/health")
 def health():
