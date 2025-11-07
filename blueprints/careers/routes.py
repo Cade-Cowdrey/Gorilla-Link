@@ -2,6 +2,9 @@
 from flask import Blueprint, render_template, jsonify, request
 from utils.analytics_util import record_page_view
 from models import Job
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Import blueprint from __init__.py
 from . import bp
@@ -13,14 +16,21 @@ def health():
 @bp.get("/")
 def index():
     record_page_view("careers")
-    # Get featured jobs (active jobs, limited to 6)
-    featured_jobs = Job.query.filter_by(is_active=True).limit(6).all()
     
-    # Get recent grad opportunities (1-3 years experience)
-    recent_grad_jobs = Job.query.filter(
-        Job.is_active == True,
-        Job.years_experience_required.in_(['1-3', '0-1'])
-    ).limit(6).all()
+    try:
+        # Get featured jobs (active jobs, limited to 6)
+        featured_jobs = Job.query.filter_by(is_active=True).limit(6).all()
+        
+        # Get recent grad opportunities (1-3 years experience)
+        recent_grad_jobs = Job.query.filter(
+            Job.is_active == True,
+            Job.years_experience_required.in_(['1-3', '0-1'])
+        ).limit(6).all()
+    except Exception as e:
+        logger.error(f"Error querying jobs: {e}")
+        # Return empty lists if database isn't available
+        featured_jobs = []
+        recent_grad_jobs = []
     
     return render_template(
         "careers/index.html", 
