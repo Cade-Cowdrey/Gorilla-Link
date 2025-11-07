@@ -194,7 +194,7 @@
         <!-- Login/User Actions -->
         <div class="flex items-center gap-4">
           {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile.view_profile') }}" class="text-sm font-semibold text-[#A6192E] hover:text-[#FFC726] transition-colors">
+            <a href="{{ url_for('profile.profile_home') }}" class="text-sm font-semibold text-[#A6192E] hover:text-[#FFC726] transition-colors">
               <i class="fas fa-user-circle mr-1"></i>{{ current_user.first_name }}
             </a>
             <a href="{{ url_for('auth.logout') }}" class="bg-[#A6192E] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#FFC726] hover:text-[#A6192E] transition-all">
@@ -343,7 +343,7 @@
           </button>
           <div class="absolute top-full right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
             <div class="py-2">
-              <a href="{{ url_for('profile.view_profile') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
+              <a href="{{ url_for('profile.profile_home') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
                 My Profile
               </a>
               <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
