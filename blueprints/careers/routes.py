@@ -43,21 +43,27 @@ def index():
 def jobs():
     record_page_view("careers_jobs")
     
-    # Get filter parameters
-    experience_filter = request.args.get('experience', 'all')
+    try:
+        # Get filter parameters
+        experience_filter = request.args.get('experience', 'all')
+        
+        # Base query
+        query = Job.query.filter_by(is_active=True)
+        
+        # Apply experience filter
+        if experience_filter == 'recent-grad':
+            query = query.filter(Job.years_experience_required.in_(['0-1', '1-3']))
+        elif experience_filter == 'mid-level':
+            query = query.filter(Job.years_experience_required.in_(['3-5', '5-10']))
+        elif experience_filter == 'senior':
+            query = query.filter(Job.years_experience_required == '10+')
+        
+        all_jobs = query.order_by(Job.posted_at.desc()).all()
+    except Exception as e:
+        logger.error(f"Error loading jobs list: {e}")
+        all_jobs = []
+        experience_filter = 'all'
     
-    # Base query
-    query = Job.query.filter_by(is_active=True)
-    
-    # Apply experience filter
-    if experience_filter == 'recent-grad':
-        query = query.filter(Job.years_experience_required.in_(['0-1', '1-3']))
-    elif experience_filter == 'mid-level':
-        query = query.filter(Job.years_experience_required.in_(['3-5', '5-10']))
-    elif experience_filter == 'senior':
-        query = query.filter(Job.years_experience_required == '10+')
-    
-    all_jobs = query.order_by(Job.posted_at.desc()).all()
     return render_template("careers/jobs.html", jobs=all_jobs, experience_filter=experience_filter)
 
 @bp.get("/upgrade-board")
@@ -65,11 +71,15 @@ def upgrade_board():
     """Job Upgrade Board - Higher paying jobs for recent graduates"""
     record_page_view("careers_upgrade_board")
     
-    # Jobs requiring 1-3 years experience with higher salaries
-    upgrade_jobs = Job.query.filter(
-        Job.is_active == True,
-        Job.years_experience_required.in_(['1-3', '3-5']),
-        Job.salary_min >= 50000  # $50K+ for upgrade positions
-    ).order_by(Job.salary_max.desc()).all()
+    try:
+        # Jobs requiring 1-3 years experience with higher salaries
+        upgrade_jobs = Job.query.filter(
+            Job.is_active == True,
+            Job.years_experience_required.in_(['1-3', '3-5']),
+            Job.salary_min >= 50000  # $50K+ for upgrade positions
+        ).order_by(Job.salary_max.desc()).all()
+    except Exception as e:
+        logger.error(f"Error loading upgrade board: {e}")
+        upgrade_jobs = []
     
     return render_template("careers/upgrade_board.html", jobs=upgrade_jobs)
