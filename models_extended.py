@@ -457,21 +457,25 @@ class WebinarRegistration(db.Model):
 # SYSTEM ARCHITECTURE
 # ================================================================
 
-class FeatureFlag(db.Model):
-    """Feature flag management"""
-    __tablename__ = "feature_flags"
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
-    enabled = db.Column(db.Boolean, default=False)
-    description = db.Column(db.Text)
-    rollout_percentage = db.Column(db.Float, default=0.0)
-    target_users = db.Column(ARRAY(db.Integer))
-    target_roles = db.Column(ARRAY(db.String))
-    created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
 
+# FeatureFlag model removed - duplicate exists in another file
+# Original definition commented out to avoid SQLAlchemy conflicts
 
+# class FeatureFlag(db.Model):
+#     """Feature flag management"""
+#     __tablename__ = "feature_flags"
+#     
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(128), unique=True, nullable=False)
+#     enabled = db.Column(db.Boolean, default=False)
+#     description = db.Column(db.Text)
+#     rollout_percentage = db.Column(db.Float, default=0.0)
+#     target_users = db.Column(ARRAY(db.Integer))
+#     target_roles = db.Column(ARRAY(db.String))
+#     created_at = db.Column(db.DateTime, default=func.now())
+#     updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+# 
+# 
 class ABTest(db.Model):
     """A/B testing experiments"""
     __tablename__ = "ab_tests"
@@ -971,7 +975,8 @@ class ChatRoom(db.Model):
     created_at = db.Column(db.DateTime, default=func.now())
     is_active = db.Column(db.Boolean, default=True)
     
-    messages = db.relationship("ChatMessage", backref="room", lazy=True)
+    # Note: ChatMessage relationship removed - ChatMessage model is for AI coach, not chat rooms
+    # messages = db.relationship("ChatMessage", backref="room", lazy=True)
     participants = db.relationship("ChatParticipant", backref="room", lazy=True)
 
 

@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from extensions import db
-from models_student_features import HousingListing, HousingReview
+from models_advanced_features import HousingListing
+from models_student_features import HousingReview
 from sqlalchemy import or_, func
 from datetime import datetime
 

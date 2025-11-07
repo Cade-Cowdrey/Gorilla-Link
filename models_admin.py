@@ -375,33 +375,37 @@ class VerificationRequest(db.Model):
 
 
 # ==================== EXPORT REQUESTS ====================
-class DataExportRequest(db.Model):
-    __tablename__ = 'data_export_requests'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    
+
+# DataExportRequest model removed - duplicate exists in another file
+# Original definition commented out to avoid SQLAlchemy conflicts
+
+# class DataExportRequest(db.Model):
+#     __tablename__ = 'data_export_requests'
+#     
+#     id = db.Column(db.Integer, primary_key=True)
+#     
     # Request Details
-    requested_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    export_type = db.Column(db.String(50), nullable=False)  # users, analytics, textbooks, all_data
-    export_format = db.Column(db.String(20), default='csv')  # csv, excel, json
-    
+#     requested_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+#     export_type = db.Column(db.String(50), nullable=False)  # users, analytics, textbooks, all_data
+#     export_format = db.Column(db.String(20), default='csv')  # csv, excel, json
+#     
     # Filters (JSON)
-    filters = db.Column(db.Text)  # Date ranges, user types, etc.
-    
+#     filters = db.Column(db.Text)  # Date ranges, user types, etc.
+#     
     # Status
-    status = db.Column(db.String(20), default='pending', index=True)  # pending, processing, completed, failed
-    requested_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+#     status = db.Column(db.String(20), default='pending', index=True)  # pending, processing, completed, failed
+#     requested_at = db.Column(db.DateTime, default=datetime.utcnow)
+#     
     # Processing
-    started_at = db.Column(db.DateTime)
-    completed_at = db.Column(db.DateTime)
-    
+#     started_at = db.Column(db.DateTime)
+#     completed_at = db.Column(db.DateTime)
+#     
     # Result
-    file_url = db.Column(db.String(500))  # URL to download
-    file_size_mb = db.Column(db.Numeric(10, 2))
-    expires_at = db.Column(db.DateTime)  # Auto-delete after 7 days
-    
-    error_message = db.Column(db.Text)
-    
+#     file_url = db.Column(db.String(500))  # URL to download
+#     file_size_mb = db.Column(db.Numeric(10, 2))
+#     expires_at = db.Column(db.DateTime)  # Auto-delete after 7 days
+#     
+#     error_message = db.Column(db.Text)
+#     
     # Relationships
-    requester = db.relationship('User', backref='export_requests')
+#     requester = db.relationship('User', backref='export_requests')

@@ -5,7 +5,8 @@ A/B testing, feature rollouts, and configuration management
 
 from typing import Dict, Any, Optional, List
 from extensions import db, cache
-from models_extended import FeatureFlag, ABTest, ABTestAssignment
+from models_admin import FeatureFlag
+from models_extended import ABTest, ABTestAssignment
 from datetime import datetime
 import logging
 import hashlib

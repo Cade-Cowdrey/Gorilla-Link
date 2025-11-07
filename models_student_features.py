@@ -60,46 +60,50 @@ class TextbookInterest(db.Model):
 
 
 # ==================== HOUSING REVIEWS ====================
-class HousingListing(db.Model):
-    __tablename__ = 'housing_listings'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    
+
+# HousingListing model removed - duplicate exists in another file
+# Original definition commented out to avoid SQLAlchemy conflicts
+
+# class HousingListing(db.Model):
+#     __tablename__ = 'housing_listings'
+#     
+#     id = db.Column(db.Integer, primary_key=True)
+#     
     # Property Information
-    property_name = db.Column(db.String(200), nullable=False)
-    address = db.Column(db.String(300), nullable=False)
-    landlord_name = db.Column(db.String(200))
-    landlord_contact = db.Column(db.String(100))
-    
+#     property_name = db.Column(db.String(200), nullable=False)
+#     address = db.Column(db.String(300), nullable=False)
+#     landlord_name = db.Column(db.String(200))
+#     landlord_contact = db.Column(db.String(100))
+#     
     # Details
-    property_type = db.Column(db.String(50))  # Apartment, House, Duplex, Room
-    bedrooms = db.Column(db.Integer)
-    bathrooms = db.Column(db.Numeric(3, 1))
-    rent_min = db.Column(db.Numeric(10, 2))
-    rent_max = db.Column(db.Numeric(10, 2))
-    
+#     property_type = db.Column(db.String(50))  # Apartment, House, Duplex, Room
+#     bedrooms = db.Column(db.Integer)
+#     bathrooms = db.Column(db.Numeric(3, 1))
+#     rent_min = db.Column(db.Numeric(10, 2))
+#     rent_max = db.Column(db.Numeric(10, 2))
+#     
     # Amenities (JSON or comma-separated)
-    amenities = db.Column(db.Text)  # "Parking,Laundry,WiFi,Pets"
-    utilities_included = db.Column(db.Text)  # "Water,Trash"
-    
+#     amenities = db.Column(db.Text)  # "Parking,Laundry,WiFi,Pets"
+#     utilities_included = db.Column(db.Text)  # "Water,Trash"
+#     
     # Location
-    distance_to_campus = db.Column(db.Numeric(5, 2))  # miles
-    latitude = db.Column(db.Numeric(10, 8))
-    longitude = db.Column(db.Numeric(11, 8))
-    
+#     distance_to_campus = db.Column(db.Numeric(5, 2))  # miles
+#     latitude = db.Column(db.Numeric(10, 8))
+#     longitude = db.Column(db.Numeric(11, 8))
+#     
     # Ratings (calculated from reviews)
-    avg_rating = db.Column(db.Numeric(3, 2), default=0)
-    avg_safety_rating = db.Column(db.Numeric(3, 2), default=0)
-    avg_maintenance_rating = db.Column(db.Numeric(3, 2), default=0)
-    avg_value_rating = db.Column(db.Numeric(3, 2), default=0)
-    review_count = db.Column(db.Integer, default=0)
-    
+#     avg_rating = db.Column(db.Numeric(3, 2), default=0)
+#     avg_safety_rating = db.Column(db.Numeric(3, 2), default=0)
+#     avg_maintenance_rating = db.Column(db.Numeric(3, 2), default=0)
+#     avg_value_rating = db.Column(db.Numeric(3, 2), default=0)
+#     review_count = db.Column(db.Integer, default=0)
+#     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    verified = db.Column(db.Boolean, default=False)
-
-
+#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+#     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+#     verified = db.Column(db.Boolean, default=False)
+# 
+# 
 class HousingReview(db.Model):
     __tablename__ = 'housing_reviews'
     
