@@ -122,25 +122,7 @@ class ScholarshipExtended(db.Model):
     scholarship = db.relationship("Scholarship", backref=db.backref("extended", uselist=False))
 
 
-class ScholarshipApplication(db.Model):
-    """Track scholarship applications"""
-    __tablename__ = "scholarship_applications"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    scholarship_id = db.Column(db.Integer, db.ForeignKey("scholarships.id"), nullable=False)
-    status = db.Column(db.String(32), default="draft")  # draft, submitted, under_review, awarded, denied
-    submitted_at = db.Column(db.DateTime)
-    essay_text = db.Column(db.Text)
-    ai_match_score = db.Column(db.Float)
-    progress_percentage = db.Column(db.Integer, default=0)
-    recommendations_uploaded = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
-    
-    user = db.relationship("User", backref="scholarship_applications")
-    scholarship = db.relationship("Scholarship", backref="applications")
+# ScholarshipApplication model moved to models_growth_features.py to avoid duplicate
 
 
 class EssayLibrary(db.Model):
@@ -233,23 +215,7 @@ class AlumniProfile(db.Model):
     user = db.relationship("User", backref=db.backref("alumni_profile", uselist=False))
 
 
-class MentorshipSession(db.Model):
-    """Track mentorship sessions"""
-    __tablename__ = "mentorship_sessions"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    mentee_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    session_date = db.Column(db.DateTime, nullable=False)
-    duration_minutes = db.Column(db.Integer)
-    topic = db.Column(db.String(255))
-    notes = db.Column(db.Text)
-    status = db.Column(db.String(32), default="scheduled")  # scheduled, completed, cancelled
-    created_at = db.Column(db.DateTime, default=func.now())
-    
-    mentor = db.relationship("User", foreign_keys=[mentor_id], backref="mentoring_sessions")
-    mentee = db.relationship("User", foreign_keys=[mentee_id], backref="mentee_sessions")
+# MentorshipSession model moved to models_growth_features.py to avoid duplicate
 
 
 class EmployerPortal(db.Model):
@@ -287,23 +253,7 @@ class SponsorshipTier(db.Model):
     priority_support = db.Column(db.Boolean, default=False)
 
 
-class EventSponsor(db.Model):
-    """Event sponsorship records"""
-    __tablename__ = "event_sponsors"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    event_id = db.Column(db.Integer, db.ForeignKey("events.id"), nullable=False)
-    sponsor_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    sponsorship_level = db.Column(db.String(32), nullable=False)  # presenting, platinum, gold, silver, bronze
-    amount_paid = db.Column(db.Float, nullable=False)
-    benefits = db.Column(JSONB)
-    active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=func.now())
-    
-    # Relationships
-    event = db.relationship("Event", backref="sponsors")
-    sponsor = db.relationship("User", backref="event_sponsorships")
+# EventSponsor model moved to models_growth_features.py to avoid duplicate
 
 
 # ================================================================
@@ -465,21 +415,7 @@ class ForumThread(db.Model):
     author = db.relationship("User", backref="forum_threads")
 
 
-class ForumPost(db.Model):
-    """Forum thread replies"""
-    __tablename__ = "forum_posts"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    thread_id = db.Column(db.Integer, db.ForeignKey("forum_threads.id"), nullable=False)
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    parent_post_id = db.Column(db.Integer, db.ForeignKey("forum_posts.id"))
-    upvotes = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=func.now())
-    
-    thread = db.relationship("ForumThread", backref="posts")
-    author = db.relationship("User", backref="forum_posts")
+# ForumPost model moved to models_growth_features.py to avoid duplicate
 
 
 class Webinar(db.Model):
@@ -719,33 +655,7 @@ class LocalBusiness(db.Model):
     created_at = db.Column(db.DateTime, default=func.now())
 
 
-class Badge(db.Model):
-    """Gamification badges"""
-    __tablename__ = "badges"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True, nullable=False)
-    description = db.Column(db.Text)
-    icon_url = db.Column(db.String(512))
-    criteria = db.Column(JSONB)
-    points = db.Column(db.Integer, default=0)
-    rarity = db.Column(db.String(32))  # common, rare, epic, legendary
-    created_at = db.Column(db.DateTime, default=func.now())
-
-
-class UserBadge(db.Model):
-    """User badge awards"""
-    __tablename__ = "user_badges"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"), nullable=False)
-    awarded_at = db.Column(db.DateTime, default=func.now())
-    
-    user = db.relationship("User", backref="earned_badges")
-    badge = db.relationship("Badge", backref="user_awards")
+# Badge and UserBadge models moved to models_growth_features.py to avoid duplicate class definitions
 
 
 class Survey(db.Model):
@@ -1065,22 +975,7 @@ class ChatRoom(db.Model):
     participants = db.relationship("ChatParticipant", backref="room", lazy=True)
 
 
-class ChatMessage(db.Model):
-    """Chat messages"""
-    __tablename__ = "chat_messages"
-    __table_args__ = {'extend_existing': True}
-    
-    id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.String(128), db.ForeignKey("chat_rooms.room_id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    message_type = db.Column(db.String(32), default='text')  # text, image, file, system
-    meta_data = db.Column(JSONB)  # For file URLs, image URLs, etc. - Renamed from metadata
-    timestamp = db.Column(db.DateTime, default=func.now())
-    edited_at = db.Column(db.DateTime)
-    deleted_at = db.Column(db.DateTime)
-    
-    user = db.relationship("User", backref="chat_messages")
+# ChatMessage model moved to models_growth_features.py to avoid duplicate
 
 
 class ChatParticipant(db.Model):

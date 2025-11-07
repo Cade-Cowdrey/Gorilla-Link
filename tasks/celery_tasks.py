@@ -241,7 +241,7 @@ def send_deadline_reminders():
     Send reminders for upcoming scholarship deadlines
     """
     from models import Scholarship, User
-    from models_extended import ScholarshipApplication
+    from models_growth_features import ScholarshipApplication
     
     try:
         # Find scholarships with deadlines in next 7 days

@@ -412,7 +412,7 @@ class ForumTopic(db.Model):
     # Relationships
     category = db.relationship('ForumCategory', back_populates='topics')
     user = db.relationship('User', backref=db.backref('forum_topics', lazy='dynamic'))
-    posts = db.relationship('ForumPost', back_populates='topic', lazy='dynamic', cascade='all, delete-orphan')
+    posts = db.relationship('ForumPost', back_populates='topic', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='ForumPost.topic_id')
     
     def __repr__(self):
         return f"<ForumTopic {self.title}>"
@@ -435,7 +435,7 @@ class ForumPost(db.Model):
     updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
-    topic = db.relationship('ForumTopic', back_populates='posts')
+    topic = db.relationship('ForumTopic', back_populates='posts', foreign_keys=[topic_id])
     user = db.relationship('User', backref=db.backref('forum_posts', lazy='dynamic'))
     replies = db.relationship('ForumPost', backref=db.backref('parent_post', remote_side=[id]), lazy='dynamic')
     votes = db.relationship('ForumVote', back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
@@ -752,7 +752,7 @@ class NotificationPreference(db.Model):
     updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
-    user = db.relationship('User', backref=db.backref('notification_preferences', uselist=False))
+    user = db.relationship('User', backref=db.backref('notification_prefs', uselist=False))
     
     def __repr__(self):
         return f"<NotificationPreference user={self.user_id}>"

@@ -158,7 +158,7 @@ def my_scholarships():
 def apply(scholarship_id: int):
     """Full scholarship application with essay, file upload, and progress tracking"""
     from models import Scholarship, db
-    from models_extended import ScholarshipApplication
+    from models_growth_features import ScholarshipApplication
     from datetime import datetime
     from werkzeug.utils import secure_filename
     import os

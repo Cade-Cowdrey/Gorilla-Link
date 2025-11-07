@@ -11,8 +11,9 @@ from extensions import db
 from models import User, Event, Company
 from models_extended import (
     Subscription, PaymentTransaction, SponsorshipTier,
-    EmployerPortal, EventSponsor
+    EmployerPortal
 )
+from models_growth_features import EventSponsor
 
 # Stripe configuration (set in environment)
 stripe.api_key = None  # Will be set from config

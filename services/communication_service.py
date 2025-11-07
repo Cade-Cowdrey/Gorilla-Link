@@ -6,7 +6,8 @@ Unified inbox, notifications, email, calendar sync, messaging, SMS, WhatsApp
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from extensions import db, mail
-from models_extended import Message, Announcement, CalendarSync, Forum, ForumThread, ForumPost, Webinar, WebinarRegistration
+from models_extended import Message, Announcement, CalendarSync, Forum, ForumThread, Webinar, WebinarRegistration
+from models_growth_features import ForumPost
 from models import Notification, User
 from flask_mail import Message as MailMessage
 import logging

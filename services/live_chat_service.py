@@ -103,7 +103,7 @@ class LiveChatService:
             dict: Message details
         """
         try:
-            from models_extended import ChatMessage
+            from models_growth_features import ChatMessage
             
             chat_message = ChatMessage(
                 room_id=room_id,
@@ -157,7 +157,7 @@ class LiveChatService:
             list: Message list
         """
         try:
-            from models_extended import ChatMessage
+            from models_growth_features import ChatMessage
             
             query = ChatMessage.query.filter_by(room_id=room_id)
             
@@ -198,7 +198,8 @@ class LiveChatService:
             list: Room list with unread counts
         """
         try:
-            from models_extended import ChatParticipant, ChatRoom, ChatMessage
+            from models_growth_features import ChatMessage
+            from models_extended import ChatParticipant, ChatRoom
             
             # Get all rooms user is in
             participants = ChatParticipant.query.filter_by(user_id=user_id).all()

@@ -452,7 +452,7 @@ class AnalyticsService:
         return User.query.filter(User.last_login >= start_date).count()
     
     def _count_scholarship_applications(self, department_id: int, start_date: datetime, end_date: datetime) -> int:
-        from models_extended import ScholarshipApplication
+        from models_growth_features import ScholarshipApplication
         return ScholarshipApplication.query.join(Scholarship).filter(
             Scholarship.department_id == department_id,
             ScholarshipApplication.created_at >= start_date
@@ -591,7 +591,7 @@ class AnalyticsService:
         return (errors / total * 100) if total > 0 else 0.0
     
     def _calculate_total_scholarships_awarded(self) -> int:
-        from models_extended import ScholarshipApplication
+        from models_growth_features import ScholarshipApplication
         return ScholarshipApplication.query.filter_by(status="awarded").count()
     
     def _calculate_total_scholarship_amount(self) -> float:
@@ -599,7 +599,7 @@ class AnalyticsService:
         return float(total) if total else 0.0
     
     def _count_students_with_scholarships(self) -> int:
-        from models_extended import ScholarshipApplication
+        from models_growth_features import ScholarshipApplication
         return db.session.query(func.count(func.distinct(ScholarshipApplication.user_id))).filter_by(status="awarded").scalar() or 0
     
     def _calculate_placement_rate(self) -> float:
