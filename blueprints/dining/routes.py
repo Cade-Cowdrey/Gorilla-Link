@@ -11,6 +11,9 @@ from models_dining import (
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 dining_bp = Blueprint('dining', __name__, url_prefix='/dining')
 
@@ -18,22 +21,28 @@ dining_bp = Blueprint('dining', __name__, url_prefix='/dining')
 @dining_bp.route('/')
 def dining_home():
     """Main dining hall page - show all locations"""
-    locations = DiningLocation.query.filter_by(is_active=True).all()
-    
-    # Get today's specials
-    today = datetime.now().date()
-    specials = DailySpecial.query.filter_by(
-        special_date=today,
-        is_active=True
-    ).limit(5).all()
-    
-    # Get trending items (highest rated this week)
-    week_ago = datetime.now() - timedelta(days=7)
-    trending_items = MenuItem.query.join(MealReview).filter(
-        MealReview.created_at >= week_ago
-    ).group_by(MenuItem.id).order_by(
-        desc(func.avg(MealReview.rating))
-    ).limit(6).all()
+    try:
+        locations = DiningLocation.query.filter_by(is_active=True).all()
+        
+        # Get today's specials
+        today = datetime.now().date()
+        specials = DailySpecial.query.filter_by(
+            special_date=today,
+            is_active=True
+        ).limit(5).all()
+        
+        # Get trending items (highest rated this week)
+        week_ago = datetime.now() - timedelta(days=7)
+        trending_items = MenuItem.query.join(MealReview).filter(
+            MealReview.created_at >= week_ago
+        ).group_by(MenuItem.id).order_by(
+            desc(func.avg(MealReview.rating))
+        ).limit(6).all()
+    except Exception as e:
+        logger.error(f"Error loading dining data: {e}")
+        locations = []
+        specials = []
+        trending_items = []
     
     return render_template('dining/index.html',
                          locations=locations,

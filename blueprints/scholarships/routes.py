@@ -47,23 +47,28 @@ def browse():
     """Browse all available scholarships from trusted sources."""
     record_page_view("scholarships_browse", current_user.id if current_user.is_authenticated else None)
     
-    # Get all active scholarships
-    query = Scholarship.query.filter_by(is_active=True)
-    
-    # Apply filters if provided
-    category = request.args.get('category')
-    if category:
-        query = query.filter(Scholarship.category == category)
-    
-    min_amount = request.args.get('min_amount', type=float)
-    if min_amount:
-        query = query.filter(Scholarship.amount >= min_amount)
-    
-    # Order by deadline (closest first)
-    scholarships = query.order_by(Scholarship.deadline).all()
-    
-    # Get unique categories for filtering
-    all_categories = [c[0] for c in Scholarship.query.with_entities(Scholarship.category).distinct().all() if c[0]]
+    try:
+        # Get all active scholarships
+        query = Scholarship.query.filter_by(is_active=True)
+        
+        # Apply filters if provided
+        category = request.args.get('category')
+        if category:
+            query = query.filter(Scholarship.category == category)
+        
+        min_amount = request.args.get('min_amount', type=float)
+        if min_amount:
+            query = query.filter(Scholarship.amount >= min_amount)
+        
+        # Order by deadline (closest first)
+        scholarships = query.order_by(Scholarship.deadline).all()
+        
+        # Get unique categories for filtering
+        all_categories = [c[0] for c in Scholarship.query.with_entities(Scholarship.category).distinct().all() if c[0]]
+    except Exception as e:
+        logger.error(f"Error loading scholarships: {e}")
+        scholarships = []
+        all_categories = []
     
     return render_template(
         "scholarships/browse.html", 
