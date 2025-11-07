@@ -1,6 +1,6 @@
 # File: blueprints/mentors/routes.py
 from flask import render_template, jsonify, request, flash, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_url
 from utils.analytics_util import track_page_view
 from services.live_chat_service import LiveChatService
 from models import User, db
@@ -8,51 +8,66 @@ from models_extended import Message
 from datetime import datetime
 from sqlalchemy import or_, and_
 from . import bp
+import logging
+
+logger = logging.getLogger(__name__)
 
 @bp.get("/health")
 def health():
     return jsonify(status="ok", section="mentors")
 
 @bp.get("/")
-@login_required
 def index():
-    """Mentor discovery and matchmaking"""
+    """Mentor discovery and matchmaking - requires login"""
+    # Check if user is logged in, redirect to login if not
+    if not current_user.is_authenticated:
+        flash('Please log in to access the mentorship program.', 'info')
+        return redirect(url_for('auth.login', next=request.url))
+    
     track_page_view("mentors")
     
     # Get available mentors (alumni and faculty)
-    mentors = User.query.filter(
-        User.role_id.in_([
-            db.session.query(db.text("id")).select_from(db.text("roles")).filter(
-                db.text("name").in_(['alumni', 'faculty'])
-            )
-        ]),
-        User.is_active == True
-    ).limit(20).all()
+    try:
+        mentors = User.query.filter(
+            User.role_id.in_([
+                db.session.query(db.text("id")).select_from(db.text("roles")).filter(
+                    db.text("name").in_(['alumni', 'faculty'])
+                )
+            ]),
+            User.is_active == True
+        ).limit(20).all()
+    except Exception as e:
+        logger.error(f"Error loading mentors: {e}")
+        mentors = []
     
     # Get user's active conversations
-    conversations = Message.query.filter(
-        or_(
-            Message.sender_id == current_user.id,
-            Message.recipient_id == current_user.id
-        )
-    ).order_by(Message.created_at.desc()).limit(10).all()
-    
-    # Group by thread
-    threads = {}
-    for msg in conversations:
-        if msg.thread_id not in threads:
-            other_user_id = msg.recipient_id if msg.sender_id == current_user.id else msg.sender_id
-            other_user = User.query.get(other_user_id)
-            threads[msg.thread_id] = {
-                'thread_id': msg.thread_id,
-                'other_user': other_user,
-                'last_message': msg,
-                'unread_count': Message.query.filter(
-                    Message.thread_id == msg.thread_id,
-                    Message.recipient_id == current_user.id,
-                    Message.is_read == False
-                ).count()
-            }
+    try:
+        conversations = Message.query.filter(
+            or_(
+                Message.sender_id == current_user.id,
+                Message.recipient_id == current_user.id
+            )
+        ).order_by(Message.created_at.desc()).limit(10).all()
+        
+        # Group by thread
+        threads = {}
+        for msg in conversations:
+            if msg.thread_id not in threads:
+                other_user_id = msg.recipient_id if msg.sender_id == current_user.id else msg.sender_id
+                other_user = User.query.get(other_user_id)
+                threads[msg.thread_id] = {
+                    'thread_id': msg.thread_id,
+                    'other_user': other_user,
+                    'last_message': msg,
+                    'unread_count': Message.query.filter(
+                        Message.thread_id == msg.thread_id,
+                        Message.recipient_id == current_user.id,
+                        Message.is_read == False
+                    ).count()
+                }
+    except Exception as e:
+        logger.error(f"Error loading conversations: {e}")
+        threads = {}
     
     return render_template('mentors/index.html', 
                          mentors=mentors, 
@@ -60,9 +75,13 @@ def index():
 
 
 @bp.get("/chat/<int:mentor_id>")
-@login_required
 def chat(mentor_id):
-    """Real-time chat interface with mentor"""
+    """Real-time chat interface with mentor - requires login"""
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        flash('Please log in to chat with mentors.', 'info')
+        return redirect(url_for('auth.login', next=request.url))
+    
     track_page_view("mentor_chat")
     
     mentor = User.query.get_or_404(mentor_id)
@@ -95,9 +114,12 @@ def chat(mentor_id):
 
 
 @bp.post("/chat/send")
-@login_required
 def send_message():
-    """Send a message"""
+    """Send a message - requires login"""
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        return jsonify({'success': False, 'error': 'Please log in to send messages'}), 401
+    
     data = request.get_json()
     
     recipient_id = data.get('recipient_id')
@@ -146,9 +168,11 @@ def send_message():
 
 
 @bp.get("/chat/messages/<thread_id>")
-@login_required
 def get_messages(thread_id):
-    """Get message history (AJAX endpoint)"""
+    """Get message history (AJAX endpoint) - requires login"""
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        return jsonify({'success': False, 'error': 'Please log in'}), 401
     
     # Verify user is part of thread
     sample_message = Message.query.filter_by(thread_id=thread_id).first()
@@ -181,9 +205,12 @@ def get_messages(thread_id):
 
 
 @bp.post("/chat/mark-read/<int:message_id>")
-@login_required
 def mark_read(message_id):
-    """Mark message as read"""
+    """Mark message as read - requires login"""
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        return jsonify({'success': False, 'error': 'Please log in'}), 401
+    
     message = Message.query.get_or_404(message_id)
     
     if message.recipient_id != current_user.id:
@@ -197,9 +224,12 @@ def mark_read(message_id):
 
 
 @bp.get("/chat/online-status/<int:user_id>")
-@login_required
 def online_status(user_id):
-    """Check if user is online"""
+    """Check if user is online - requires login"""
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        return jsonify({'success': False, 'error': 'Please log in'}), 401
+    
     is_online = user_id in LiveChatService.online_users
     
     user = User.query.get(user_id)
