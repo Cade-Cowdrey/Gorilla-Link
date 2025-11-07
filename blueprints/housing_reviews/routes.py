@@ -5,7 +5,7 @@ from models_student_features import HousingListing, HousingReview
 from sqlalchemy import or_, func
 from datetime import datetime
 
-housing_bp = Blueprint('housing', __name__, url_prefix='/housing')
+housing_bp = Blueprint('housing_reviews', __name__, url_prefix='/housing')
 
 @housing_bp.route('/')
 def index():
