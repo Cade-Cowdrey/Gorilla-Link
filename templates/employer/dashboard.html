@@ -47,7 +47,7 @@
       <h3 class="text-xl font-heading text-crimson mb-2">{{ job.title }}</h3>
       <p class="text-gray mb-2">{{ job.location }}</p>
       <p class="text-sm text-gray mb-4">{{ job.description[:150] }}...</p>
-      <a href="{{ url_for('careers.details', job_id=job.id) }}" class="btn btn-gold">View Details</a>
+      <a href="{{ url_for('careers.jobs') }}" class="btn btn-gold">Browse Jobs</a>
     </div>
     {% else %}
     <div class="col-span-3 text-center text-gray">No active job postings yet.</div>
@@ -63,7 +63,7 @@
   <p class="text-white mb-6 max-w-2xl mx-auto">
     Access enhanced analytics, featured listings, and direct PSU marketing by joining a premium partnership tier.
   </p>
-  <a href="{{ url_for('employers_bp.upgrade') }}" class="btn btn-gold mr-3">View Tiers</a>
+  <a href="{{ url_for('employer.index') }}" class="btn btn-gold mr-3">Employer Portal</a>
   <a href="{{ url_for('careers.index') }}" class="btn btn-crimson">Go to Careers</a>
 </section>
 {% endblock %}

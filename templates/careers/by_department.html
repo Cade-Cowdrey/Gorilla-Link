@@ -5,7 +5,7 @@
 <h1 class="text-3xl font-bold mb-6">Careers by Department</h1>
 <div class="grid md:grid-cols-3 gap-6">
 {% for d in departments %}
-<a href="{{ url_for('careers.dashboard') }}" class="p-6 rounded-2xl shadow bg-white hover:shadow-lg">
+<a href="{{ url_for('careers.jobs') }}" class="p-6 rounded-2xl shadow bg-white hover:shadow-lg">
 <div class="text-sm opacity-70">{{ d.slug | upper }}</div>
 <div class="text-xl font-semibold">{{ d.title }}</div>
 <div class="mt-2">Open roles: <strong>{{ d.open_roles }}</strong></div>

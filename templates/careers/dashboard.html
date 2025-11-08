@@ -10,7 +10,7 @@
   <p class="text-gray max-w-2xl mx-auto mb-10">
     Discover opportunities from top employers partnering with Pittsburg State University.
   </p>
-  <a href="{{ url_for('careers.add_job') }}" class="btn btn-gold">Post a Job or Internship</a>
+  <a href="{{ url_for('careers.jobs') }}" class="btn btn-gold">Browse All Jobs</a>
 </section>
 
 <!-- ============================================================
@@ -24,7 +24,7 @@
       <p class="font-semibold text-gray mb-2">{{ job.company }}</p>
       <p class="text-gray mb-4">{{ job.location }}</p>
       <p class="text-sm text-gray mb-6">{{ job.description[:160] }}...</p>
-      <a href="{{ url_for('careers.details', job_id=job.id) }}" class="btn btn-crimson">View Details</a>
+      <a href="{{ url_for('careers.jobs') }}" class="btn btn-crimson">View All Jobs</a>
     </div>
     {% else %}
     <div class="col-span-3 text-center text-gray">No jobs posted yet. Check back soon!</div>
