@@ -41,7 +41,7 @@
                                     <span class="psu-badge psu-badge-gold">{{ notification_count }}</span>
                                 {% endif %}
                             </a>
-                            <a href="{{ url_for('profile.view_profile') }}" class="psu-nav-link">
+                            <a href="{{ url_for('profile.profile_home') }}" class="psu-nav-link">
                                 <i class="fas fa-user-circle"></i>
                                 {{ current_user.first_name }}
                             </a>
@@ -179,7 +179,7 @@
                     <ul class="psu-footer-links">
                         <li><a href="{{ url_for('core.home') }}">Home</a></li>
                         <li><a href="{{ url_for('careers.index') }}">Job Board</a></li>
-                        <li><a href="{{ url_for('resume.dashboard') }}">Resume Builder</a></li>
+                        <li><a href="{{ url_for('resume.index') }}">Resume Builder</a></li>
                         <li><a href="{{ url_for('alumni.index') }}">Alumni Network</a></li>
                         <li><a href="{{ url_for('events.events_home') }}">Events</a></li>
                     </ul>
