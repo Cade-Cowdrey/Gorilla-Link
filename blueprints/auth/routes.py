@@ -18,20 +18,18 @@ def login():
     
     if request.method == "POST":
         try:
-            username = request.form.get("username") or request.form.get("email")
+            email = request.form.get("email")
             password = request.form.get("password")
             
-            # Try to find user by username or email
-            user = User.query.filter(
-                (User.username == username) | (User.email == username)
-            ).first()
+            # Find user by email
+            user = User.query.filter_by(email=email).first()
             
             if user and user.check_password(password):
                 login_user(user)
                 flash("Welcome back!", "success")
                 next_page = request.args.get('next')
                 return redirect(next_page or url_for("core.home"))
-            flash("Invalid credentials.", "danger")
+            flash("Invalid email or password.", "danger")
         except Exception as e:
             logger.error(f"Login error: {e}")
             flash("An error occurred during login. Please try again.", "danger")
@@ -59,31 +57,27 @@ def register():
     
     if request.method == "POST":
         try:
-            username = request.form.get("username")
+            full_name = request.form.get("name")
             email = request.form.get("email")
             password = request.form.get("password")
-            confirm_password = request.form.get("confirm_password")
             
             # Validation
-            if not username or not email or not password:
+            if not full_name or not email or not password:
                 flash("All fields are required.", "danger")
                 return render_template("auth/register.html", title="Register | PittState-Connect")
             
-            if password != confirm_password:
-                flash("Passwords do not match.", "danger")
-                return render_template("auth/register.html", title="Register | PittState-Connect")
-            
             # Check if user already exists
-            if User.query.filter_by(username=username).first():
-                flash("Username already taken.", "danger")
-                return render_template("auth/register.html", title="Register | PittState-Connect")
-            
             if User.query.filter_by(email=email).first():
                 flash("Email already registered.", "danger")
                 return render_template("auth/register.html", title="Register | PittState-Connect")
             
+            # Split name into first and last
+            name_parts = full_name.strip().split(maxsplit=1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ""
+            
             # Create new user
-            user = User(username=username, email=email)
+            user = User(first_name=first_name, last_name=last_name, email=email)
             user.set_password(password)
             db.session.add(user)
             db.session.commit()

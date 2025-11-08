@@ -189,8 +189,6 @@
           </div>
         </div>
 
-        </div>
-
         <!-- Login/User Actions -->
         <div class="flex items-center gap-4">
           {% if current_user.is_authenticated %}
@@ -210,207 +208,81 @@
 
       <!-- Desktop Navigation - Below Logo -->
       <nav class="hidden lg:flex items-center gap-1 mt-4 border-t border-gray-200 pt-3">
-        <a href="{{ url_for('index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Home</a>
-        <a href="{{ url_for('scholarships.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Scholarships</a>
-        <a href="{{ url_for('careers.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Careers</a>
-        <a href="{{ url_for('alumni.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Alumni Network</a>
-        <a href="{{ url_for('dining.dining_home') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Dining</a>
+        <a href="{{ url_for('index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Home</a>
+        <a href="{{ url_for('scholarships.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Alumni</a>
+        <a href="{{ url_for('certifications.browse') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Certifications</a>
+        <a href="{{ url_for('resume.resume_dashboard') }}" class="nav-link px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all">Resume Builder</a>
 
-        <!-- Student Life Dropdown (NEW FEATURES!) -->
+        <!-- Campus Life Dropdown -->
         <div class="relative group z-50">
           <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
-            Student Life
+            Campus Life
             <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
+          <div class="absolute top-full left-0 mt-1 w-56 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
             <div class="py-1">
-              {# Textbook Exchange - Blueprint not configured yet
-              <a href="{{ url_for('textbook.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-book mr-2 text-[#A6192E]"></i>Textbook Exchange
-              </a>
-              #}
               <a href="{{ url_for('housing.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
                 <i class="fas fa-home mr-2 text-[#A6192E]"></i>Housing
               </a>
               <a href="{{ url_for('dining.dining_home') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-utensils mr-2 text-[#A6192E]"></i>Dining Halls
+                <i class="fas fa-utensils mr-2 text-[#A6192E]"></i>Dining
               </a>
-              {# Student Discounts - Blueprint not configured yet
-              <a href="{{ url_for('discounts.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-tags mr-2 text-[#A6192E]"></i>Student Discounts
-              </a>
-              #}
               <a href="{{ url_for('events.events_home') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-calendar mr-2 text-[#A6192E]"></i>Events Calendar
-              </a>
-              {# Campus Wait Times - Blueprint not configured yet
-              <a href="{{ url_for('wait_times.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-clock mr-2 text-[#A6192E]"></i>Campus Wait Times
-              </a>
-              #}
-            </div>
-          </div>
-        </div>
-
-        <!-- Academic Resources Dropdown -->
-        <div class="relative group z-50">
-          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
-            Academics
-            <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
-            <div class="py-1">
-              {# Course Materials - Blueprint not configured yet
-              <a href="{{ url_for('course_library.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-folder mr-2 text-[#A6192E]"></i>Course Materials
-              </a>
-              #}
-              {# Professor Reviews - Blueprint not configured yet
-              <a href="{{ url_for('professor.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chalkboard-teacher mr-2 text-[#A6192E]"></i>Professor Reviews
-              </a>
-              #}
-              {# Grade Explorer - Blueprint not configured yet
-              <a href="{{ url_for('grade_explorer.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chart-bar mr-2 text-[#A6192E]"></i>Grade Distribution
-              </a>
-              #}
-              {# GPA Calculator - No blueprint exists yet
-              <a href="{{ url_for('gpa_calculator.calculator_home') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-calculator mr-2 text-[#A6192E]"></i>GPA Calculator
-              </a>
-              #}
-              <a href="{{ url_for('scholarships.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-graduation-cap mr-2 text-[#A6192E]"></i>Scholarships
-              </a>
-              <a href="https://library.pittstate.edu/" target="_blank" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-book mr-2 text-[#A6192E]"></i>Axe Library
+                <i class="fas fa-calendar mr-2 text-[#A6192E]"></i>Events
               </a>
             </div>
           </div>
         </div>
-
-        <!-- Resources Dropdown -->
-        <div class="relative group z-50">
-          <button class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] transition-all inline-flex items-center gap-1">
-            Resources
-            <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div class="absolute top-full left-0 mt-1 w-64 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-200 z-[9999]">
-            <div class="py-1">
-              <a href="{{ url_for('careers.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-briefcase mr-2 text-[#A6192E]"></i>Career Services
-              </a>
-              <a href="{{ url_for('mentors.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-users mr-2 text-[#A6192E]"></i>Mentorship Program
-              </a>
-              <a href="{{ url_for('portfolio.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-user mr-2 text-[#A6192E]"></i>My Profile
-              </a>
-              <a href="{{ url_for('analytics_bp.index') }}" class="block px-5 py-2.5 hover:bg-gray-100 transition-colors text-sm text-gray-700">
-                <i class="fas fa-chart-line mr-2 text-[#A6192E]"></i>Analytics Dashboard
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <a href="{{ url_for('events.events_home') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">Events</a>
-        <a href="{{ url_for('announcements_bp.index') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-[#FFC726] hover:border-b-2 hover:border-[#FFC726] transition-all">News</a>
       </nav>
-    </div>
-        {% if current_user.is_authenticated %}
-        <!-- Notifications -->
-        <button class="relative hover:text-gold transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-          </svg>
-          <span class="absolute -top-1 -right-1 bg-gold text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">3</span>
-        </button>
-        
-        <!-- Profile Dropdown -->
-        <div class="relative group">
-          <button class="flex items-center gap-2 hover:text-gold transition-colors">
-            <div class="w-8 h-8 bg-gold text-crimson rounded-full flex items-center justify-center font-bold text-sm">
-              {{ current_user.first_name[0] if current_user.first_name else 'U' }}
-            </div>
-            <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div class="absolute top-full right-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 dropdown-menu">
-            <div class="py-2">
-              <a href="{{ url_for('profile.profile_home') }}" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
-                My Profile
-              </a>
-              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
-                Settings
-              </a>
-              <a href="#" class="block px-4 py-3 hover:bg-crimson hover:text-white transition-colors text-sm">
-                My Applications
-              </a>
-              <div class="border-t border-gray-200 my-1"></div>
-              <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 hover:bg-red-600 hover:text-white transition-colors text-sm">
-                Logout
-              </a>
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <a href="{{ url_for('auth.login') }}" class="bg-gold text-crimson font-bold px-5 py-2 rounded hover:bg-yellow-400 transition-colors text-sm uppercase tracking-wide">
-          Login
-        </a>
-        {% endif %}
 
-        <!-- Mobile Menu Button -->
-        <button id="mobile-menu-btn" class="lg:hidden text-white hover:text-gold transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
+      <!-- Mobile Menu Button -->
+      <button class="lg:hidden text-[#A6192E] text-2xl" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
     </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden lg:hidden bg-crimson border-t border-white/10">
-      <div class="max-w-7xl mx-auto px-6 py-4 space-y-2">
-        <a href="{{ url_for('index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Home</a>
-        <a href="{{ url_for('scholarships.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Scholarships</a>
-        <a href="{{ url_for('careers.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Careers</a>
-        <a href="{{ url_for('alumni.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Alumni Network</a>
-        <a href="{{ url_for('events.events_home') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">Events</a>
-        <a href="{{ url_for('announcements_bp.index') }}" class="block py-2 hover:text-gold transition-colors uppercase text-sm font-semibold">News</a>
-        <div class="border-t border-white/10 pt-2 mt-2">
-          <p class="text-xs text-gray-300 mb-2 uppercase font-semibold">Resources</p>
-          <a href="{{ url_for('scholarships.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Scholarships</a>
-          <a href="{{ url_for('careers.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Career Services</a>
-          <a href="{{ url_for('mentors.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">Mentorship</a>
-          <a href="{{ url_for('portfolio.index') }}" class="block py-2 pl-4 hover:text-gold transition-colors text-sm">My Profile</a>
-        </div>
-      </div>
+    <!-- Mobile Navigation -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-gray-200">
+      <nav class="px-6 py-4 space-y-2">
+        <a href="{{ url_for('index') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Home</a>
+        <a href="{{ url_for('scholarships.index') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Scholarships</a>
+        <a href="{{ url_for('careers.index') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Careers</a>
+        <a href="{{ url_for('alumni.index') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Alumni</a>
+        <a href="{{ url_for('certifications.browse') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Certifications</a>
+        <a href="{{ url_for('resume.resume_dashboard') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Resume Builder</a>
+        <a href="{{ url_for('housing.index') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Housing</a>
+        <a href="{{ url_for('dining.dining_home') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Dining</a>
+        <a href="{{ url_for('events.events_home') }}" class="block py-2 text-sm font-semibold text-gray-700 hover:text-[#A6192E]">Events</a>
+      </nav>
     </div>
   </header>
 
-  <!-- FLASH MESSAGES -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="max-w-7xl mx-auto mt-4 px-6 space-y-2">
-    {% for category, message in messages %}
-    <div class="p-4 rounded border-l-4 {% if category == 'success' %}bg-green-50 border-green-600 text-green-800{% elif category == 'error' %}bg-red-50 border-red-600 text-red-800{% elif category == 'warning' %}bg-yellow-50 border-yellow-600 text-yellow-800{% else %}bg-blue-50 border-blue-600 text-blue-800{% endif %}">
-      <p class="font-medium">{{ message }}</p>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endwith %}
+  <script>
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
+    }
+  </script>
 
-  <!-- MAIN CONTENT -->
-  <main class="flex-1">
+  <!-- Flash Messages -->
+  <div class="container mx-auto px-6 pt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800 border border-green-300{% elif category == 'danger' or category == 'error' %}bg-red-100 text-red-800 border border-red-300{% elif category == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-300{% else %}bg-blue-100 text-blue-800 border border-blue-300{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-grow">
     {% block content %}{% endblock %}
   </main>
 
