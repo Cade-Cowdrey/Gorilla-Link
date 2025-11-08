@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ resume.user.full_name }} - Resume</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #2C3E50;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2E86AB;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 28pt;
+            color: #1A5490;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+        
+        .header .contact {
+            font-size: 10pt;
+            color: #555;
+            margin-top: 8px;
+        }
+        
+        .header .contact span {
+            margin: 0 10px;
+        }
+        
+        .section {
+            margin-bottom: 18px;
+        }
+        
+        .section-title {
+            font-size: 14pt;
+            color: #2E86AB;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid #2E86AB;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .entry {
+            margin-bottom: 15px;
+        }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+        
+        .entry-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #2C3E50;
+        }
+        
+        .entry-organization {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #555;
+            font-style: italic;
+        }
+        
+        .entry-date {
+            font-size: 10pt;
+            color: #777;
+        }
+        
+        .entry-details {
+            margin-left: 0;
+            padding-left: 18px;
+            margin-top: 6px;
+        }
+        
+        .entry-details li {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .skill-item {
+            font-size: 10pt;
+            padding: 4px 8px;
+            background: #E8F4F8;
+            border-left: 3px solid #2E86AB;
+        }
+        
+        .summary {
+            text-align: justify;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ resume.user.full_name }}</h1>
+        <div class="contact">
+            <span>📧 {{ resume.user.email }}</span>
+            {% if resume.user.phone %}<span>📱 {{ resume.user.phone }}</span>{% endif %}
+            {% if resume.user.linkedin_url %}<span>💼 LinkedIn</span>{% endif %}
+            {% if resume.user.github_url %}<span>💻 GitHub</span>{% endif %}
+        </div>
+    </div>
+    
+    {% if resume.summary %}
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <div class="summary">{{ resume.summary }}</div>
+    </div>
+    {% endif %}
+    
+    {% for section in resume.sections %}
+    <div class="section">
+        <div class="section-title">{{ section.title }}</div>
+        
+        {% if section.content_type == 'bullets' %}
+            {% for entry in section.entries %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div>
+                        <div class="entry-title">{{ entry.title }}</div>
+                        {% if entry.organization %}<div class="entry-organization">{{ entry.organization }}</div>{% endif %}
+                    </div>
+                    {% if entry.start_date or entry.end_date %}
+                    <div class="entry-date">
+                        {{ entry.start_date.strftime('%b %Y') if entry.start_date }}
+                        {% if entry.end_date %} - {{ entry.end_date.strftime('%b %Y') }}{% else %} - Present{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% if entry.description %}
+                <ul class="entry-details">
+                    {% for bullet in entry.description.split('\n') %}
+                    {% if bullet.strip() %}
+                    <li>{{ bullet.strip('•- ').strip() }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% elif section.content_type == 'skills' %}
+            <div class="skills-grid">
+                {% for skill in section.content.split(',') %}
+                <div class="skill-item">{{ skill.strip() }}</div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div>{{ section.content }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>

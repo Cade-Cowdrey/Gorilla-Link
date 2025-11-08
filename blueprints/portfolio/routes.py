@@ -1,13 +1,26 @@
 # File: blueprints/portfolio/routes.py
-from flask import Blueprint, render_template_string, jsonify, request, redirect, url_for, flash
+from flask import Blueprint, render_template_string, jsonify, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
 from extensions import db
 from models_portfolio import Portfolio, PortfolioExperience, PortfolioProject, PortfolioAward, PortfolioSkill
 from models import User
 from datetime import datetime
 from sqlalchemy import desc
+import json
+import os
+from werkzeug.utils import secure_filename
+import pdfkit
+from io import BytesIO
 
 bp = Blueprint("portfolio", __name__, url_prefix="/portfolio")
+
+# Configuration
+UPLOAD_FOLDER = 'static/uploads/portfolios'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ======================================================
 # TEMPLATES
@@ -167,21 +180,749 @@ PORTFOLIO_EDIT_TEMPLATE = """
 {% block title %}Edit Portfolio | PittState-Connect{% endblock %}
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">Edit Your Portfolio</h1>
-    <p class="text-muted mb-4">Update your professional information</p>
-    
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Your portfolio URL: 
-        <a href="{{ url_for('portfolio.view', slug=portfolio.slug) }}" target="_blank">
-            {{ request.host_url }}portfolio/{{ portfolio.slug }}
-        </a>
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Sidebar Navigation -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Portfolio Manager</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#basic-info" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-person"></i> Basic Info
+                    </a>
+                    <a href="#experiences" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                        <i class="bi bi-briefcase"></i> Experiences
+                    </a>
+                    <a href="#projects" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-folder"></i> Projects
+                    </a>
+                    <a href="#awards" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-trophy"></i> Awards
+                    </a>
+                    <a href="#skills" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-star"></i> Skills
+                    </a>
+                    <a href="#media" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-image"></i> Media
+                    </a>
+                    <a href="#theme" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-palette"></i> Theme
+                    </a>
+                    <a href="#analytics" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="bi bi-graph-up"></i> Analytics
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('portfolio.view', slug=portfolio.slug) }}" class="btn btn-success w-100 mb-2" target="_blank">
+                        <i class="bi bi-eye"></i> View Portfolio
+                    </a>
+                    <a href="{{ url_for('portfolio.export_pdf', slug=portfolio.slug) }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-download"></i> Download PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <div class="tab-content">
+                <!-- Basic Info Tab -->
+                <div class="tab-pane fade" id="basic-info">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h4><i class="bi bi-person-circle"></i> Basic Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('portfolio.update_basic') }}" class="needs-validation">
+                                <div class="mb-3">
+                                    <label class="form-label">Portfolio URL</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">{{ request.host_url }}portfolio/</span>
+                                        <input type="text" class="form-control" value="{{ portfolio.slug }}" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="headline" class="form-label">Professional Headline</label>
+                                    <input type="text" class="form-control" id="headline" name="headline" 
+                                           value="{{ portfolio.headline or '' }}" 
+                                           placeholder="e.g., Turning Strategy into Impact through Leadership">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="about" class="form-label">About Me</label>
+                                    <textarea class="form-control" id="about" name="about" rows="6">{{ portfolio.about or '' }}</textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ portfolio.phone or '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="website_url" class="form-label">Website</label>
+                                        <input type="url" class="form-control" id="website_url" name="website_url" value="{{ portfolio.website_url or '' }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="linkedin_url" class="form-label">LinkedIn URL</label>
+                                    <input type="url" class="form-control" id="linkedin_url" name="linkedin_url" value="{{ portfolio.linkedin_url or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="github_url" class="form-label">GitHub URL</label>
+                                    <input type="url" class="form-control" id="github_url" name="github_url" value="{{ portfolio.github_url or '' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="twitter_url" class="form-label">Twitter/X URL</label>
+                                    <input type="url" class="form-control" id="twitter_url" name="twitter_url" value="{{ portfolio.twitter_url or '' }}">
+                                </div>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_public" name="is_public" value="true" {% if portfolio.is_public %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_public">Make portfolio public</label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Experiences Tab -->
+                <div class="tab-pane fade show active" id="experiences">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4><i class="bi bi-briefcase"></i> Work Experience</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExperienceModal">
+                                <i class="bi bi-plus-circle"></i> Add Experience
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            {% if portfolio.experiences %}
+                            <div class="list-group">
+                                {% for exp in portfolio.experiences %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1">{{ exp.title }}</h5>
+                                            <p class="mb-1 text-primary">{{ exp.company }}</p>
+                                            <small class="text-muted">
+                                                {{ exp.start_date.strftime('%b %Y') }} - {% if exp.end_date %}{{ exp.end_date.strftime('%b %Y') }}{% else %}Present{% endif %}
+                                                {% if exp.location %}| {{ exp.location }}{% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editExperience({{ exp.id }})">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteExperience({{ exp.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% if exp.description %}
+                                    <p class="mt-2 mb-0">{{ exp.description }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">No experiences added yet. Click "Add Experience" to get started!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Projects Tab -->
+                <div class="tab-pane fade" id="projects">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4><i class="bi bi-folder"></i> Projects</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                                <i class="bi bi-plus-circle"></i> Add Project
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            {% if portfolio.projects %}
+                            <div class="row">
+                                {% for project in portfolio.projects %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {% if project.image_url %}
+                                        <img src="{{ project.image_url }}" class="card-img-top" alt="{{ project.title }}">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ project.title }}</h5>
+                                            {% if project.subtitle %}
+                                            <p class="card-subtitle text-muted mb-2">{{ project.subtitle }}</p>
+                                            {% endif %}
+                                            {% if project.description %}
+                                            <p class="card-text small">{{ project.description[:100] }}...</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editProject({{ project.id }})">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteProject({{ project.id }})">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">No projects added yet. Click "Add Project" to showcase your work!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Awards Tab -->
+                <div class="tab-pane fade" id="awards">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4><i class="bi bi-trophy"></i> Awards & Honors</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAwardModal">
+                                <i class="bi bi-plus-circle"></i> Add Award
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            {% if portfolio.awards %}
+                            <div class="list-group">
+                                {% for award in portfolio.awards %}
+                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ award.title }}</h6>
+                                        {% if award.issuer %}<p class="mb-1 text-muted small">{{ award.issuer }}</p>{% endif %}
+                                        {% if award.date %}<small class="text-muted">{{ award.date.strftime('%B %Y') }}</small>{% endif %}
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editAward({{ award.id }})">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAward({{ award.id }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">No awards added yet. Add your achievements!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skills Tab -->
+                <div class="tab-pane fade" id="skills">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4><i class="bi bi-star"></i> Skills</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+                                <i class="bi bi-plus-circle"></i> Add Skill
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            {% if portfolio.skills %}
+                            {% set skills_by_category = {} %}
+                            {% for skill in portfolio.skills %}
+                                {% set category = skill.category or 'Other' %}
+                                {% if category not in skills_by_category %}
+                                    {% set _ = skills_by_category.update({category: []}) %}
+                                {% endif %}
+                                {% set _ = skills_by_category[category].append(skill) %}
+                            {% endfor %}
+                            
+                            {% for category, skills in skills_by_category.items() %}
+                            <div class="mb-4">
+                                <h6 class="text-primary mb-3">{{ category }}</h6>
+                                <div class="row g-2">
+                                    {% for skill in skills %}
+                                    <div class="col-md-4">
+                                        <div class="d-flex justify-content-between align-items-center border rounded p-2">
+                                            <div>
+                                                <span class="fw-bold">{{ skill.name }}</span>
+                                                {% if skill.proficiency %}
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar" style="width: {{ skill.proficiency * 20 }}%"></div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-danger" onclick="deleteSkill({{ skill.id }})">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-muted text-center py-4">No skills added yet. Add your skills to showcase your expertise!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Media Tab -->
+                <div class="tab-pane fade" id="media">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5><i class="bi bi-image"></i> Profile Image</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('portfolio.upload_profile_image') }}" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    {% if portfolio.profile_image %}
+                                    <img src="{{ portfolio.profile_image }}" class="img-thumbnail mb-3" style="max-width: 200px;">
+                                    {% endif %}
+                                    <input type="file" class="form-control" name="profile_image" accept="image/*" required>
+                                    <small class="text-muted">Recommended: Square image, at least 400x400px</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload"></i> Upload Image
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5><i class="bi bi-file-pdf"></i> Resume</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('portfolio.upload_resume') }}" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    {% if portfolio.resume_url %}
+                                    <a href="{{ portfolio.resume_url }}" class="btn btn-sm btn-outline-primary mb-3" target="_blank">
+                                        <i class="bi bi-file-pdf"></i> View Current Resume
+                                    </a>
+                                    {% endif %}
+                                    <input type="file" class="form-control" name="resume" accept=".pdf" required>
+                                    <small class="text-muted">PDF format only</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload"></i> Upload Resume
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Theme Tab -->
+                <div class="tab-pane fade" id="theme">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h4><i class="bi bi-palette"></i> Theme Customization</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('portfolio.update_theme') }}">
+                                <div class="mb-4">
+                                    <label class="form-label">Color Scheme</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="psu-theme" value="psu" {% if not portfolio.theme or portfolio.theme == 'psu' %}checked{% endif %}>
+                                            <label class="btn btn-outline-danger w-100" for="psu-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #BE1E2D 0%, #FFB81C 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>PSU Crimson & Gold</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="professional-theme" value="professional" {% if portfolio.theme == 'professional' %}checked{% endif %}>
+                                            <label class="btn btn-outline-primary w-100" for="professional-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>Professional Blue</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="modern-theme" value="modern" {% if portfolio.theme == 'modern' %}checked{% endif %}>
+                                            <label class="btn btn-outline-success w-100" for="modern-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>Modern Green</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="elegant-theme" value="elegant" {% if portfolio.theme == 'elegant' %}checked{% endif %}>
+                                            <label class="btn btn-outline-secondary w-100" for="elegant-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #6b7280 0%, #374151 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>Elegant Gray</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="vibrant-theme" value="vibrant" {% if portfolio.theme == 'vibrant' %}checked{% endif %}>
+                                            <label class="btn btn-outline-warning w-100" for="vibrant-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>Vibrant Orange</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="creative-theme" value="creative" {% if portfolio.theme == 'creative' %}checked{% endif %}>
+                                            <label class="btn btn-outline-info w-100" for="creative-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <strong>Creative Purple</strong>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="custom_css" class="form-label">Custom CSS <small class="text-muted">(Advanced)</small></label>
+                                    <textarea class="form-control font-monospace" id="custom_css" name="custom_css" rows="8" placeholder="/* Add your custom CSS here */">{{ portfolio.custom_css or '' }}</textarea>
+                                    <small class="text-muted">You can override theme styles with custom CSS</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Theme
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tab -->
+                <div class="tab-pane fade" id="analytics">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h4><i class="bi bi-graph-up"></i> Portfolio Analytics</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <h2 class="display-4">{{ portfolio.views }}</h2>
+                                            <p class="mb-0">Total Views</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <h2 class="display-4">{{ portfolio.experiences|length }}</h2>
+                                            <p class="mb-0">Experiences</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <h2 class="display-4">{{ portfolio.projects|length }}</h2>
+                                            <p class="mb-0">Projects</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <h2 class="display-4">{{ portfolio.awards|length }}</h2>
+                                            <p class="mb-0">Awards</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h5>Profile Completeness</h5>
+                                {% set completeness = 0 %}
+                                {% if portfolio.headline %}{% set completeness = completeness + 15 %}{% endif %}
+                                {% if portfolio.about %}{% set completeness = completeness + 15 %}{% endif %}
+                                {% if portfolio.profile_image %}{% set completeness = completeness + 10 %}{% endif %}
+                                {% if portfolio.resume_url %}{% set completeness = completeness + 10 %}{% endif %}
+                                {% if portfolio.experiences %}{% set completeness = completeness + 20 %}{% endif %}
+                                {% if portfolio.projects %}{% set completeness = completeness + 15 %}{% endif %}
+                                {% if portfolio.awards %}{% set completeness = completeness + 10 %}{% endif %}
+                                {% if portfolio.skills %}{% set completeness = completeness + 5 %}{% endif %}
+                                
+                                <div class="progress" style="height: 30px;">
+                                    <div class="progress-bar bg-success" style="width: {{ completeness }}%">
+                                        {{ completeness }}%
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    {% if completeness < 100 %}
+                                    <p class="text-muted">Improve your portfolio:</p>
+                                    <ul class="list-unstyled">
+                                        {% if not portfolio.headline %}<li><i class="bi bi-circle text-warning"></i> Add a professional headline (15%)</li>{% endif %}
+                                        {% if not portfolio.about %}<li><i class="bi bi-circle text-warning"></i> Write your about section (15%)</li>{% endif %}
+                                        {% if not portfolio.profile_image %}<li><i class="bi bi-circle text-warning"></i> Upload a profile image (10%)</li>{% endif %}
+                                        {% if not portfolio.resume_url %}<li><i class="bi bi-circle text-warning"></i> Upload your resume (10%)</li>{% endif %}
+                                        {% if not portfolio.experiences %}<li><i class="bi bi-circle text-warning"></i> Add work experience (20%)</li>{% endif %}
+                                        {% if not portfolio.projects %}<li><i class="bi bi-circle text-warning"></i> Showcase your projects (15%)</li>{% endif %}
+                                        {% if not portfolio.awards %}<li><i class="bi bi-circle text-warning"></i> Add awards and honors (10%)</li>{% endif %}
+                                        {% if not portfolio.skills %}<li><i class="bi bi-circle text-warning"></i> List your skills (5%)</li>{% endif %}
+                                    </ul>
+                                    {% else %}
+                                    <p class="text-success"><i class="bi bi-check-circle-fill"></i> Your portfolio is complete! Great job!</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <p class="text-muted">Portfolio editing coming soon! For now, you can view your portfolio above.</p>
-    <a href="{{ url_for('portfolio.view', slug=portfolio.slug) }}" class="btn btn-primary">
-        <i class="bi bi-eye"></i> View My Portfolio
-    </a>
 </div>
+
+<!-- Add Experience Modal -->
+<div class="modal fade" id="addExperienceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('portfolio.add_experience') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exp_title" class="form-label">Job Title *</label>
+                        <input type="text" class="form-control" id="exp_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exp_company" class="form-label">Company *</label>
+                        <input type="text" class="form-control" id="exp_company" name="company" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exp_location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="exp_location" name="location" placeholder="e.g., Pittsburg, KS">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="exp_start_date" class="form-label">Start Date *</label>
+                            <input type="month" class="form-control" id="exp_start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="exp_end_date" class="form-label">End Date</label>
+                            <input type="month" class="form-control" id="exp_end_date" name="end_date">
+                            <small class="text-muted">Leave blank if current position</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exp_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="exp_description" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exp_bullets" class="form-label">Key Achievements (one per line)</label>
+                        <textarea class="form-control" id="exp_bullets" name="bullets" rows="4" placeholder="- Led team of 5 people&#10;- Increased sales by 25%&#10;- Implemented new process"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Experience</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Project Modal -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('portfolio.add_project') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="proj_title" class="form-label">Project Title *</label>
+                        <input type="text" class="form-control" id="proj_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_subtitle" class="form-label">Subtitle</label>
+                        <input type="text" class="form-control" id="proj_subtitle" name="subtitle" placeholder="e.g., Strategic Marketing & Planning Analysis">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="proj_description" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_date" class="form-label">Date/Period</label>
+                        <input type="text" class="form-control" id="proj_date" name="date" placeholder="e.g., April 2025 or 2024-2025">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_impact" class="form-label">Impact/Results</label>
+                        <textarea class="form-control" id="proj_impact" name="impact" rows="3" placeholder="Describe the impact or results of this project"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_url" class="form-label">Project URL</label>
+                        <input type="url" class="form-control" id="proj_url" name="project_url" placeholder="https://...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_github" class="form-label">GitHub URL</label>
+                        <input type="url" class="form-control" id="proj_github" name="github_url" placeholder="https://github.com/...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_tags" class="form-label">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="proj_tags" name="tags" placeholder="Python, Web Development, Data Analysis">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proj_image" class="form-label">Project Image</label>
+                        <input type="file" class="form-control" id="proj_image" name="image" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Award Modal -->
+<div class="modal fade" id="addAwardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Award</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('portfolio.add_award') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="award_title" class="form-label">Award Title *</label>
+                        <input type="text" class="form-control" id="award_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="award_issuer" class="form-label">Issuing Organization</label>
+                        <input type="text" class="form-control" id="award_issuer" name="issuer" placeholder="e.g., Pittsburg State University">
+                    </div>
+                    <div class="mb-3">
+                        <label for="award_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="award_description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="award_date" class="form-label">Date</label>
+                        <input type="month" class="form-control" id="award_date" name="date">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Award</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('portfolio.add_skill') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="skill_name" class="form-label">Skill Name *</label>
+                        <input type="text" class="form-control" id="skill_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skill_category" class="form-label">Category</label>
+                        <select class="form-select" id="skill_category" name="category">
+                            <option value="Technical">Technical</option>
+                            <option value="Leadership">Leadership</option>
+                            <option value="Communication">Communication</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Design">Design</option>
+                            <option value="Data Analysis">Data Analysis</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skill_proficiency" class="form-label">Proficiency Level</label>
+                        <input type="range" class="form-range" id="skill_proficiency" name="proficiency" min="1" max="5" step="1" value="3" oninput="this.nextElementSibling.textContent = this.value">
+                        <div class="text-center"><span>3</span>/5</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Skill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteExperience(id) {
+    if (confirm('Are you sure you want to delete this experience?')) {
+        fetch(`{{ url_for('portfolio.delete_experience', id=0) }}`.replace('0', id), { method: 'DELETE' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function deleteProject(id) {
+    if (confirm('Are you sure you want to delete this project?')) {
+        fetch(`{{ url_for('portfolio.delete_project', id=0) }}`.replace('0', id), { method: 'DELETE' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function deleteAward(id) {
+    if (confirm('Are you sure you want to delete this award?')) {
+        fetch(`{{ url_for('portfolio.delete_award', id=0) }}`.replace('0', id), { method: 'DELETE' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+
+function deleteSkill(id) {
+    if (confirm('Are you sure you want to delete this skill?')) {
+        fetch(`{{ url_for('portfolio.delete_skill', id=0) }}`.replace('0', id), { method: 'DELETE' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+}
+</script>
 {% endblock %}
 """
 
@@ -192,14 +933,84 @@ PORTFOLIO_VIEW_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user.full_name }} | Professional Portfolio</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% if portfolio.headline %}{{ portfolio.headline }}{% else %}Professional portfolio of {{ user.full_name }}{% endif %}">
+    <meta name="author" content="{{ user.full_name }}">
+    <meta name="keywords" content="{{ user.full_name }}, portfolio, Pittsburg State University, {{ user.major if user.major }}">
+    
+    <!-- Open Graph Meta Tags for Social Sharing -->
+    <meta property="og:title" content="{{ user.full_name }} | Professional Portfolio">
+    <meta property="og:description" content="{% if portfolio.headline %}{{ portfolio.headline }}{% else %}Professional portfolio showcasing work and achievements{% endif %}">
+    <meta property="og:type" content="profile">
+    <meta property="og:url" content="{{ request.url }}">
+    {% if portfolio.profile_image %}
+    <meta property="og:image" content="{{ request.host_url }}{{ portfolio.profile_image[1:] }}">
+    {% endif %}
+    <meta property="og:site_name" content="PittState-Connect">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ user.full_name }} | Professional Portfolio">
+    <meta name="twitter:description" content="{% if portfolio.headline %}{{ portfolio.headline }}{% else %}Professional portfolio showcasing work and achievements{% endif %}">
+    {% if portfolio.profile_image %}
+    <meta name="twitter:image" content="{{ request.host_url }}{{ portfolio.profile_image[1:] }}">
+    {% endif %}
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
+        {% if portfolio.theme == 'professional' %}
         :root {
-            --psu-crimson: #BE1E2D;
-            --psu-gold: #FFB81C;
             --primary-color: #2563eb;
             --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --psu-crimson: #2563eb;
+            --psu-gold: #3b82f6;
+        }
+        {% elif portfolio.theme == 'modern' %}
+        :root {
+            --primary-color: #10b981;
+            --secondary-color: #059669;
+            --accent-color: #34d399;
+            --psu-crimson: #10b981;
+            --psu-gold: #34d399;
+        }
+        {% elif portfolio.theme == 'elegant' %}
+        :root {
+            --primary-color: #6b7280;
+            --secondary-color: #374151;
+            --accent-color: #9ca3af;
+            --psu-crimson: #6b7280;
+            --psu-gold: #9ca3af;
+        }
+        {% elif portfolio.theme == 'vibrant' %}
+        :root {
+            --primary-color: #f59e0b;
+            --secondary-color: #d97706;
+            --accent-color: #fbbf24;
+            --psu-crimson: #f59e0b;
+            --psu-gold: #fbbf24;
+        }
+        {% elif portfolio.theme == 'creative' %}
+        :root {
+            --primary-color: #8b5cf6;
+            --secondary-color: #7c3aed;
+            --accent-color: #a78bfa;
+            --psu-crimson: #8b5cf6;
+            --psu-gold: #a78bfa;
+        }
+        {% else %}
+        :root {
+            --primary-color: #BE1E2D;
+            --secondary-color: #8B1520;
+            --accent-color: #FFB81C;
+            --psu-crimson: #BE1E2D;
+            --psu-gold: #FFB81C;
+        }
+        {% endif %}
+        
+        :root {
             --text-color: #1f2937;
             --light-bg: #f9fafb;
         }
@@ -235,12 +1046,17 @@ PORTFOLIO_VIEW_TEMPLATE = """
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
             border: 3px solid var(--psu-crimson);
         }
         
+        .psu-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
         .hero-section {
-            background: linear-gradient(135deg, var(--psu-crimson) 0%, #8B1520 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             padding: 5rem 0;
             text-align: center;
@@ -477,6 +1293,11 @@ PORTFOLIO_VIEW_TEMPLATE = """
                 right: 80px;
             }
         }
+        
+        /* Custom CSS from user */
+        {% if portfolio.custom_css %}
+        {{ portfolio.custom_css | safe }}
+        {% endif %}
     </style>
 </head>
 <body>
@@ -487,7 +1308,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
     
     <!-- Pitt State Logo Badge -->
     <div class="psu-logo" title="Pittsburg State University">
-        🦍
+        <img src="/static/images/psu-gorilla-logo.svg" alt="PSU Gorilla Logo">
     </div>
     
     <!-- Hero Section -->
@@ -777,3 +1598,367 @@ def view(slug):
     user = User.query.get(portfolio.user_id)
     
     return render_template_string(PORTFOLIO_VIEW_TEMPLATE, portfolio=portfolio, user=user)
+
+# ======================================================
+# CONTENT MANAGEMENT ROUTES
+# ======================================================
+
+@bp.post("/update-basic")
+@login_required
+def update_basic():
+    """Update basic portfolio information"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    portfolio.headline = request.form.get('headline', '')
+    portfolio.about = request.form.get('about', '')
+    portfolio.phone = request.form.get('phone', '')
+    portfolio.website_url = request.form.get('website_url', '')
+    portfolio.linkedin_url = request.form.get('linkedin_url', '')
+    portfolio.github_url = request.form.get('github_url', '')
+    portfolio.twitter_url = request.form.get('twitter_url', '')
+    portfolio.is_public = request.form.get('is_public', 'false') == 'true'
+    
+    db.session.commit()
+    flash("Portfolio updated successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+@bp.post("/add-experience")
+@login_required
+def add_experience():
+    """Add new work experience"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    # Parse dates
+    start_date = datetime.strptime(request.form.get('start_date') + '-01', '%Y-%m-%d').date()
+    end_date_str = request.form.get('end_date')
+    end_date = datetime.strptime(end_date_str + '-01', '%Y-%m-%d').date() if end_date_str else None
+    
+    # Process bullets
+    bullets_text = request.form.get('bullets', '')
+    bullets = [line.strip('- ').strip() for line in bullets_text.split('\n') if line.strip()]
+    
+    experience = PortfolioExperience(
+        portfolio_id=portfolio.id,
+        title=request.form.get('title'),
+        company=request.form.get('company'),
+        location=request.form.get('location', ''),
+        start_date=start_date,
+        end_date=end_date,
+        description=request.form.get('description', ''),
+        bullets=json.dumps(bullets) if bullets else None
+    )
+    
+    db.session.add(experience)
+    db.session.commit()
+    
+    flash("Experience added successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+@bp.delete("/experience/<int:id>")
+@login_required
+def delete_experience(id):
+    """Delete work experience"""
+    experience = PortfolioExperience.query.get_or_404(id)
+    
+    # Verify ownership
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
+    if experience.portfolio_id != portfolio.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    db.session.delete(experience)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
+@bp.post("/add-project")
+@login_required
+def add_project():
+    """Add new project"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    # Handle image upload
+    image_url = None
+    if 'image' in request.files:
+        file = request.files['image']
+        if file and file.filename and allowed_file(file.filename):
+            # Create upload directory if it doesn't exist
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            
+            filename = secure_filename(f"{current_user.id}_{datetime.now().timestamp()}_{file.filename}")
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            image_url = f"/static/uploads/portfolios/{filename}"
+    
+    # Process tags
+    tags_text = request.form.get('tags', '')
+    tags = [tag.strip() for tag in tags_text.split(',') if tag.strip()]
+    
+    project = PortfolioProject(
+        portfolio_id=portfolio.id,
+        title=request.form.get('title'),
+        subtitle=request.form.get('subtitle', ''),
+        description=request.form.get('description', ''),
+        date=request.form.get('date', ''),
+        impact=request.form.get('impact', ''),
+        project_url=request.form.get('project_url', ''),
+        github_url=request.form.get('github_url', ''),
+        image_url=image_url,
+        tags=json.dumps(tags) if tags else None
+    )
+    
+    db.session.add(project)
+    db.session.commit()
+    
+    flash("Project added successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+@bp.delete("/project/<int:id>")
+@login_required
+def delete_project(id):
+    """Delete project"""
+    project = PortfolioProject.query.get_or_404(id)
+    
+    # Verify ownership
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
+    if project.portfolio_id != portfolio.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    # Delete image file if exists
+    if project.image_url:
+        try:
+            filepath = project.image_url.replace('/static/', 'static/')
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except:
+            pass
+    
+    db.session.delete(project)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
+@bp.post("/add-award")
+@login_required
+def add_award():
+    """Add new award"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    # Parse date
+    date_str = request.form.get('date')
+    award_date = datetime.strptime(date_str + '-01', '%Y-%m-%d').date() if date_str else None
+    
+    award = PortfolioAward(
+        portfolio_id=portfolio.id,
+        title=request.form.get('title'),
+        issuer=request.form.get('issuer', ''),
+        description=request.form.get('description', ''),
+        date=award_date
+    )
+    
+    db.session.add(award)
+    db.session.commit()
+    
+    flash("Award added successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+@bp.delete("/award/<int:id>")
+@login_required
+def delete_award(id):
+    """Delete award"""
+    award = PortfolioAward.query.get_or_404(id)
+    
+    # Verify ownership
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
+    if award.portfolio_id != portfolio.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    db.session.delete(award)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
+@bp.post("/add-skill")
+@login_required
+def add_skill():
+    """Add new skill"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    skill = PortfolioSkill(
+        portfolio_id=portfolio.id,
+        name=request.form.get('name'),
+        category=request.form.get('category', 'Other'),
+        proficiency=int(request.form.get('proficiency', 3))
+    )
+    
+    db.session.add(skill)
+    db.session.commit()
+    
+    flash("Skill added successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+@bp.delete("/skill/<int:id>")
+@login_required
+def delete_skill(id):
+    """Delete skill"""
+    skill = PortfolioSkill.query.get_or_404(id)
+    
+    # Verify ownership
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
+    if skill.portfolio_id != portfolio.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    db.session.delete(skill)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
+# ======================================================
+# MEDIA UPLOAD ROUTES
+# ======================================================
+
+@bp.post("/upload-profile-image")
+@login_required
+def upload_profile_image():
+    """Upload profile image"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    if 'profile_image' not in request.files:
+        flash("No file uploaded", "error")
+        return redirect(url_for('portfolio.edit'))
+    
+    file = request.files['profile_image']
+    if file.filename == '':
+        flash("No file selected", "error")
+        return redirect(url_for('portfolio.edit'))
+    
+    if file and allowed_file(file.filename):
+        # Create upload directory
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        # Delete old image if exists
+        if portfolio.profile_image:
+            try:
+                old_path = portfolio.profile_image.replace('/static/', 'static/')
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            except:
+                pass
+        
+        # Save new image
+        filename = secure_filename(f"profile_{current_user.id}_{datetime.now().timestamp()}_{file.filename}")
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        portfolio.profile_image = f"/static/uploads/portfolios/{filename}"
+        db.session.commit()
+        
+        flash("Profile image uploaded successfully!", "success")
+    else:
+        flash("Invalid file type. Please upload an image file.", "error")
+    
+    return redirect(url_for('portfolio.edit'))
+
+@bp.post("/upload-resume")
+@login_required
+def upload_resume():
+    """Upload resume PDF"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    if 'resume' not in request.files:
+        flash("No file uploaded", "error")
+        return redirect(url_for('portfolio.edit'))
+    
+    file = request.files['resume']
+    if file.filename == '':
+        flash("No file selected", "error")
+        return redirect(url_for('portfolio.edit'))
+    
+    if file and file.filename.endswith('.pdf'):
+        # Create upload directory
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        # Delete old resume if exists
+        if portfolio.resume_url:
+            try:
+                old_path = portfolio.resume_url.replace('/static/', 'static/')
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            except:
+                pass
+        
+        # Save new resume
+        filename = secure_filename(f"resume_{current_user.id}_{datetime.now().timestamp()}.pdf")
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        portfolio.resume_url = f"/static/uploads/portfolios/{filename}"
+        db.session.commit()
+        
+        flash("Resume uploaded successfully!", "success")
+    else:
+        flash("Please upload a PDF file.", "error")
+    
+    return redirect(url_for('portfolio.edit'))
+
+# ======================================================
+# THEME CUSTOMIZATION ROUTES
+# ======================================================
+
+@bp.post("/update-theme")
+@login_required
+def update_theme():
+    """Update portfolio theme"""
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
+    
+    portfolio.theme = request.form.get('theme_preset', 'psu')
+    portfolio.custom_css = request.form.get('custom_css', '')
+    
+    db.session.commit()
+    
+    flash("Theme updated successfully!", "success")
+    return redirect(url_for('portfolio.edit'))
+
+# ======================================================
+# EXPORT ROUTES
+# ======================================================
+
+@bp.get("/export/<slug>/pdf")
+def export_pdf(slug):
+    """Export portfolio as PDF"""
+    portfolio = Portfolio.query.filter_by(slug=slug).first_or_404()
+    
+    # Check permissions
+    if not portfolio.is_public and (not current_user.is_authenticated or current_user.id != portfolio.user_id):
+        return jsonify({"error": "Portfolio is private"}), 403
+    
+    # Get user info
+    user = User.query.get(portfolio.user_id)
+    
+    # Render portfolio HTML
+    html_content = render_template_string(PORTFOLIO_VIEW_TEMPLATE, portfolio=portfolio, user=user)
+    
+    try:
+        # Generate PDF using pdfkit
+        pdf = pdfkit.from_string(html_content, False, options={
+            'page-size': 'Letter',
+            'margin-top': '0.5in',
+            'margin-right': '0.5in',
+            'margin-bottom': '0.5in',
+            'margin-left': '0.5in',
+            'encoding': 'UTF-8',
+            'no-outline': None,
+            'enable-local-file-access': None
+        })
+        
+        # Create response
+        response = send_file(
+            BytesIO(pdf),
+            as_attachment=True,
+            download_name=f"{slug}_portfolio.pdf",
+            mimetype='application/pdf'
+        )
+        
+        return response
+    except Exception as e:
+        flash(f"Error generating PDF: {str(e)}", "error")
+        return redirect(url_for('portfolio.view', slug=slug))

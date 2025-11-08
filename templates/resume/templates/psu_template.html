@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ resume.user.full_name }} - Resume</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 35%;
+            background: #BE1E2D;
+            color: white;
+            padding: 40px 25px;
+            min-height: 11in;
+        }
+        
+        .sidebar h1 {
+            font-size: 24pt;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+        
+        .sidebar .tagline {
+            font-size: 11pt;
+            color: #FFB81C;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #FFB81C;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .sidebar .contact-item {
+            margin-bottom: 8px;
+            font-size: 9pt;
+            line-height: 1.5;
+        }
+        
+        .sidebar .skill-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            border-left: 3px solid #FFB81C;
+            font-size: 9pt;
+        }
+        
+        .main-content {
+            width: 65%;
+            padding: 40px 30px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-text {
+            font-size: 14pt;
+            font-weight: 700;
+            color: #8B1520;
+        }
+        
+        .logo-emoji {
+            font-size: 30pt;
+        }
+        
+        .section {
+            margin-bottom: 22px;
+        }
+        
+        .section-title {
+            font-size: 14pt;
+            color: #BE1E2D;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid #FFB81C;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .entry {
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        
+        .entry-header {
+            margin-bottom: 4px;
+        }
+        
+        .entry-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .entry-organization {
+            font-size: 10pt;
+            color: #BE1E2D;
+            font-weight: 600;
+        }
+        
+        .entry-date {
+            font-size: 9pt;
+            color: #666;
+            float: right;
+        }
+        
+        .entry-location {
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .entry-details {
+            margin-left: 0;
+            padding-left: 18px;
+            margin-top: 6px;
+        }
+        
+        .entry-details li {
+            margin-bottom: 4px;
+            line-height: 1.5;
+            font-size: 10pt;
+        }
+        
+        .summary {
+            text-align: justify;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .psu-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #FFB81C;
+            font-size: 8pt;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo" style="text-align: center; margin-bottom: 20px;">
+                <div class="logo-emoji">🦍</div>
+                <div style="color: #FFB81C; font-weight: 700; font-size: 10pt; letter-spacing: 2px;">PITTSBURG STATE</div>
+            </div>
+            
+            <h1>{{ resume.user.full_name }}</h1>
+            {% if resume.headline %}
+            <div class="tagline">{{ resume.headline }}</div>
+            {% endif %}
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Contact</div>
+                <div class="contact-item">📧 {{ resume.user.email }}</div>
+                {% if resume.user.phone %}<div class="contact-item">📱 {{ resume.user.phone }}</div>{% endif %}
+                {% if resume.user.city and resume.user.state %}<div class="contact-item">📍 {{ resume.user.city }}, {{ resume.user.state }}</div>{% endif %}
+                {% if resume.user.linkedin_url %}<div class="contact-item">💼 LinkedIn</div>{% endif %}
+                {% if resume.user.github_url %}<div class="contact-item">💻 GitHub</div>{% endif %}
+            </div>
+            
+            {% if resume.user.major %}
+            <div class="sidebar-section">
+                <div class="sidebar-title">Education</div>
+                <div style="font-weight: 600; margin-bottom: 4px;">{{ resume.user.major }}</div>
+                <div style="font-size: 9pt;">Pittsburg State University</div>
+                {% if resume.user.graduation_year %}<div style="font-size: 9pt; color: #FFB81C;">Class of {{ resume.user.graduation_year }}</div>{% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Skills</div>
+                {% set sample_skills = ['Leadership', 'Project Management', 'Data Analysis', 'Communication', 'Problem Solving', 'Teamwork'] %}
+                {% for skill in sample_skills %}
+                <div class="skill-item">{{ skill }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% if resume.summary %}
+            <div class="section">
+                <div class="section-title">Professional Summary</div>
+                <div class="summary">{{ resume.summary }}</div>
+            </div>
+            {% endif %}
+            
+            {% for section in resume.sections %}
+            <div class="section">
+                <div class="section-title">{{ section.title }}</div>
+                
+                {% if section.content_type == 'bullets' %}
+                    {% for entry in section.entries %}
+                    <div class="entry">
+                        <div class="entry-header">
+                            <span class="entry-date">
+                                {% if entry.start_date %}
+                                {{ entry.start_date.strftime('%b %Y') }}
+                                {% if entry.end_date %} - {{ entry.end_date.strftime('%b %Y') }}{% else %} - Present{% endif %}
+                                {% endif %}
+                            </span>
+                            <div class="entry-title">{{ entry.title }}</div>
+                            {% if entry.organization %}<div class="entry-organization">{{ entry.organization }}</div>{% endif %}
+                            {% if entry.location %}<div class="entry-location">{{ entry.location }}</div>{% endif %}
+                        </div>
+                        {% if entry.description %}
+                        <ul class="entry-details">
+                            {% for bullet in entry.description.split('\n') %}
+                            {% if bullet.strip() %}
+                            <li>{{ bullet.strip('•- ').strip() }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div>{{ section.content }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="psu-footer">
+                Powered by PittState-Connect | Go Gorillas! 🦍
+            </div>
+        </div>
+    </div>
+</body>
+</html>
