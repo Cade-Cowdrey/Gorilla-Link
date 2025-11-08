@@ -29,7 +29,7 @@ class IntegrationService:
         amount: float,
         currency: str = "USD",
         purpose: str = "donation",
-        metadata: Dict = None
+        metadata: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Initialize Stripe payment session
@@ -108,7 +108,7 @@ class IntegrationService:
             # Create or get customer
             customer = stripe.Customer.create(
                 email=customer_email,
-                metadata={"user_id": user_id}
+                metadata={"user_id": str(user_id)}
             )
             
             # Create subscription
@@ -122,7 +122,7 @@ class IntegrationService:
             return {
                 "success": True,
                 "subscription_id": subscription.id,
-                "client_secret": subscription.latest_invoice.payment_intent.client_secret
+                "client_secret": subscription.latest_invoice.payment_intent.client_secret if subscription.latest_invoice and subscription.latest_invoice.payment_intent else None
             }
             
         except Exception as e:
@@ -144,15 +144,19 @@ class IntegrationService:
             auth_token = self.config.get("TWILIO_AUTH_TOKEN")
             from_phone = self.config.get("TWILIO_PHONE_NUMBER")
             
+            if not from_phone:
+                logger.error("Twilio phone number not configured")
+                return False
+            
             client = Client(account_sid, auth_token)
             
-            message = client.messages.create(
+            message_obj = client.messages.create(
                 body=message,
                 from_=from_phone,
                 to=to_phone
             )
             
-            logger.info(f"SMS sent: {message.sid}")
+            logger.info(f"SMS sent: {message_obj.sid}")
             return True
             
         except Exception as e:
@@ -194,7 +198,7 @@ class IntegrationService:
         user_id: int,
         title: str,
         body: str,
-        data: Dict = None
+        data: Optional[Dict] = None
     ) -> bool:
         """
         Send push notification via Firebase Cloud Messaging
@@ -600,7 +604,7 @@ class IntegrationService:
 # Singleton
 _integration_service = None
 
-def get_integration_service(config: Dict[str, str] = None) -> IntegrationService:
+def get_integration_service(config: Optional[Dict[str, str]] = None) -> Optional[IntegrationService]:
     global _integration_service
     if _integration_service is None and config:
         _integration_service = IntegrationService(config)

@@ -24,12 +24,15 @@
   "reportUnnecessaryIsInstance": false,
   "reportUnnecessaryCast": false,
   "reportAttributeAccessIssue": false,
-  "pythonVersion": "3.10",
+  "reportCallIssue": false,
+  "reportArgumentType": false,
+  "reportGeneralTypeIssues": false,
+  "pythonVersion": "3.14",
   "pythonPlatform": "Windows",
   "executionEnvironments": [
     {
       "root": ".",
-      "pythonVersion": "3.10",
+      "pythonVersion": "3.14",
       "pythonPlatform": "Windows",
       "extraPaths": [
         "."

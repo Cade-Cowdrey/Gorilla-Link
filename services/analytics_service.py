@@ -219,7 +219,7 @@ class AnalyticsService:
     # DATA EXPORTS (CSV/PDF)
     # ============================================================
     
-    def export_analytics_csv(self, report_type: str, filters: Dict = None) -> BytesIO:
+    def export_analytics_csv(self, report_type: str, filters: Optional[Dict] = None) -> BytesIO:
         """
         Export analytics data as CSV
         """
@@ -239,7 +239,7 @@ class AnalyticsService:
         buffer.seek(0)
         return buffer
     
-    def export_analytics_pdf(self, report_type: str, filters: Dict = None) -> BytesIO:
+    def export_analytics_pdf(self, report_type: str, filters: Optional[Dict] = None) -> BytesIO:
         """
         Export analytics as PDF report (using reportlab)
         """
@@ -729,7 +729,7 @@ class AnalyticsService:
             "content_distribution": {}
         }
     
-    def _generate_user_activity_dataframe(self, filters: Dict = None) -> pd.DataFrame:
+    def _generate_user_activity_dataframe(self, filters: Optional[Dict] = None) -> pd.DataFrame:
         users = User.query.all()
         data = []
         for user in users:
@@ -743,7 +743,7 @@ class AnalyticsService:
             })
         return pd.DataFrame(data)
     
-    def _generate_scholarship_dataframe(self, filters: Dict = None) -> pd.DataFrame:
+    def _generate_scholarship_dataframe(self, filters: Optional[Dict] = None) -> pd.DataFrame:
         scholarships = Scholarship.query.all()
         data = []
         for s in scholarships:
@@ -755,7 +755,7 @@ class AnalyticsService:
             })
         return pd.DataFrame(data)
     
-    def _generate_jobs_dataframe(self, filters: Dict = None) -> pd.DataFrame:
+    def _generate_jobs_dataframe(self, filters: Optional[Dict] = None) -> pd.DataFrame:
         jobs = Job.query.filter_by(is_active=True).all()
         data = []
         for job in jobs:
@@ -767,7 +767,7 @@ class AnalyticsService:
             })
         return pd.DataFrame(data)
     
-    def _generate_pageviews_dataframe(self, filters: Dict = None) -> pd.DataFrame:
+    def _generate_pageviews_dataframe(self, filters: Optional[Dict] = None) -> pd.DataFrame:
         views = PageView.query.limit(1000).all()
         data = []
         for view in views:
