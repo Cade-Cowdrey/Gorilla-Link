@@ -8,6 +8,9 @@ from flask_login import login_required, current_user
 
 referrals_bp = Blueprint('referrals', __name__, url_prefix='/referrals')
 
+# Export as 'bp' for auto-discovery
+bp = referrals_bp
+
 
 @referrals_bp.route('/')
 @login_required

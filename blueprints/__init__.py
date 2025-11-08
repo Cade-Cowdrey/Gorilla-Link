@@ -57,18 +57,19 @@ def register_blueprints(app):
                 logger.error(f"❌ Failed to register blueprint '{module_name}': {e}")
 
     # Register growth feature blueprints (direct .py files)
+    # Note: Skip gamification, push_notifications, and referrals as they're already registered as subdirectories
     logger.info("🔍 Registering growth feature blueprints...")
     
     growth_features = [
-        ('gamification', 'gamification_bp'),
+        # ('gamification', 'gamification_bp'),  # Already registered as subdirectory
         ('success_stories', 'success_stories_bp'),
-        ('referrals', 'referrals_bp'),
+        # ('referrals', 'referrals_bp'),  # Already registered as subdirectory
         ('recommendations', 'recommendations_bp'),
         ('ai_coach', 'ai_coach_bp'),
         ('forums', 'forums_bp'),
         ('mentorship', 'mentorship_bp'),
         ('auto_apply', 'auto_apply_bp'),
-        ('push_notifications', 'push_notifications_bp'),
+        # ('push_notifications', 'push_notifications_bp'),  # Already registered as subdirectory
         ('messages', 'messages_bp'),
     ]
     
