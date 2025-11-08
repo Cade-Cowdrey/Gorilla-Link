@@ -49,8 +49,11 @@ try:
     from eth_account import Account
     WEB3_AVAILABLE = True
 except ImportError:
+    # Create stub classes to prevent errors
+    Web3 = None
+    Account = None
     WEB3_AVAILABLE = False
-    logging.warning("web3 package not installed. Run: pip install web3 eth-account")
+    logging.warning("web3 package not installed. Blockchain features disabled. Run: pip install web3 eth-account")
 
 from models import db, User, Experience, Education
 
@@ -186,7 +189,7 @@ class BlockchainCredentialService:
         
         # Initialize Web3 if available
         self.web3 = None
-        if WEB3_AVAILABLE:
+        if WEB3_AVAILABLE and Web3 is not None:
             try:
                 self.web3 = Web3(Web3.HTTPProvider(self.network_config['rpc_url']))
                 if self.web3.is_connected():
@@ -195,6 +198,8 @@ class BlockchainCredentialService:
                     self.logger.warning(f"Could not connect to {self.network_config['name']}")
             except Exception as e:
                 self.logger.error(f"Web3 initialization error: {str(e)}")
+        else:
+            self.logger.warning("Web3 not available - blockchain features disabled")
         
         # Initialize smart contract
         self.contract = None
@@ -227,7 +232,7 @@ class BlockchainCredentialService:
         """
         try:
             # Validate inputs
-            if not self.web3 or not self.web3.is_connected():
+            if not WEB3_AVAILABLE or not self.web3 or (self.web3 and not self.web3.is_connected()):
                 return {
                     'success': False,
                     'error': 'Blockchain connection not available',
@@ -238,7 +243,7 @@ class BlockchainCredentialService:
                 return {'success': False, 'error': 'Invalid credential type'}
             
             # Validate wallet address
-            if not Web3.is_address(wallet_address):
+            if Web3 is None or not Web3.is_address(wallet_address):
                 return {'success': False, 'error': 'Invalid wallet address'}
             
             wallet_address = Web3.to_checksum_address(wallet_address)

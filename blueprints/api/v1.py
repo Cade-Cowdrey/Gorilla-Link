@@ -447,6 +447,9 @@ def initialize_payment():
         "STRIPE_SECRET_KEY": os.getenv("STRIPE_SECRET_KEY")
     })
     
+    if not integration:
+        return jsonify({"error": "Integration service not available"}), 503
+    
     result = integration.initialize_stripe_payment(
         user_id=current_user.id,
         amount=data.get('amount'),
@@ -473,6 +476,9 @@ def send_sms():
         "TWILIO_AUTH_TOKEN": os.getenv("TWILIO_AUTH_TOKEN"),
         "TWILIO_PHONE_NUMBER": os.getenv("TWILIO_PHONE_NUMBER")
     })
+    
+    if not integration:
+        return jsonify({"error": "Integration service not available"}), 503
     
     success = integration.send_sms(
         to_phone=data.get('phone'),
@@ -1169,6 +1175,9 @@ def create_subscription():
         
         if error:
             return jsonify({"error": error}), 400
+        
+        if not subscription:
+            return jsonify({"error": "Failed to create subscription"}), 500
         
         return jsonify({
             "id": subscription.id,

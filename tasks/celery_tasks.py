@@ -227,6 +227,10 @@ def send_push_notification(user_id: int, title: str, body: str, data: dict = Non
             "FIREBASE_CREDENTIALS": os.getenv("FIREBASE_CREDENTIALS")
         })
         
+        if not integration:
+            logger.warning("Integration service not available for push notifications")
+            return {"success": False, "error": "Service not available"}
+        
         success = integration.send_push_notification(user_id, title, body, data)
         return {"success": success}
         

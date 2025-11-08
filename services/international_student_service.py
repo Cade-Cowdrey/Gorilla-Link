@@ -948,9 +948,12 @@ class InternationalStudentService:
     def _calculate_days_until(self, date_str: str) -> int:
         """Calculate days until a specific date"""
         if not date_str:
-            return None
-        target = datetime.strptime(date_str, '%Y-%m-%d')
-        return (target - datetime.now()).days
+            return 0  # Return 0 instead of None for consistent int return type
+        try:
+            target = datetime.strptime(date_str, '%Y-%m-%d')
+            return (target - datetime.now()).days
+        except:
+            return 0
     
     def _get_opt_recommendations(self, remaining_days: int, unemployment_days: int, is_stem: bool) -> List[str]:
         """Get recommendations based on OPT status"""

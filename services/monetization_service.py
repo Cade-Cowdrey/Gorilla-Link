@@ -498,12 +498,15 @@ class MonetizationService:
             # Process payment if required
             if package["cost"] > 0 and payment_method_id:
                 user = User.query.get(user_id)
+                if not user:
+                    return None, "User not found"
                 
                 # Create payment intent
+                stripe_customer_id = getattr(user, 'stripe_customer_id', None)
                 payment_intent = stripe.PaymentIntent.create(
                     amount=int(package["cost"] * 100),
                     currency='usd',
-                    customer=user.stripe_customer_id if hasattr(user, 'stripe_customer_id') else None,
+                    customer=stripe_customer_id,
                     payment_method=payment_method_id,
                     confirm=True,
                     description=f'{package["name"]} - {event.name}'
@@ -557,14 +560,20 @@ class MonetizationService:
         
         for sponsor in sponsors:
             user = User.query.get(sponsor.sponsor_user_id)
+            if not user:
+                continue
+            
             employer = EmployerPortal.query.filter_by(user_id=sponsor.sponsor_user_id).first()
+            
+            # Get display name
+            display_name = employer.company_name if employer else f"{user.first_name} {user.last_name}"
             
             result.append({
                 "id": sponsor.id,
                 "level": sponsor.sponsorship_level,
                 "amount": sponsor.amount_paid,
                 "benefits": sponsor.benefits,
-                "company_name": employer.company_name if employer else user.username,
+                "company_name": display_name,
                 "logo_url": employer.logo_url if employer else None,
                 "created_at": sponsor.created_at
             })

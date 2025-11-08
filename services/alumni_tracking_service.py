@@ -822,9 +822,10 @@ class AlumniCareerTrackingService:
                     match_reasons.append(f"Works at {company}")
                 
                 # Experience level (prefer senior alumni)
-                if metrics.get('current_career_level') in ['senior', 'management', 'executive']:
+                career_level = metrics.get('current_career_level')
+                if career_level and career_level in ['senior', 'management', 'executive']:
                     match_score += 20
-                    match_reasons.append(f"{metrics.get('current_career_level').title()} level professional")
+                    match_reasons.append(f"{career_level.title()} level professional")
                 
                 # Years of experience
                 years_exp = metrics.get('total_years_experience', 0)
