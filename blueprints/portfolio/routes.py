@@ -1634,7 +1634,12 @@ def add_experience():
     portfolio = Portfolio.query.filter_by(user_id=current_user.id).first_or_404()
     
     # Parse dates
-    start_date = datetime.strptime(request.form.get('start_date') + '-01', '%Y-%m-%d').date()
+    start_date_str = request.form.get('start_date')
+    if not start_date_str:
+        flash("Start date is required", "error")
+        return redirect(url_for('portfolio.edit'))
+    
+    start_date = datetime.strptime(start_date_str + '-01', '%Y-%m-%d').date()
     end_date_str = request.form.get('end_date')
     end_date = datetime.strptime(end_date_str + '-01', '%Y-%m-%d').date() if end_date_str else None
     
@@ -1667,7 +1672,7 @@ def delete_experience(id):
     
     # Verify ownership
     portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
-    if experience.portfolio_id != portfolio.id:
+    if not portfolio or experience.portfolio_id != portfolio.id:
         return jsonify({"error": "Unauthorized"}), 403
     
     db.session.delete(experience)
@@ -1725,7 +1730,7 @@ def delete_project(id):
     
     # Verify ownership
     portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
-    if project.portfolio_id != portfolio.id:
+    if not portfolio or project.portfolio_id != portfolio.id:
         return jsonify({"error": "Unauthorized"}), 403
     
     # Delete image file if exists
@@ -1774,7 +1779,7 @@ def delete_award(id):
     
     # Verify ownership
     portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
-    if award.portfolio_id != portfolio.id:
+    if not portfolio or award.portfolio_id != portfolio.id:
         return jsonify({"error": "Unauthorized"}), 403
     
     db.session.delete(award)
@@ -1809,7 +1814,7 @@ def delete_skill(id):
     
     # Verify ownership
     portfolio = Portfolio.query.filter_by(user_id=current_user.id).first()
-    if skill.portfolio_id != portfolio.id:
+    if not portfolio or skill.portfolio_id != portfolio.id:
         return jsonify({"error": "Unauthorized"}), 403
     
     db.session.delete(skill)
@@ -1878,7 +1883,7 @@ def upload_resume():
         flash("No file selected", "error")
         return redirect(url_for('portfolio.edit'))
     
-    if file and file.filename.endswith('.pdf'):
+    if file and file.filename and file.filename.endswith('.pdf'):
         # Create upload directory
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
         

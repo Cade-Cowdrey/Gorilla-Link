@@ -410,6 +410,9 @@ class DataGovernanceService:
                 }
             
             policy = self.get_retention_policy(entity_type)
+            if not policy:
+                return {"error": f"No retention policy found for {entity_type}"}
+            
             deleted_count = 0
             
             if entity_type == "PageView":

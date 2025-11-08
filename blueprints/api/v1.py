@@ -110,7 +110,10 @@ def system_status():
 @limiter.limit("20 per minute")
 def ai_chat():
     """AI chat assistant"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+    
     message = data.get('message')
     session_id = data.get('session_id')
     
@@ -144,7 +147,9 @@ def ai_chat():
 @limiter.limit("5 per hour")
 def ai_generate_resume():
     """AI-powered resume generation"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        data = {}
     
     ai_service = get_ai_service(
         api_key=os.getenv('OPENAI_API_KEY')
@@ -173,7 +178,10 @@ def ai_generate_resume():
 @limiter.limit("10 per hour")
 def improve_essay():
     """AI essay improvement suggestions"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+    
     essay_text = data.get('essay')
     prompt = data.get('prompt', '')
     
@@ -203,7 +211,10 @@ def enable_2fa():
 @login_required
 def verify_2fa():
     """Verify 2FA token"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+    
     token = data.get('token')
     
     if not token:
@@ -236,7 +247,10 @@ def get_audit_logs():
 @login_required
 def record_consent():
     """Record user consent"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
+    
     consent_type = data.get('consent_type')
     granted = data.get('granted', False)
     
@@ -355,7 +369,9 @@ def unified_inbox():
 @limiter.limit("30 per hour")
 def send_message():
     """Send internal message"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
     
     recipient_id = data.get('recipient_id')
     subject = data.get('subject')
@@ -380,7 +396,9 @@ def send_message():
 @admin_required
 def create_notification():
     """Create system notification"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
     
     comm = get_communication_service()
     success = comm.create_notification(
@@ -421,7 +439,9 @@ def get_announcements():
 @login_required
 def initialize_payment():
     """Initialize Stripe payment"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
     
     integration = get_integration_service({
         "STRIPE_SECRET_KEY": os.getenv("STRIPE_SECRET_KEY")
@@ -444,7 +464,9 @@ def initialize_payment():
 @limiter.limit("10 per hour")
 def send_sms():
     """Send SMS notification"""
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON data"}), 400
     
     integration = get_integration_service({
         "TWILIO_ACCOUNT_SID": os.getenv("TWILIO_ACCOUNT_SID"),

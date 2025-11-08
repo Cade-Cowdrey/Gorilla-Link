@@ -517,7 +517,7 @@ class IntegrationService:
         Sync user/donor data to Salesforce
         """
         try:
-            from simple_salesforce import Salesforce
+            from simple_salesforce.api import Salesforce
             
             sf = Salesforce(
                 username=self.config.get("SALESFORCE_USERNAME"),
