@@ -3,6 +3,11 @@ Innovative features that PSU doesn't have but desperately needs
 These features solve real student problems and create tremendous value
 """
 
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
+
 from extensions import db
 from datetime import datetime
 from sqlalchemy import Index

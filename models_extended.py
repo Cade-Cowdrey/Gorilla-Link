@@ -3,6 +3,11 @@ Extended Models for Production-Grade PittState-Connect
 Includes: Security, Scholarships Phase 2, Alumni, Analytics, AI, Communication, Monetization
 """
 
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
+
 import datetime
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -60,7 +65,7 @@ class AuditLog(db.Model):
     resource_id = db.Column(db.Integer)
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.String(512))
-    details = db.Column(JSONB)
+    details = db.Column(JSONB if USE_POSTGRES else JSON)
     timestamp = db.Column(db.DateTime, default=func.now(), index=True)
     severity = db.Column(db.String(20), default="info")  # info, warning, critical
     
@@ -109,10 +114,10 @@ class ScholarshipExtended(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     scholarship_id = db.Column(db.Integer, db.ForeignKey("scholarships.id"), unique=True)
-    ai_tags = db.Column(ARRAY(db.String), default=[])
-    match_criteria = db.Column(JSONB)  # GPA, major, year, demographics
+    ai_tags = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON, default=[])
+    match_criteria = db.Column(JSONB if USE_POSTGRES else JSON)  # GPA, major, year, demographics
     essay_required = db.Column(db.Boolean, default=False)
-    essay_prompts = db.Column(JSONB)
+    essay_prompts = db.Column(JSONB if USE_POSTGRES else JSON)
     num_recommendations = db.Column(db.Integer, default=0)
     renewable = db.Column(db.Boolean, default=False)
     award_notification_date = db.Column(db.Date)
@@ -136,7 +141,7 @@ class EssayLibrary(db.Model):
     content = db.Column(db.Text)
     prompt = db.Column(db.Text)
     is_public = db.Column(db.Boolean, default=False)
-    ai_suggestions = db.Column(JSONB)
+    ai_suggestions = db.Column(JSONB if USE_POSTGRES else JSON)
     word_count = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=func.now())
     updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
@@ -153,7 +158,7 @@ class FinancialLiteracy(db.Model):
     category = db.Column(db.String(64))  # budgeting, loans, investing, etc.
     content = db.Column(db.Text)
     video_url = db.Column(db.String(512))
-    quiz_data = db.Column(JSONB)
+    quiz_data = db.Column(JSONB if USE_POSTGRES else JSON)
     difficulty_level = db.Column(db.String(20))  # beginner, intermediate, advanced
     created_at = db.Column(db.DateTime, default=func.now())
 
@@ -208,8 +213,8 @@ class AlumniProfile(db.Model):
     industry = db.Column(db.String(128))
     linkedin_url = db.Column(db.String(512))
     is_mentor = db.Column(db.Boolean, default=False)
-    mentorship_areas = db.Column(ARRAY(db.String))
-    availability = db.Column(JSONB)  # calendar availability
+    mentorship_areas = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
+    availability = db.Column(JSONB if USE_POSTGRES else JSON)  # calendar availability
     created_at = db.Column(db.DateTime, default=func.now())
     
     user = db.relationship("User", backref=db.backref("alumni_profile", uselist=False))
@@ -246,7 +251,7 @@ class SponsorshipTier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True, nullable=False)
     annual_cost = db.Column(db.Float, nullable=False)
-    benefits = db.Column(JSONB)
+    benefits = db.Column(JSONB if USE_POSTGRES else JSON)
     max_job_postings = db.Column(db.Integer)
     analytics_access = db.Column(db.Boolean, default=False)
     featured_placement = db.Column(db.Boolean, default=False)
@@ -269,7 +274,7 @@ class AIConversation(db.Model):
     session_id = db.Column(db.String(64), nullable=False, index=True)
     message = db.Column(db.Text, nullable=False)
     response = db.Column(db.Text)
-    context = db.Column(JSONB)
+    context = db.Column(JSONB if USE_POSTGRES else JSON)
     model_used = db.Column(db.String(64))
     tokens_used = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=func.now())
@@ -284,7 +289,7 @@ class PredictiveModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     model_name = db.Column(db.String(128), unique=True, nullable=False)
     model_type = db.Column(db.String(64))  # success_prediction, churn, engagement
-    model_data = db.Column(JSONB)
+    model_data = db.Column(JSONB if USE_POSTGRES else JSON)
     accuracy_score = db.Column(db.Float)
     last_trained = db.Column(db.DateTime)
     active = db.Column(db.Boolean, default=True)
@@ -300,7 +305,7 @@ class UserPrediction(db.Model):
     prediction_type = db.Column(db.String(64))
     score = db.Column(db.Float)
     confidence = db.Column(db.Float)
-    factors = db.Column(JSONB)
+    factors = db.Column(JSONB if USE_POSTGRES else JSON)
     generated_at = db.Column(db.DateTime, default=func.now())
     
     user = db.relationship("User", backref="predictions")
@@ -335,7 +340,7 @@ class Message(db.Model):
     is_read = db.Column(db.Boolean, default=False)
     read_at = db.Column(db.DateTime)
     thread_id = db.Column(db.String(64), index=True)
-    attachments = db.Column(JSONB)
+    attachments = db.Column(JSONB if USE_POSTGRES else JSON)
     encrypted = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -371,7 +376,7 @@ class Announcement(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"))
     priority = db.Column(db.String(20), default="normal")  # low, normal, high, urgent
-    target_audience = db.Column(ARRAY(db.String))  # students, faculty, alumni, all
+    target_audience = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)  # students, faculty, alumni, all
     published_at = db.Column(db.DateTime)
     expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=func.now())
@@ -470,8 +475,8 @@ class WebinarRegistration(db.Model):
 #     enabled = db.Column(db.Boolean, default=False)
 #     description = db.Column(db.Text)
 #     rollout_percentage = db.Column(db.Float, default=0.0)
-#     target_users = db.Column(ARRAY(db.Integer))
-#     target_roles = db.Column(ARRAY(db.String))
+#     target_users = db.Column(ARRAY(db.Integer) if USE_POSTGRES else JSON)
+#     target_roles = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
 #     created_at = db.Column(db.DateTime, default=func.now())
 #     updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
 # 
@@ -483,8 +488,8 @@ class ABTest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True, nullable=False)
     description = db.Column(db.Text)
-    variant_a = db.Column(JSONB)
-    variant_b = db.Column(JSONB)
+    variant_a = db.Column(JSONB if USE_POSTGRES else JSON)
+    variant_b = db.Column(JSONB if USE_POSTGRES else JSON)
     traffic_split = db.Column(db.Float, default=0.5)
     status = db.Column(db.String(32), default="draft")  # draft, running, completed
     winner = db.Column(db.String(1))  # A or B
@@ -515,7 +520,7 @@ class EventLog(db.Model):
     event_type = db.Column(db.String(128), nullable=False, index=True)
     aggregate_id = db.Column(db.String(64), index=True)
     aggregate_type = db.Column(db.String(64))
-    event_data = db.Column(JSONB, nullable=False)
+    event_data = db.Column(JSONB if USE_POSTGRES else JSON, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     timestamp = db.Column(db.DateTime, default=func.now(), index=True)
     version = db.Column(db.Integer, default=1)
@@ -531,8 +536,8 @@ class TenantConfig(db.Model):
     tenant_id = db.Column(db.String(64), unique=True, nullable=False)
     tenant_name = db.Column(db.String(255), nullable=False)
     subdomain = db.Column(db.String(128), unique=True)
-    branding = db.Column(JSONB)  # colors, logos, etc.
-    features_enabled = db.Column(JSONB)
+    branding = db.Column(JSONB if USE_POSTGRES else JSON)  # colors, logos, etc.
+    features_enabled = db.Column(JSONB if USE_POSTGRES else JSON)
     database_uri = db.Column(db.String(512))
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=func.now())
@@ -552,7 +557,7 @@ class ExternalIntegration(db.Model):
     access_token = db.Column(db.Text)
     refresh_token = db.Column(db.Text)
     token_expires_at = db.Column(db.DateTime)
-    config = db.Column(JSONB)
+    config = db.Column(JSONB if USE_POSTGRES else JSON)
     enabled = db.Column(db.Boolean, default=True)
     last_synced = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=func.now())
@@ -572,7 +577,7 @@ class PaymentTransaction(db.Model):
     payment_method = db.Column(db.String(32))  # stripe, paypal, etc.
     purpose = db.Column(db.String(128))  # donation, sponsorship, premium_subscription
     status = db.Column(db.String(32), default="pending")  # pending, completed, failed, refunded
-    meta_data = db.Column(JSONB)  # Renamed from metadata to avoid SQLAlchemy conflict
+    meta_data = db.Column(JSONB if USE_POSTGRES else JSON)  # Renamed from metadata to avoid SQLAlchemy conflict
     created_at = db.Column(db.DateTime, default=func.now())
     
     user = db.relationship("User", backref="transactions")
@@ -586,7 +591,7 @@ class PushNotificationToken(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     token = db.Column(db.String(512), unique=True, nullable=False)
     platform = db.Column(db.String(32))  # ios, android, web
-    device_info = db.Column(JSONB)
+    device_info = db.Column(JSONB if USE_POSTGRES else JSON)
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -608,7 +613,7 @@ class DataLineage(db.Model):
     version = db.Column(db.String(32))
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
     created_at = db.Column(db.DateTime, default=func.now())
-    schema_snapshot = db.Column(JSONB)
+    schema_snapshot = db.Column(JSONB if USE_POSTGRES else JSON)
     
     creator = db.relationship("User", backref="created_datasets")
 
@@ -670,7 +675,7 @@ class Survey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
-    questions = db.Column(JSONB, nullable=False)
+    questions = db.Column(JSONB if USE_POSTGRES else JSON, nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
     active = db.Column(db.Boolean, default=True)
     anonymous = db.Column(db.Boolean, default=False)
@@ -688,7 +693,7 @@ class SurveyResponse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     survey_id = db.Column(db.Integer, db.ForeignKey("surveys.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    responses = db.Column(JSONB, nullable=False)
+    responses = db.Column(JSONB if USE_POSTGRES else JSON, nullable=False)
     submitted_at = db.Column(db.DateTime, default=func.now())
     
     survey = db.relationship("Survey", backref="responses")
@@ -746,7 +751,7 @@ class MicroCredential(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     issuing_department = db.Column(db.Integer, db.ForeignKey("departments.id"))
-    criteria = db.Column(JSONB)
+    criteria = db.Column(JSONB if USE_POSTGRES else JSON)
     badge_image_url = db.Column(db.String(512))
     blockchain_verified = db.Column(db.Boolean, default=False)
     blockchain_hash = db.Column(db.String(128))
@@ -780,7 +785,7 @@ class ResearchFunding(db.Model):
     deadline = db.Column(db.Date)
     description = db.Column(db.Text)
     eligibility = db.Column(db.Text)
-    research_areas = db.Column(ARRAY(db.String))
+    research_areas = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     created_at = db.Column(db.DateTime, default=func.now())
 
 
@@ -797,7 +802,7 @@ class QRCheckIn(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     check_in_time = db.Column(db.DateTime, default=func.now())
     location = db.Column(db.String(255))
-    geolocation = db.Column(JSONB)  # lat, lng
+    geolocation = db.Column(JSONB if USE_POSTGRES else JSON)  # lat, lng
     
     event = db.relationship("Event", backref="checkins")
     user = db.relationship("User", backref="checkins")
@@ -813,7 +818,7 @@ class KioskSession(db.Model):
     session_start = db.Column(db.DateTime, default=func.now())
     session_end = db.Column(db.DateTime)
     users_served = db.Column(db.Integer, default=0)
-    activities = db.Column(JSONB)
+    activities = db.Column(JSONB if USE_POSTGRES else JSON)
 
 
 # ================================================================
@@ -860,7 +865,7 @@ class BlockchainCredential(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     credential_type = db.Column(db.String(64), nullable=False)
-    credential_data = db.Column(JSONB)
+    credential_data = db.Column(JSONB if USE_POSTGRES else JSON)
     blockchain_hash = db.Column(db.String(128), unique=True)
     blockchain_network = db.Column(db.String(32))  # ethereum, polygon, etc.
     transaction_id = db.Column(db.String(128))
@@ -898,7 +903,7 @@ class SavedSearch(db.Model):
     name = db.Column(db.String(128), nullable=False)
     query = db.Column(db.String(512), nullable=False)
     entity_types = db.Column(db.Text)  # JSON array
-    filters = db.Column(JSONB)  # Saved filter criteria
+    filters = db.Column(JSONB if USE_POSTGRES else JSON)  # Saved filter criteria
     email_alerts = db.Column(db.Boolean, default=False)
     alert_frequency = db.Column(db.String(32), default='daily')  # daily, weekly
     last_alerted = db.Column(db.DateTime)

@@ -2,6 +2,11 @@ from extensions import db
 from datetime import datetime
 from sqlalchemy import Index
 
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
+
 # ==================== TEXTBOOK EXCHANGE ====================
 class TextbookListing(db.Model):
     __tablename__ = 'textbook_listings'

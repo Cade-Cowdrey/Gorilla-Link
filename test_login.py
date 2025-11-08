@@ -18,7 +18,7 @@ def test_login():
             users = User.query.limit(5).all()
             print("\n[INFO] Sample users:")
             for user in users:
-                print(f"  - {user.username} ({user.email}) - Has password: {bool(user.password_hash)}")
+                print(f"  - {user.first_name} {user.last_name} ({user.email}) - Has password: {bool(user.password_hash)}")
         
         # Create a test user if none exist
         test_email = "test@pittstate.edu"
@@ -27,9 +27,9 @@ def test_login():
         if not test_user:
             print(f"\n[INFO] Creating test user...")
             test_user = User(
-                username="testuser",
-                email=test_email,
-                full_name="Test User"
+                first_name="Test",
+                last_name="User",
+                email=test_email
             )
             test_user.set_password("password123")
             db.session.add(test_user)

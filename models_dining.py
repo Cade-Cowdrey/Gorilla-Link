@@ -3,7 +3,12 @@ Dining Hall Models - Real-time food reviews and ratings
 """
 from extensions import db
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy import JSON
+
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
 
 class DiningLocation(db.Model):
     """PSU Dining locations (Café, Food Court, etc.)"""
@@ -16,10 +21,10 @@ class DiningLocation(db.Model):
     description = db.Column(db.Text)
     
     # Hours of operation (JSON: {monday: {open: '07:00', close: '21:00'}, ...})
-    hours = db.Column(JSONB)
+    hours = db.Column(JSON)
     
     accepts_meal_plan = db.Column(db.Boolean, default=True)
-    cuisine_types = db.Column(ARRAY(db.String))  # ['American', 'Pizza', 'Asian']
+    cuisine_types = db.Column(JSON)  # ['American', 'Pizza', 'Asian']
     
     # Contact & Info
     phone = db.Column(db.String(20))
@@ -99,12 +104,12 @@ class MenuItem(db.Model):
     meal_plan_swipes = db.Column(db.Integer)  # How many swipes it costs
     
     # Dietary information
-    dietary_tags = db.Column(ARRAY(db.String))  # vegetarian, vegan, gluten_free, etc.
-    allergens = db.Column(ARRAY(db.String))  # dairy, nuts, soy, etc.
+    dietary_tags = db.Column(JSON)  # vegetarian, vegan, gluten_free, etc.
+    allergens = db.Column(JSON)  # dairy, nuts, soy, etc.
     calories = db.Column(db.Integer)
     
     # Availability
-    available_days = db.Column(ARRAY(db.String))  # ['monday', 'wednesday', 'friday']
+    available_days = db.Column(JSON)  # ['monday', 'wednesday', 'friday']
     is_special = db.Column(db.Boolean, default=False)  # Limited time offering
     available_until = db.Column(db.DateTime)  # For limited items
     
@@ -138,7 +143,7 @@ class MealReview(db.Model):
     review_text = db.Column(db.Text)
     
     # Photos
-    photo_urls = db.Column(ARRAY(db.String))  # Multiple photos allowed
+    photo_urls = db.Column(JSON)  # Multiple photos allowed
     
     # Meal details
     meal_type = db.Column(db.String(20))  # breakfast, lunch, dinner, snack

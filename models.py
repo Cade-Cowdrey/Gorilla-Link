@@ -4,6 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSON, JSONB, ARRAY
 from extensions import db
+import os
+
+# Determine if we're using PostgreSQL or SQLite
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
 
 # ---------------------------
 # USER & AUTH MODELS
@@ -56,15 +61,15 @@ class User(UserMixin, db.Model):
     github_url = db.Column(db.String(512))
     portfolio_url = db.Column(db.String(512))
     gpa = db.Column(db.Float)
-    skills = db.Column(ARRAY(db.String))
-    interests = db.Column(ARRAY(db.String))
+    skills = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
+    interests = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     resume_url = db.Column(db.String(512))
     transcript_url = db.Column(db.String(512))
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(128))
     onboarding_completed = db.Column(db.Boolean, default=False)
-    privacy_settings = db.Column(JSONB)
-    notification_preferences = db.Column(JSONB)
+    privacy_settings = db.Column(JSONB if USE_POSTGRES else JSON)
+    notification_preferences = db.Column(JSONB if USE_POSTGRES else JSON)
     last_active = db.Column(db.DateTime)
     
     # Payment integration
@@ -351,9 +356,9 @@ class MockInterview(db.Model):
     job_id = db.Column(db.Integer, db.ForeignKey("jobs.id"), nullable=True)
     interview_type = db.Column(db.String(50))  # behavioral, technical, case, phone
     difficulty = db.Column(db.String(20))  # easy, medium, hard
-    questions = db.Column(JSONB)  # Array of questions with suggested answers
-    user_responses = db.Column(JSONB)  # User's recorded/written responses
-    ai_feedback = db.Column(JSONB)  # AI-generated feedback on responses
+    questions = db.Column(JSONB if USE_POSTGRES else JSON)  # Array of questions with suggested answers
+    user_responses = db.Column(JSONB if USE_POSTGRES else JSON)  # User's recorded/written responses
+    ai_feedback = db.Column(JSONB if USE_POSTGRES else JSON)  # AI-generated feedback on responses
     overall_score = db.Column(db.Float)
     completed_at = db.Column(db.DateTime)
     duration_minutes = db.Column(db.Integer)
@@ -371,8 +376,8 @@ class CareerAssessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     assessment_type = db.Column(db.String(50))  # personality, skills, interests, values
-    results = db.Column(JSONB)  # Assessment results and scores
-    recommendations = db.Column(JSONB)  # Career path recommendations
+    results = db.Column(JSONB if USE_POSTGRES else JSON)  # Assessment results and scores
+    recommendations = db.Column(JSONB if USE_POSTGRES else JSON)  # Career path recommendations
     completed_at = db.Column(db.DateTime, default=func.now())
     
     # Relationships
@@ -409,7 +414,7 @@ class LearningResource(db.Model):
     duration_hours = db.Column(db.Float)
     cost = db.Column(db.Float)  # 0 for free
     rating = db.Column(db.Float)
-    tags = db.Column(ARRAY(db.String))
+    tags = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -440,7 +445,7 @@ class IndustryInsight(db.Model):
     content = db.Column(db.Text)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     insight_type = db.Column(db.String(50))  # trend, advice, salary_data, skills_demand
-    data_points = db.Column(JSONB)  # Structured data (salary ranges, growth rates, etc.)
+    data_points = db.Column(JSONB if USE_POSTGRES else JSON)  # Structured data (salary ranges, growth rates, etc.)
     views_count = db.Column(db.Integer, default=0)
     published_at = db.Column(db.DateTime, default=func.now())
     is_featured = db.Column(db.Boolean, default=False)
@@ -509,7 +514,7 @@ class JobPosting(db.Model):
     experience_level = db.Column(db.String(50))  # entry, mid, senior
     salary_min = db.Column(db.Float)
     salary_max = db.Column(db.Float)
-    skills_required = db.Column(ARRAY(db.String))
+    skills_required = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     posted_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     is_active = db.Column(db.Boolean, default=True)
     posted_at = db.Column(db.DateTime, default=func.now())
@@ -558,7 +563,7 @@ class SalaryData(db.Model):
     salary_max = db.Column(db.Float)
     salary_currency = db.Column(db.String(10), default='USD')
     employment_type = db.Column(db.String(50))  # full_time, part_time, contract
-    benefits = db.Column(JSONB)  # Healthcare, 401k, PTO, etc.
+    benefits = db.Column(JSONB if USE_POSTGRES else JSON)  # Healthcare, 401k, PTO, etc.
     submitted_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     is_verified = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=func.now())

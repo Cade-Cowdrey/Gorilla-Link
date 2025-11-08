@@ -3,6 +3,11 @@ PSU Connect - Growth Features Database Models
 Models for gamification, social features, and engagement systems
 """
 
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
+
 from extensions import db
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSON, JSONB, ARRAY
@@ -25,7 +30,7 @@ class Badge(db.Model):
     icon = db.Column(db.String(255))  # Font Awesome icon class or image URL
     category = db.Column(db.String(50))  # resume, networking, learning, career, etc.
     points = db.Column(db.Integer, default=0)  # Points awarded for earning this badge
-    criteria = db.Column(JSONB)  # JSON describing how to earn this badge
+    criteria = db.Column(JSONB if USE_POSTGRES else JSON)  # JSON describing how to earn this badge
     is_active = db.Column(db.Boolean, default=True)
     rarity = db.Column(db.String(20), default='common')  # common, uncommon, rare, epic, legendary
     created_at = db.Column(db.DateTime, default=func.now())
@@ -93,7 +98,7 @@ class ProfileCompletionProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     completion_percentage = db.Column(db.Integer, default=0)
-    completed_tasks = db.Column(ARRAY(db.String))  # List of completed task slugs
+    completed_tasks = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)  # List of completed task slugs
     last_updated = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
     # Individual task completion flags
@@ -215,7 +220,7 @@ class SuccessStory(db.Model):
     company_name = db.Column(db.String(255))
     position = db.Column(db.String(255))
     salary_range = db.Column(db.String(100))  # Optional, e.g., "$60K-$80K"
-    tags = db.Column(ARRAY(db.String))
+    tags = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     image_url = db.Column(db.String(512))
     is_featured = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=True)
@@ -399,7 +404,7 @@ class ForumTopic(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    tags = db.Column(ARRAY(db.String))
+    tags = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     views_count = db.Column(db.Integer, default=0)
     is_pinned = db.Column(db.Boolean, default=False)
     is_locked = db.Column(db.Boolean, default=False)
@@ -497,8 +502,8 @@ class MentorProfile(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
-    expertise_areas = db.Column(ARRAY(db.String))
-    industries = db.Column(ARRAY(db.String))
+    expertise_areas = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
+    industries = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     current_company = db.Column(db.String(255))
     current_position = db.Column(db.String(255))
     years_experience = db.Column(db.Integer)
@@ -527,9 +532,9 @@ class MenteeProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     career_goals = db.Column(db.Text)
-    interests = db.Column(ARRAY(db.String))
-    target_industries = db.Column(ARRAY(db.String))
-    preferred_mentor_traits = db.Column(ARRAY(db.String))
+    interests = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
+    target_industries = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
+    preferred_mentor_traits = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     availability = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -556,7 +561,7 @@ class MentorshipMatch(db.Model):
     scheduled_end_at = db.Column(db.DateTime)
     ended_at = db.Column(db.DateTime)
     meetings_completed = db.Column(db.Integer, default=0)
-    goals_achieved = db.Column(JSONB)
+    goals_achieved = db.Column(JSONB if USE_POSTGRES else JSON)
     mentor_rating = db.Column(db.Integer)  # 1-5 stars
     mentee_rating = db.Column(db.Integer)  # 1-5 stars
     feedback = db.Column(db.Text)
@@ -584,7 +589,7 @@ class MentorshipSession(db.Model):
     meeting_link = db.Column(db.String(512))  # Zoom/Google Meet link
     agenda = db.Column(db.Text)
     notes = db.Column(db.Text)
-    action_items = db.Column(JSONB)
+    action_items = db.Column(JSONB if USE_POSTGRES else JSON)
     completed_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -681,7 +686,7 @@ class UserBehavior(db.Model):
     action_type = db.Column(db.String(50), nullable=False)  # view, click, apply, save, share
     item_type = db.Column(db.String(50), nullable=False)  # job, profile, course, event
     item_id = db.Column(db.Integer, nullable=False)
-    meta_data = db.Column(JSONB)  # Additional context - Renamed from metadata
+    meta_data = db.Column(JSONB if USE_POSTGRES else JSON)  # Additional context - Renamed from metadata
     timestamp = db.Column(db.DateTime, default=func.now())
     session_id = db.Column(db.String(255))
     
@@ -790,7 +795,7 @@ class ChatMessage(db.Model):
     role = db.Column(db.String(20), nullable=False)  # user or assistant
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
-    meta_data = db.Column(JSONB)  # Renamed from metadata to avoid SQLAlchemy conflict
+    meta_data = db.Column(JSONB if USE_POSTGRES else JSON)  # Renamed from metadata to avoid SQLAlchemy conflict
     
     # Relationships
     user = db.relationship('User', backref=db.backref('chat_messages', lazy='dynamic', order_by='ChatMessage.created_at'))
@@ -936,7 +941,7 @@ class AcademicRecord(db.Model):
     cumulative_credits = db.Column(db.Integer)
     major_declared = db.Column(db.Boolean, default=False)
     honors_program = db.Column(db.Boolean, default=False)
-    dean_list = db.Column(ARRAY(db.String))  # Semesters on dean's list
+    dean_list = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)  # Semesters on dean's list
     academic_standing = db.Column(db.String(50))  # good_standing, probation, etc.
     last_updated = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
@@ -965,7 +970,7 @@ class EmployerPartnership(db.Model):
     exclusive_access = db.Column(db.Boolean, default=False)  # First access to PSU students
     logo_url = db.Column(db.String(512))
     website = db.Column(db.String(512))
-    industries = db.Column(ARRAY(db.String))
+    industries = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)
     is_active = db.Column(db.Boolean, default=True)
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=func.now())
@@ -1011,15 +1016,15 @@ class InstitutionalAnnouncement(db.Model):
     content = db.Column(db.Text, nullable=False)
     announcement_type = db.Column(db.String(50))  # urgent, maintenance, deadline, general, emergency
     priority = db.Column(db.String(20), default='normal')  # low, normal, high, critical
-    target_audience = db.Column(ARRAY(db.String))  # all, students, alumni, faculty, specific_departments
-    department_ids = db.Column(ARRAY(db.Integer))  # Target specific departments
+    target_audience = db.Column(ARRAY(db.String) if USE_POSTGRES else JSON)  # all, students, alumni, faculty, specific_departments
+    department_ids = db.Column(ARRAY(db.Integer) if USE_POSTGRES else JSON)  # Target specific departments
     posted_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     show_as_banner = db.Column(db.Boolean, default=False)
     banner_color = db.Column(db.String(20))  # red for urgent, blue for info
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
-    attachments = db.Column(JSONB)  # PDFs, forms, etc.
+    attachments = db.Column(JSONB if USE_POSTGRES else JSON)  # PDFs, forms, etc.
     views_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=func.now())
     
@@ -1044,7 +1049,7 @@ class ComplianceLog(db.Model):
     ip_address = db.Column(db.String(50))
     user_agent = db.Column(db.String(512))
     justification = db.Column(db.Text)  # Why was this data accessed
-    details = db.Column(JSONB)
+    details = db.Column(JSONB if USE_POSTGRES else JSON)
     timestamp = db.Column(db.DateTime, default=func.now())
     
     # Relationships
@@ -1089,7 +1094,7 @@ class SystemHealthMetric(db.Model):
     threshold_warning = db.Column(db.Float)
     threshold_critical = db.Column(db.Float)
     status = db.Column(db.String(20))  # healthy, warning, critical
-    details = db.Column(JSONB)
+    details = db.Column(JSONB if USE_POSTGRES else JSON)
     timestamp = db.Column(db.DateTime, default=func.now())
     
     def __repr__(self):
@@ -1163,7 +1168,7 @@ class EventSponsor(db.Model):
     company_name = db.Column(db.String(255), nullable=False)
     sponsorship_level = db.Column(db.String(50))  # title, platinum, gold, silver, bronze
     booth_number = db.Column(db.String(20))
-    representatives = db.Column(JSONB)  # List of company reps attending
+    representatives = db.Column(JSONB if USE_POSTGRES else JSON)  # List of company reps attending
     logo_url = db.Column(db.String(512))
     website = db.Column(db.String(512))
     recruiting_positions = db.Column(db.Integer, default=0)
@@ -1293,7 +1298,7 @@ class DashboardMetric(db.Model):
     time_period = db.Column(db.String(50))  # daily, weekly, monthly, semester, annual
     calculation_method = db.Column(db.Text)  # SQL query or logic used
     last_calculated = db.Column(db.DateTime, default=func.now())
-    metric_metadata = db.Column(JSONB)  # Additional context (renamed from 'metadata')
+    metric_metadata = db.Column(JSONB if USE_POSTGRES else JSON)  # Additional context (renamed from 'metadata')
     
     def calculate_change_percentage(self):
         """Calculate percentage change from previous value"""
@@ -1459,8 +1464,8 @@ class IntegrationLog(db.Model):
     error_message = db.Column(db.Text)
     execution_time_seconds = db.Column(db.Float)
     api_endpoint = db.Column(db.String(255))
-    request_payload = db.Column(JSONB)
-    response_payload = db.Column(JSONB)
+    request_payload = db.Column(JSONB if USE_POSTGRES else JSON)
+    response_payload = db.Column(JSONB if USE_POSTGRES else JSON)
     initiated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=func.now())
     

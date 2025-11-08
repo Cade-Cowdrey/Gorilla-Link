@@ -3,6 +3,11 @@ Portfolio Models - Professional Portfolio System
 Stores user portfolios, experiences, projects, awards, and skills
 """
 
+# Determine if we're using PostgreSQL or SQLite
+import os
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///pittstate_connect_local.db')
+USE_POSTGRES = DATABASE_URL.startswith('postgresql')
+
 from extensions import db
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.sql import func
