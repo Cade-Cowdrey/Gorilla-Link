@@ -116,7 +116,7 @@ class ScholarshipSponsorship(db.Model):
     __tablename__ = 'scholarship_sponsorships'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Scholarship details
     name = db.Column(db.String(200), nullable=False)  # e.g., "ABC Corp Tech Scholarship"
@@ -135,7 +135,7 @@ class ScholarshipSponsorship(db.Model):
     
     # Status
     status = db.Column(db.String(50), default='active')  # active, awarded, expired
-    recipient_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    recipient_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -154,7 +154,7 @@ class CareerFairParticipation(db.Model):
     __tablename__ = 'career_fair_participation'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Fair details
     fair_name = db.Column(db.String(200), nullable=False)
@@ -190,8 +190,8 @@ class JobBoost(db.Model):
     __tablename__ = 'job_boosts'
     
     id = db.Column(db.Integer, primary_key=True)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Boost details
     boost_type = db.Column(db.String(50))  # 24hr, 7day, 30day
@@ -231,7 +231,7 @@ class EmployerBrandingPackage(db.Model):
     __tablename__ = 'employer_branding_packages'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Package details
     package_type = db.Column(db.String(50))  # basic, standard, premium
@@ -267,7 +267,7 @@ class RevenueTransaction(db.Model):
     __tablename__ = 'revenue_transactions'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Transaction details
     transaction_type = db.Column(db.String(50), nullable=False)  # subscription, scholarship, fair, boost, branding
