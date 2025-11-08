@@ -444,7 +444,7 @@ def export_pdf(resume, template):
 
 
 def export_docx(resume, template):
-    """Export resume as Word document"""
+    """Export resume as Word document with Pitt State branding"""
     try:
         doc = Document()
         
@@ -454,12 +454,26 @@ def export_docx(resume, template):
         font.name = template.font_family if template else 'Calibri'
         font.size = Pt(11)
         
-        # Header with name
-        header = doc.add_paragraph()
-        header.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        name_run = header.add_run(current_user.full_name)
+        # Add Pitt State header with logo placeholder
+        header_section = doc.sections[0].header
+        header_para = header_section.paragraphs[0]
+        header_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+        # Pitt State branding text
+        psu_run = header_para.add_run("PITTSBURG STATE UNIVERSITY")
+        psu_run.font.size = Pt(8)
+        psu_run.font.color.rgb = RGBColor(190, 30, 45)  # Pitt State crimson
+        psu_run.bold = True
+        
+        header_para.add_run("\n🦍")  # Gorilla emoji as placeholder
+        
+        # Main content - Header with name
+        name_header = doc.add_paragraph()
+        name_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        name_run = name_header.add_run(current_user.full_name)
         name_run.bold = True
-        name_run.font.size = Pt(18)
+        name_run.font.size = Pt(20)
+        name_run.font.color.rgb = RGBColor(190, 30, 45)  # Pitt State crimson
         
         # Contact info
         contact = doc.add_paragraph()
@@ -468,32 +482,60 @@ def export_docx(resume, template):
         if hasattr(current_user, 'phone') and current_user.phone:
             contact_text += f" | {current_user.phone}"
         if hasattr(current_user, 'linkedin_url') and current_user.linkedin_url:
-            contact_text += f" | {current_user.linkedin_url}"
+            contact_text += f" | LinkedIn"
+        if hasattr(current_user, 'major') and current_user.major:
+            contact_text += f" | {current_user.major}"
         contact.add_run(contact_text)
+        
+        # Pitt State student indicator
+        if hasattr(current_user, 'graduation_year') and current_user.graduation_year:
+            grad_para = doc.add_paragraph()
+            grad_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            grad_run = grad_para.add_run(f"Pittsburg State University | Class of {current_user.graduation_year}")
+            grad_run.font.size = Pt(10)
+            grad_run.font.color.rgb = RGBColor(80, 80, 80)
+        
+        doc.add_paragraph()  # Spacing
+        
+        # Add decorative line in Pitt State colors
+        line_para = doc.add_paragraph()
+        line_run = line_para.add_run("_" * 80)
+        line_run.font.color.rgb = RGBColor(190, 30, 45)
         
         doc.add_paragraph()  # Spacing
         
         # Add sections
         for section in sorted(resume.sections, key=lambda x: x.order):
-            # Section title
+            # Section title with Pitt State styling
             section_title = doc.add_paragraph()
             section_run = section_title.add_run(section.title.upper())
             section_run.bold = True
-            section_run.font.size = Pt(12)
+            section_run.font.size = Pt(13)
+            section_run.font.color.rgb = RGBColor(190, 30, 45)
             
             # Add horizontal line
-            doc.add_paragraph('_' * 80)
+            line_para = doc.add_paragraph()
+            line_run = line_para.add_run("_" * 80)
+            line_run.font.color.rgb = RGBColor(200, 200, 200)
             
             # Section content
             content_para = doc.add_paragraph(section.content)
             content_para.paragraph_format.space_after = Pt(12)
+        
+        # Footer with Pitt State branding
+        footer_section = doc.sections[0].footer
+        footer_para = footer_section.paragraphs[0]
+        footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        footer_run = footer_para.add_run("Powered by PittState-Connect | Go Gorillas! 🦍")
+        footer_run.font.size = Pt(8)
+        footer_run.font.color.rgb = RGBColor(120, 120, 120)
         
         # Save to BytesIO
         docx_file = BytesIO()
         doc.save(docx_file)
         docx_file.seek(0)
         
-        filename = f"{resume.title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.docx"
+        filename = f"PSU_Resume_{resume.title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.docx"
         
         return send_file(
             docx_file,

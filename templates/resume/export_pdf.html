@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ resume.user.full_name }} - Resume</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+        
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Pitt State Header */
+        .psu-header {
+            text-align: right;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #BE1E2D;
+        }
+        
+        .psu-logo {
+            font-size: 24px;
+            color: #BE1E2D;
+            display: inline-block;
+        }
+        
+        .psu-text {
+            font-size: 8pt;
+            color: #BE1E2D;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        /* Name Header */
+        .name-header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #BE1E2D;
+            margin: 0;
+        }
+        
+        /* Contact Info */
+        .contact-info {
+            text-align: center;
+            font-size: 10pt;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        .psu-student {
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        /* Section Titles */
+        .section-title {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #BE1E2D;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #FFB81C;
+            text-transform: uppercase;
+        }
+        
+        /* Section Content */
+        .section-content {
+            margin-bottom: 15px;
+        }
+        
+        .experience-item {
+            margin-bottom: 12px;
+        }
+        
+        .experience-title {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .experience-company {
+            color: #BE1E2D;
+            font-weight: 600;
+        }
+        
+        .experience-dates {
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+        }
+        
+        /* Lists */
+        ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 3px;
+        }
+        
+        /* Footer */
+        .psu-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 7pt;
+            color: #999;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+        }
+        
+        .gorilla-watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 40px;
+            opacity: 0.05;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pitt State Header -->
+    <div class="psu-header">
+        <span class="psu-logo">🦍</span><br>
+        <span class="psu-text">PITTSBURG STATE UNIVERSITY</span>
+    </div>
+    
+    <!-- Name -->
+    <div class="name-header">
+        <h1 class="name">{{ resume.user.full_name }}</h1>
+    </div>
+    
+    <!-- Contact Information -->
+    <div class="contact-info">
+        {{ resume.user.email }}
+        {% if resume.user.phone %} | {{ resume.user.phone }}{% endif %}
+        {% if resume.user.linkedin_url %} | LinkedIn{% endif %}
+        {% if resume.user.portfolio_url %} | Portfolio{% endif %}
+    </div>
+    
+    <!-- Pitt State Student Info -->
+    {% if resume.user.major or resume.user.graduation_year %}
+    <div class="psu-student">
+        {% if resume.user.major %}{{ resume.user.major }}{% endif %}
+        {% if resume.user.graduation_year %} | Class of {{ resume.user.graduation_year }}{% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Resume Sections -->
+    {% for section in resume.sections|sort(attribute='order') %}
+    <div class="section">
+        <div class="section-title">{{ section.title }}</div>
+        <div class="section-content">
+            {{ section.content|safe }}
+        </div>
+    </div>
+    {% endfor %}
+    
+    <!-- Watermark -->
+    <div class="gorilla-watermark">🦍</div>
+    
+    <!-- Footer -->
+    <div class="psu-footer">
+        Powered by PittState-Connect | Go Gorillas! 🦍
+    </div>
+</body>
+</html>

@@ -196,6 +196,8 @@ PORTFOLIO_VIEW_TEMPLATE = """
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
+            --psu-crimson: #BE1E2D;
+            --psu-gold: #FFB81C;
             --primary-color: #2563eb;
             --secondary-color: #1e40af;
             --text-color: #1f2937;
@@ -208,11 +210,53 @@ PORTFOLIO_VIEW_TEMPLATE = """
             line-height: 1.7;
         }
         
+        /* Pitt State Branding Header */
+        .psu-branding {
+            background: var(--psu-crimson);
+            color: white;
+            padding: 0.5rem 0;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .psu-logo {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(190, 30, 45, 0.3);
+            z-index: 1000;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 3px solid var(--psu-crimson);
+        }
+        
         .hero-section {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: linear-gradient(135deg, var(--psu-crimson) 0%, #8B1520 100%);
             color: white;
             padding: 5rem 0;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="80" opacity="0.05">🦍</text></svg>') repeat;
+            opacity: 0.1;
         }
         
         .profile-image {
@@ -220,20 +264,37 @@ PORTFOLIO_VIEW_TEMPLATE = """
             height: 150px;
             border-radius: 50%;
             border: 5px solid white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
         }
         
         .hero-headline {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
         
         .hero-tagline {
             font-size: 1.2rem;
             opacity: 0.95;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .psu-badge {
+            background: var(--psu-gold);
+            color: #333;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: 600;
+            margin-top: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .social-links a {
@@ -246,6 +307,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
         
         .social-links a:hover {
             transform: scale(1.2);
+            color: var(--psu-gold);
         }
         
         .section-title {
@@ -254,6 +316,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
             margin-bottom: 2rem;
             position: relative;
             padding-bottom: 0.5rem;
+            color: var(--psu-crimson);
         }
         
         .section-title::after {
@@ -263,11 +326,11 @@ PORTFOLIO_VIEW_TEMPLATE = """
             left: 0;
             width: 60px;
             height: 3px;
-            background: var(--primary-color);
+            background: var(--psu-gold);
         }
         
         .experience-card {
-            border-left: 3px solid var(--primary-color);
+            border-left: 3px solid var(--psu-crimson);
             padding-left: 1.5rem;
             margin-bottom: 2.5rem;
         }
@@ -284,7 +347,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
         
         .experience-company {
             font-size: 1.1rem;
-            color: var(--primary-color);
+            color: var(--psu-crimson);
             font-weight: 500;
         }
         
@@ -301,21 +364,23 @@ PORTFOLIO_VIEW_TEMPLATE = """
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
             transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 4px solid var(--psu-crimson);
         }
         
         .project-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(190, 30, 45, 0.15);
         }
         
         .project-title {
             font-size: 1.4rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            color: var(--psu-crimson);
         }
         
         .project-subtitle {
-            color: var(--primary-color);
+            color: var(--text-color);
             font-weight: 500;
             margin-bottom: 0.75rem;
         }
@@ -327,7 +392,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
         }
         
         .btn-portfolio {
-            background: var(--primary-color);
+            background: var(--psu-crimson);
             color: white;
             padding: 0.5rem 1.5rem;
             border-radius: 25px;
@@ -338,7 +403,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
         }
         
         .btn-portfolio:hover {
-            background: var(--secondary-color);
+            background: #8B1520;
             color: white;
         }
         
@@ -347,7 +412,7 @@ PORTFOLIO_VIEW_TEMPLATE = """
             padding: 1rem 1.5rem;
             border-radius: 8px;
             margin-bottom: 1rem;
-            border-left: 4px solid var(--primary-color);
+            border-left: 4px solid var(--psu-gold);
         }
         
         .award-title {
@@ -363,6 +428,11 @@ PORTFOLIO_VIEW_TEMPLATE = """
             text-align: center;
         }
         
+        .psu-footer-logo {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
         .contact-info {
             margin: 2rem 0;
         }
@@ -375,9 +445,9 @@ PORTFOLIO_VIEW_TEMPLATE = """
         .theme-toggle {
             position: fixed;
             top: 20px;
-            right: 20px;
+            right: 120px;
             background: white;
-            border: 2px solid var(--primary-color);
+            border: 2px solid var(--psu-crimson);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -387,14 +457,39 @@ PORTFOLIO_VIEW_TEMPLATE = """
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: transform 0.2s;
+            z-index: 999;
         }
         
         .theme-toggle:hover {
             transform: scale(1.1);
         }
+        
+        @media (max-width: 768px) {
+            .psu-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+                top: 60px;
+                right: 10px;
+            }
+            
+            .theme-toggle {
+                right: 80px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Pitt State Branding Bar -->
+    <div class="psu-branding">
+        🦍 PITTSBURG STATE UNIVERSITY | PROFESSIONAL PORTFOLIO
+    </div>
+    
+    <!-- Pitt State Logo Badge -->
+    <div class="psu-logo" title="Pittsburg State University">
+        🦍
+    </div>
+    
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
@@ -411,10 +506,17 @@ PORTFOLIO_VIEW_TEMPLATE = """
             <p class="hero-tagline">{{ portfolio.headline }}</p>
             {% endif %}
             
+            <div class="psu-badge">
+                🎓 Pittsburg State University
+                {% if user.graduation_year %}| Class of {{ user.graduation_year }}{% endif %}
+            </div>
+            
             {% if portfolio.resume_url %}
-            <a href="{{ portfolio.resume_url }}" class="btn btn-light btn-lg" target="_blank">
-                <i class="bi bi-file-earmark-pdf"></i> View Résumé
-            </a>
+            <div class="mt-3">
+                <a href="{{ portfolio.resume_url }}" class="btn btn-light btn-lg" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> View Résumé
+                </a>
+            </div>
             {% endif %}
             
             <div class="social-links mt-4">
@@ -557,8 +659,10 @@ PORTFOLIO_VIEW_TEMPLATE = """
     <!-- Footer -->
     <footer>
         <div class="container">
+            <div class="psu-footer-logo">🦍</div>
+            <p style="font-weight: 600; color: var(--psu-gold);">PITTSBURG STATE UNIVERSITY</p>
             <p>&copy; {{ now().year }} {{ user.full_name }} | Professional Portfolio</p>
-            <p class="text-muted small">Powered by PittState-Connect</p>
+            <p class="text-muted small">Powered by PittState-Connect | Go Gorillas!</p>
         </div>
     </footer>
     
