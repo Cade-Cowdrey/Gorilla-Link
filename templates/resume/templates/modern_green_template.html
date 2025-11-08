@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ resume.user.full_name }} - Resume</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #2C2C2C;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 32%;
+            background: linear-gradient(180deg, #2C5F2D 0%, #1E4620 100%);
+            color: white;
+            padding: 40px 25px;
+            min-height: 11in;
+        }
+        
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            margin-bottom: 15px;
+        }
+        
+        .sidebar h1 {
+            font-size: 20pt;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+        
+        .sidebar .tagline {
+            font-size: 10pt;
+            color: #A8D5BA;
+            margin-bottom: 25px;
+            font-weight: 400;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #A8D5BA;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #A8D5BA;
+            padding-bottom: 5px;
+        }
+        
+        .sidebar .contact-item {
+            margin-bottom: 10px;
+            font-size: 9pt;
+            line-height: 1.6;
+        }
+        
+        .sidebar .contact-item i {
+            color: #A8D5BA;
+            margin-right: 8px;
+        }
+        
+        .sidebar .skill-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+        }
+        
+        .main-content {
+            width: 68%;
+            padding: 40px 35px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 14pt;
+            color: #2C5F2D;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 3px solid #2C5F2D;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .entry {
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+        
+        .entry-header {
+            margin-bottom: 5px;
+        }
+        
+        .entry-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #2C2C2C;
+        }
+        
+        .entry-organization {
+            font-size: 11pt;
+            color: #2C5F2D;
+            font-weight: 600;
+        }
+        
+        .entry-date {
+            font-size: 9pt;
+            color: #666;
+            float: right;
+        }
+        
+        .entry-location {
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .entry-details {
+            margin-left: 0;
+            padding-left: 20px;
+            margin-top: 6px;
+        }
+        
+        .entry-details li {
+            margin-bottom: 4px;
+            line-height: 1.6;
+            font-size: 10pt;
+        }
+        
+        .summary {
+            text-align: justify;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile-section">
+                {% if resume.user.profile_image or resume.user.profile_image_url %}
+                <img src="{{ resume.user.profile_image or resume.user.profile_image_url }}" alt="Profile" class="profile-image">
+                {% endif %}
+                <h1>{{ resume.user.first_name }}<br>{{ resume.user.last_name }}</h1>
+                {% if resume.headline %}
+                <div class="tagline">{{ resume.headline }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Contact</div>
+                <div class="contact-item">✉ {{ resume.user.email }}</div>
+                {% if resume.user.phone %}<div class="contact-item">☎ {{ resume.user.phone }}</div>{% endif %}
+                {% if resume.user.city and resume.user.state %}<div class="contact-item">📍 {{ resume.user.city }}, {{ resume.user.state }}</div>{% endif %}
+                {% if resume.user.linkedin_url %}<div class="contact-item">💼 LinkedIn</div>{% endif %}
+                {% if resume.user.github_url %}<div class="contact-item">💻 GitHub</div>{% endif %}
+            </div>
+            
+            {% if resume.user.major %}
+            <div class="sidebar-section">
+                <div class="sidebar-title">Education</div>
+                <div style="font-weight: 600; margin-bottom: 5px;">{{ resume.user.major }}</div>
+                <div style="font-size: 9pt;">University Degree</div>
+                {% if resume.user.graduation_year %}<div style="font-size: 9pt; color: #A8D5BA;">Class of {{ resume.user.graduation_year }}</div>{% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Skills</div>
+                {% set sample_skills = ['Leadership', 'Communication', 'Project Management', 'Data Analysis', 'Problem Solving', 'Teamwork'] %}
+                {% for skill in sample_skills %}
+                <div class="skill-item">{{ skill }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% if resume.summary %}
+            <div class="section">
+                <div class="section-title">Professional Summary</div>
+                <div class="summary">{{ resume.summary }}</div>
+            </div>
+            {% endif %}
+            
+            {% for section in resume.sections %}
+            <div class="section">
+                <div class="section-title">{{ section.title }}</div>
+                
+                {% if section.content_type == 'bullets' %}
+                    {% for entry in section.entries %}
+                    <div class="entry">
+                        <div class="entry-header">
+                            <span class="entry-date">
+                                {% if entry.start_date %}
+                                {{ entry.start_date.strftime('%b %Y') }}
+                                {% if entry.end_date %} - {{ entry.end_date.strftime('%b %Y') }}{% else %} - Present{% endif %}
+                                {% endif %}
+                            </span>
+                            <div class="entry-title">{{ entry.title }}</div>
+                            {% if entry.organization %}<div class="entry-organization">{{ entry.organization }}</div>{% endif %}
+                            {% if entry.location %}<div class="entry-location">{{ entry.location }}</div>{% endif %}
+                        </div>
+                        {% if entry.description %}
+                        <ul class="entry-details">
+                            {% for bullet in entry.description.split('\n') %}
+                            {% if bullet.strip() %}
+                            <li>{{ bullet.strip('•- ').strip() }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div>{{ section.content }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

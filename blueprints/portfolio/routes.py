@@ -1302,14 +1302,16 @@ PORTFOLIO_VIEW_TEMPLATE = """
 </head>
 <body>
     <!-- Pitt State Branding Bar -->
+    {% if portfolio.theme == 'psu' or not portfolio.theme %}
     <div class="psu-branding">
-        🦍 PITTSBURG STATE UNIVERSITY | PROFESSIONAL PORTFOLIO
+        PITTSBURG STATE UNIVERSITY | PROFESSIONAL PORTFOLIO
     </div>
     
     <!-- Pitt State Logo Badge -->
     <div class="psu-logo" title="Pittsburg State University">
-        <img src="/static/images/psu-gorilla-logo.svg" alt="PSU Gorilla Logo">
+        <img src="/static/images/pittstate-logo.png" alt="PSU Logo" onerror="this.style.display='none'">
     </div>
+    {% endif %}
     
     <!-- Hero Section -->
     <section class="hero-section">
@@ -1480,10 +1482,13 @@ PORTFOLIO_VIEW_TEMPLATE = """
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="psu-footer-logo">🦍</div>
+            {% if portfolio.theme == 'psu' or not portfolio.theme %}
+            <div class="psu-footer-logo">
+                <img src="/static/images/pittstate-logo.png" alt="PSU" style="max-height: 40px;" onerror="this.style.display='none'">
+            </div>
             <p style="font-weight: 600; color: var(--psu-gold);">PITTSBURG STATE UNIVERSITY</p>
+            {% endif %}
             <p>&copy; {{ now().year }} {{ user.full_name }} | Professional Portfolio</p>
-            <p class="text-muted small">Powered by PittState-Connect | Go Gorillas!</p>
         </div>
     </footer>
     
