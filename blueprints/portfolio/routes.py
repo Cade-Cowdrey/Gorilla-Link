@@ -531,59 +531,76 @@ PORTFOLIO_EDIT_TEMPLATE = """
                         <div class="card-body">
                             <form method="POST" action="{{ url_for('portfolio.update_theme') }}">
                                 <div class="mb-4">
-                                    <label class="form-label">Color Scheme</label>
+                                    <label class="form-label fw-bold">Choose Your Industry Theme</label>
+                                    <p class="text-muted small">Select a professionally designed theme tailored to your field</p>
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="theme_preset" id="psu-theme" value="psu" {% if not portfolio.theme or portfolio.theme == 'psu' %}checked{% endif %}>
-                                            <label class="btn btn-outline-danger w-100" for="psu-theme">
+                                            <label class="btn btn-outline-danger w-100 h-100" for="psu-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #BE1E2D 0%, #FFB81C 100%); height: 50px; border-radius: 5px;"></div>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #BE1E2D 0%, #FFB81C 100%); height: 50px; border-radius: 8px;"></div>
                                                     <strong>PSU Crimson & Gold</strong>
+                                                    <small class="d-block text-muted">University Pride</small>
                                                 </div>
                                             </label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" class="btn-check" name="theme_preset" id="professional-theme" value="professional" {% if portfolio.theme == 'professional' %}checked{% endif %}>
-                                            <label class="btn btn-outline-primary w-100" for="professional-theme">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="modern-dark-theme" value="modern-dark" {% if portfolio.theme == 'modern-dark' %}checked{% endif %}>
+                                            <label class="btn btn-outline-dark w-100 h-100" for="modern-dark-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); height: 50px; border-radius: 5px;"></div>
-                                                    <strong>Professional Blue</strong>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #1a1f36 0%, #00d4ff 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Modern Dark</strong>
+                                                    <small class="d-block text-muted">Tech & Design</small>
                                                 </div>
                                             </label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" class="btn-check" name="theme_preset" id="modern-theme" value="modern" {% if portfolio.theme == 'modern' %}checked{% endif %}>
-                                            <label class="btn btn-outline-success w-100" for="modern-theme">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="healthcare-theme" value="healthcare" {% if portfolio.theme == 'healthcare' %}checked{% endif %}>
+                                            <label class="btn btn-outline-info w-100 h-100" for="healthcare-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); height: 50px; border-radius: 5px;"></div>
-                                                    <strong>Modern Green</strong>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #0077c8 0%, #00a3e0 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Healthcare Blue</strong>
+                                                    <small class="d-block text-muted">Medical & Nursing</small>
                                                 </div>
                                             </label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" class="btn-check" name="theme_preset" id="elegant-theme" value="elegant" {% if portfolio.theme == 'elegant' %}checked{% endif %}>
-                                            <label class="btn btn-outline-secondary w-100" for="elegant-theme">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="business-theme" value="business" {% if portfolio.theme == 'business' %}checked{% endif %}>
+                                            <label class="btn btn-outline-secondary w-100 h-100" for="business-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #6b7280 0%, #374151 100%); height: 50px; border-radius: 5px;"></div>
-                                                    <strong>Elegant Gray</strong>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #1a1a2e 0%, #d4af37 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Executive Business</strong>
+                                                    <small class="d-block text-muted">Corporate & Finance</small>
                                                 </div>
                                             </label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" class="btn-check" name="theme_preset" id="vibrant-theme" value="vibrant" {% if portfolio.theme == 'vibrant' %}checked{% endif %}>
-                                            <label class="btn btn-outline-warning w-100" for="vibrant-theme">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="construction-theme" value="construction" {% if portfolio.theme == 'construction' %}checked{% endif %}>
+                                            <label class="btn btn-outline-warning w-100 h-100" for="construction-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); height: 50px; border-radius: 5px;"></div>
-                                                    <strong>Vibrant Orange</strong>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #ff6b35 0%, #ffa500 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Construction Bold</strong>
+                                                    <small class="d-block text-muted">Engineering & Trades</small>
                                                 </div>
                                             </label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="theme_preset" id="creative-theme" value="creative" {% if portfolio.theme == 'creative' %}checked{% endif %}>
-                                            <label class="btn btn-outline-info w-100" for="creative-theme">
+                                            <label class="btn btn-outline-primary w-100 h-100" for="creative-theme">
                                                 <div class="py-3">
-                                                    <div class="mb-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); height: 50px; border-radius: 5px;"></div>
-                                                    <strong>Creative Purple</strong>
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Creative Arts</strong>
+                                                    <small class="d-block text-muted">Design & Media</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" class="btn-check" name="theme_preset" id="tech-theme" value="tech" {% if portfolio.theme == 'tech' %}checked{% endif %}>
+                                            <label class="btn btn-outline-success w-100 h-100" for="tech-theme">
+                                                <div class="py-3">
+                                                    <div class="mb-2" style="background: linear-gradient(135deg, #0a192f 0%, #00ff88 100%); height: 50px; border-radius: 8px;"></div>
+                                                    <strong>Technology</strong>
+                                                    <small class="d-block text-muted">Software & IT</small>
                                                 </div>
                                             </label>
                                         </div>
@@ -960,64 +977,194 @@ PORTFOLIO_VIEW_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        {% if portfolio.theme == 'professional' %}
+        {% if portfolio.theme == 'modern-dark' %}
+        /* Modern Dark Theme - Inspired by contemporary portfolio design */
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
-            --psu-crimson: #2563eb;
-            --psu-gold: #3b82f6;
+            --primary-color: #1a1f36;
+            --secondary-color: #0f1419;
+            --accent-color: #00d4ff;
+            --psu-crimson: #00d4ff;
+            --psu-gold: #ffd700;
+            --text-color: #e2e8f0;
+            --light-bg: #1e2433;
+            --card-bg: #242b3d;
         }
-        {% elif portfolio.theme == 'modern' %}
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f36 100%);
+            color: var(--text-color);
+        }
+        .card, .section {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1a1f36 0%, #0f1419 100%);
+        }
+        
+        {% elif portfolio.theme == 'healthcare' %}
+        /* Healthcare/Medical Theme - Professional, clean, trustworthy */
         :root {
-            --primary-color: #10b981;
-            --secondary-color: #059669;
-            --accent-color: #34d399;
-            --psu-crimson: #10b981;
-            --psu-gold: #34d399;
+            --primary-color: #0077c8;
+            --secondary-color: #004e8c;
+            --accent-color: #00a3e0;
+            --psu-crimson: #0077c8;
+            --psu-gold: #00a3e0;
+            --text-color: #2c3e50;
+            --light-bg: #f0f8ff;
+            --card-bg: #ffffff;
         }
-        {% elif portfolio.theme == 'elegant' %}
+        body {
+            background: linear-gradient(to bottom, #f0f8ff 0%, #e6f4ff 100%);
+        }
+        .card {
+            border-left: 4px solid var(--accent-color);
+            box-shadow: 0 4px 16px rgba(0, 119, 200, 0.1);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #0077c8 0%, #005a9c 100%);
+        }
+        
+        {% elif portfolio.theme == 'business' %}
+        /* Business/Corporate Theme - Executive, sophisticated */
         :root {
-            --primary-color: #6b7280;
-            --secondary-color: #374151;
-            --accent-color: #9ca3af;
-            --psu-crimson: #6b7280;
-            --psu-gold: #9ca3af;
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #d4af37;
+            --psu-crimson: #1a1a2e;
+            --psu-gold: #d4af37;
+            --text-color: #2d3436;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
         }
-        {% elif portfolio.theme == 'vibrant' %}
+        body {
+            background: #f8f9fa;
+        }
+        .card {
+            border-top: 3px solid var(--accent-color);
+            box-shadow: 0 10px 30px rgba(26, 26, 46, 0.15);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+        }
+        h2 {
+            border-left: 5px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+        
+        {% elif portfolio.theme == 'construction' %}
+        /* Construction/Engineering Theme - Bold, industrial, strong */
         :root {
-            --primary-color: #f59e0b;
-            --secondary-color: #d97706;
-            --accent-color: #fbbf24;
-            --psu-crimson: #f59e0b;
-            --psu-gold: #fbbf24;
+            --primary-color: #ff6b35;
+            --secondary-color: #d84315;
+            --accent-color: #ffa500;
+            --psu-crimson: #ff6b35;
+            --psu-gold: #ffa500;
+            --text-color: #1a1a1a;
+            --light-bg: #f5f5f0;
+            --card-bg: #ffffff;
         }
+        body {
+            background: linear-gradient(to bottom, #f5f5f0 0%, #e8e8e0 100%);
+        }
+        .card {
+            border: 2px solid #ddd;
+            border-left: 6px solid var(--primary-color);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.2);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #ff6b35 0%, #d84315 100%);
+        }
+        h1, h2, h3 {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
         {% elif portfolio.theme == 'creative' %}
+        /* Creative/Design Theme - Artistic, vibrant, expressive */
         :root {
-            --primary-color: #8b5cf6;
-            --secondary-color: #7c3aed;
-            --accent-color: #a78bfa;
-            --psu-crimson: #8b5cf6;
-            --psu-gold: #a78bfa;
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --accent-color: #ec4899;
+            --psu-crimson: #6366f1;
+            --psu-gold: #ec4899;
+            --text-color: #1e293b;
+            --light-bg: #faf5ff;
+            --card-bg: #ffffff;
         }
+        body {
+            background: linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%);
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+            border: 2px solid rgba(99, 102, 241, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.25);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        {% elif portfolio.theme == 'tech' %}
+        /* Technology/Software Theme - Sleek, modern, innovative */
+        :root {
+            --primary-color: #00ff88;
+            --secondary-color: #00cc6a;
+            --accent-color: #00ffaa;
+            --psu-crimson: #00ff88;
+            --psu-gold: #00ffaa;
+            --text-color: #0a0e27;
+            --light-bg: #f0fff4;
+            --card-bg: #ffffff;
+        }
+        body {
+            background: linear-gradient(to bottom, #f0fff4 0%, #e6ffed 100%);
+        }
+        .card {
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.1);
+            border-radius: 12px;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #0a192f 0%, #0f2847 100%);
+        }
+        code, .monospace {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 255, 136, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
         {% else %}
+        /* Default PSU Theme */
         :root {
             --primary-color: #BE1E2D;
             --secondary-color: #8B1520;
             --accent-color: #FFB81C;
             --psu-crimson: #BE1E2D;
             --psu-gold: #FFB81C;
+            --text-color: #1f2937;
+            --light-bg: #f9fafb;
+            --card-bg: #ffffff;
+        }
+        body {
+            background: #f9fafb;
+        }
+        .card {
+            box-shadow: 0 4px 16px rgba(190, 30, 45, 0.1);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #BE1E2D 0%, #8B1520 100%);
         }
         {% endif %}
         
-        :root {
-            --text-color: #1f2937;
-            --light-bg: #f9fafb;
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            color: var(--text-color);
             line-height: 1.7;
         }
         
