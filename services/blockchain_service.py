@@ -183,6 +183,8 @@ class BlockchainCredentialService:
         """
         self.logger = logger
         self.network_config = self.NETWORKS.get(network)
+        if not self.network_config:
+            raise ValueError(f"Invalid network: {network}. Must be one of {list(self.NETWORKS.keys())}")
         
         if not self.network_config:
             raise ValueError(f"Invalid network: {network}. Options: {list(self.NETWORKS.keys())}")

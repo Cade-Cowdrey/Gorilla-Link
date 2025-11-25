@@ -223,6 +223,10 @@ class NotificationHubService:
             from services.integration_service import get_integration_service
             integration = get_integration_service()
             
+            if not integration:
+                logger.warning("Integration service not available for SMS")
+                return False
+            
             sms_message = f"{title}: {message}"
             integration.send_sms(user.phone, sms_message)
             return True

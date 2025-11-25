@@ -803,7 +803,8 @@ class CompanyReviewService:
     def _get_rating_distribution(self, reviews: List[Dict]) -> Dict[str, int]:
         """Get overall rating distribution"""
         ratings = [r['overall_rating'] for r in reviews]
-        return self._get_distribution(ratings)
+        dist = self._get_distribution(ratings)
+        return {str(k): v for k, v in dist.items()}
     
     def _analyze_trending_topics(self, reviews: List[Dict]) -> List[Dict]:
         """Analyze trending topics in reviews"""
@@ -859,7 +860,7 @@ class CompanyReviewService:
     
     def _aggregate_preparation_tips(self, interviews: List[Dict]) -> List[str]:
         """Aggregate preparation tips"""
-        tips = [i.get('preparation_tips') for i in interviews if i.get('preparation_tips')]
+        tips = [str(i.get('preparation_tips')) for i in interviews if i.get('preparation_tips')]
         return list(set(tips))[:5]
     
     def _analyze_interview_process(self, interviews: List[Dict]) -> Dict[str, Any]:
@@ -892,7 +893,7 @@ class CompanyReviewService:
             if review:
                 review.helpful_count = (review.helpful_count or 0) + 1
                 db.session.commit()
-                return review.helpful_count
+                return int(review.helpful_count)
             
             return 1
             

@@ -408,7 +408,15 @@ class EmployerAnalyticsService:
             ).all()
             
             # Track sources (where candidates came from)
-            source_stats = defaultdict(lambda: {
+            from typing import TypedDict
+            class SourceStat(TypedDict):
+                total_applications: int
+                hired: int
+                interviews: int
+                avg_quality: list
+                avg_time_to_hire: list
+            
+            source_stats: dict = defaultdict(lambda: {
                 'total_applications': 0,
                 'hired': 0,
                 'interviews': 0,
@@ -450,15 +458,19 @@ class EmployerAnalyticsService:
             # Calculate metrics for each source
             source_performance = []
             for source, stats in source_stats.items():
-                hire_rate = (stats['hired'] / stats['total_applications'] * 100) if stats['total_applications'] > 0 else 0
-                interview_rate = (stats['interviews'] / stats['total_applications'] * 100) if stats['total_applications'] > 0 else 0
+                total_apps = int(stats['total_applications'])
+                hired = int(stats['hired'])
+                interviews = int(stats['interviews'])
+                
+                hire_rate = (hired / total_apps * 100) if total_apps > 0 else 0
+                interview_rate = (interviews / total_apps * 100) if total_apps > 0 else 0
                 avg_quality = sum(stats['avg_quality']) / len(stats['avg_quality']) if stats['avg_quality'] else 0
                 avg_time = sum(stats['avg_time_to_hire']) / len(stats['avg_time_to_hire']) if stats['avg_time_to_hire'] else 0
                 
                 source_performance.append({
                     'source': source,
-                    'total_applications': stats['total_applications'],
-                    'hires': stats['hired'],
+                    'total_applications': total_apps,
+                    'hires': hired,
                     'hire_rate': round(hire_rate, 1),
                     'interview_rate': round(interview_rate, 1),
                     'avg_candidate_quality': round(avg_quality, 1),

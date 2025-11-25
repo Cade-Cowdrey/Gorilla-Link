@@ -317,7 +317,7 @@ class SecurityService:
             consent_type=consent_type
         ).order_by(ConsentRecord.granted_at.desc()).first()
         
-        return consent and consent.granted and not consent.revoked_at
+        return bool(consent and consent.granted and not consent.revoked_at)
     
     def get_user_consents(self, user_id: int) -> List[ConsentRecord]:
         """

@@ -336,7 +336,7 @@ class AIService:
 # Singleton instance
 _ai_service_instance = None
 
-def get_ai_service(api_key: str = None, model: str = "gpt-4o-mini") -> AIService:
+def get_ai_service(api_key: str = None, model: str = "gpt-4o-mini"):
     """Get or create AI service singleton"""
     global _ai_service_instance
     if _ai_service_instance is None and api_key:
