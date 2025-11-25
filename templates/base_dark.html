@@ -35,7 +35,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top"
        style="background: linear-gradient(90deg, #000, #330000);">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-warning" href="{{ url_for('core.index') }}">
+      <a class="navbar-brand fw-bold text-warning" href="{{ url_for('core.home') }}">
         <img src="{{ PSU_BRAND.favicon }}" alt="PSU" width="32" class="me-2 align-text-top" />
         PittState-Connect
       </a>
@@ -48,7 +48,7 @@
 
       <div class="collapse navbar-collapse" id="navbarDark">
         <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a href="{{ url_for('core.index') }}" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="{{ url_for('core.home') }}" class="nav-link">Home</a></li>
           <li class="nav-item"><a href="{{ url_for('departments.index') }}" class="nav-link">Departments</a></li>
           <li class="nav-item"><a href="{{ url_for('careers.index') }}" class="nav-link">Careers</a></li>
           <li class="nav-item"><a href="{{ url_for('scholarships.index') }}" class="nav-link">Scholarships</a></li>
