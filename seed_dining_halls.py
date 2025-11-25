@@ -857,10 +857,6 @@ def seed_dining_data():
         print("3. The University Club (Einstein Bros & Chilaca)")
         print("4. KTC Cafe (Kansas Technology Center)")
         print("5. Axe Grind (Starbucks in Axe Library)")
-
-if __name__ == "__main__":
-    seed_dining_data()
-
         
         # 2. Gorilla Crossing - Food court in Overman Student Center
         gorilla_crossing = DiningHall(

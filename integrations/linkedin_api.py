@@ -50,7 +50,7 @@ class LinkedInIntegrator:
         query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
         return f"{self.auth_url}?{query_string}"
     
-    def exchange_code_for_token(self, code: str) -> Dict:
+    def exchange_code_for_token(self, code: str) -> Dict | None:
         """
         Exchange authorization code for access token
         
@@ -83,7 +83,7 @@ class LinkedInIntegrator:
             logger.error(f"LinkedIn token exchange error: {e}")
             return None
     
-    def refresh_access_token(self, refresh_token: str) -> Dict:
+    def refresh_access_token(self, refresh_token: str) -> Dict | None:
         """
         Refresh an expired access token
         

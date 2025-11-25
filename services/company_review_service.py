@@ -910,7 +910,7 @@ class CompanyReviewService:
         avg_rating = statistics.mean([r['overall_rating'] for r in reviews])
         return int((avg_rating / 5.0) * 100)
     
-    def _calculate_category_score(self, reviews: List[Dict], category: str) -> int:
+    def _calculate_category_score(self, reviews: List[Dict], category: str) -> int | None:
         """Calculate category score"""
         ratings = [r[category] for r in reviews if r.get(category)]
         if not ratings:

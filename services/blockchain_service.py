@@ -793,7 +793,7 @@ class BlockchainCredentialService:
         """Simulate revocation transaction"""
         return f"0x{''.join([f'{random.randint(0,15):x}' for _ in range(64)])}"
     
-    def _generate_qr_code(self, token_id: int, chain_id: int) -> str:
+    def _generate_qr_code(self, token_id: int, chain_id: int) -> str | None:
         """Generate QR code for credential verification"""
         try:
             verification_url = f"https://pittstate-connect.edu/verify/{token_id}?chain={chain_id}"

@@ -31,7 +31,7 @@ OCCUPATION_CODES = {
 }
 
 
-def fetch_occupation_data(series_id: str, start_year: int, end_year: int) -> Dict:
+def fetch_occupation_data(series_id: str, start_year: int, end_year: int) -> Dict | None:
     """
     Fetch BLS data for specific occupation
     
@@ -41,7 +41,7 @@ def fetch_occupation_data(series_id: str, start_year: int, end_year: int) -> Dic
         end_year: End year for data
     
     Returns:
-        Dict with BLS API response
+        Dict with BLS API response or None on error
     """
     
     headers = {'Content-type': 'application/json'}

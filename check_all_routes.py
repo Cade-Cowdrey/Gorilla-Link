@@ -23,7 +23,7 @@ def check_routes():
             if rule.endpoint != 'static':
                 routes.append({
                     'endpoint': rule.endpoint,
-                    'methods': ','.join(rule.methods - {'HEAD', 'OPTIONS'}),
+                    'methods': ','.join(rule.methods - {'HEAD', 'OPTIONS'}) if rule.methods else '',
                     'path': str(rule)
                 })
         

@@ -167,6 +167,7 @@ def create_app(config=None):
         except Exception as e:
             # Automatically captured by Sentry middleware
             # But you can add context:
+            query = request.args.get('query', '')
             capture_exception(e, context={
                 'endpoint': '/api/example',
                 'user_id': current_user.id,
