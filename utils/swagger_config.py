@@ -3,7 +3,14 @@ Swagger/OpenAPI Configuration for API Documentation
 Provides automatic API documentation with interactive UI
 """
 
-from flasgger import Swagger
+try:
+    from flasgger import Swagger
+    SWAGGER_AVAILABLE = True
+except ImportError:
+    SWAGGER_AVAILABLE = False
+    Swagger = None
+    print("flasgger not installed. API docs disabled. Install with: pip install flasgger")
+
 from flask import request, current_app
 import os
 
@@ -282,6 +289,10 @@ def init_swagger(app):
     Args:
         app: Flask application instance
     """
+    if not SWAGGER_AVAILABLE:
+        print("Swagger/Flasgger not available - API documentation disabled")
+        return None
+    
     config = get_swagger_config()
     template = get_swagger_template()
     

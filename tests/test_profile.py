@@ -3,7 +3,12 @@ Unit tests for user profile management
 Tests profile viewing, editing, and settings
 """
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
+    print("pytest not installed. Install with: pip install pytest")
+
 from models import User
 
 

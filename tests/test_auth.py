@@ -3,7 +3,12 @@ Unit tests for authentication endpoints
 Tests login, logout, registration, password reset
 """
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
+    print("pytest not installed. Install with: pip install pytest")
+
 from flask import url_for
 from models import User
 

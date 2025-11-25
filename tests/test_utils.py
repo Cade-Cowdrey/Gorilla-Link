@@ -3,7 +3,12 @@ Unit tests for utility functions
 Tests for input validation, security, rate limiting, etc.
 """
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
+    print("pytest not installed. Install with: pip install pytest")
+
 from utils.input_validation import (
     sanitize_html, validate_email, validate_phone,
     validate_url, check_sql_injection_patterns

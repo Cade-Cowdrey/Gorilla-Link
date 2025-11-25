@@ -3,7 +3,12 @@ Integration tests for job posting and application workflow
 Tests the complete job lifecycle
 """
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
+    print("pytest not installed. Install with: pip install pytest")
+
 from datetime import datetime, timedelta
 from models import Job, JobApplication
 

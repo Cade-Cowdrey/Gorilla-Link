@@ -3,7 +3,13 @@ Pytest configuration and fixtures for testing
 Provides reusable test fixtures and configuration
 """
 
-import pytest
+try:
+    import pytest
+    PYTEST_AVAILABLE = True
+except ImportError:
+    PYTEST_AVAILABLE = False
+    print("pytest not installed. Install with: pip install pytest")
+
 import os
 import tempfile
 from datetime import datetime, timedelta

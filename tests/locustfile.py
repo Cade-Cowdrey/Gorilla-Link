@@ -3,7 +3,20 @@ Performance tests using Locust
 Load testing for key endpoints
 """
 
-from locust import HttpUser, task, between
+try:
+    from locust import HttpUser, task, between
+    LOCUST_AVAILABLE = True
+except ImportError:
+    LOCUST_AVAILABLE = False
+    print("locust not installed. Install with: pip install locust")
+    # Create stub classes
+    class HttpUser:
+        pass
+    def task(func):
+        return func
+    def between(min_wait, max_wait):
+        return lambda: None
+
 import random
 
 
