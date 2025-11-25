@@ -115,7 +115,7 @@ class ResumeParserService:
         try:
             # Extract text using pdfplumber (better for layout)
             text = ""
-            with pdfplumber.open(file_path) as pdf:
+            with pdfplumber.open(file_path) as pdf:  # type: ignore[possibly-unbound]
                 for page in pdf.pages:
                     text += page.extract_text() + "\n"
             
@@ -132,7 +132,7 @@ class ResumeParserService:
             return {'success': False, 'error': 'DOCX parsing not available'}
         
         try:
-            doc = Document(file_path)
+            doc = Document(file_path)  # type: ignore[possibly-unbound]
             text = "\n".join([para.text for para in doc.paragraphs])
             return self._parse_resume_text(text)
             

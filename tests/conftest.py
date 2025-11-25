@@ -4,11 +4,12 @@ Provides reusable test fixtures and configuration
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import-not-found]
     PYTEST_AVAILABLE = True
 except ImportError:
     PYTEST_AVAILABLE = False
     print("pytest not installed. Install with: pip install pytest")
+    pytest = None  # type: ignore[assignment]
 
 import os
 import tempfile

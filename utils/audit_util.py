@@ -200,7 +200,7 @@ def _incr_rate_limit_bucket(user_id: Optional[str], ip: Optional[str]) -> Tuple[
         p.expire(bucket, RATE_LIMIT_WINDOW_SEC)
         count, _ = p.execute()
         ttl = redis_client.ttl(bucket)
-        return int(count), int(ttl if ttl > 0 else RATE_LIMIT_WINDOW_SEC)
+        return int(count), int(ttl if ttl > 0 else RATE_LIMIT_WINDOW_SEC)  # type: ignore[operator]
     except Exception as e:
         logging.warning(f"[audit_util] rate-limit incr failed: {e}")
         return (0, RATE_LIMIT_WINDOW_SEC)

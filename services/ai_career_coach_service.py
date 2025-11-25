@@ -91,7 +91,7 @@ class AICareerCoachService:
         self.logger = logger
         
         if OPENAI_AVAILABLE and openai_api_key:
-            openai.api_key = openai_api_key
+            openai.api_key = openai_api_key  # type: ignore[possibly-unbound]
             self.openai_enabled = True
         else:
             self.openai_enabled = False
@@ -580,7 +580,7 @@ Provide:
             return self._get_fallback_response(coach_type, query)
         
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.ChatCompletion.create(  # type: ignore[possibly-unbound]
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -864,7 +864,7 @@ Provide:
         """Get networking targets"""
         return ['LinkedIn groups', 'Industry conferences', 'Alumni network']
     
-    def _create_milestone_tracker(self, timeline: str) -> List[Dict[str, str]]:
+    def _create_milestone_tracker(self, timeline: str) -> List[Dict[str, Any]]:
         """Create milestone tracker"""
         return [
             {'month': 3, 'milestone': 'Complete 2 online courses', 'status': 'pending'},

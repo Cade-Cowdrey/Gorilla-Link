@@ -111,7 +111,7 @@ def _track_failures(job_name: str, entry: dict):
         current_fails = redis_client.incr(fail_key)
         redis_client.expire(fail_key, 86400)  # reset every 24 hours
 
-        if current_fails >= 3:
+        if current_fails >= 3:  # type: ignore[operator]
             msg = (
                 f"🚨 PSU Scheduler Alert: Job '{job_name}' failed {current_fails} times in 24h.\n\n"
                 f"Last error: {entry.get('message', 'No message')}\n"

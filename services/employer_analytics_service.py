@@ -435,17 +435,17 @@ class EmployerAnalyticsService:
                 elif hasattr(app, 'application_source'):
                     source = app.application_source
                 
-                source_stats[source]['total_applications'] += 1
+                source_stats[source]['total_applications'] += 1  # type: ignore[operator]
                 
                 # Track hires
                 if app.status == 'accepted':
-                    source_stats[source]['hired'] += 1
+                    source_stats[source]['hired'] += 1  # type: ignore[operator]
                     days_to_hire = (app.updated_at - app.created_at).days
                     source_stats[source]['avg_time_to_hire'].append(days_to_hire)
                 
                 # Track interviews
                 if app.status in ['interview', 'offer', 'accepted']:
-                    source_stats[source]['interviews'] += 1
+                    source_stats[source]['interviews'] += 1  # type: ignore[operator]
                 
                 # Quality score (based on candidate profile)
                 quality = 5.0

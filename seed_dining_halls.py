@@ -859,7 +859,7 @@ def seed_dining_data():
         print("5. Axe Grind (Starbucks in Axe Library)")
         
         # 2. Gorilla Crossing - Food court in Overman Student Center
-        gorilla_crossing = DiningHall(
+        gorilla_crossing = DiningLocation(
             name="Gorilla Crossing",
             location="Overman Student Center",
             description="Food court featuring Pizza Hut, Overman Burger Company, Pitt BBQ, and Sub Stand. Offers quick-service dining options. Note: Meal plan swipes not accepted - use Dining Dollars.",
@@ -880,7 +880,7 @@ def seed_dining_data():
         db.session.add(gorilla_crossing)
         
         # 3. The University Club - Einstein Bros & Chilaca
-        university_club = DiningHall(
+        university_club = DiningLocation(
             name="The University Club",
             location="Lower Level, Overman Student Center",
             description="Features Einstein Bros. Bagels and Chilaca Mexican cuisine. Perfect spot for coffee, bagels, and fresh Mexican dishes.",
@@ -901,7 +901,7 @@ def seed_dining_data():
         db.session.add(university_club)
         
         # 4. KTC Cafe - Kansas Technology Center
-        ktc_cafe = DiningHall(
+        ktc_cafe = DiningLocation(
             name="KTC Cafe",
             location="Kansas Technology Center",
             description="Convenient cafe offering hot meals, sandwiches, snacks, and drinks for students and faculty in the technology center.",
@@ -922,7 +922,7 @@ def seed_dining_data():
         db.session.add(ktc_cafe)
         
         # 5. Axe Grind - Starbucks in Axe Library
-        axe_grind = DiningHall(
+        axe_grind = DiningLocation(
             name="Axe Grind",
             location="Axe Library",
             description="Starbucks location serving premium coffee, drinks, smoothies, sandwiches, and snacks. Perfect study break spot in the library.",

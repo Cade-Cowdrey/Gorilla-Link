@@ -398,17 +398,17 @@ def admin_update_pathway_data():
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
     
-    data = request.json
+    data = request.json or {}
     pathway_id = data.get('pathway_id')
     
     pathway = CareerPathway.query.get_or_404(pathway_id)
     
     # Update salary data
-    if 'regional_median_salary' in data:
+    if data and 'regional_median_salary' in data:
         pathway.regional_median_salary = data['regional_median_salary']
-    if 'national_median_salary' in data:
+    if data and 'national_median_salary' in data:
         pathway.national_median_salary = data['national_median_salary']
-    if 'job_growth_rate' in data:
+    if data and 'job_growth_rate' in data:
         pathway.job_growth_rate = data['job_growth_rate']
     
     pathway.last_updated = datetime.utcnow()
