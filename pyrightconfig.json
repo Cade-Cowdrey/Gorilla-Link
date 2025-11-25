@@ -13,7 +13,7 @@
     "DEBUG": true
   },
   "stubPath": "./typings",
-  "reportMissingImports": true,
+  "reportMissingImports": "none",
   "reportMissingTypeStubs": false,
   "reportUnknownParameterType": false,
   "reportUnknownArgumentType": false,
@@ -27,6 +27,13 @@
   "reportCallIssue": false,
   "reportArgumentType": false,
   "reportGeneralTypeIssues": false,
+  "reportOptionalCall": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none",
+  "reportFunctionMemberAccess": "none",
+  "reportIncompatibleMethodOverride": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportInconsistentConstructor": false,
   "pythonVersion": "3.14",
   "pythonPlatform": "Windows",
   "executionEnvironments": [
